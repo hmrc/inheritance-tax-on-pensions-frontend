@@ -24,12 +24,14 @@ import java.time.{LocalDate, Month}
 import scala.util.{Failure, Success, Try}
 
 private[mappings] class LocalDateFormatter(
-                                            invalidKey: String,
-                                            allRequiredKey: String,
-                                            twoRequiredKey: String,
-                                            requiredKey: String,
-                                            args: Seq[String] = Seq.empty
-                                          )(implicit messages: Messages) extends Formatter[LocalDate] with Formatters {
+  invalidKey: String,
+  allRequiredKey: String,
+  twoRequiredKey: String,
+  requiredKey: String,
+  args: Seq[String] = Seq.empty
+)(implicit messages: Messages)
+    extends Formatter[LocalDate]
+    with Formatters {
 
   private val fieldKeys: List[String] = List("day", "month", "year")
 
@@ -53,18 +55,17 @@ private[mappings] class LocalDateFormatter(
     val month = new MonthFormatter(invalidKey, args)
 
     for {
-      day   <- int.bind(s"$key.day", data)
+      day <- int.bind(s"$key.day", data)
       month <- month.bind(s"$key.month", data)
-      year  <- int.bind(s"$key.year", data)
-      date  <- toDate(key, day, month, year)
+      year <- int.bind(s"$key.year", data)
+      date <- toDate(key, day, month, year)
     } yield date
   }
 
   override def bind(key: String, data: Map[String, String]): Either[Seq[FormError], LocalDate] = {
 
-    val fields = fieldKeys.map {
-      field =>
-        field -> data.get(s"$key.$field").filter(_.nonEmpty)
+    val fields = fieldKeys.map { field =>
+      field -> data.get(s"$key.$field").filter(_.nonEmpty)
     }.toMap
 
     lazy val missingFields = fields
@@ -105,12 +106,14 @@ private class MonthFormatter(invalidKey: String, args: Seq[String] = Seq.empty) 
 
     baseFormatter
       .bind(key, data)
-      .flatMap {
-        str =>
-          months
-            .find(m => m.getValue.toString == str.replaceAll("^0+", "") || m.toString == str.toUpperCase || m.toString.take(3) == str.toUpperCase)
-            .map(x => Right(x.getValue))
-            .getOrElse(Left(List(FormError(key, invalidKey, args))))
+      .flatMap { str =>
+        months
+          .find(m =>
+            m.getValue.toString == str.replaceAll("^0+", "") || m.toString == str.toUpperCase || m.toString
+              .take(3) == str.toUpperCase
+          )
+          .map(x => Right(x.getValue))
+          .getOrElse(Left(List(FormError(key, invalidKey, args))))
       }
   }
 
