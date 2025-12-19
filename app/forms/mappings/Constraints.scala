@@ -86,7 +86,7 @@ trait Constraints {
   protected def maxDate(maximum: LocalDate, errorKey: String, args: Any*): Constraint[LocalDate] =
     Constraint {
       case date if date.isAfter(maximum) =>
-        Invalid(errorKey, args: _*)
+        Invalid(errorKey, args*)
       case _ =>
         Valid
     }
@@ -94,12 +94,12 @@ trait Constraints {
   protected def minDate(minimum: LocalDate, errorKey: String, args: Any*): Constraint[LocalDate] =
     Constraint {
       case date if date.isBefore(minimum) =>
-        Invalid(errorKey, args: _*)
+        Invalid(errorKey, args*)
       case _ =>
         Valid
     }
 
-  protected def nonEmptySet(errorKey: String): Constraint[Set[_]] =
+  protected def nonEmptySet(errorKey: String): Constraint[Set[?]] =
     Constraint {
       case set if set.nonEmpty =>
         Valid
@@ -107,9 +107,7 @@ trait Constraints {
         Invalid(errorKey)
     }
 
-  protected def minimumCurrency(minimum: BigDecimal, errorKey: String)(implicit
-    ev: Ordering[BigDecimal]
-  ): Constraint[BigDecimal] =
+  protected def minimumCurrency(minimum: BigDecimal, errorKey: String): Constraint[BigDecimal] =
     Constraint { input =>
       if (input >= minimum) {
         Valid
@@ -118,9 +116,7 @@ trait Constraints {
       }
     }
 
-  protected def maximumCurrency(maximum: BigDecimal, errorKey: String)(implicit
-    ev: Ordering[BigDecimal]
-  ): Constraint[BigDecimal] =
+  protected def maximumCurrency(maximum: BigDecimal, errorKey: String): Constraint[BigDecimal] =
     Constraint { input =>
       if (input <= maximum) {
         Valid

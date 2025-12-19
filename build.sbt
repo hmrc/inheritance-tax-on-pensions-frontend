@@ -41,7 +41,12 @@ lazy val microservice = (project in file("."))
     ScoverageKeys.coverageHighlighting := true,
     scalacOptions ++= Seq(
       "-feature",
-      "-Wconf:cat=deprecation:ws,cat=feature:ws,cat=optimizer:ws,src=target/.*:s"
+      "-Wconf:msg=Flag.*repeatedly:s",
+      "-Wconf:msg=unused import&src=.*views/.*:s",
+      "-Wconf:msg=unused&src=.*Routes\\.scala:s",
+      "-Wconf:msg=match may not be exhaustive.&src=.*routes:s",
+      "-Xmax-inlines", "100",
+      "-language:implicitConversions"
     ),
     libraryDependencies ++= AppDependencies(),
     retrieveManaged := true,

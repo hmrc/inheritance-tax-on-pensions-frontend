@@ -18,6 +18,8 @@ package models
 
 import play.api.libs.json._
 
+import scala.annotation.nowarn
+
 trait Enumerable[A] {
 
   def withName(str: String): Option[A]
@@ -45,7 +47,7 @@ object Enumerable {
           JsError("error.invalid")
       }
 
-    implicit def writes[A: Enumerable]: Writes[A] =
+    @nowarn implicit def writes[A: Enumerable]: Writes[A] =
       Writes(value => JsString(value.toString))
   }
 }
