@@ -15,6 +15,8 @@ lazy val microservice = (project in file("."))
   .settings(ThisBuild / useSuperShell := false)
   .settings(
     name := appName,
+    semanticdbEnabled := true,
+    semanticdbVersion := scalafixSemanticdb.revision,
     RoutesKeys.routesImport ++= Seq(
       "models._",
       "uk.gov.hmrc.play.bootstrap.binders.RedirectUrl"
@@ -46,6 +48,7 @@ lazy val microservice = (project in file("."))
     pipelineStages := Seq(digest),
     Assets / pipelineStages := Seq(concat),
     scalafmtOnCompile := true,
+    scalafixOnCompile := true
   )
 
 lazy val testSettings: Seq[Def.Setting[_]] = Seq(

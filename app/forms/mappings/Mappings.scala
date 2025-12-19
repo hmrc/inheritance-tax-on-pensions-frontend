@@ -16,10 +16,10 @@
 
 package forms.mappings
 
-import models.Enumerable
-import play.api.data.FieldMapping
 import play.api.data.Forms.of
+import models.Enumerable
 import play.api.i18n.Messages
+import play.api.data.FieldMapping
 
 import java.time.LocalDate
 

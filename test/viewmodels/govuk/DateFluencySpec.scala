@@ -16,14 +16,14 @@
 
 package viewmodels.govuk
 
-import forms.mappings.Mappings
-import org.scalatest.OptionValues
-import org.scalatest.freespec.AnyFreeSpec
 import org.scalatest.matchers.must.Matchers
-import play.api.data.Form
-import play.api.i18n.Messages
-import play.api.test.Helpers.stubMessages
+import forms.mappings.Mappings
 import viewmodels.govuk.all._
+import org.scalatest.OptionValues
+import play.api.i18n.Messages
+import play.api.data.Form
+import play.api.test.Helpers.stubMessages
+import org.scalatest.freespec.AnyFreeSpec
 
 import java.time.LocalDate
 

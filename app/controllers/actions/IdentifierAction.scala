@@ -16,16 +16,16 @@
 
 package controllers.actions
 
-import com.google.inject.Inject
-import config.FrontendAppConfig
-import controllers.routes
-import models.requests.IdentifierRequest
-import play.api.mvc.Results._
 import play.api.mvc._
+import com.google.inject.Inject
+import controllers.routes
+import config.FrontendAppConfig
 import uk.gov.hmrc.auth.core._
 import uk.gov.hmrc.auth.core.retrieve.v2.Retrievals
 import uk.gov.hmrc.http.{HeaderCarrier, UnauthorizedException}
+import play.api.mvc.Results._
 import uk.gov.hmrc.play.http.HeaderCarrierConverter
+import models.requests.IdentifierRequest
 
 import scala.concurrent.{ExecutionContext, Future}
 

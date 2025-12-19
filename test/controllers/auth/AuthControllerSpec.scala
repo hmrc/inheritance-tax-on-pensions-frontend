@@ -16,19 +16,19 @@
 
 package controllers.auth
 
-import base.SpecBase
-import config.FrontendAppConfig
-import org.mockito.ArgumentMatchers.{any, eq => eqTo}
-import org.mockito.Mockito.{times, verify, when}
-import org.scalatestplus.mockito.MockitoSugar
-import play.api.inject.bind
 import play.api.test.FakeRequest
-import play.api.test.Helpers._
+import base.SpecBase
 import repositories.SessionRepository
-
-import java.net.URLEncoder
+import org.scalatestplus.mockito.MockitoSugar
+import org.mockito.ArgumentMatchers.{any, eq => eqTo}
+import play.api.test.Helpers._
+import org.mockito.Mockito.{times, verify, when}
+import play.api.inject.bind
+import config.FrontendAppConfig
 
 import scala.concurrent.Future
+
+import java.net.URLEncoder
 
 class AuthControllerSpec extends SpecBase with MockitoSugar {
 

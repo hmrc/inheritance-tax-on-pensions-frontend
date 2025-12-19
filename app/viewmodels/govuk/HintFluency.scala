@@ -16,8 +16,8 @@
 
 package viewmodels.govuk
 
-import uk.gov.hmrc.govukfrontend.views.viewmodels.content.Content
 import uk.gov.hmrc.govukfrontend.views.viewmodels.hint.Hint
+import uk.gov.hmrc.govukfrontend.views.viewmodels.content.Content
 
 object hint extends HintFluency
 
