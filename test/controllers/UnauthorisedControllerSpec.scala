@@ -16,10 +16,10 @@
 
 package controllers
 
-import base.SpecBase
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import views.html.UnauthorisedView
+import base.SpecBase
 
 class UnauthorisedControllerSpec extends SpecBase {
 

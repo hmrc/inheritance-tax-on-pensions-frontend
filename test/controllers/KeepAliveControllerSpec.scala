@@ -16,14 +16,14 @@
 
 package controllers
 
-import base.SpecBase
-import org.mockito.ArgumentMatchers.any
-import org.mockito.Mockito.{never, times, verify, when}
-import org.scalatestplus.mockito.MockitoSugar
-import play.api.inject.bind
 import play.api.test.FakeRequest
-import play.api.test.Helpers._
+import play.api.inject.bind
+import base.SpecBase
 import repositories.SessionRepository
+import org.scalatestplus.mockito.MockitoSugar
+import org.mockito.ArgumentMatchers.any
+import play.api.test.Helpers._
+import org.mockito.Mockito._
 
 import scala.concurrent.Future
 

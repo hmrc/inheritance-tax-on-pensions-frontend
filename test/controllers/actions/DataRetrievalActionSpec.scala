@@ -16,16 +16,16 @@
 
 package controllers.actions
 
+import play.api.test.FakeRequest
+import org.mockito.Mockito._
 import base.SpecBase
+import repositories.SessionRepository
 import models.UserAnswers
 import models.requests.{IdentifierRequest, OptionalDataRequest}
-import org.mockito.Mockito._
 import org.scalatestplus.mockito.MockitoSugar
-import play.api.test.FakeRequest
-import repositories.SessionRepository
 
-import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
+import scala.concurrent.ExecutionContext.Implicits.global
 
 class DataRetrievalActionSpec extends SpecBase with MockitoSugar {
 

@@ -16,12 +16,12 @@
 
 package viewmodels.govuk
 
+import uk.gov.hmrc.govukfrontend.views.viewmodels.label.Label
+import uk.gov.hmrc.govukfrontend.views.viewmodels.hint.Hint
+import uk.gov.hmrc.govukfrontend.views.viewmodels.FormGroup
+import uk.gov.hmrc.govukfrontend.views.viewmodels.input.{Input, PrefixOrSuffix}
 import play.api.data.Field
 import play.api.i18n.Messages
-import uk.gov.hmrc.govukfrontend.views.viewmodels.FormGroup
-import uk.gov.hmrc.govukfrontend.views.viewmodels.hint.Hint
-import uk.gov.hmrc.govukfrontend.views.viewmodels.input.{Input, PrefixOrSuffix}
-import uk.gov.hmrc.govukfrontend.views.viewmodels.label.Label
 import viewmodels.{ErrorMessageAwareness, InputWidth}
 
 object input extends InputFluency

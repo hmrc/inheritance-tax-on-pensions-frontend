@@ -18,8 +18,8 @@ package utils
 
 import org.scalatest.freespec.AnyFreeSpec
 import org.scalatest.matchers.must.Matchers
-import play.api.i18n.Lang
 import utils.DateTimeFormats.dateTimeFormat
+import play.api.i18n.Lang
 
 import java.time.LocalDate
 
