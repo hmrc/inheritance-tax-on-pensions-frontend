@@ -16,14 +16,14 @@
 
 package controllers.actions
 
-import play.api.mvc._
+import play.api.mvc.*
 import com.google.inject.Inject
 import controllers.routes
 import config.FrontendAppConfig
-import uk.gov.hmrc.auth.core._
+import uk.gov.hmrc.auth.core.*
 import uk.gov.hmrc.auth.core.retrieve.v2.Retrievals
 import uk.gov.hmrc.http.{HeaderCarrier, UnauthorizedException}
-import play.api.mvc.Results._
+import play.api.mvc.Results.*
 import uk.gov.hmrc.play.http.HeaderCarrierConverter
 import models.requests.IdentifierRequest
 
@@ -33,9 +33,10 @@ trait IdentifierAction
     extends ActionBuilder[IdentifierRequest, AnyContent]
     with ActionFunction[Request, IdentifierRequest]
 
-class AuthenticatedIdentifierAction @Inject() (
-  override val authConnector: AuthConnector,
+class IdentifierActionImpl @Inject()(
   config: FrontendAppConfig,
+  override val authConnector: AuthConnector,
+  sessionDataCacheConnector: SessionDataCacheConnector,
   val parser: BodyParsers.Default
 )(implicit val executionContext: ExecutionContext)
     extends IdentifierAction
@@ -60,20 +61,3 @@ class AuthenticatedIdentifierAction @Inject() (
   }
 }
 
-class SessionIdentifierAction @Inject() (
-  val parser: BodyParsers.Default
-)(implicit val executionContext: ExecutionContext)
-    extends IdentifierAction {
-
-  override def invokeBlock[A](request: Request[A], block: IdentifierRequest[A] => Future[Result]): Future[Result] = {
-
-    implicit val hc: HeaderCarrier = HeaderCarrierConverter.fromRequestAndSession(request, request.session)
-
-    hc.sessionId match {
-      case Some(session) =>
-        block(IdentifierRequest(request, session.value))
-      case None =>
-        Future.successful(Redirect(routes.JourneyRecoveryController.onPageLoad()))
-    }
-  }
-}
