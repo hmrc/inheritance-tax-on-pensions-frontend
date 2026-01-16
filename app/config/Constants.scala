@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 HM Revenue & Customs
+ * Copyright 2024 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,12 +14,18 @@
  * limitations under the License.
  */
 
-package models.requests
+package config
 
-import play.api.mvc.{Request, WrappedRequest}
-import models.UserAnswers
 
-case class OptionalDataRequest[A](request: Request[A], userAnswers: Option[UserAnswers])
-    extends WrappedRequest[A](request)
 
-case class DataRequest[A](request: Request[A], userAnswers: UserAnswers) extends WrappedRequest[A](request)
+object Constants {
+
+  val psaEnrolmentKey = "HMRC-PODS-ORG"
+  val pspEnrolmentKey = "HMRC-PODSPP-ORG"
+
+  val psaIdKey = "PSAID"
+  val pspIdKey = "PSPID"
+
+  val PSA = "PSA"
+  val PSP = "PSP"
+}

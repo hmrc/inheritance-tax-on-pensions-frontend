@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 HM Revenue & Customs
+ * Copyright 2024 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,12 +14,16 @@
  * limitations under the License.
  */
 
-package models.requests
+package utils
 
-import play.api.mvc.{Request, WrappedRequest}
-import models.UserAnswers
+object Extractors {
 
-case class OptionalDataRequest[A](request: Request[A], userAnswers: Option[UserAnswers])
-    extends WrappedRequest[A](request)
+  object && {
+    def unapply[A](a: A): Some[(A, A)] = Some((a, a))
+  }
 
-case class DataRequest[A](request: Request[A], userAnswers: UserAnswers) extends WrappedRequest[A](request)
+  object Int {
+    def unapply(s: String): Option[Int] =
+      s.toIntOption
+  }
+}

@@ -31,7 +31,7 @@ class SessionDataCacheConnectorSpec extends BaseConnectorSpec {
 
   implicit val hc: HeaderCarrier = HeaderCarrier()
 
-  override protected def applicationBuilder(userAnswers: Option[UserAnswers]): GuiceApplicationBuilder =
+  override protected def applicationBuilder(userAnswers: Option[UserAnswers] = None, isPsa: Boolean = true): GuiceApplicationBuilder =
     super.applicationBuilder(userAnswers).configure("microservice.services.pensionAdministrator.port" -> wireMockPort)
 
   val externalId = "test-id"

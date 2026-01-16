@@ -17,14 +17,19 @@
 package controllers.actions
 
 import play.api.mvc._
-import com.google.inject.Inject
 import connectors.SessionDataCacheConnector
 import controllers.routes
-import config.FrontendAppConfig
-import uk.gov.hmrc.auth.core._
+import config.{Constants, FrontendAppConfig}
+import uk.gov.hmrc.auth.core.retrieve.~
 import uk.gov.hmrc.auth.core.retrieve.v2.Retrievals
-import uk.gov.hmrc.http.{HeaderCarrier, UnauthorizedException}
+import uk.gov.hmrc.http.HeaderCarrier
+import models.SessionData
 import play.api.mvc.Results._
+import models.PensionSchemeUser.{Administrator, Practitioner}
+import com.google.inject.Inject
+import utils.Extractors.&&
+import uk.gov.hmrc.auth.core._
+import models.requests.IdentifierRequest.{AdministratorRequest, PractitionerRequest}
 import uk.gov.hmrc.play.http.HeaderCarrierConverter
 import models.requests.IdentifierRequest
 
@@ -35,10 +40,10 @@ trait IdentifierAction
     with ActionFunction[Request, IdentifierRequest]
 
 class IdentifierActionImpl @Inject() (
-  config: FrontendAppConfig,
+  appConfig: FrontendAppConfig,
   override val authConnector: AuthConnector,
   sessionDataCacheConnector: SessionDataCacheConnector,
-  val parser: BodyParsers.Default
+  playBodyParsers: PlayBodyParsers
 )(implicit val executionContext: ExecutionContext)
     extends IdentifierAction
     with AuthorisedFunctions {
@@ -47,17 +52,51 @@ class IdentifierActionImpl @Inject() (
 
     implicit val hc: HeaderCarrier = HeaderCarrierConverter.fromRequestAndSession(request, request.session)
 
-    authorised()
-      .retrieve(Retrievals.internalId) {
-        _.map { internalId =>
-          block(IdentifierRequest(request, internalId))
-        }.getOrElse(throw new UnauthorizedException("Unable to retrieve internal Id"))
+    authorised(Enrolment(Constants.psaEnrolmentKey).or(Enrolment(Constants.pspEnrolmentKey)))
+      .retrieve(Retrievals.internalId.and(Retrievals.externalId).and(Retrievals.allEnrolments)) {
+
+        case Some(internalId) ~ Some(externalId) ~ (IsPSA(psaId) && IsPSP(pspId)) =>
+          sessionDataCacheConnector.fetch(externalId).flatMap {
+            case None =>
+              Future.successful(Redirect(appConfig.urls.managePensionsSchemes.adminOrPractitionerUrl))
+            case Some(SessionData(Administrator)) =>
+              block(AdministratorRequest(internalId, externalId, request, psaId.value))
+            case Some(SessionData(Practitioner)) =>
+              block(PractitionerRequest(internalId, externalId, request, pspId.value))
+          }
+
+        case Some(internalId) ~ Some(externalId) ~ IsPSA(psaId) =>
+          block(AdministratorRequest(internalId, externalId, request, psaId.value))
+
+        case Some(internalId) ~ Some(externalId) ~ IsPSP(pspId) =>
+          block(PractitionerRequest(internalId, externalId, request, pspId.value))
+
+        case Some(_) ~ Some(_) ~ _ =>
+          Future.successful(Redirect(appConfig.urls.managePensionsSchemes.registerUrl))
+
+        case _ => Future.successful(Redirect(routes.UnauthorisedController.onPageLoad()))
       }
       .recover {
         case _: NoActiveSession =>
-          Redirect(config.loginUrl, Map("continue" -> Seq(config.loginContinueUrl)))
+          Redirect(appConfig.urls.loginUrl, Map("continue" -> Seq(appConfig.urls.loginContinueUrl)))
         case _: AuthorisationException =>
-          Redirect(routes.UnauthorisedController.onPageLoad())
+          Redirect(appConfig.urls.managePensionsSchemes.registerUrl)
       }
+  }
+
+  override def parser: BodyParser[AnyContent] = playBodyParsers.default
+
+  private object IsPSA {
+    def unapply(enrolments: Enrolments): Option[EnrolmentIdentifier] =
+      enrolments.enrolments
+        .find(_.key == Constants.psaEnrolmentKey)
+        .flatMap(_.getIdentifier(Constants.psaIdKey))
+  }
+
+  private object IsPSP {
+    def unapply(enrolments: Enrolments): Option[EnrolmentIdentifier] =
+      enrolments.enrolments
+        .find(_.key == Constants.pspEnrolmentKey)
+        .flatMap(_.getIdentifier(Constants.pspIdKey))
   }
 }
