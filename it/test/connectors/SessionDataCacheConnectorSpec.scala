@@ -34,7 +34,6 @@ class SessionDataCacheConnectorSpec extends BaseConnectorSpec {
   override protected def applicationBuilder(userAnswers: Option[UserAnswers] = None, isPsa: Boolean = true): GuiceApplicationBuilder =
     super.applicationBuilder(userAnswers).configure("microservice.services.pensionAdministrator.port" -> wireMockPort)
 
-  val externalId = "test-id"
   lazy val url = s"/pension-administrator/journey-cache/session-data-self"
 
   def stubGet(response: ResponseDefinitionBuilder): StubMapping =
@@ -56,25 +55,25 @@ class SessionDataCacheConnectorSpec extends BaseConnectorSpec {
     "return an administrator" in runningApplication { implicit app =>
       stubGet(okResponse(Administrator))
 
-      connector.fetch(externalId).futureValue mustBe Some(SessionData(Administrator))
+      connector.fetch().futureValue mustBe Some(SessionData(Administrator))
     }
 
     "return a practitioner" in runningApplication { implicit app =>
       stubGet(okResponse(Practitioner))
 
-      connector.fetch(externalId).futureValue mustBe Some(SessionData(Practitioner))
+      connector.fetch().futureValue mustBe Some(SessionData(Practitioner))
     }
 
     "return none" in runningApplication { implicit app =>
       stubGet(notFound)
 
-      connector.fetch(externalId).futureValue mustBe None
+      connector.fetch().futureValue mustBe None
     }
 
     "return a failed future for bad request" in runningApplication { implicit app =>
       stubGet(badRequest)
 
-      connector.fetch(externalId).failed.futureValue
+      connector.fetch().failed.futureValue
     }
   }
 }

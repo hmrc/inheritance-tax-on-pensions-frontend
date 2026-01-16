@@ -26,7 +26,7 @@ import scala.concurrent.{ExecutionContext, Future}
 
 import javax.inject.Inject
 
-class FakePspIdentifierAction @Inject()(
+class FakePspIdentifierAction @Inject() (
   val bodyParsers: PlayBodyParsers
 )(implicit
   override val executionContext: ExecutionContext

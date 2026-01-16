@@ -16,8 +16,6 @@
 
 package config
 
-
-
 object Constants {
 
   val psaEnrolmentKey = "HMRC-PODS-ORG"

@@ -56,7 +56,7 @@ class IdentifierActionImpl @Inject() (
       .retrieve(Retrievals.internalId.and(Retrievals.externalId).and(Retrievals.allEnrolments)) {
 
         case Some(internalId) ~ Some(externalId) ~ (IsPSA(psaId) && IsPSP(pspId)) =>
-          sessionDataCacheConnector.fetch(externalId).flatMap {
+          sessionDataCacheConnector.fetch().flatMap {
             case None =>
               Future.successful(Redirect(appConfig.urls.managePensionsSchemes.adminOrPractitionerUrl))
             case Some(SessionData(Administrator)) =>

@@ -88,7 +88,7 @@ class IdentifierActionSpec extends SpecBase with StubPlayBodyParsersFactory {
     setSessionValue(Future.successful(value))
 
   def setSessionValue(value: Future[Option[SessionData]]): Unit =
-    when(mockSessionDataCacheConnector.fetch(any())(using any(), any()))
+    when(mockSessionDataCacheConnector.fetch()(using any(), any()))
       .thenReturn(value)
 
   "IdentifierAction" - {

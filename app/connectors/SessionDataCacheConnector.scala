@@ -31,12 +31,8 @@ class SessionDataCacheConnector @Inject() (config: FrontendAppConfig, http: Http
 
   private def url: String = s"${config.pensionsAdministrator}/pension-administrator/journey-cache/session-data-self"
 
-  def fetch(cacheId: String)(implicit hc: HeaderCarrier, ec: ExecutionContext): Future[Option[SessionData]] =
+  def fetch()(implicit hc: HeaderCarrier, ec: ExecutionContext): Future[Option[SessionData]] =
     http
       .get(url"$url")
       .execute[Option[SessionData]]
-      .recoverWith { t =>
-        logger.warn(s"Failed to fetch $cacheId with message ${t.getMessage}")
-        Future.failed(t)
-      }
 }
