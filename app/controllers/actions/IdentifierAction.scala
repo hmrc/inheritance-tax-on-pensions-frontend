@@ -16,14 +16,15 @@
 
 package controllers.actions
 
-import play.api.mvc.*
+import play.api.mvc._
 import com.google.inject.Inject
+import connectors.SessionDataCacheConnector
 import controllers.routes
 import config.FrontendAppConfig
-import uk.gov.hmrc.auth.core.*
+import uk.gov.hmrc.auth.core._
 import uk.gov.hmrc.auth.core.retrieve.v2.Retrievals
 import uk.gov.hmrc.http.{HeaderCarrier, UnauthorizedException}
-import play.api.mvc.Results.*
+import play.api.mvc.Results._
 import uk.gov.hmrc.play.http.HeaderCarrierConverter
 import models.requests.IdentifierRequest
 
@@ -33,7 +34,7 @@ trait IdentifierAction
     extends ActionBuilder[IdentifierRequest, AnyContent]
     with ActionFunction[Request, IdentifierRequest]
 
-class IdentifierActionImpl @Inject()(
+class IdentifierActionImpl @Inject() (
   config: FrontendAppConfig,
   override val authConnector: AuthConnector,
   sessionDataCacheConnector: SessionDataCacheConnector,
@@ -60,4 +61,3 @@ class IdentifierActionImpl @Inject()(
       }
   }
 }
-

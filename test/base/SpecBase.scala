@@ -24,9 +24,12 @@ import controllers.actions._
 import models.UserAnswers
 import play.api.i18n.{Messages, MessagesApi}
 import play.api.inject.guice.GuiceApplicationBuilder
+import play.api.test.Helpers.running
 import org.scalatest.freespec.AnyFreeSpec
 import org.scalatest.{OptionValues, TryValues}
 import play.api.Application
+
+import scala.reflect.ClassTag
 
 trait SpecBase
     extends AnyFreeSpec
@@ -49,4 +52,13 @@ trait SpecBase
         bind[IdentifierAction].to[FakeIdentifierAction],
         bind[DataRetrievalAction].toInstance(new FakeDataRetrievalAction(userAnswers))
       )
+      .configure(
+        "auditing.enabled" -> false,
+        "metric.enabled" -> false
+      )
+
+  protected def injected[A: ClassTag](implicit app: Application): A = app.injector.instanceOf[A]
+
+  def runningApplication(block: Application => Unit): Unit =
+    running(_ => applicationBuilder())(block)
 }

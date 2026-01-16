@@ -20,10 +20,12 @@ import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import play.api.mvc._
 import com.google.inject.Inject
+import connectors.SessionDataCacheConnector
 import controllers.routes
 import config.FrontendAppConfig
 import uk.gov.hmrc.auth.core.retrieve.Retrieval
 import uk.gov.hmrc.http.HeaderCarrier
+import org.scalatestplus.mockito.MockitoSugar.mock
 import uk.gov.hmrc.auth.core.authorise.Predicate
 import base.SpecBase
 import uk.gov.hmrc.auth.core._
@@ -32,6 +34,7 @@ import scala.concurrent.{ExecutionContext, Future}
 import scala.concurrent.ExecutionContext.Implicits.global
 
 class AuthActionSpec extends SpecBase {
+  val mockSessionDataCacheConnector: SessionDataCacheConnector = mock[SessionDataCacheConnector]
 
   class Harness(authAction: IdentifierAction) {
     def onPageLoad(): Action[AnyContent] = authAction(_ => Results.Ok)
@@ -50,8 +53,9 @@ class AuthActionSpec extends SpecBase {
           val appConfig = application.injector.instanceOf[FrontendAppConfig]
 
           val authAction = new IdentifierActionImpl(
-            new FakeFailingAuthConnector(new MissingBearerToken),
             appConfig,
+            new FakeFailingAuthConnector(new MissingBearerToken),
+            mockSessionDataCacheConnector,
             bodyParsers
           )
           val controller = new Harness(authAction)
@@ -74,8 +78,9 @@ class AuthActionSpec extends SpecBase {
           val appConfig = application.injector.instanceOf[FrontendAppConfig]
 
           val authAction = new IdentifierActionImpl(
-            new FakeFailingAuthConnector(new BearerTokenExpired),
             appConfig,
+            new FakeFailingAuthConnector(new BearerTokenExpired),
+            mockSessionDataCacheConnector,
             bodyParsers
           )
           val controller = new Harness(authAction)
@@ -98,8 +103,9 @@ class AuthActionSpec extends SpecBase {
           val appConfig = application.injector.instanceOf[FrontendAppConfig]
 
           val authAction = new IdentifierActionImpl(
-            new FakeFailingAuthConnector(new InsufficientEnrolments),
             appConfig,
+            new FakeFailingAuthConnector(new InsufficientEnrolments),
+            mockSessionDataCacheConnector,
             bodyParsers
           )
           val controller = new Harness(authAction)
@@ -122,8 +128,9 @@ class AuthActionSpec extends SpecBase {
           val appConfig = application.injector.instanceOf[FrontendAppConfig]
 
           val authAction = new IdentifierActionImpl(
-            new FakeFailingAuthConnector(new InsufficientConfidenceLevel),
             appConfig,
+            new FakeFailingAuthConnector(new InsufficientConfidenceLevel),
+            mockSessionDataCacheConnector,
             bodyParsers
           )
           val controller = new Harness(authAction)
@@ -146,8 +153,9 @@ class AuthActionSpec extends SpecBase {
           val appConfig = application.injector.instanceOf[FrontendAppConfig]
 
           val authAction = new IdentifierActionImpl(
-            new FakeFailingAuthConnector(new UnsupportedAuthProvider),
             appConfig,
+            new FakeFailingAuthConnector(new UnsupportedAuthProvider),
+            mockSessionDataCacheConnector,
             bodyParsers
           )
           val controller = new Harness(authAction)
@@ -170,8 +178,9 @@ class AuthActionSpec extends SpecBase {
           val appConfig = application.injector.instanceOf[FrontendAppConfig]
 
           val authAction = new IdentifierActionImpl(
-            new FakeFailingAuthConnector(new UnsupportedAffinityGroup),
             appConfig,
+            new FakeFailingAuthConnector(new UnsupportedAffinityGroup),
+            mockSessionDataCacheConnector,
             bodyParsers
           )
           val controller = new Harness(authAction)
@@ -194,8 +203,9 @@ class AuthActionSpec extends SpecBase {
           val appConfig = application.injector.instanceOf[FrontendAppConfig]
 
           val authAction = new IdentifierActionImpl(
-            new FakeFailingAuthConnector(new UnsupportedCredentialRole),
             appConfig,
+            new FakeFailingAuthConnector(new UnsupportedCredentialRole),
+            mockSessionDataCacheConnector,
             bodyParsers
           )
           val controller = new Harness(authAction)
