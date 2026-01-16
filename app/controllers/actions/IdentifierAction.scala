@@ -17,13 +17,19 @@
 package controllers.actions
 
 import play.api.mvc._
-import com.google.inject.Inject
+import connectors.SessionDataCacheConnector
 import controllers.routes
-import config.FrontendAppConfig
-import uk.gov.hmrc.auth.core._
+import config.{Constants, FrontendAppConfig}
+import uk.gov.hmrc.auth.core.retrieve.~
 import uk.gov.hmrc.auth.core.retrieve.v2.Retrievals
-import uk.gov.hmrc.http.{HeaderCarrier, UnauthorizedException}
+import uk.gov.hmrc.http.HeaderCarrier
+import models.SessionData
 import play.api.mvc.Results._
+import models.PensionSchemeUser.{Administrator, Practitioner}
+import com.google.inject.Inject
+import utils.Extractors.&&
+import uk.gov.hmrc.auth.core._
+import models.requests.IdentifierRequest.{AdministratorRequest, PractitionerRequest}
 import uk.gov.hmrc.play.http.HeaderCarrierConverter
 import models.requests.IdentifierRequest
 
@@ -33,10 +39,11 @@ trait IdentifierAction
     extends ActionBuilder[IdentifierRequest, AnyContent]
     with ActionFunction[Request, IdentifierRequest]
 
-class AuthenticatedIdentifierAction @Inject() (
+class IdentifierActionImpl @Inject() (
+  appConfig: FrontendAppConfig,
   override val authConnector: AuthConnector,
-  config: FrontendAppConfig,
-  val parser: BodyParsers.Default
+  sessionDataCacheConnector: SessionDataCacheConnector,
+  playBodyParsers: PlayBodyParsers
 )(implicit val executionContext: ExecutionContext)
     extends IdentifierAction
     with AuthorisedFunctions {
@@ -45,35 +52,64 @@ class AuthenticatedIdentifierAction @Inject() (
 
     implicit val hc: HeaderCarrier = HeaderCarrierConverter.fromRequestAndSession(request, request.session)
 
-    authorised()
-      .retrieve(Retrievals.internalId) {
-        _.map { internalId =>
-          block(IdentifierRequest(request, internalId))
-        }.getOrElse(throw new UnauthorizedException("Unable to retrieve internal Id"))
+    authorised(Enrolment(Constants.psaEnrolmentKey).or(Enrolment(Constants.pspEnrolmentKey)))
+      .retrieve(Retrievals.internalId.and(Retrievals.externalId).and(Retrievals.allEnrolments)) {
+
+        case Some(internalId) ~ Some(externalId) ~ (IsPSA(psaId) && IsPSP(pspId)) =>
+          fetchFromSessionData(internalId, externalId, request, psaId.value, pspId.value, block)
+
+        case Some(internalId) ~ Some(externalId) ~ IsPSA(psaId) =>
+          block(AdministratorRequest(internalId, externalId, request, psaId.value))
+
+        case Some(internalId) ~ Some(externalId) ~ IsPSP(pspId) =>
+          block(PractitionerRequest(internalId, externalId, request, pspId.value))
+
+        case Some(_) ~ Some(_) ~ _ =>
+          Future.successful(Redirect(appConfig.urls.managePensionsSchemes.registerUrl))
+
+        case _ => Future.successful(Redirect(routes.UnauthorisedController.onPageLoad()))
       }
       .recover {
         case _: NoActiveSession =>
-          Redirect(config.loginUrl, Map("continue" -> Seq(config.loginContinueUrl)))
+          Redirect(appConfig.urls.loginUrl, Map("continue" -> Seq(appConfig.urls.loginContinueUrl)))
         case _: AuthorisationException =>
-          Redirect(routes.UnauthorisedController.onPageLoad())
+          Redirect(appConfig.urls.managePensionsSchemes.registerUrl)
       }
   }
-}
 
-class SessionIdentifierAction @Inject() (
-  val parser: BodyParsers.Default
-)(implicit val executionContext: ExecutionContext)
-    extends IdentifierAction {
-
-  override def invokeBlock[A](request: Request[A], block: IdentifierRequest[A] => Future[Result]): Future[Result] = {
-
+  private def fetchFromSessionData[A](
+    internalId: String,
+    externalId: String,
+    request: Request[A],
+    psaId: String,
+    pspId: String,
+    block: IdentifierRequest[A] => Future[Result]
+  ) = {
     implicit val hc: HeaderCarrier = HeaderCarrierConverter.fromRequestAndSession(request, request.session)
 
-    hc.sessionId match {
-      case Some(session) =>
-        block(IdentifierRequest(request, session.value))
+    sessionDataCacheConnector.fetch().flatMap {
       case None =>
-        Future.successful(Redirect(routes.JourneyRecoveryController.onPageLoad()))
+        Future.successful(Redirect(appConfig.urls.managePensionsSchemes.adminOrPractitionerUrl))
+      case Some(SessionData(Administrator)) =>
+        block(AdministratorRequest(internalId, externalId, request, psaId))
+      case Some(SessionData(Practitioner)) =>
+        block(PractitionerRequest(internalId, externalId, request, pspId))
     }
+  }
+
+  override def parser: BodyParser[AnyContent] = playBodyParsers.default
+
+  private object IsPSA {
+    def unapply(enrolments: Enrolments): Option[EnrolmentIdentifier] =
+      enrolments.enrolments
+        .find(_.key == Constants.psaEnrolmentKey)
+        .flatMap(_.getIdentifier(Constants.psaIdKey))
+  }
+
+  private object IsPSP {
+    def unapply(enrolments: Enrolments): Option[EnrolmentIdentifier] =
+      enrolments.enrolments
+        .find(_.key == Constants.pspEnrolmentKey)
+        .flatMap(_.getIdentifier(Constants.pspIdKey))
   }
 }
