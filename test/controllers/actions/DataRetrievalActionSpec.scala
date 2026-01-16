@@ -19,9 +19,9 @@ package controllers.actions
 import play.api.test.FakeRequest
 import org.mockito.Mockito._
 import base.SpecBase
-import models.PensionSchemeId.PsaId
+import models.PensionSchemeId.{PsaId, PspId}
 import repositories.SessionRepository
-import generators.ModelGenerators.administratorRequestGen
+import generators.ModelGenerators.{administratorRequestGen, practitionerRequestGen}
 import models.UserAnswers
 import models.requests.{IdentifierRequest, OptionalDataRequest}
 import org.scalatestplus.mockito.MockitoSugar
@@ -38,35 +38,60 @@ class DataRetrievalActionSpec extends SpecBase with MockitoSugar {
   "Data Retrieval Action" - {
 
     "when there is no data in the cache" - {
+      val sessionRepository = mock[SessionRepository]
+      when(sessionRepository.get("id")).thenReturn(Future(None))
+      val action = new Harness(sessionRepository)
 
-      "must set userAnswers to 'None' in the request" in {
+      "and identified as PSA" - {
+        "must set userAnswers to 'None' in the request" in {
 
-        val sessionRepository = mock[SessionRepository]
-        when(sessionRepository.get("id")).thenReturn(Future(None))
-        val action = new Harness(sessionRepository)
+          val identifierRequest =
+            administratorRequestGen(FakeRequest()).map(_.copy(userId = "id", psaId = PsaId("A1234567"))).sample.value
+          val result = action.callTransform(identifierRequest).futureValue
 
-        val identifierRequest =
-          administratorRequestGen(FakeRequest()).map(_.copy(userId = "id", psaId = PsaId("A1234567"))).sample.value
-        val result = action.callTransform(identifierRequest).futureValue
+          result.userAnswers must not be defined
+        }
+      }
+      "and identified as PSP" - {
+        "must set userAnswers to 'None' in the request" in {
 
-        result.userAnswers must not be defined
+          val identifierRequest =
+            practitionerRequestGen(FakeRequest()).map(_.copy(userId = "id", pspId = PspId("A1234567"))).sample.value
+          val result = action.callTransform(identifierRequest).futureValue
+
+          result.userAnswers must not be defined
+        }
       }
     }
 
     "when there is data in the cache" - {
 
-      "must build a userAnswers object and add it to the request" in {
+      val sessionRepository = mock[SessionRepository]
+      when(sessionRepository.get("id")).thenReturn(Future(Some(UserAnswers("id"))))
+      val action = new Harness(sessionRepository)
 
-        val sessionRepository = mock[SessionRepository]
-        when(sessionRepository.get("id")).thenReturn(Future(Some(UserAnswers("id"))))
-        val action = new Harness(sessionRepository)
+      "and identified as PSA" - {
+        "must build a userAnswers object and add it to the request" in {
 
-        val identifierRequest =
-          administratorRequestGen(FakeRequest()).map(_.copy(userId = "id", psaId = PsaId("A1234567"))).sample.value
-        val result = action.callTransform(identifierRequest).futureValue
+          val identifierRequest =
+            administratorRequestGen(FakeRequest()).map(_.copy(userId = "id", psaId = PsaId("A1234567"))).sample.value
+          val result = action.callTransform(identifierRequest).futureValue
 
-        result.userAnswers mustBe defined
+          result.userAnswers mustBe defined
+        }
       }
+
+      "and identified as PSP" - {
+        "must build a userAnswers object and add it to the request" in {
+
+          val identifierRequest =
+            practitionerRequestGen(FakeRequest()).map(_.copy(userId = "id", pspId = PspId("A1234567"))).sample.value
+          val result = action.callTransform(identifierRequest).futureValue
+
+          result.userAnswers mustBe defined
+        }
+      }
+
     }
   }
 }
