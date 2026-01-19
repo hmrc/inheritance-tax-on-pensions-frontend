@@ -47,58 +47,60 @@ class MinimalDetailsConnectorSpec extends BaseConnectorSpec {
 
   def connector(implicit app: Application): MinimalDetailsConnector = injected[MinimalDetailsConnector]
 
-  "fetch" - {
+  List(true, false).foreach { fetchAsPsa =>
+    s"fetch as PSA=$fetchAsPsa" - {
 
-    "return psa minimal details" in runningApplication { implicit app =>
-      val md = minimalDetailsGen.sample.value
-      stubGet(loggedInAsPsa = true, ok(Json.stringify(Json.toJson(md))))
-
-      val result = connector.fetch(loggedInAsPsa = true).futureValue
-
-      result mustBe Right(md)
-    }
-
-    "return psp minimal details" in runningApplication { implicit app =>
-      val md = minimalDetailsGen.sample.value
-      stubGet(loggedInAsPsa = false, ok(Json.stringify(Json.toJson(md))))
-
-      val result = connector.fetch(loggedInAsPsa = false).futureValue
-
-      result mustBe Right(md)
-    }
-
-    "return a details not found when 404 returned with message" in runningApplication { implicit app =>
-      stubGet(loggedInAsPsa = true, notFound.withBody(Constants.detailsNotFound))
-
-      val result = connector.fetch(loggedInAsPsa = true).futureValue
-
-      result mustBe Left(DetailsNotFound)
-    }
-
-    "return a delimited admin error when forbidden with delimited admin error returned" in runningApplication {
-      implicit app =>
-        val body = stringContains(Constants.delimitedPSA).sample.value
-
-        stubGet(loggedInAsPsa = true, forbidden.withBody(body))
+      "return psa minimal details as $" in runningApplication { implicit app =>
+        val md = minimalDetailsGen.sample.value
+        stubGet(loggedInAsPsa = true, ok(Json.stringify(Json.toJson(md))))
 
         val result = connector.fetch(loggedInAsPsa = true).futureValue
 
-        result mustBe Left(DelimitedAdmin)
-    }
-
-    "fail future when a 404 returned" in runningApplication { implicit app =>
-      stubGet(loggedInAsPsa = true, notFound)
-
-      assertThrows[Exception] {
-        connector.fetch(loggedInAsPsa = true).futureValue
+        result mustBe Right(md)
       }
-    }
 
-    "fail future for any other http failure code" in runningApplication { implicit app =>
-      stubGet(loggedInAsPsa = true, badRequest)
+      "return psp minimal details" in runningApplication { implicit app =>
+        val md = minimalDetailsGen.sample.value
+        stubGet(loggedInAsPsa = false, ok(Json.stringify(Json.toJson(md))))
 
-      assertThrows[Exception] {
-        connector.fetch(loggedInAsPsa = true).futureValue
+        val result = connector.fetch(loggedInAsPsa = false).futureValue
+
+        result mustBe Right(md)
+      }
+
+      "return a details not found when 404 returned with message" in runningApplication { implicit app =>
+        stubGet(loggedInAsPsa = true, notFound.withBody(Constants.detailsNotFound))
+
+        val result = connector.fetch(loggedInAsPsa = true).futureValue
+
+        result mustBe Left(DetailsNotFound)
+      }
+
+      "return a delimited admin error when forbidden with delimited admin error returned" in runningApplication {
+        implicit app =>
+          val body = stringContains(Constants.delimitedPSA).sample.value
+
+          stubGet(loggedInAsPsa = true, forbidden.withBody(body))
+
+          val result = connector.fetch(loggedInAsPsa = true).futureValue
+
+          result mustBe Left(DelimitedAdmin)
+      }
+
+      "fail future when a 404 returned" in runningApplication { implicit app =>
+        stubGet(loggedInAsPsa = true, notFound)
+
+        assertThrows[Exception] {
+          connector.fetch(loggedInAsPsa = true).futureValue
+        }
+      }
+
+      "fail future for any other http failure code" in runningApplication { implicit app =>
+        stubGet(loggedInAsPsa = true, badRequest)
+
+        assertThrows[Exception] {
+          connector.fetch(loggedInAsPsa = true).futureValue
+        }
       }
     }
   }

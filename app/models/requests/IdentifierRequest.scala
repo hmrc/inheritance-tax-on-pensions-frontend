@@ -23,7 +23,8 @@ import models.PensionSchemeId
 
 sealed abstract class IdentifierRequest[A](request: Request[A]) extends WrappedRequest[A](request) { self =>
 
-  val userId: String
+  val userId: String // user below getUserId instead:
+  def getUserId: String = fold(_.userId, _.userId)
 
   def fold[B](admin: AdministratorRequest[A] => B, practitioner: PractitionerRequest[A] => B): B =
     self match {
@@ -31,7 +32,6 @@ sealed abstract class IdentifierRequest[A](request: Request[A]) extends WrappedR
       case p: PractitionerRequest[A] => practitioner(p)
     }
 
-  def getUserId: String = fold(_.userId, _.userId)
 
   def pensionSchemeId: PensionSchemeId = fold(_.psaId, _.pspId)
 }
