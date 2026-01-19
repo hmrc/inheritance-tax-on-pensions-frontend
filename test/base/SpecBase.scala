@@ -19,14 +19,22 @@ package base
 import play.api.test.FakeRequest
 import org.scalatest.concurrent.{IntegrationPatience, ScalaFutures}
 import org.scalatest.matchers.must.Matchers
+import org.apache.pekko.stream.Materializer
 import play.api.inject.bind
 import controllers.actions._
+import org.apache.pekko.actor.ActorSystem
 import models.UserAnswers
 import play.api.i18n.{Messages, MessagesApi}
+import org.scalatestplus.mockito.MockitoSugar
 import play.api.inject.guice.GuiceApplicationBuilder
+import play.api.test.Helpers.running
 import org.scalatest.freespec.AnyFreeSpec
 import org.scalatest.{OptionValues, TryValues}
 import play.api.Application
+
+import scala.reflect.ClassTag
+
+import java.net.URLEncoder
 
 trait SpecBase
     extends AnyFreeSpec
@@ -34,7 +42,11 @@ trait SpecBase
     with TryValues
     with OptionValues
     with ScalaFutures
+    with MockitoSugar
     with IntegrationPatience {
+
+  implicit val actorSystem: ActorSystem = ActorSystem("unit-tests")
+  implicit val mat: Materializer = Materializer.createMaterializer(actorSystem)
 
   val userAnswersId: String = "id"
 
@@ -42,11 +54,33 @@ trait SpecBase
 
   def messages(app: Application): Messages = app.injector.instanceOf[MessagesApi].preferred(FakeRequest())
 
-  protected def applicationBuilder(userAnswers: Option[UserAnswers] = None): GuiceApplicationBuilder =
+  protected def applicationBuilder(
+    userAnswers: Option[UserAnswers] = None,
+    isPsa: Boolean = true
+  ): GuiceApplicationBuilder = {
+    val identifierActionBind = if (isPsa) {
+      bind[IdentifierAction].to[FakePsaIdentifierAction]
+    } else {
+      bind[IdentifierAction].to[FakePspIdentifierAction]
+    }
+
     new GuiceApplicationBuilder()
       .overrides(
         bind[DataRequiredAction].to[DataRequiredActionImpl],
-        bind[IdentifierAction].to[FakeIdentifierAction],
+        identifierActionBind,
         bind[DataRetrievalAction].toInstance(new FakeDataRetrievalAction(userAnswers))
       )
+      .configure(
+        "auditing.enabled" -> false,
+        "metric.enabled" -> false
+      )
+  }
+
+  protected def injected[A: ClassTag](implicit app: Application): A = app.injector.instanceOf[A]
+
+  def runningApplication(block: Application => Unit): Unit =
+    running(_ => applicationBuilder())(block)
+
+  def urlEncode(input: String): String = URLEncoder.encode(input, "utf-8")
+
 }

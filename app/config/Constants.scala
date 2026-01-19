@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 HM Revenue & Customs
+ * Copyright 2024 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,8 +14,16 @@
  * limitations under the License.
  */
 
-package models
+package config
 
-class WithName(val name: String) {
-  override val toString: String = name
+object Constants {
+
+  val psaEnrolmentKey = "HMRC-PODS-ORG"
+  val pspEnrolmentKey = "HMRC-PODSPP-ORG"
+
+  val psaIdKey = "PSAID"
+  val pspIdKey = "PSPID"
+
+  val PSA = "PSA"
+  val PSP = "PSP"
 }

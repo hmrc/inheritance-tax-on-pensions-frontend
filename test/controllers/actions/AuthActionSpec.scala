@@ -16,11 +16,11 @@
 
 package controllers.actions
 
-import play.api.test.FakeRequest
+import play.api.test.{FakeRequest, StubPlayBodyParsersFactory}
 import play.api.test.Helpers._
 import play.api.mvc._
 import com.google.inject.Inject
-import controllers.routes
+import connectors.SessionDataCacheConnector
 import config.FrontendAppConfig
 import uk.gov.hmrc.auth.core.retrieve.Retrieval
 import uk.gov.hmrc.http.HeaderCarrier
@@ -31,7 +31,8 @@ import uk.gov.hmrc.auth.core._
 import scala.concurrent.{ExecutionContext, Future}
 import scala.concurrent.ExecutionContext.Implicits.global
 
-class AuthActionSpec extends SpecBase {
+class AuthActionSpec extends SpecBase with StubPlayBodyParsersFactory {
+  val mockSessionDataCacheConnector: SessionDataCacheConnector = mock[SessionDataCacheConnector]
 
   class Harness(authAction: IdentifierAction) {
     def onPageLoad(): Action[AnyContent] = authAction(_ => Results.Ok)
@@ -46,19 +47,19 @@ class AuthActionSpec extends SpecBase {
         val application = applicationBuilder(userAnswers = None).build()
 
         running(application) {
-          val bodyParsers = application.injector.instanceOf[BodyParsers.Default]
           val appConfig = application.injector.instanceOf[FrontendAppConfig]
 
-          val authAction = new AuthenticatedIdentifierAction(
-            new FakeFailingAuthConnector(new MissingBearerToken),
+          val authAction = new IdentifierActionImpl(
             appConfig,
-            bodyParsers
+            new FakeFailingAuthConnector(new MissingBearerToken),
+            mockSessionDataCacheConnector,
+            stubPlayBodyParsers
           )
           val controller = new Harness(authAction)
           val result = controller.onPageLoad()(FakeRequest())
 
           status(result) mustBe SEE_OTHER
-          redirectLocation(result).value must startWith(appConfig.loginUrl)
+          redirectLocation(result).value must startWith(appConfig.urls.loginUrl)
         }
       }
     }
@@ -70,139 +71,139 @@ class AuthActionSpec extends SpecBase {
         val application = applicationBuilder(userAnswers = None).build()
 
         running(application) {
-          val bodyParsers = application.injector.instanceOf[BodyParsers.Default]
           val appConfig = application.injector.instanceOf[FrontendAppConfig]
 
-          val authAction = new AuthenticatedIdentifierAction(
-            new FakeFailingAuthConnector(new BearerTokenExpired),
+          val authAction = new IdentifierActionImpl(
             appConfig,
-            bodyParsers
+            new FakeFailingAuthConnector(new BearerTokenExpired),
+            mockSessionDataCacheConnector,
+            stubPlayBodyParsers
           )
           val controller = new Harness(authAction)
           val result = controller.onPageLoad()(FakeRequest())
 
           status(result) mustBe SEE_OTHER
-          redirectLocation(result).value must startWith(appConfig.loginUrl)
+          redirectLocation(result).value must startWith(appConfig.urls.loginUrl)
         }
       }
     }
 
     "the user doesn't have sufficient enrolments" - {
 
-      "must redirect the user to the unauthorised page" in {
+      "must redirect the user to the you-need-to-register page" in {
 
         val application = applicationBuilder(userAnswers = None).build()
 
         running(application) {
-          val bodyParsers = application.injector.instanceOf[BodyParsers.Default]
           val appConfig = application.injector.instanceOf[FrontendAppConfig]
 
-          val authAction = new AuthenticatedIdentifierAction(
-            new FakeFailingAuthConnector(new InsufficientEnrolments),
+          val authAction = new IdentifierActionImpl(
             appConfig,
-            bodyParsers
+            new FakeFailingAuthConnector(new InsufficientEnrolments),
+            mockSessionDataCacheConnector,
+            stubPlayBodyParsers
           )
           val controller = new Harness(authAction)
           val result = controller.onPageLoad()(FakeRequest())
 
           status(result) mustBe SEE_OTHER
-          redirectLocation(result).value mustBe routes.UnauthorisedController.onPageLoad().url
+          redirectLocation(result).value mustBe appConfig.urls.managePensionsSchemes.registerUrl
         }
       }
     }
 
     "the user doesn't have sufficient confidence level" - {
 
-      "must redirect the user to the unauthorised page" in {
+      "must redirect the user to the you-need-to-register page" in {
 
         val application = applicationBuilder(userAnswers = None).build()
 
         running(application) {
-          val bodyParsers = application.injector.instanceOf[BodyParsers.Default]
           val appConfig = application.injector.instanceOf[FrontendAppConfig]
 
-          val authAction = new AuthenticatedIdentifierAction(
-            new FakeFailingAuthConnector(new InsufficientConfidenceLevel),
+          val authAction = new IdentifierActionImpl(
             appConfig,
-            bodyParsers
+            new FakeFailingAuthConnector(new InsufficientConfidenceLevel),
+            mockSessionDataCacheConnector,
+            stubPlayBodyParsers
           )
           val controller = new Harness(authAction)
           val result = controller.onPageLoad()(FakeRequest())
 
           status(result) mustBe SEE_OTHER
-          redirectLocation(result).value mustBe routes.UnauthorisedController.onPageLoad().url
+          redirectLocation(result).value mustBe appConfig.urls.managePensionsSchemes.registerUrl
         }
       }
     }
 
     "the user used an unaccepted auth provider" - {
 
-      "must redirect the user to the unauthorised page" in {
+      "must redirect the user to the you-need-to-register page" in {
 
         val application = applicationBuilder(userAnswers = None).build()
 
         running(application) {
-          val bodyParsers = application.injector.instanceOf[BodyParsers.Default]
           val appConfig = application.injector.instanceOf[FrontendAppConfig]
 
-          val authAction = new AuthenticatedIdentifierAction(
-            new FakeFailingAuthConnector(new UnsupportedAuthProvider),
+          val authAction = new IdentifierActionImpl(
             appConfig,
-            bodyParsers
+            new FakeFailingAuthConnector(new UnsupportedAuthProvider),
+            mockSessionDataCacheConnector,
+            stubPlayBodyParsers
           )
           val controller = new Harness(authAction)
           val result = controller.onPageLoad()(FakeRequest())
 
           status(result) mustBe SEE_OTHER
-          redirectLocation(result).value mustBe routes.UnauthorisedController.onPageLoad().url
+          redirectLocation(result).value mustBe appConfig.urls.managePensionsSchemes.registerUrl
         }
       }
     }
 
     "the user has an unsupported affinity group" - {
 
-      "must redirect the user to the unauthorised page" in {
+      "must redirect the user to the you-need-to-register page" in {
 
         val application = applicationBuilder(userAnswers = None).build()
 
         running(application) {
-          val bodyParsers = application.injector.instanceOf[BodyParsers.Default]
           val appConfig = application.injector.instanceOf[FrontendAppConfig]
 
-          val authAction = new AuthenticatedIdentifierAction(
-            new FakeFailingAuthConnector(new UnsupportedAffinityGroup),
+          val authAction = new IdentifierActionImpl(
             appConfig,
-            bodyParsers
+            new FakeFailingAuthConnector(new UnsupportedAffinityGroup),
+            mockSessionDataCacheConnector,
+            stubPlayBodyParsers
           )
           val controller = new Harness(authAction)
           val result = controller.onPageLoad()(FakeRequest())
 
           status(result) mustBe SEE_OTHER
-          redirectLocation(result) mustBe Some(routes.UnauthorisedController.onPageLoad().url)
+          redirectLocation(result) mustBe Some(appConfig.urls.managePensionsSchemes.registerUrl)
         }
       }
     }
 
     "the user has an unsupported credential role" - {
 
-      "must redirect the user to the unauthorised page" in {
+      "must redirect the user to the you-need-to-register page" in {
 
         val application = applicationBuilder(userAnswers = None).build()
 
         running(application) {
-          val bodyParsers = application.injector.instanceOf[BodyParsers.Default]
           val appConfig = application.injector.instanceOf[FrontendAppConfig]
 
-          val authAction = new AuthenticatedIdentifierAction(
-            new FakeFailingAuthConnector(new UnsupportedCredentialRole),
+          val authAction = new IdentifierActionImpl(
             appConfig,
-            bodyParsers
+            new FakeFailingAuthConnector(new UnsupportedCredentialRole),
+            mockSessionDataCacheConnector,
+            stubPlayBodyParsers
           )
           val controller = new Harness(authAction)
           val result = controller.onPageLoad()(FakeRequest())
 
           status(result) mustBe SEE_OTHER
-          redirectLocation(result) mustBe Some(routes.UnauthorisedController.onPageLoad().url)
+          redirectLocation(result) mustBe Some(appConfig.urls.managePensionsSchemes.registerUrl)
         }
       }
     }
