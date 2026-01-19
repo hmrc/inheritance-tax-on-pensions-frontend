@@ -41,5 +41,22 @@ class IndexControllerSpec extends SpecBase {
         contentAsString(result) mustEqual view()(using request, messages(application)).toString
       }
     }
+
+    "must return OK when accessed as PSP" in {
+
+      val application = applicationBuilder(userAnswers = None, isPsa = false).build()
+
+      running(application) {
+        val request = FakeRequest(GET, routes.IndexController.onPageLoad().url)
+
+        val result = route(application, request).value
+
+        val view = application.injector.instanceOf[IndexView]
+
+        status(result) mustEqual OK
+
+        contentAsString(result) mustEqual view()(using request, messages(application)).toString
+      }
+    }
   }
 }

@@ -1,6 +1,5 @@
 import play.sbt.routes.RoutesKeys
 import sbt.Def
-import scoverage.ScoverageKeys
 import uk.gov.hmrc.versioning.SbtGitVersioning.autoImport.majorVersion
 
 lazy val appName: String = "inheritance-tax-on-pensions-frontend"
@@ -34,11 +33,6 @@ lazy val microservice = (project in file("."))
       "viewmodels.govuk.all._"
     ),
     PlayKeys.playDefaultPort := 10711,
-    ScoverageKeys.coverageExcludedFiles := "<empty>;Reverse.*;.*handlers.*;.*components.*;" +
-      ".*Routes.*;.*viewmodels.govuk.*;.*controllers.testonly.*,models.*",
-    ScoverageKeys.coverageMinimumStmtTotal := 80,
-    ScoverageKeys.coverageFailOnMinimum := true,
-    ScoverageKeys.coverageHighlighting := true,
     scalacOptions ++= Seq(
       "-feature",
       "-Wconf:msg=Flag.*repeatedly:s",
@@ -54,7 +48,8 @@ lazy val microservice = (project in file("."))
     Assets / pipelineStages := Seq(concat),
     scalafmtOnCompile := true,
     scalafixOnCompile := true
-  )
+  ).settings(CodeCoverageSettings.settings: _*)
+
 
 lazy val testSettings: Seq[Def.Setting[_]] = Seq(
   fork := true,
