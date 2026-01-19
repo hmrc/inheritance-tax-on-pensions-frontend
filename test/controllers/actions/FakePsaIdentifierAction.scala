@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 HM Revenue & Customs
+ * Copyright 2024 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,20 +17,25 @@
 package controllers.actions
 
 import play.api.mvc._
+import generators.Generators
+import models.PensionSchemeId.PsaId
+import org.scalatest.OptionValues
 import models.requests.IdentifierRequest
 
 import scala.concurrent.{ExecutionContext, Future}
 
 import javax.inject.Inject
 
-class FakeIdentifierAction @Inject() (bodyParsers: PlayBodyParsers) extends IdentifierAction {
+class FakePsaIdentifierAction @Inject() (
+  val bodyParsers: PlayBodyParsers
+)(implicit
+  override val executionContext: ExecutionContext
+) extends IdentifierAction
+    with Generators
+    with OptionValues {
 
   override def invokeBlock[A](request: Request[A], block: IdentifierRequest[A] => Future[Result]): Future[Result] =
-    block(IdentifierRequest(request, "id"))
+    block(administratorRequestGen(request).map(_.copy(userId = "id", psaId = PsaId("A1234567"))).sample.value)
 
-  override def parser: BodyParser[AnyContent] =
-    bodyParsers.default
-
-  override protected def executionContext: ExecutionContext =
-    scala.concurrent.ExecutionContext.Implicits.global
+  override def parser: BodyParser[AnyContent] = bodyParsers.default
 }
