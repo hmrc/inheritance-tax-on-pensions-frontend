@@ -37,7 +37,9 @@ class UnauthorisedControllerSpec extends SpecBase {
         val view = application.injector.instanceOf[UnauthorisedView]
 
         status(result) mustEqual OK
-        contentAsString(result) mustEqual view()(using request, messages(application)).toString
+        contentAsString(result) mustEqual view(
+          "https://www.gov.uk/government/organisations/hm-revenue-customs/contact/pension-scheme-enquiries"
+        )(using request, messages(application)).toString
       }
     }
   }

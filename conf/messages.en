@@ -31,6 +31,10 @@ index.title = inheritance-tax-on-pensions-frontend
 index.heading = inheritance-tax-on-pensions-frontend
 index.guidance = Welcome to your new frontend. Please see the README file for a guide to getting started.
 
+submissionList.title = Your submissions
+submissionList.heading = Your submissions
+submissionList.guidance = This is a placeholder for the page with list of submissions for the scheme
+
 checkYourAnswers.title = Check your answers
 checkYourAnswers.heading = Check your answers
 
@@ -45,5 +49,7 @@ signedOut.title = For your security, we signed you out
 signedOut.heading = For your security, we signed you out
 signedOut.guidance = We did not save your answers.
 
-unauthorised.title = You can’t access this service with this account
-unauthorised.heading = You can’t access this service with this account
+unauthorised.title = You cannot access this service with this account
+unauthorised.heading = You cannot access this service with this account
+unauthorised.paragraph =  If you think you should have access to this service, you can
+unauthorised.linkMessage = contact HMRC for pension scheme help

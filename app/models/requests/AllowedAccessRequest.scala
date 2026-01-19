@@ -14,30 +14,20 @@
  * limitations under the License.
  */
 
-package models
+package models.requests
 
-import models.PensionSchemeId.{PsaId, PspId}
+import play.api.mvc.WrappedRequest
+import models.SchemeId.Srn
+import models.{MinimalDetails, PensionSchemeId, SchemeDetails}
 
-sealed trait PensionSchemeId { self =>
+case class AllowedAccessRequest[A](
+  request: IdentifierRequest[A],
+  schemeDetails: SchemeDetails,
+  minimalDetails: MinimalDetails,
+  srn: Srn
+) extends WrappedRequest[A](request) {
 
-  val value: String
+  val getUserId: String = request.getUserId
 
-  def fold[B](f1: PsaId => B, f2: PspId => B): B =
-    self match {
-      case id @ PsaId(_) => f1(id)
-      case id @ PspId(_) => f2(id)
-    }
-
-  val isPSP: Boolean = this match {
-    case PspId(_) => true
-    case _ => false
-  }
-}
-
-object PensionSchemeId {
-
-  case class PspId(value: String) extends PensionSchemeId
-
-  case class PsaId(value: String) extends PensionSchemeId
-
+  val pensionSchemeId: PensionSchemeId = request.pensionSchemeId
 }

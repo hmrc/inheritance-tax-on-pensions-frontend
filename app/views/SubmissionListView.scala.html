@@ -1,4 +1,4 @@
-/*
+@*
  * Copyright 2026 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -12,32 +12,20 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- */
+ *@
 
-package models
+@this(
+    layout: templates.Layout
+)
 
-import models.PensionSchemeId.{PsaId, PspId}
+@()(implicit request: Request[?], messages: Messages)
 
-sealed trait PensionSchemeId { self =>
+@layout(
+    pageTitle    = titleNoForm(messages("submissionList.title")),
+    showBackLink = false
+) {
 
-  val value: String
+    <h1 class="govuk-heading-xl">@messages("submissionList.heading")</h1>
 
-  def fold[B](f1: PsaId => B, f2: PspId => B): B =
-    self match {
-      case id @ PsaId(_) => f1(id)
-      case id @ PspId(_) => f2(id)
-    }
-
-  val isPSP: Boolean = this match {
-    case PspId(_) => true
-    case _ => false
-  }
-}
-
-object PensionSchemeId {
-
-  case class PspId(value: String) extends PensionSchemeId
-
-  case class PsaId(value: String) extends PensionSchemeId
-
+    <p class="govuk-body">@messages("submissionList.guidance")</p>
 }

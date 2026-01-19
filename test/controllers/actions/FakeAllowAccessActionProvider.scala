@@ -18,24 +18,27 @@ package controllers.actions
 
 import play.api.mvc._
 import generators.Generators
-import models.PensionSchemeId.PsaId
 import org.scalatest.OptionValues
-import models.requests.IdentifierRequest
+import models.{MinimalDetails, SchemeDetails, SchemeId}
+import models.requests.{AllowedAccessRequest, IdentifierRequest}
 
 import scala.concurrent.{ExecutionContext, Future}
 
 import javax.inject.Inject
 
-class FakePsaIdentifierAction @Inject() (
-  val bodyParsers: PlayBodyParsers
-)(implicit
-  override val executionContext: ExecutionContext
-) extends IdentifierAction
+class FakeAllowAccessActionProvider @Inject() (schemeDetails: SchemeDetails, minimalDetails: MinimalDetails)
+    extends AllowAccessActionProvider
     with Generators
     with OptionValues {
 
-  override def invokeBlock[A](request: Request[A], block: IdentifierRequest[A] => Future[Result]): Future[Result] =
-    block(administratorRequestGen(request).map(_.copy(userId = "id", psaId = PsaId("A1234567"))).sample.value)
+  override def apply(srn: SchemeId.Srn): ActionFunction[IdentifierRequest, AllowedAccessRequest] =
+    new ActionFunction[IdentifierRequest, AllowedAccessRequest] {
+      override def invokeBlock[A](
+        request: IdentifierRequest[A],
+        block: AllowedAccessRequest[A] => Future[Result]
+      ): Future[Result] =
+        block(AllowedAccessRequest(request, schemeDetails, minimalDetails, srn))
 
-  override def parser: BodyParser[AnyContent] = bodyParsers.default
+      override protected def executionContext: ExecutionContext = scala.concurrent.ExecutionContext.Implicits.global
+    }
 }

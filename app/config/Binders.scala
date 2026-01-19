@@ -14,30 +14,18 @@
  * limitations under the License.
  */
 
-package models
+package config
 
-import models.PensionSchemeId.{PsaId, PspId}
+import play.api.mvc.PathBindable
+import models.SchemeId.Srn
 
-sealed trait PensionSchemeId { self =>
+object Binders {
 
-  val value: String
+  implicit val srnBinder: PathBindable[Srn] = new PathBindable[Srn] {
 
-  def fold[B](f1: PsaId => B, f2: PspId => B): B =
-    self match {
-      case id @ PsaId(_) => f1(id)
-      case id @ PspId(_) => f2(id)
-    }
+    override def bind(key: String, value: String): Either[String, Srn] =
+      Srn(value).toRight("Invalid scheme reference number")
 
-  val isPSP: Boolean = this match {
-    case PspId(_) => true
-    case _ => false
+    override def unbind(key: String, value: Srn): String = value.value
   }
-}
-
-object PensionSchemeId {
-
-  case class PspId(value: String) extends PensionSchemeId
-
-  case class PsaId(value: String) extends PensionSchemeId
-
 }

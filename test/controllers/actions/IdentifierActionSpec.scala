@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 HM Revenue & Customs
+ * Copyright 2026 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -62,20 +62,25 @@ class IdentifierActionSpec extends SpecBase with StubPlayBodyParsersFactory {
   val mockAuthConnector: AuthConnector = mock[AuthConnector]
   val mockSessionDataCacheConnector: SessionDataCacheConnector = mock[SessionDataCacheConnector]
 
-  def authResult(internalId: Option[String], externalId: Option[String], enrolments: Enrolment*) =
-    new ~(new ~(internalId, externalId), Enrolments(enrolments.toSet))
+  def authResult(
+    internalId: Option[String],
+    externalId: Option[String],
+    affinityGroup: Option[AffinityGroup],
+    enrolments: Enrolment*
+  ) =
+    new ~(new ~(new ~(internalId, externalId), affinityGroup), Enrolments(enrolments.toSet))
 
   val psaEnrolment: Enrolment =
     Enrolment(Constants.psaEnrolmentKey, Seq(EnrolmentIdentifier(Constants.psaIdKey, "A000000")), "Activated")
   val pspEnrolment: Enrolment =
     Enrolment(Constants.pspEnrolmentKey, Seq(EnrolmentIdentifier(Constants.pspIdKey, "A000001")), "Activated")
 
-  def beforeEach(): Unit = {
+  override def beforeEach(): Unit = {
     reset(mockAuthConnector)
     reset(mockSessionDataCacheConnector)
   }
 
-  def setAuthValue(value: Option[String] ~ Option[String] ~ Enrolments): Unit =
+  def setAuthValue(value: Option[String] ~ Option[String] ~ Option[AffinityGroup] ~ Enrolments): Unit =
     setAuthValue(Future.successful(value))
 
   def setAuthValue[A](value: Future[A]): Unit =
@@ -113,7 +118,7 @@ class IdentifierActionSpec extends SpecBase with StubPlayBodyParsersFactory {
       }
 
       "Redirect to unauthorised page when user does not have an external id" in runningApplication { implicit app =>
-        setAuthValue(authResult(Some("id"), None, psaEnrolment))
+        setAuthValue(authResult(Some("id"), None, None, psaEnrolment))
 
         val result = handler.run(FakeRequest())
         val expectedUrl = routes.UnauthorisedController.onPageLoad().url
@@ -122,7 +127,16 @@ class IdentifierActionSpec extends SpecBase with StubPlayBodyParsersFactory {
       }
 
       "Redirect to unauthorised page when user does not have an internal id" in runningApplication { implicit app =>
-        setAuthValue(authResult(None, Some("id"), psaEnrolment))
+        setAuthValue(authResult(None, Some("id"), None, psaEnrolment))
+
+        val result = handler.run(FakeRequest())
+        val expectedUrl = routes.UnauthorisedController.onPageLoad().url
+
+        redirectLocation(result) mustBe Some(expectedUrl)
+      }
+
+      "Redirect to unauthorised page when affinity group is Agent" in runningApplication { implicit app =>
+        setAuthValue(authResult(Some("id"), Some("externalId"), Some(AffinityGroup.Agent), psaEnrolment))
 
         val result = handler.run(FakeRequest())
         val expectedUrl = routes.UnauthorisedController.onPageLoad().url
@@ -132,7 +146,7 @@ class IdentifierActionSpec extends SpecBase with StubPlayBodyParsersFactory {
 
       "Redirect user to manage pension scheme when user does not have a psa or psp enrolment" in runningApplication {
         implicit app =>
-          setAuthValue(authResult(Some("internalId"), Some("externalId")))
+          setAuthValue(authResult(Some("internalId"), Some("externalId"), None))
 
           val result = handler.run(FakeRequest())
           val expectedUrl = appConfig.urls.managePensionsSchemes.registerUrl
@@ -142,7 +156,7 @@ class IdentifierActionSpec extends SpecBase with StubPlayBodyParsersFactory {
 
       "Redirect user to admin or practitioner page" - {
         "user has both psa and psp enrolment but nothing is in the cache" in runningApplication { implicit app =>
-          setAuthValue(authResult(Some("internalId"), Some("externalId"), psaEnrolment, pspEnrolment))
+          setAuthValue(authResult(Some("internalId"), Some("externalId"), None, psaEnrolment, pspEnrolment))
           setSessionValue(None)
 
           val result = handler.run(FakeRequest())
@@ -155,7 +169,7 @@ class IdentifierActionSpec extends SpecBase with StubPlayBodyParsersFactory {
 
     "return an IdentifierRequest" - {
       "User has a psa enrolment" in runningApplication { implicit app =>
-        setAuthValue(authResult(Some("internalId"), Some("externalId"), psaEnrolment))
+        setAuthValue(authResult(Some("internalId"), Some("externalId"), None, psaEnrolment))
 
         val result = handler.run(FakeRequest())
 
@@ -167,7 +181,7 @@ class IdentifierActionSpec extends SpecBase with StubPlayBodyParsersFactory {
       }
 
       "User has a psp enrolment" in runningApplication { implicit app =>
-        setAuthValue(authResult(Some("internalId"), Some("externalId"), pspEnrolment))
+        setAuthValue(authResult(Some("internalId"), Some("externalId"), None, pspEnrolment))
 
         val result = handler.run(FakeRequest())
 
@@ -179,7 +193,7 @@ class IdentifierActionSpec extends SpecBase with StubPlayBodyParsersFactory {
       }
 
       "User has a both psa and psp enrolment with admin stored in cache" in runningApplication { implicit app =>
-        setAuthValue(authResult(Some("internalId"), Some("externalId"), psaEnrolment, pspEnrolment))
+        setAuthValue(authResult(Some("internalId"), Some("externalId"), None, psaEnrolment, pspEnrolment))
         setSessionValue(Some(SessionData(Administrator)))
 
         val result = handler.run(FakeRequest())
@@ -192,7 +206,7 @@ class IdentifierActionSpec extends SpecBase with StubPlayBodyParsersFactory {
       }
 
       "User has a both psa and psp enrolment with practitioner stored in cache" in runningApplication { implicit app =>
-        setAuthValue(authResult(Some("internalId"), Some("externalId"), psaEnrolment, pspEnrolment))
+        setAuthValue(authResult(Some("internalId"), Some("externalId"), None, psaEnrolment, pspEnrolment))
         setSessionValue(Some(SessionData(Practitioner)))
 
         val result = handler.run(FakeRequest())

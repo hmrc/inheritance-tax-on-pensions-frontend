@@ -1,5 +1,5 @@
 @*
- * Copyright 2025 HM Revenue & Customs
+ * Copyright 2024 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,14 +18,17 @@
     layout: templates.Layout
 )
 
-@()(implicit request: Request[?], messages: Messages)
+@(pensionSchemeEnquiryUrl: String)(implicit request: Request[?], messages: Messages)
 
 @layout(
     pageTitle = titleNoForm(messages("unauthorised.title")),
-    timeout   = false
+    timeout = false
 ) {
 
     <h1 class="govuk-heading-xl">@messages("unauthorised.heading")</h1>
 
-    <p class="govuk-body">@messages("unauthorised.guidance")</p>
+    <p class="govuk-body">@messages("unauthorised.paragraph")
+        <a href="@pensionSchemeEnquiryUrl"
+           class="govuk-link" >@messages("unauthorised.linkMessage")</a>.
+    </p>
 }

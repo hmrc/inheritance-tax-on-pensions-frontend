@@ -53,18 +53,23 @@ class IdentifierActionImpl @Inject() (
     implicit val hc: HeaderCarrier = HeaderCarrierConverter.fromRequestAndSession(request, request.session)
 
     authorised(Enrolment(Constants.psaEnrolmentKey).or(Enrolment(Constants.pspEnrolmentKey)))
-      .retrieve(Retrievals.internalId.and(Retrievals.externalId).and(Retrievals.allEnrolments)) {
+      .retrieve(
+        Retrievals.internalId.and(Retrievals.externalId).and(Retrievals.affinityGroup).and(Retrievals.allEnrolments)
+      ) {
 
-        case Some(internalId) ~ Some(externalId) ~ (IsPSA(psaId) && IsPSP(pspId)) =>
+        case _ ~ _ ~ Some(AffinityGroup.Agent) ~ _ =>
+          Future.successful(Redirect(routes.UnauthorisedController.onPageLoad()))
+
+        case Some(internalId) ~ Some(externalId) ~ _ ~ (IsPSA(psaId) && IsPSP(pspId)) =>
           fetchFromSessionData(internalId, externalId, request, psaId.value, pspId.value, block)
 
-        case Some(internalId) ~ Some(externalId) ~ IsPSA(psaId) =>
+        case Some(internalId) ~ Some(externalId) ~ _ ~ IsPSA(psaId) =>
           block(AdministratorRequest(internalId, externalId, request, psaId.value))
 
-        case Some(internalId) ~ Some(externalId) ~ IsPSP(pspId) =>
+        case Some(internalId) ~ Some(externalId) ~ _ ~ IsPSP(pspId) =>
           block(PractitionerRequest(internalId, externalId, request, pspId.value))
 
-        case Some(_) ~ Some(_) ~ _ =>
+        case Some(_) ~ Some(_) ~ _ ~ _ =>
           Future.successful(Redirect(appConfig.urls.managePensionsSchemes.registerUrl))
 
         case _ => Future.successful(Redirect(routes.UnauthorisedController.onPageLoad()))
