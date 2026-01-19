@@ -14,21 +14,8 @@
  * limitations under the License.
  */
 
-package config
+package utils
 
-object Constants {
-
-  val psaEnrolmentKey = "HMRC-PODS-ORG"
-  val pspEnrolmentKey = "HMRC-PODSPP-ORG"
-
-  val psaIdKey = "PSAID"
-  val pspIdKey = "PSPID"
-
-  val PSA = "PSA"
-  val PSP = "PSP"
-
-  val SRN = "SRN"
-
-  val delimitedPSA = "DELIMITED_PSAID"
-  val detailsNotFound = "no match found"
+abstract class WithName(val name: String) {
+  override val toString: String = name
 }

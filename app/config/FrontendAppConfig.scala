@@ -21,14 +21,17 @@ import com.google.inject.{Inject, Singleton}
 import play.api.Configuration
 import play.api.i18n.Lang
 
+import scala.concurrent.duration.Duration
+
 @Singleton
 class FrontendAppConfig @Inject() (configuration: Configuration) {
 
-  val host: String = configuration.get[String]("host")
+  private val host: String = configuration.get[String]("host")
   val appName: String = configuration.get[String]("appName")
 
   private val contactHost = configuration.get[String]("contact-frontend.host")
   private val contactFormServiceIdentifier = "inheritance-tax-on-pensions-frontend"
+  val ifsTimeout: Duration = configuration.get[Duration]("ifs.timeout")
 
   def feedbackUrl(implicit request: RequestHeader): String =
     s"$contactHost/contact/beta-feedback?service=$contactFormServiceIdentifier&backUrl=${host + request.uri}"
@@ -63,4 +66,5 @@ class FrontendAppConfig @Inject() (configuration: Configuration) {
   val cacheTtl: Long = configuration.get[Int]("mongodb.timeToLiveInSeconds")
 
   val pensionsAdministrator: Service = configuration.get[Service]("microservice.services.pensionAdministrator")
+  val pensionsScheme: Service = configuration.get[Service]("microservice.services.pensionsScheme")
 }

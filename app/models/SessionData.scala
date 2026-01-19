@@ -38,4 +38,5 @@ object PensionSchemeUser {
     case JsString(Practitioner.name) => JsSuccess(Practitioner)
     case _ => JsError("unknown value")
   }
+  implicit val writesPensionSchemeUser: Writes[PensionSchemeUser] = s => JsString(s.toString)
 }

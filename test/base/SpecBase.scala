@@ -21,6 +21,7 @@ import org.scalatest.concurrent.{IntegrationPatience, ScalaFutures}
 import org.scalatest.matchers.must.Matchers
 import org.apache.pekko.stream.Materializer
 import play.api.inject.bind
+import generators.Generators
 import controllers.actions._
 import org.apache.pekko.actor.ActorSystem
 import models.UserAnswers
@@ -43,6 +44,7 @@ trait SpecBase
     with OptionValues
     with ScalaFutures
     with MockitoSugar
+    with Generators
     with IntegrationPatience {
 
   implicit val actorSystem: ActorSystem = ActorSystem("unit-tests")
