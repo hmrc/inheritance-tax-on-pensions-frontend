@@ -56,14 +56,7 @@ class IdentifierActionImpl @Inject() (
       .retrieve(Retrievals.internalId.and(Retrievals.externalId).and(Retrievals.allEnrolments)) {
 
         case Some(internalId) ~ Some(externalId) ~ (IsPSA(psaId) && IsPSP(pspId)) =>
-          sessionDataCacheConnector.fetch().flatMap {
-            case None =>
-              Future.successful(Redirect(appConfig.urls.managePensionsSchemes.adminOrPractitionerUrl))
-            case Some(SessionData(Administrator)) =>
-              block(AdministratorRequest(internalId, externalId, request, psaId.value))
-            case Some(SessionData(Practitioner)) =>
-              block(PractitionerRequest(internalId, externalId, request, pspId.value))
-          }
+          fetchFromSessionData(internalId, externalId, request, psaId.value, pspId.value, block)
 
         case Some(internalId) ~ Some(externalId) ~ IsPSA(psaId) =>
           block(AdministratorRequest(internalId, externalId, request, psaId.value))
@@ -82,6 +75,26 @@ class IdentifierActionImpl @Inject() (
         case _: AuthorisationException =>
           Redirect(appConfig.urls.managePensionsSchemes.registerUrl)
       }
+  }
+
+  private def fetchFromSessionData[A](
+    internalId: String,
+    externalId: String,
+    request: Request[A],
+    psaId: String,
+    pspId: String,
+    block: IdentifierRequest[A] => Future[Result]
+  ) = {
+    implicit val hc: HeaderCarrier = HeaderCarrierConverter.fromRequestAndSession(request, request.session)
+
+    sessionDataCacheConnector.fetch().flatMap {
+      case None =>
+        Future.successful(Redirect(appConfig.urls.managePensionsSchemes.adminOrPractitionerUrl))
+      case Some(SessionData(Administrator)) =>
+        block(AdministratorRequest(internalId, externalId, request, psaId))
+      case Some(SessionData(Practitioner)) =>
+        block(PractitionerRequest(internalId, externalId, request, pspId))
+    }
   }
 
   override def parser: BodyParser[AnyContent] = playBodyParsers.default

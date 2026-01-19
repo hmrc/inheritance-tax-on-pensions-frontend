@@ -47,13 +47,11 @@ class IdentifierActionSpec extends SpecBase with StubPlayBodyParsersFactory {
     )(using ExecutionContext.global)
 
   class Handler(appConfig: FrontendAppConfig) {
-    def run: Action[AnyContent] = authAction(appConfig) { request =>
-      request match {
-        case AdministratorRequest(userId, externalId, _, id) =>
-          Ok(Json.obj("userId" -> userId, "externalId" -> externalId, "psaId" -> id.value))
-        case PractitionerRequest(userId, externalId, _, id) =>
-          Ok(Json.obj("userId" -> userId, "externalId" -> externalId, "pspId" -> id.value))
-      }
+    def run: Action[AnyContent] = authAction(appConfig) {
+      case AdministratorRequest(userId, externalId, _, id) =>
+        Ok(Json.obj("userId" -> userId, "externalId" -> externalId, "psaId" -> id.value))
+      case PractitionerRequest(userId, externalId, _, id) =>
+        Ok(Json.obj("userId" -> userId, "externalId" -> externalId, "pspId" -> id.value))
     }
   }
 
