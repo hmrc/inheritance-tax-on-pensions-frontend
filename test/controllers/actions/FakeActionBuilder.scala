@@ -14,30 +14,18 @@
  * limitations under the License.
  */
 
-package models
+package controllers.actions
 
-import models.PensionSchemeId.{PsaId, PspId}
+import play.api.test.Helpers.stubBodyParser
+import play.api.mvc._
 
-sealed trait PensionSchemeId { self =>
+import scala.concurrent.{ExecutionContext, Future}
 
-  val value: String
+class FakeActionBuilder[F[_], A](fa: F[A]) extends ActionBuilder[F, AnyContent] {
+  override def parser: BodyParser[AnyContent] = stubBodyParser[AnyContent]()
 
-  def fold[B](f1: PsaId => B, f2: PspId => B): B =
-    self match {
-      case id @ PsaId(_) => f1(id)
-      case id @ PspId(_) => f2(id)
-    }
+  override def invokeBlock[B](request: Request[B], block: F[B] => Future[Result]): Future[Result] =
+    block(fa.asInstanceOf[F[B]])
 
-  val isPSP: Boolean = this match {
-    case PspId(_) => true
-    case _ => false
-  }
-}
-
-object PensionSchemeId {
-
-  case class PspId(value: String) extends PensionSchemeId
-
-  case class PsaId(value: String) extends PensionSchemeId
-
+  override protected def executionContext: ExecutionContext = ExecutionContext.global
 }

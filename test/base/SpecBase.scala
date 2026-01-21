@@ -21,15 +21,16 @@ import org.scalatest.concurrent.{IntegrationPatience, ScalaFutures}
 import org.scalatest.matchers.must.Matchers
 import org.apache.pekko.stream.Materializer
 import play.api.inject.bind
-import controllers.actions._
+import generators.Generators
+import controllers.actions.{FakeAllowAccessActionProvider, _}
 import org.apache.pekko.actor.ActorSystem
-import models.UserAnswers
+import models.{MinimalDetails, SchemeDetails, UserAnswers}
 import play.api.i18n.{Messages, MessagesApi}
 import org.scalatestplus.mockito.MockitoSugar
 import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.test.Helpers.running
 import org.scalatest.freespec.AnyFreeSpec
-import org.scalatest.{OptionValues, TryValues}
+import org.scalatest._
 import play.api.Application
 
 import scala.reflect.ClassTag
@@ -43,7 +44,11 @@ trait SpecBase
     with OptionValues
     with ScalaFutures
     with MockitoSugar
-    with IntegrationPatience {
+    with BeforeAndAfterEach
+    with BeforeAndAfterAll
+    with Generators
+    with IntegrationPatience
+    with TestValues {
 
   implicit val actorSystem: ActorSystem = ActorSystem("unit-tests")
   implicit val mat: Materializer = Materializer.createMaterializer(actorSystem)
@@ -56,7 +61,9 @@ trait SpecBase
 
   protected def applicationBuilder(
     userAnswers: Option[UserAnswers] = None,
-    isPsa: Boolean = true
+    isPsa: Boolean = true,
+    schemeDetails: SchemeDetails = defaultSchemeDetails,
+    minimalDetails: MinimalDetails = defaultMinimalDetails
   ): GuiceApplicationBuilder = {
     val identifierActionBind = if (isPsa) {
       bind[IdentifierAction].to[FakePsaIdentifierAction]
@@ -68,7 +75,8 @@ trait SpecBase
       .overrides(
         bind[DataRequiredAction].to[DataRequiredActionImpl],
         identifierActionBind,
-        bind[DataRetrievalAction].toInstance(new FakeDataRetrievalAction(userAnswers))
+        bind[DataRetrievalAction].toInstance(new FakeDataRetrievalAction(userAnswers)),
+        bind[AllowAccessActionProvider].toInstance(new FakeAllowAccessActionProvider(schemeDetails, minimalDetails))
       )
       .configure(
         "auditing.enabled" -> false,

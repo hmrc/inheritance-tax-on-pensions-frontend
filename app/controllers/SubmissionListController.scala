@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 HM Revenue & Customs
+ * Copyright 2026 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,21 +17,24 @@
 package controllers
 
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
-import config.FrontendAppConfig
-import views.html.UnauthorisedView
+import controllers.actions.{AllowAccessActionProvider, IdentifierAction}
+import views.html.SubmissionListView
+import models.SchemeId.Srn
 import play.api.i18n.I18nSupport
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
 
 import javax.inject.Inject
 
-class UnauthorisedController @Inject() (
+class SubmissionListController @Inject() (
   val controllerComponents: MessagesControllerComponents,
-  appConfig: FrontendAppConfig,
-  view: UnauthorisedView
+  identify: IdentifierAction,
+  allowAccess: AllowAccessActionProvider,
+  view: SubmissionListView
 ) extends FrontendBaseController
     with I18nSupport {
 
-  def onPageLoad(): Action[AnyContent] = Action { implicit request =>
-    Ok(view(appConfig.urls.pensionSchemeEnquiry))
-  }
+  def onPageLoad(srn: Srn): Action[AnyContent] =
+    identify.andThen(allowAccess(srn)) { implicit request =>
+      Ok(view())
+    }
 }

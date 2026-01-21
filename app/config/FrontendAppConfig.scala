@@ -21,14 +21,17 @@ import com.google.inject.{Inject, Singleton}
 import play.api.Configuration
 import play.api.i18n.Lang
 
+import scala.concurrent.duration.Duration
+
 @Singleton
 class FrontendAppConfig @Inject() (configuration: Configuration) {
 
-  val host: String = configuration.get[String]("host")
-  val appName: String = configuration.get[String]("appName")
-
+  private val host: String = configuration.get[String]("host")
   private val contactHost = configuration.get[String]("contact-frontend.host")
   private val contactFormServiceIdentifier = "inheritance-tax-on-pensions-frontend"
+
+  val appName: String = configuration.get[String]("appName")
+  val ifsTimeout: Duration = configuration.get[Duration]("ifs.timeout")
 
   def feedbackUrl(implicit request: RequestHeader): String =
     s"$contactHost/contact/beta-feedback?service=$contactFormServiceIdentifier&backUrl=${host + request.uri}"
@@ -37,12 +40,28 @@ class FrontendAppConfig @Inject() (configuration: Configuration) {
     val loginUrl: String = configuration.get[String]("urls.login")
     val loginContinueUrl: String = configuration.get[String]("urls.loginContinue")
     val signOutUrl: String = configuration.get[String]("urls.signOut")
+    val pensionSchemeEnquiry: String = configuration.get[String]("urls.pensionSchemeEnquiry")
 
     object managePensionsSchemes {
       val baseUrl: String = configuration.get[String]("urls.manage-pension-schemes.baseUrl")
       val registerUrl: String = baseUrl + configuration.get[String]("urls.manage-pension-schemes.register")
       val adminOrPractitionerUrl: String =
         baseUrl + configuration.get[String]("urls.manage-pension-schemes.adminOrPractitioner")
+      val contactHmrc: String = baseUrl + configuration.get[String]("urls.manage-pension-schemes.contactHmrc")
+      val cannotAccessDeregistered: String =
+        baseUrl + configuration.get[String]("urls.manage-pension-schemes.cannotAccessDeregistered")
+    }
+
+    object pensionAdministrator {
+      val baseUrl: String = configuration.get[String]("urls.pension-administrator.baseUrl")
+      val updateContactDetails: String =
+        baseUrl + configuration.get[String]("urls.pension-administrator.updateContactDetails")
+    }
+
+    object pensionPractitioner {
+      val baseUrl: String = configuration.get[String]("urls.pension-practitioner.baseUrl")
+      val updateContactDetails: String =
+        baseUrl + configuration.get[String]("urls.pension-administrator.updateContactDetails")
     }
   }
 
@@ -63,4 +82,5 @@ class FrontendAppConfig @Inject() (configuration: Configuration) {
   val cacheTtl: Long = configuration.get[Int]("mongodb.timeToLiveInSeconds")
 
   val pensionsAdministrator: Service = configuration.get[Service]("microservice.services.pensionAdministrator")
+  val pensionsScheme: Service = configuration.get[Service]("microservice.services.pensionsScheme")
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 HM Revenue & Customs
+ * Copyright 2026 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,7 +20,7 @@ import com.github.tomakehurst.wiremock.client.ResponseDefinitionBuilder
 import com.github.tomakehurst.wiremock.client.WireMock.{badRequest, notFound, ok}
 import com.github.tomakehurst.wiremock.stubbing.StubMapping
 import models.PensionSchemeUser.{Administrator, Practitioner}
-import models.{PensionSchemeUser, SessionData, UserAnswers}
+import models.{MinimalDetails, PensionSchemeUser, SchemeDetails, SessionData, UserAnswers}
 import play.api.Application
 import play.api.inject.guice.GuiceApplicationBuilder
 import uk.gov.hmrc.http.HeaderCarrier
@@ -30,11 +30,13 @@ import scala.concurrent.ExecutionContext.Implicits.global
 class SessionDataCacheConnectorSpec extends BaseConnectorSpec {
 
   implicit val hc: HeaderCarrier = HeaderCarrier()
-
-  override protected def applicationBuilder(userAnswers: Option[UserAnswers] = None, isPsa: Boolean = true): GuiceApplicationBuilder =
-    super.applicationBuilder(userAnswers).configure("microservice.services.pensionAdministrator.port" -> wireMockPort)
-
   lazy val url = s"/pension-administrator/journey-cache/session-data-self"
+
+  override protected def applicationBuilder(userAnswers: Option[UserAnswers] = None, isPsa: Boolean = true,
+                                            schemeDetails: SchemeDetails = defaultSchemeDetails,
+                                            minimalDetails: MinimalDetails = defaultMinimalDetails
+                                           ): GuiceApplicationBuilder =
+    super.applicationBuilder(userAnswers).configure("microservice.services.pensionAdministrator.port" -> wireMockPort)
 
   def stubGet(response: ResponseDefinitionBuilder): StubMapping =
     stubGet(url, response)

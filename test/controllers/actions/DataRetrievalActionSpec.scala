@@ -21,7 +21,6 @@ import org.mockito.Mockito._
 import base.SpecBase
 import models.PensionSchemeId.{PsaId, PspId}
 import repositories.SessionRepository
-import generators.ModelGenerators.{administratorRequestGen, practitionerRequestGen}
 import models.UserAnswers
 import models.requests.{IdentifierRequest, OptionalDataRequest}
 import org.scalatestplus.mockito.MockitoSugar
