@@ -18,17 +18,13 @@ package utils
 
 import play.api.i18n.Lang
 
-import java.util.Locale
 import java.time.format.DateTimeFormatter
 
 object DateTimeFormats {
 
   private val dateTimeFormatter = DateTimeFormatter.ofPattern("d MMMM yyyy")
 
-  private val localisedDateTimeFormatters = Map(
-    "en" -> dateTimeFormatter,
-    "cy" -> dateTimeFormatter.withLocale(new Locale("cy"))
-  )
+  private val localisedDateTimeFormatters = Map("en" -> dateTimeFormatter)
 
   def dateTimeFormat()(implicit lang: Lang): DateTimeFormatter =
     localisedDateTimeFormatters.getOrElse(lang.code, dateTimeFormatter)

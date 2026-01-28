@@ -68,13 +68,7 @@ class FrontendAppConfig @Inject() (configuration: Configuration) {
   private val exitSurveyBaseUrl: String = configuration.get[String]("feedback-frontend.host")
   val exitSurveyUrl: String = s"$exitSurveyBaseUrl/feedback/inheritance-tax-on-pensions-frontend"
 
-  val languageTranslationEnabled: Boolean =
-    configuration.get[Boolean]("features.welsh-translation")
-
-  def languageMap: Map[String, Lang] = Map(
-    "en" -> Lang("en"),
-    "cy" -> Lang("cy")
-  )
+  def languageMap: Map[String, Lang] = Map("en" -> Lang("en"))
 
   val timeout: Int = configuration.get[Int]("timeout-dialog.timeout")
   val countdown: Int = configuration.get[Int]("timeout-dialog.countdown")
