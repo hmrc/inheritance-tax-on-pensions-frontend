@@ -19,3 +19,8 @@ GET         /account/signed-out                          controllers.auth.Signed
 GET         /unauthorised                                controllers.UnauthorisedController.onPageLoad()
 
 GET         /:srn/submission-list                        controllers.SubmissionListController.onPageLoad(srn: Srn)
+
+GET         /:srn/inputPagePlaceholder                   controllers.InputPagePlaceholderController.onPageLoad(srn: Srn, mode: Mode = NormalMode)
+POST        /:srn/inputPagePlaceholder                   controllers.InputPagePlaceholderController.onSubmit(srn: Srn, mode: Mode = NormalMode)
+GET         /:srn/changeInputPagePlaceholder             controllers.InputPagePlaceholderController.onPageLoad(srn: Srn, mode: Mode = CheckMode)
+POST        /:srn/changeInputPagePlaceholder             controllers.InputPagePlaceholderController.onSubmit(srn: Srn, mode: Mode = CheckMode)
