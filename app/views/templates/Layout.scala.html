@@ -42,8 +42,7 @@
             signOutUrl          = Some(controllers.auth.routes.AuthController.signOut().url),
             signOutButtonText   = Some(messages("timeout.signOut")),
             title               = Some(messages("timeout.title")),
-            message             = Some(messages("timeout.message")),
-            language            = Some(messages.lang.code)
+            message             = Some(messages("timeout.message"))
         ))
     }
 }
@@ -66,6 +65,5 @@
         displayHmrcBanner = showHmrcBanner,
         phaseBanner = Some(alphaBanner(appConfig.feedbackUrl))
     ),
-    isWelshTranslationAvailable = appConfig.languageTranslationEnabled,
     backLink = if (showBackLink) Some(BackLink.mimicsBrowserBackButtonViaJavaScript) else None
 ))(content)
