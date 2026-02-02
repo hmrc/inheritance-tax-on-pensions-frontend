@@ -53,3 +53,10 @@ unauthorised.title = You cannot access this service with this account
 unauthorised.heading = You cannot access this service with this account
 unauthorised.paragraph =  If you think you should have access to this service, you can
 unauthorised.linkMessage = contact HMRC for pension scheme help
+
+inputPagePlaceholder.title = Input Page Placeholder
+inputPagePlaceholder.heading = Input Page Placeholder
+inputPagePlaceholder.checkYourAnswersLabel = Check your answers
+inputPagePlaceholder.error.required = Enter some input!
+inputPagePlaceholder.error.length = Your input must be 100 characters or less
+inputPagePlaceholder.change.hidden = Input Page Placeholder
