@@ -28,24 +28,22 @@ import scala.concurrent.{ExecutionContext, Future}
 import javax.inject.Inject
 
 class InheritanceTaxOnPensionsConnector @Inject() (
-                                                    config: FrontendAppConfig,
-                                                    implicit val httpClient: HttpClientV2
-                                                  )(implicit ec: ExecutionContext)
-  extends HttpReadsInstances {
+  config: FrontendAppConfig,
+  implicit val httpClient: HttpClientV2
+)(implicit ec: ExecutionContext)
+    extends HttpReadsInstances {
 
   def fetchUserAnswers(id: String)(implicit
-                                    hc: HeaderCarrier
-  ): Future[Either[UpstreamErrorResponse, UserAnswers]] = {
+    hc: HeaderCarrier
+  ): Future[Either[UpstreamErrorResponse, UserAnswers]] =
     httpClient
       .get(url"${config.getUserAnswersUrl(id)}")
       .execute[Either[UpstreamErrorResponse, UserAnswers]]
-  }
 
-  def setUserAnswers(userAnswers: UserAnswers)(implicit hc: HeaderCarrier): Future[HttpResponse] = {
+  def setUserAnswers(userAnswers: UserAnswers)(implicit hc: HeaderCarrier): Future[HttpResponse] =
     httpClient
       .put(url"${config.setUserAnswersUrl()}")
       .setHeader("Csrf-Token" -> "nocheck")
       .withBody(Json.toJson(userAnswers))
       .execute[HttpResponse]
-  }
 }

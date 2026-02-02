@@ -30,7 +30,7 @@ import scala.concurrent.Future
 class InheritanceTaxOnPensionsConnectorSpec extends SpecBase {
 
   implicit val hc: HeaderCarrier = HeaderCarrier()
-  
+
   "fetchUserAnswers" - {
     "must successfully fetch user answers" in new SetUp {
       val expectedUserAnswers: UserAnswers = emptyUserAnswers
@@ -76,8 +76,8 @@ class InheritanceTaxOnPensionsConnectorSpec extends SpecBase {
 
   class SetUp {
     val id = "some_id"
-    val mockConfig: FrontendAppConfig  = mock[FrontendAppConfig]
-    val httpClient: HttpClientV2       = mock[HttpClientV2]
+    val mockConfig: FrontendAppConfig = mock[FrontendAppConfig]
+    val httpClient: HttpClientV2 = mock[HttpClientV2]
     val mockHttpResponse: HttpResponse = mock[HttpResponse]
     val requestBuilder: RequestBuilder = mock[RequestBuilder]
 
