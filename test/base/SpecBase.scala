@@ -34,6 +34,7 @@ import org.scalatest._
 import play.api.Application
 
 import scala.reflect.ClassTag
+import scala.concurrent.ExecutionContext
 
 import java.net.URLEncoder
 
@@ -90,5 +91,7 @@ trait SpecBase
     running(_ => applicationBuilder())(block)
 
   def urlEncode(input: String): String = URLEncoder.encode(input, "utf-8")
+
+  implicit val ec: ExecutionContext = scala.concurrent.ExecutionContext.Implicits.global
 
 }

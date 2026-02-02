@@ -28,7 +28,6 @@ import play.api.libs.json.Json
 import uk.gov.hmrc.http.{HeaderCarrier, UpstreamErrorResponse}
 
 import scala.concurrent.Await
-import scala.concurrent.ExecutionContext.Implicits.global
 
 class SchemeDetailsConnectorSpec extends BaseConnectorSpec {
 

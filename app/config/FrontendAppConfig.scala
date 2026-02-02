@@ -77,4 +77,14 @@ class FrontendAppConfig @Inject() (configuration: Configuration) {
 
   val pensionsAdministrator: Service = configuration.get[Service]("microservice.services.pensionAdministrator")
   val pensionsScheme: Service = configuration.get[Service]("microservice.services.pensionsScheme")
+
+  def getUserAnswersUrl(srn: String): String =
+    s"$inheritanceTaxOnPensionsHost/inheritance-tax-on-pensions/user-answers/$srn"
+
+  def setUserAnswersUrl(): String =
+    s"$inheritanceTaxOnPensionsHost/inheritance-tax-on-pensions/user-answers"
+
+  private val inheritanceTaxOnPensionsHost: String =
+    configuration.get[Service]("microservice.services.inheritanceTaxOnPensions").baseUrl
+
 }
