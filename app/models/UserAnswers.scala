@@ -67,12 +67,17 @@ final case class UserAnswers(
 
 object UserAnswers {
 
-  implicit val format: OFormat[UserAnswers] =
+  val reads: Reads[UserAnswers] =
     (__ \ "_id")
-      .format[String]
-      .and((__ \ "data").format[JsObject])
-      .and((__ \ "lastUpdated").format(using MongoJavatimeFormats.instantFormat))(
-        UserAnswers.apply,
-        o => Tuple.fromProductTyped(o)
-      )
+      .read[String]
+      .and((__ \ "data").read[JsObject])
+      .and((__ \ "lastUpdated").read(using MongoJavatimeFormats.instantFormat))(UserAnswers.apply)
+
+  val writes: OWrites[UserAnswers] =
+    (__ \ "_id")
+      .write[String]
+      .and((__ \ "data").write[JsObject])
+      .and((__ \ "lastUpdated").write(using MongoJavatimeFormats.instantFormat))(ua => (ua.id, ua.data, ua.lastUpdated))
+
+  implicit val format: OFormat[UserAnswers] = OFormat(reads, writes)
 }

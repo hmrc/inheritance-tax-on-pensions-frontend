@@ -17,22 +17,45 @@
 package controllers.actions
 
 import play.api.mvc.ActionTransformer
-import repositories.SessionRepository
-import models.requests.{IdentifierRequest, OptionalDataRequest}
+import connectors.InheritanceTaxOnPensionsConnector
+import play.api.Logging
+import models.UserAnswers
+import play.api.http.Status.NOT_FOUND
+import uk.gov.hmrc.http.HeaderCarrier
+import uk.gov.hmrc.play.http.HeaderCarrierConverter
+import models.requests.{AllowedAccessRequest, OptionalDataRequest}
 
 import scala.concurrent.{ExecutionContext, Future}
 
 import javax.inject.Inject
 
 class DataRetrievalActionImpl @Inject() (
-  val sessionRepository: SessionRepository
+  val inheritanceTaxOnPensionsConnector: InheritanceTaxOnPensionsConnector
 )(implicit val executionContext: ExecutionContext)
-    extends DataRetrievalAction {
+    extends DataRetrievalAction
+    with Logging {
 
-  override protected def transform[A](request: IdentifierRequest[A]): Future[OptionalDataRequest[A]] =
-    sessionRepository.get(request.getUserId).map {
-      OptionalDataRequest(request, _)
-    }
+  override protected def transform[A](request: AllowedAccessRequest[A]): Future[OptionalDataRequest[A]] = {
+
+    val headerCarrier: HeaderCarrier = HeaderCarrierConverter.fromRequestAndSession(request, request.session)
+
+    // TODO - We may wish to move this into a service and handle NOT_FOUND and HTTP exceptions? Journey recovery?
+    // TODO - Do we need to think about the cache key?
+    // TODO - When do we want to create the cache? Start of the journey?
+    inheritanceTaxOnPensionsConnector
+      .fetchUserAnswers(request.getUserId)(using headerCarrier)
+      .map {
+        case Right(ua) => OptionalDataRequest(request, Some(ua))
+        case Left(ex) if ex.statusCode == NOT_FOUND =>
+          logger.info("No user answers found - creating new user answers")
+          OptionalDataRequest(request, Some(UserAnswers(request.getUserId)))
+        case Left(ex) =>
+          logger.warn("Data retrieval failed with upstream error response: ", ex)
+          // TODO - we may want to return a Future[Either[Result, OptionalDataRequest[A]]] and go to journey recovery?
+          throw new RuntimeException("Failed to fetch user answers from the cache")
+      }
+  }
+
 }
 
-trait DataRetrievalAction extends ActionTransformer[IdentifierRequest, OptionalDataRequest]
+trait DataRetrievalAction extends ActionTransformer[AllowedAccessRequest, OptionalDataRequest]

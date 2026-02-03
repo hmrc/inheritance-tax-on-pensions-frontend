@@ -17,12 +17,19 @@
 package controllers
 
 import play.api.test.FakeRequest
-import play.api.test.Helpers._
+import connectors.InheritanceTaxOnPensionsConnector
+import play.api.inject.bind
 import views.html.InputPagePlaceholderView
 import base.SpecBase
-import forms.InputPagePlaceholderFormProvider
 import models.NormalMode
 import play.api.data.Form
+import org.mockito.ArgumentMatchers.any
+import play.api.test.Helpers._
+import org.mockito.Mockito._
+import forms.InputPagePlaceholderFormProvider
+import uk.gov.hmrc.http.HttpResponse
+
+import scala.concurrent.Future
 
 class InputPagePlaceholderControllerSpec extends SpecBase {
 
@@ -51,7 +58,15 @@ class InputPagePlaceholderControllerSpec extends SpecBase {
 
     "must redirect to submission list when valid data is submitted" in {
 
-      val application = applicationBuilder(userAnswers = Some(emptyUserAnswers)).build()
+      val mockInheritanceTaxOnPensionsConnector = mock[InheritanceTaxOnPensionsConnector]
+      when(mockInheritanceTaxOnPensionsConnector.setUserAnswers(any())(using any()))
+        .thenReturn(Future.successful(mock[HttpResponse]))
+
+      val application = applicationBuilder(userAnswers = Some(emptyUserAnswers))
+        .overrides(
+          bind[InheritanceTaxOnPensionsConnector].toInstance(mockInheritanceTaxOnPensionsConnector)
+        )
+        .build()
 
       running(application) {
         val request =
@@ -62,6 +77,8 @@ class InputPagePlaceholderControllerSpec extends SpecBase {
 
         status(result) mustEqual SEE_OTHER
         redirectLocation(result).value mustEqual routes.SubmissionListController.onPageLoad(srn).url
+
+        verify(mockInheritanceTaxOnPensionsConnector, times(1)).setUserAnswers(any())(using any())
       }
     }
 
