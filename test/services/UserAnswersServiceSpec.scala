@@ -33,13 +33,14 @@ import scala.concurrent.Future
 class UserAnswersServiceSpec extends SpecBase {
 
   implicit val hc: HeaderCarrier = HeaderCarrier()
-  implicit val allowedAccessRequestPrePopulation: AllowedAccessRequest[AnyContentAsEmpty.type] = allowedAccessRequestGen(
-    FakeRequest()
-      .withSession((PREPOPULATION_FLAG, "true"))
-  ).sample.value
-  
+  implicit val allowedAccessRequestPrePopulation: AllowedAccessRequest[AnyContentAsEmpty.type] =
+    allowedAccessRequestGen(
+      FakeRequest()
+        .withSession((PREPOPULATION_FLAG, "true"))
+    ).sample.value
+
   "fetch" - {
-    
+
     "must return a success if the operation was successful" in new Setup {
       val userAnswers: UserAnswers = emptyUserAnswers
       when(mockInheritanceTaxOnPensionsConnector.fetchUserAnswers(any(), any(), any(), any(), any())(using any()))
@@ -61,7 +62,7 @@ class UserAnswersServiceSpec extends SpecBase {
   }
 
   "set" - {
-    
+
     "must return a success if the operation was successful" in new Setup {
       when(mockInheritanceTaxOnPensionsConnector.setUserAnswers(any(), any(), any(), any(), any())(using any()))
         .thenReturn(Future.successful(HttpResponse(status = OK, body = "success response")))

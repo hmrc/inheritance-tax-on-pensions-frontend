@@ -24,11 +24,12 @@ import models.requests.AllowedAccessRequest
 
 import scala.concurrent.Future
 
-class UserAnswersService @Inject()(inheritanceTaxOnPensionsConnector: InheritanceTaxOnPensionsConnector)
-  extends BaseService {
+class UserAnswersService @Inject() (inheritanceTaxOnPensionsConnector: InheritanceTaxOnPensionsConnector)
+    extends BaseService {
 
-  def fetch(id: String)(implicit hc: HeaderCarrier, request: AllowedAccessRequest[?]):
-  Future[Either[UpstreamErrorResponse, UserAnswers]] = {
+  def fetch(
+    id: String
+  )(implicit hc: HeaderCarrier, request: AllowedAccessRequest[?]): Future[Either[UpstreamErrorResponse, UserAnswers]] =
     inheritanceTaxOnPensionsConnector.fetchUserAnswers(
       id,
       schemeAdministratorOrPractitionerName,
@@ -36,15 +37,15 @@ class UserAnswersService @Inject()(inheritanceTaxOnPensionsConnector: Inheritanc
       srnVal,
       role
     )
-  }
-  
-  def set(userAnswers: UserAnswers)(implicit hc: HeaderCarrier, request: AllowedAccessRequest[?]):
-  Future[HttpResponse] = {
+
+  def set(
+    userAnswers: UserAnswers
+  )(implicit hc: HeaderCarrier, request: AllowedAccessRequest[?]): Future[HttpResponse] =
     inheritanceTaxOnPensionsConnector.setUserAnswers(
       userAnswers,
       schemeAdministratorOrPractitionerName,
       schemeName,
-      srnVal, role
+      srnVal,
+      role
     )
-  }
 }

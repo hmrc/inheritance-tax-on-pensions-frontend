@@ -17,6 +17,7 @@
 package connectors
 
 import config.FrontendAppConfig
+import config.Constants._
 import uk.gov.hmrc.http._
 import models.UserAnswers
 import uk.gov.hmrc.http.client.HttpClientV2
@@ -46,10 +47,10 @@ class InheritanceTaxOnPensionsConnector @Inject() (
       .get(url"${config.getUserAnswersUrl(id)}")
       .transform(
         _.addHttpHeaders(
-          "srn" -> srnVal,
-          "userName" -> schemeAdministratorOrPractitionerName,
-          "schemeName" -> schemeName,
-          "requestRole" -> role
+          SRN_HEADER -> srnVal,
+          USERNAME_HEADER -> schemeAdministratorOrPractitionerName,
+          SCHEME_NAME_HEADER -> schemeName,
+          ROLE_HEADER -> role
         )
       )
       .execute[Either[UpstreamErrorResponse, UserAnswers]]
@@ -67,10 +68,10 @@ class InheritanceTaxOnPensionsConnector @Inject() (
       .withBody(Json.toJson(userAnswers))
       .transform(
         _.addHttpHeaders(
-          "srn" -> srnVal,
-          "userName" -> schemeAdministratorOrPractitionerName,
-          "schemeName" -> schemeName,
-          "requestRole" -> role
+          SRN_HEADER -> srnVal,
+          USERNAME_HEADER -> schemeAdministratorOrPractitionerName,
+          SCHEME_NAME_HEADER -> schemeName,
+          ROLE_HEADER -> role
         )
       )
       .execute[HttpResponse]
