@@ -16,8 +16,8 @@
 
 package controllers
 
+import services.UserAnswersService
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
-import connectors.InheritanceTaxOnPensionsConnector
 import pages.InputPagePlaceholderPage
 import controllers.actions._
 import forms.InputPagePlaceholderFormProvider
@@ -40,7 +40,7 @@ class InputPagePlaceholderController @Inject() (
   requireData: DataRequiredAction,
   formProvider: InputPagePlaceholderFormProvider,
   val controllerComponents: MessagesControllerComponents,
-  inheritanceTaxOnPensionsConnector: InheritanceTaxOnPensionsConnector,
+  userAnswersService: UserAnswersService,
   view: InputPagePlaceholderView
 )(implicit ec: ExecutionContext)
     extends FrontendBaseController
@@ -72,7 +72,7 @@ class InputPagePlaceholderController @Inject() (
             value =>
               for {
                 updatedAnswers <- Future.fromTry(request.userAnswers.set(InputPagePlaceholderPage, value))
-                _ <- inheritanceTaxOnPensionsConnector.setUserAnswers(updatedAnswers)
+                _ <- userAnswersService.set(updatedAnswers)(using hc, request.request)
               } yield Redirect(routes.SubmissionListController.onPageLoad(srn))
           )
       }

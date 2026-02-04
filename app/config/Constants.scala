@@ -31,4 +31,6 @@ object Constants {
 
   val delimitedPSA = "DELIMITED_PSAID"
   val detailsNotFound = "no match found"
+
+  val PREPOPULATION_FLAG = "prePopulationFlag"
 }

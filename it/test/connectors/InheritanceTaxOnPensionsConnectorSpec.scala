@@ -41,6 +41,9 @@ class InheritanceTaxOnPensionsConnectorSpec extends BaseConnectorSpec {
   val fetchUrl = s"/inheritance-tax-on-pensions/user-answers/$id"
   val setUrl = "/inheritance-tax-on-pensions/user-answers"
   val clock: Clock    = Clock.fixed(Instant.ofEpochMilli(1718118467838L), ZoneId.of("Europe/London"))
+  val schemeAdministratorOrPractitionerName: String = "name"
+  val srnVal: String = "testSrn"
+  val role: String = "role"
 
   val userAnswers: UserAnswers = UserAnswers(
     id = id,
@@ -60,7 +63,7 @@ class InheritanceTaxOnPensionsConnectorSpec extends BaseConnectorSpec {
             .willReturn(aResponse().withStatus(OK).withBody(jsonResponse))
         )
 
-        whenReady(connector.fetchUserAnswers(id)) { result =>
+        whenReady(connector.fetchUserAnswers(id, schemeAdministratorOrPractitionerName, schemeName, srnVal, role)) { result =>
           result mustBe Right(userAnswers)
         }
       }
@@ -71,7 +74,7 @@ class InheritanceTaxOnPensionsConnectorSpec extends BaseConnectorSpec {
             .willReturn(aResponse().withStatus(INTERNAL_SERVER_ERROR))
         )
 
-        whenReady(connector.fetchUserAnswers(id)) { result =>
+        whenReady(connector.fetchUserAnswers(id, schemeAdministratorOrPractitionerName, schemeName, srnVal, role)) { result =>
           result.isLeft mustBe true
           result.swap.toOption.get.statusCode mustBe INTERNAL_SERVER_ERROR
         }
@@ -86,7 +89,7 @@ class InheritanceTaxOnPensionsConnectorSpec extends BaseConnectorSpec {
             .willReturn(aResponse().withStatus(OK))
         )
 
-        whenReady(connector.setUserAnswers(userAnswers)) { result =>
+        whenReady(connector.setUserAnswers(userAnswers, schemeAdministratorOrPractitionerName, schemeName, srnVal, role)) { result =>
           result.status mustBe OK
         }
       }
@@ -98,7 +101,7 @@ class InheritanceTaxOnPensionsConnectorSpec extends BaseConnectorSpec {
             .willReturn(aResponse().withStatus(SERVICE_UNAVAILABLE))
         )
 
-        whenReady(connector.setUserAnswers(userAnswers)) { result =>
+        whenReady(connector.setUserAnswers(userAnswers, schemeAdministratorOrPractitionerName, schemeName, srnVal, role)) { result =>
           result.status mustBe SERVICE_UNAVAILABLE
         }
       }

@@ -59,7 +59,7 @@ class InputPagePlaceholderControllerSpec extends SpecBase {
     "must redirect to submission list when valid data is submitted" in {
 
       val mockInheritanceTaxOnPensionsConnector = mock[InheritanceTaxOnPensionsConnector]
-      when(mockInheritanceTaxOnPensionsConnector.setUserAnswers(any())(using any()))
+      when(mockInheritanceTaxOnPensionsConnector.setUserAnswers(any(), any(), any(), any(), any())(using any()))
         .thenReturn(Future.successful(mock[HttpResponse]))
 
       val application = applicationBuilder(userAnswers = Some(emptyUserAnswers))
@@ -78,7 +78,8 @@ class InputPagePlaceholderControllerSpec extends SpecBase {
         status(result) mustEqual SEE_OTHER
         redirectLocation(result).value mustEqual routes.SubmissionListController.onPageLoad(srn).url
 
-        verify(mockInheritanceTaxOnPensionsConnector, times(1)).setUserAnswers(any())(using any())
+        verify(mockInheritanceTaxOnPensionsConnector, times(1))
+          .setUserAnswers(any(), any(), any(), any(), any())(using any())
       }
     }
 

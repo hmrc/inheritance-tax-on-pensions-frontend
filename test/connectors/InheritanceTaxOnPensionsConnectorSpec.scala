@@ -20,10 +20,11 @@ import org.mockito.Mockito._
 import config.FrontendAppConfig
 import base.SpecBase
 import play.api.libs.json.Json
-import uk.gov.hmrc.http._
 import models.UserAnswers
 import uk.gov.hmrc.http.client.{HttpClientV2, RequestBuilder}
 import org.mockito.ArgumentMatchers.{any, eq => eqTo}
+import play.api.http.Status.INTERNAL_SERVER_ERROR
+import uk.gov.hmrc.http._
 
 import scala.concurrent.Future
 
@@ -32,6 +33,7 @@ class InheritanceTaxOnPensionsConnectorSpec extends SpecBase {
   implicit val hc: HeaderCarrier = HeaderCarrier()
 
   "fetchUserAnswers" - {
+
     "must successfully fetch user answers" in new SetUp {
       val expectedUserAnswers: UserAnswers = emptyUserAnswers
       val mockUrl = s"http://inheritance-tax-on-pensions/user-answers/$id"
@@ -41,15 +43,38 @@ class InheritanceTaxOnPensionsConnectorSpec extends SpecBase {
       when(requestBuilder.execute[Either[UpstreamErrorResponse, UserAnswers]](using any(), any()))
         .thenReturn(Future.successful(Right(expectedUserAnswers)))
 
+      when(requestBuilder.transform(any()))
+        .thenReturn(requestBuilder)
+
       when(connector.httpClient.get(any())(using any())).thenReturn(requestBuilder)
 
-      whenReady(connector.fetchUserAnswers(id)) {
+      whenReady(connector.fetchUserAnswers(id, schemeAdministratorOrPractitionerName, schemeName, srnVal, role)) {
         _ mustBe Right(expectedUserAnswers)
+      }
+    }
+
+    "must return exception when an error is encountered" in new SetUp {
+      val errorResponse: UpstreamErrorResponse = UpstreamErrorResponse("Something went wrong", INTERNAL_SERVER_ERROR)
+      val mockUrl = s"http://inheritance-tax-on-pensions/user-answers/$id"
+
+      when(mockConfig.getUserAnswersUrl(any())).thenReturn(mockUrl)
+
+      when(requestBuilder.execute[Either[UpstreamErrorResponse, UserAnswers]](using any(), any()))
+        .thenReturn(Future.successful(Left(errorResponse)))
+
+      when(requestBuilder.transform(any()))
+        .thenReturn(requestBuilder)
+
+      when(connector.httpClient.get(any())(using any())).thenReturn(requestBuilder)
+
+      whenReady(connector.fetchUserAnswers(id, schemeAdministratorOrPractitionerName, schemeName, srnVal, role)) {
+        _ mustBe Left(errorResponse)
       }
     }
   }
 
   "setUserAnswers" - {
+
     "must successfully write user answers" in new SetUp {
       val expectedUserAnswers: UserAnswers = emptyUserAnswers
 
@@ -65,21 +90,29 @@ class InheritanceTaxOnPensionsConnectorSpec extends SpecBase {
       when(requestBuilder.setHeader("Csrf-Token" -> "nocheck"))
         .thenReturn(requestBuilder)
 
+      when(requestBuilder.transform(any()))
+        .thenReturn(requestBuilder)
+
       when(requestBuilder.execute[HttpResponse](using any(), any()))
         .thenReturn(Future.successful(mockHttpResponse))
 
-      connector.setUserAnswers(expectedUserAnswers)
+      connector.setUserAnswers(expectedUserAnswers, schemeAdministratorOrPractitionerName, schemeName, srnVal, role)
 
       verify(connector.httpClient, atLeastOnce).put(eqTo(url"$putUrl"))(using any())
     }
   }
 
   class SetUp {
+
     val id = "some_id"
     val mockConfig: FrontendAppConfig = mock[FrontendAppConfig]
     val httpClient: HttpClientV2 = mock[HttpClientV2]
     val mockHttpResponse: HttpResponse = mock[HttpResponse]
     val requestBuilder: RequestBuilder = mock[RequestBuilder]
+    val schemeAdministratorOrPractitionerName: String = "name"
+    val schemeName: String = "schemeName"
+    val srnVal: String = "testSrn"
+    val role: String = "role"
 
     val connector =
       new InheritanceTaxOnPensionsConnector(config = mockConfig, httpClient = httpClient)

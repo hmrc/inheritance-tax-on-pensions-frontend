@@ -16,8 +16,8 @@
 
 package controllers.actions
 
+import services.UserAnswersService
 import play.api.mvc.ActionTransformer
-import connectors.InheritanceTaxOnPensionsConnector
 import play.api.Logging
 import models.UserAnswers
 import play.api.http.Status.NOT_FOUND
@@ -30,7 +30,7 @@ import scala.concurrent.{ExecutionContext, Future}
 import javax.inject.Inject
 
 class DataRetrievalActionImpl @Inject() (
-  val inheritanceTaxOnPensionsConnector: InheritanceTaxOnPensionsConnector
+  val userAnswersService: UserAnswersService
 )(implicit val executionContext: ExecutionContext)
     extends DataRetrievalAction
     with Logging {
@@ -39,20 +39,19 @@ class DataRetrievalActionImpl @Inject() (
 
     val headerCarrier: HeaderCarrier = HeaderCarrierConverter.fromRequestAndSession(request, request.session)
 
-    // TODO - We may wish to move this into a service and handle NOT_FOUND and HTTP exceptions? Journey recovery?
-    // TODO - Do we need to think about the cache key?
-    // TODO - When do we want to create the cache? Start of the journey?
-    inheritanceTaxOnPensionsConnector
-      .fetchUserAnswers(request.getUserId)(using headerCarrier)
+    // TODO - when we further establish the service we may wish to think about the following
+    //          - the cache (user answers) key
+    //          - How we handle user answers creation and error handling and logging
+    userAnswersService
+      .fetch(request.getUserId)(using headerCarrier, request)
       .map {
         case Right(ua) => OptionalDataRequest(request, Some(ua))
         case Left(ex) if ex.statusCode == NOT_FOUND =>
-          logger.info("No user answers found - creating new user answers")
+          logger.info("[DataRetrievalActionImpl][transform] - No user answers found - creating new user answers")
           OptionalDataRequest(request, Some(UserAnswers(request.getUserId)))
         case Left(ex) =>
-          logger.warn("Data retrieval failed with upstream error response: ", ex)
-          // TODO - we may want to return a Future[Either[Result, OptionalDataRequest[A]]] and go to journey recovery?
-          throw new RuntimeException("Failed to fetch user answers from the cache")
+          logger.warn("[DataRetrievalActionImpl][transform] - Data retrieval failed with upstream error response: ", ex)
+          OptionalDataRequest(request, None)
       }
   }
 
