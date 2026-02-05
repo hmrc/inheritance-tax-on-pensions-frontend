@@ -29,7 +29,6 @@ import base.SpecBase
 import uk.gov.hmrc.auth.core._
 
 import scala.concurrent.{ExecutionContext, Future}
-import scala.concurrent.ExecutionContext.Implicits.global
 
 class AuthActionSpec extends SpecBase with StubPlayBodyParsersFactory {
   val mockSessionDataCacheConnector: SessionDataCacheConnector = mock[SessionDataCacheConnector]

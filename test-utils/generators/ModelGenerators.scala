@@ -21,7 +21,7 @@ import models.PensionSchemeUser.{Administrator, Practitioner}
 import models.SchemeId.{Pstr, Srn}
 import models.PensionSchemeId.{PsaId, PspId}
 import models._
-import models.requests.IdentifierRequest
+import models.requests.{AllowedAccessRequest, IdentifierRequest}
 import org.scalacheck.Gen._
 import models.requests.IdentifierRequest.{AdministratorRequest, PractitionerRequest}
 import models.SchemeStatus._
@@ -33,6 +33,14 @@ trait ModelGenerators extends BasicGenerators {
   val pspIdGen: Gen[PspId] = nonEmptyString.map(PspId.apply)
   val pensionSchemeIdGen: Gen[PensionSchemeId] = Gen.oneOf(psaIdGen, pspIdGen)
   val pensionSchemeUserGen: Gen[PensionSchemeUser] = Gen.oneOf(Administrator, Practitioner)
+
+  def allowedAccessRequestGen[A](request: Request[A]): Gen[AllowedAccessRequest[A]] =
+    for {
+      request <- identifierRequestGen[A](request)
+      schemeDetails <- schemeDetailsGen
+      minimalDetails <- minimalDetailsGen
+      srn <- srnGen
+    } yield AllowedAccessRequest(request, schemeDetails, minimalDetails, srn)
 
   def practitionerRequestGen[A](request: Request[A]): Gen[PractitionerRequest[A]] =
     for {

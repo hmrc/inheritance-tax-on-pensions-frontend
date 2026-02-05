@@ -31,4 +31,12 @@ object Constants {
 
   val delimitedPSA = "DELIMITED_PSAID"
   val detailsNotFound = "no match found"
+
+  val PREPOPULATION_FLAG = "prePopulationFlag"
+
+  // iHTP auth headers
+  val SRN_HEADER = "srn"
+  val USERNAME_HEADER = "userName"
+  val SCHEME_NAME_HEADER = "schemeName"
+  val ROLE_HEADER = "requestRole"
 }

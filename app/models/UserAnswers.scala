@@ -19,6 +19,7 @@ package models
 import queries.{Gettable, Settable}
 import play.api.libs.json._
 import uk.gov.hmrc.mongo.play.json.formats.MongoJavatimeFormats
+import play.api.libs.functional.syntax.toFunctionalBuilderOps
 
 import scala.util.{Failure, Success, Try}
 
@@ -66,25 +67,17 @@ final case class UserAnswers(
 
 object UserAnswers {
 
-  val reads: Reads[UserAnswers] = {
-
-    import play.api.libs.functional.syntax._
-
+  val reads: Reads[UserAnswers] =
     (__ \ "_id")
       .read[String]
       .and((__ \ "data").read[JsObject])
       .and((__ \ "lastUpdated").read(using MongoJavatimeFormats.instantFormat))(UserAnswers.apply)
-  }
 
-  val writes: OWrites[UserAnswers] = {
-
-    import play.api.libs.functional.syntax._
-
+  val writes: OWrites[UserAnswers] =
     (__ \ "_id")
       .write[String]
       .and((__ \ "data").write[JsObject])
       .and((__ \ "lastUpdated").write(using MongoJavatimeFormats.instantFormat))(ua => (ua.id, ua.data, ua.lastUpdated))
-  }
 
   implicit val format: OFormat[UserAnswers] = OFormat(reads, writes)
 }

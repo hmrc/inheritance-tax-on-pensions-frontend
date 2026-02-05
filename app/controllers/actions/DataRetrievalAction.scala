@@ -16,23 +16,45 @@
 
 package controllers.actions
 
+import services.UserAnswersService
 import play.api.mvc.ActionTransformer
-import repositories.SessionRepository
-import models.requests.{IdentifierRequest, OptionalDataRequest}
+import play.api.Logging
+import models.UserAnswers
+import play.api.http.Status.NOT_FOUND
+import uk.gov.hmrc.http.HeaderCarrier
+import uk.gov.hmrc.play.http.HeaderCarrierConverter
+import models.requests.{AllowedAccessRequest, OptionalDataRequest}
 
 import scala.concurrent.{ExecutionContext, Future}
 
 import javax.inject.Inject
 
 class DataRetrievalActionImpl @Inject() (
-  val sessionRepository: SessionRepository
+  val userAnswersService: UserAnswersService
 )(implicit val executionContext: ExecutionContext)
-    extends DataRetrievalAction {
+    extends DataRetrievalAction
+    with Logging {
 
-  override protected def transform[A](request: IdentifierRequest[A]): Future[OptionalDataRequest[A]] =
-    sessionRepository.get(request.getUserId).map {
-      OptionalDataRequest(request, _)
-    }
+  override protected def transform[A](request: AllowedAccessRequest[A]): Future[OptionalDataRequest[A]] = {
+
+    val headerCarrier: HeaderCarrier = HeaderCarrierConverter.fromRequestAndSession(request, request.session)
+
+    // TODO - when we further establish the service we may wish to think about the following
+    //          - the cache (user answers) key
+    //          - How we handle user answers creation and error handling and logging
+    userAnswersService
+      .fetch(request.getUserId)(using headerCarrier, request)
+      .map {
+        case Right(ua) => OptionalDataRequest(request, Some(ua))
+        case Left(ex) if ex.statusCode == NOT_FOUND =>
+          logger.info("[DataRetrievalActionImpl][transform] - No user answers found - creating new user answers")
+          OptionalDataRequest(request, Some(UserAnswers(request.getUserId)))
+        case Left(ex) =>
+          logger.warn("[DataRetrievalActionImpl][transform] - Data retrieval failed with upstream error response: ", ex)
+          OptionalDataRequest(request, None)
+      }
+  }
+
 }
 
-trait DataRetrievalAction extends ActionTransformer[IdentifierRequest, OptionalDataRequest]
+trait DataRetrievalAction extends ActionTransformer[AllowedAccessRequest, OptionalDataRequest]

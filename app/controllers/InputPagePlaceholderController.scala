@@ -16,7 +16,9 @@
 
 package controllers
 
+import services.UserAnswersService
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
+import pages.InputPagePlaceholderPage
 import controllers.actions._
 import forms.InputPagePlaceholderFormProvider
 import models.Mode
@@ -26,7 +28,7 @@ import models.SchemeId.Srn
 import play.api.i18n.{I18nSupport, MessagesApi}
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
 
-import scala.concurrent.Future
+import scala.concurrent.{ExecutionContext, Future}
 
 import javax.inject.Inject
 
@@ -34,26 +36,44 @@ class InputPagePlaceholderController @Inject() (
   override val messagesApi: MessagesApi,
   identify: IdentifierAction,
   allowAccess: AllowAccessActionProvider,
+  getData: DataRetrievalAction,
+  requireData: DataRequiredAction,
   formProvider: InputPagePlaceholderFormProvider,
   val controllerComponents: MessagesControllerComponents,
+  userAnswersService: UserAnswersService,
   view: InputPagePlaceholderView
-) extends FrontendBaseController
+)(implicit ec: ExecutionContext)
+    extends FrontendBaseController
     with I18nSupport {
 
   val form: Form[String] = formProvider()
 
   def onPageLoad(srn: Srn, mode: Mode): Action[AnyContent] =
-    identify.andThen(allowAccess(srn)) { implicit request =>
-      Ok(view(form, srn, mode))
-    }
+    identify
+      .andThen(allowAccess(srn))
+      .andThen(getData)
+      .andThen(requireData) { implicit request =>
+        request.userAnswers.get(InputPagePlaceholderPage) match {
+          case Some(input) => Ok(view(form.fill(input), srn, mode))
+          case _ => Ok(view(form, srn, mode))
+        }
+      }
 
   def onSubmit(srn: Srn, mode: Mode): Action[AnyContent] =
-    identify.andThen(allowAccess(srn)).async { implicit request =>
-      form
-        .bindFromRequest()
-        .fold(
-          formWithErrors => Future.successful(BadRequest(view(formWithErrors, srn, mode))),
-          _ => Future.successful(Redirect(routes.SubmissionListController.onPageLoad(srn)))
-        )
-    }
+    identify
+      .andThen(allowAccess(srn))
+      .andThen(getData)
+      .andThen(requireData)
+      .async { implicit request =>
+        form
+          .bindFromRequest()
+          .fold(
+            formWithErrors => Future.successful(BadRequest(view(formWithErrors, srn, mode))),
+            value =>
+              for {
+                updatedAnswers <- Future.fromTry(request.userAnswers.set(InputPagePlaceholderPage, value))
+                _ <- userAnswersService.set(updatedAnswers)(using hc, request.request)
+              } yield Redirect(routes.SubmissionListController.onPageLoad(srn))
+          )
+      }
 }
