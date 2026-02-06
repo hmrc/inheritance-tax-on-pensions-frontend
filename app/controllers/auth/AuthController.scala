@@ -19,7 +19,7 @@ package controllers.auth
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import config.FrontendAppConfig
 import controllers.actions.IdentifierAction
-import repositories.SessionRepository
+import repositories.SessionSchemeDetailsRepository
 import play.api.i18n.I18nSupport
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
 
@@ -30,7 +30,7 @@ import javax.inject.Inject
 class AuthController @Inject() (
   val controllerComponents: MessagesControllerComponents,
   config: FrontendAppConfig,
-  sessionRepository: SessionRepository,
+  sessionRepository: SessionSchemeDetailsRepository,
   identify: IdentifierAction
 )(implicit ec: ExecutionContext)
     extends FrontendBaseController
