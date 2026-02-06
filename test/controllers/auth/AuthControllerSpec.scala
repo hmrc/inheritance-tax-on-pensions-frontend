@@ -18,7 +18,7 @@ package controllers.auth
 
 import play.api.test.FakeRequest
 import base.SpecBase
-import repositories.SessionRepository
+import repositories.SessionSchemeDetailsRepository
 import org.scalatestplus.mockito.MockitoSugar
 import org.mockito.ArgumentMatchers.{any, eq => eqTo}
 import play.api.test.Helpers._
@@ -36,12 +36,12 @@ class AuthControllerSpec extends SpecBase with MockitoSugar {
 
     "must clear user answers and redirect to sign out, specifying the exit survey as the continue URL" in {
 
-      val mockSessionRepository = mock[SessionRepository]
+      val mockSessionRepository = mock[SessionSchemeDetailsRepository]
       when(mockSessionRepository.clear(any())).thenReturn(Future.successful(true))
 
       val application =
         applicationBuilder(None)
-          .overrides(bind[SessionRepository].toInstance(mockSessionRepository))
+          .overrides(bind[SessionSchemeDetailsRepository].toInstance(mockSessionRepository))
           .build()
 
       running(application) {
@@ -65,12 +65,12 @@ class AuthControllerSpec extends SpecBase with MockitoSugar {
 
     "must clear users answers and redirect to sign out, specifying SignedOut as the continue URL" in {
 
-      val mockSessionRepository = mock[SessionRepository]
+      val mockSessionRepository = mock[SessionSchemeDetailsRepository]
       when(mockSessionRepository.clear(any())).thenReturn(Future.successful(true))
 
       val application =
         applicationBuilder(None, isPsa = false)
-          .overrides(bind[SessionRepository].toInstance(mockSessionRepository))
+          .overrides(bind[SessionSchemeDetailsRepository].toInstance(mockSessionRepository))
           .build()
 
       running(application) {

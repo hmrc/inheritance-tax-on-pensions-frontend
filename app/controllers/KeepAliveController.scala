@@ -19,7 +19,7 @@ package controllers
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import models.SchemeId.Srn
 import controllers.actions.IdentifierAction
-import repositories.SessionRepository
+import repositories.SessionSchemeDetailsRepository
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
 
 import scala.concurrent.ExecutionContext
@@ -29,7 +29,7 @@ import javax.inject.Inject
 class KeepAliveController @Inject() (
   val controllerComponents: MessagesControllerComponents,
   identify: IdentifierAction,
-  sessionRepository: SessionRepository
+  sessionRepository: SessionSchemeDetailsRepository
 )(implicit ec: ExecutionContext)
     extends FrontendBaseController {
 
