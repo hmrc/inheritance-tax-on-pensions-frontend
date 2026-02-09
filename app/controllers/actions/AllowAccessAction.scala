@@ -80,7 +80,7 @@ class AllowAccessAction(
     }
   }
 
-  // TODO - Check the scheme details repository first, if not present call the connector and then populate the repository
+  // TODO (IHTP-275) - Check the scheme details repository first, if not present call the connector and then populate the repository
   private def fetchSchemeDetails[A](request: IdentifierRequest[A], srn: Srn)(implicit
     hc: HeaderCarrier
   ): Future[Option[SchemeDetails]] =
@@ -89,7 +89,7 @@ class AllowAccessAction(
       p => schemeDetailsConnector.details(p.pspId, srn)
     )
 
-  // TODO - Check the minimal details repository first, if not present call the connector and then populate the repository
+  // TODO (IHTP-275) - Check the minimal details repository first, if not present call the connector and then populate the repository
   private def fetchMinimalDetails[A](
     request: IdentifierRequest[A]
   )(implicit hc: HeaderCarrier): Future[Either[MinimalDetailsError, MinimalDetails]] =
