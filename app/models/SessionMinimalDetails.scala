@@ -16,25 +16,25 @@
 
 package models
 
-import play.api.libs.json.{Format, OFormat, __}
+import play.api.libs.json.{__, Format, OFormat}
 import uk.gov.hmrc.mongo.play.json.formats.MongoJavatimeFormats
 import play.api.libs.functional.syntax._
 
 import java.time.Instant
 
 case class SessionMinimalDetails(
-                                 id: String, // TODO - what is the correct session cache key for this?
-                                 minimalDetails: MinimalDetails,
-                                 lastUpdated: Instant = Instant.now
-                               ) {
-
-}
+  id: String, // TODO - what is the correct session cache key for this?
+  minimalDetails: MinimalDetails,
+  lastUpdated: Instant = Instant.now
+) {}
 
 object SessionMinimalDetails {
   implicit val format: OFormat[SessionMinimalDetails] =
-    (
-      (__ \ "_id").format[String] and
-        (__ \ "minimalDetails").format[MinimalDetails] and
-        (__ \ "lastUpdated").format(using MongoJavatimeFormats.instantFormat)
-      )(SessionMinimalDetails.apply, o => Tuple.fromProductTyped(o))
+    (__ \ "_id")
+      .format[String]
+      .and((__ \ "minimalDetails").format[MinimalDetails])
+      .and((__ \ "lastUpdated").format(using MongoJavatimeFormats.instantFormat))(
+        SessionMinimalDetails.apply,
+        o => Tuple.fromProductTyped(o)
+      )
 }

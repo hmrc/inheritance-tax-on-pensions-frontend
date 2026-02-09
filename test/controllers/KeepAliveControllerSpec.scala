@@ -19,7 +19,7 @@ package controllers
 import play.api.test.FakeRequest
 import play.api.inject.bind
 import base.SpecBase
-import repositories.SessionSchemeDetailsRepository
+import repositories.{SessionMinimalDetailsRepository, SessionSchemeDetailsRepository}
 import org.scalatestplus.mockito.MockitoSugar
 import org.mockito.ArgumentMatchers.any
 import play.api.test.Helpers._
@@ -35,12 +35,18 @@ class KeepAliveControllerSpec extends SpecBase with MockitoSugar {
 
       "must keep the answers alive and return OK" in {
 
-        val mockSessionRepository = mock[SessionSchemeDetailsRepository]
-        when(mockSessionRepository.keepAlive(any())).thenReturn(Future.successful(true))
+        val mockSessionSchemeDetailsRepository: SessionSchemeDetailsRepository = mock[SessionSchemeDetailsRepository]
+        val mockSessionMinimalDetailsRepository: SessionMinimalDetailsRepository = mock[SessionMinimalDetailsRepository]
+
+        when(mockSessionSchemeDetailsRepository.keepAlive(any())).thenReturn(Future.successful(true))
+        when(mockSessionMinimalDetailsRepository.keepAlive(any())).thenReturn(Future.successful(true))
 
         val application =
           applicationBuilder(Some(emptyUserAnswers))
-            .overrides(bind[SessionSchemeDetailsRepository].toInstance(mockSessionRepository))
+            .overrides(
+              bind[SessionSchemeDetailsRepository].toInstance(mockSessionSchemeDetailsRepository),
+              bind[SessionMinimalDetailsRepository].toInstance(mockSessionMinimalDetailsRepository)
+            )
             .build()
 
         running(application) {
@@ -50,7 +56,8 @@ class KeepAliveControllerSpec extends SpecBase with MockitoSugar {
           val result = route(application, request).value
 
           status(result) mustEqual OK
-          verify(mockSessionRepository, times(1)).keepAlive(emptyUserAnswers.id)
+          verify(mockSessionSchemeDetailsRepository, times(1)).keepAlive(emptyUserAnswers.id)
+          verify(mockSessionMinimalDetailsRepository, times(1)).keepAlive(emptyUserAnswers.id)
         }
       }
     }
@@ -59,12 +66,18 @@ class KeepAliveControllerSpec extends SpecBase with MockitoSugar {
 
       "must return OK" in {
 
-        val mockSessionRepository = mock[SessionSchemeDetailsRepository]
-        when(mockSessionRepository.keepAlive(any())).thenReturn(Future.successful(true))
+        val mockSessionSchemeDetailsRepository = mock[SessionSchemeDetailsRepository]
+        val mockSessionMinimalDetailsRepository: SessionMinimalDetailsRepository = mock[SessionMinimalDetailsRepository]
+
+        when(mockSessionSchemeDetailsRepository.keepAlive(any())).thenReturn(Future.successful(true))
+        when(mockSessionMinimalDetailsRepository.keepAlive(any())).thenReturn(Future.successful(true))
 
         val application =
           applicationBuilder(None)
-            .overrides(bind[SessionSchemeDetailsRepository].toInstance(mockSessionRepository))
+            .overrides(
+              bind[SessionSchemeDetailsRepository].toInstance(mockSessionSchemeDetailsRepository),
+              bind[SessionMinimalDetailsRepository].toInstance(mockSessionMinimalDetailsRepository)
+            )
             .build()
 
         running(application) {
@@ -74,7 +87,8 @@ class KeepAliveControllerSpec extends SpecBase with MockitoSugar {
           val result = route(application, request).value
 
           status(result) mustEqual OK
-          verify(mockSessionRepository, times(1)).keepAlive(emptyUserAnswers.id)
+          verify(mockSessionSchemeDetailsRepository, times(1)).keepAlive(emptyUserAnswers.id)
+          verify(mockSessionMinimalDetailsRepository, times(1)).keepAlive(emptyUserAnswers.id)
         }
       }
     }

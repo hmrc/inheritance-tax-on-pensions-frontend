@@ -33,7 +33,7 @@ import java.util.concurrent.TimeUnit
 import javax.inject.{Inject, Singleton}
 
 @Singleton
-class SessionMinimalDetailsRepository @Inject()(
+class SessionMinimalDetailsRepository @Inject() (
   mongoComponent: MongoComponent,
   appConfig: FrontendAppConfig,
   clock: Clock
