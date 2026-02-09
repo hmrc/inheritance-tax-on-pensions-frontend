@@ -39,7 +39,7 @@ class SessionSchemeDetailsRepository @Inject() (
   clock: Clock
 )(implicit ec: ExecutionContext)
     extends PlayMongoRepository[SessionSchemeDetails](
-      collectionName = "user-answers",
+      collectionName = "scheme-details",
       mongoComponent = mongoComponent,
       domainFormat = SessionSchemeDetails.format,
       indexes = Seq(

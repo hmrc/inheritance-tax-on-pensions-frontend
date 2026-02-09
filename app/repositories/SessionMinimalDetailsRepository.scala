@@ -39,7 +39,7 @@ class SessionMinimalDetailsRepository @Inject() (
   clock: Clock
 )(implicit ec: ExecutionContext)
     extends PlayMongoRepository[SessionMinimalDetails](
-      collectionName = "user-answers",
+      collectionName = "minimal-details",
       mongoComponent = mongoComponent,
       domainFormat = SessionMinimalDetails.format,
       indexes = Seq(
