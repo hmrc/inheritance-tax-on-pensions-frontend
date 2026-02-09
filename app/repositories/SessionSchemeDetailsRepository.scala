@@ -21,7 +21,7 @@ import org.mongodb.scala.model._
 import uk.gov.hmrc.mdc.Mdc
 import org.mongodb.scala.bson.conversions.Bson
 import play.api.libs.json.Format
-import models.UserAnswers
+import models.SessionSchemeDetails
 import uk.gov.hmrc.mongo.play.json.formats.MongoJavatimeFormats
 import uk.gov.hmrc.mongo.play.json.PlayMongoRepository
 import config.FrontendAppConfig
@@ -33,23 +33,25 @@ import java.util.concurrent.TimeUnit
 import javax.inject.{Inject, Singleton}
 
 @Singleton
-class SessionRepository @Inject() (
+class SessionSchemeDetailsRepository @Inject() (
   mongoComponent: MongoComponent,
   appConfig: FrontendAppConfig,
   clock: Clock
 )(implicit ec: ExecutionContext)
-    extends PlayMongoRepository[UserAnswers](
-      collectionName = "user-answers",
+    extends PlayMongoRepository[SessionSchemeDetails](
+      collectionName = "scheme-details",
       mongoComponent = mongoComponent,
-      domainFormat = UserAnswers.format,
+      domainFormat = SessionSchemeDetails.format,
       indexes = Seq(
         IndexModel(
           Indexes.ascending("lastUpdated"),
           IndexOptions()
-            .name("lastUpdatedIdx")
-            .expireAfter(appConfig.cacheTtl, TimeUnit.SECONDS)
+            .name("lastUpdated")
+            .expireAfter(appConfig.sessionTtl, TimeUnit.SECONDS)
         )
-      )
+      ),
+      extraCodecs = Seq.empty,
+      replaceIndexes = true
     ) {
 
   implicit val instantFormat: Format[Instant] = MongoJavatimeFormats.instantFormat
@@ -65,7 +67,7 @@ class SessionRepository @Inject() (
       .toFuture()
       .map(_ => true)
 
-  def get(id: String): Future[Option[UserAnswers]] =
+  def get(id: String): Future[Option[SessionSchemeDetails]] =
     keepAlive(id).flatMap { _ =>
       Mdc.preservingMdc {
         collection
@@ -74,14 +76,14 @@ class SessionRepository @Inject() (
       }
     }
 
-  def set(answers: UserAnswers): Future[Boolean] = {
+  def set(sessionSchemeDetails: SessionSchemeDetails): Future[Boolean] = {
 
-    val updatedAnswers = answers.copy(lastUpdated = Instant.now(clock))
+    val updated = sessionSchemeDetails.copy(lastUpdated = Instant.now(clock))
 
     collection
       .replaceOne(
-        filter = byId(updatedAnswers.id),
-        replacement = updatedAnswers,
+        filter = byId(updated.id),
+        replacement = updated,
         options = ReplaceOptions().upsert(true)
       )
       .toFuture()
