@@ -16,6 +16,7 @@
 
 package controllers.actions
 
+import services.SessionService
 import play.api.mvc.{ActionFunction, Result}
 import com.google.inject.ImplementedBy
 import connectors.{MinimalDetailsConnector, MinimalDetailsError, SchemeDetailsConnector}
@@ -36,20 +37,21 @@ import scala.concurrent.{ExecutionContext, Future}
 import javax.inject.{Inject, Singleton}
 
 @Singleton
-class AllowAccessAction(
-  srn: Srn,
-  appConfig: FrontendAppConfig,
-  schemeDetailsConnector: SchemeDetailsConnector,
-  minimalDetailsConnector: MinimalDetailsConnector
-)(implicit override val executionContext: ExecutionContext)
-    extends ActionFunction[IdentifierRequest, AllowedAccessRequest] {
+class AllowAccessActionWithSessionCache(
+                         srn: Srn,
+                         appConfig: FrontendAppConfig,
+                         schemeDetailsConnector: SchemeDetailsConnector,
+                         minimalDetailsConnector: MinimalDetailsConnector,
+                         sessionService: SessionService
+                       )(implicit override val executionContext: ExecutionContext)
+  extends ActionFunction[IdentifierRequest, AllowedAccessRequest] {
 
   private val validStatuses: List[SchemeStatus] = List(Open, WoundUp, Deregistered)
 
   override def invokeBlock[A](
-    request: IdentifierRequest[A],
-    block: AllowedAccessRequest[A] => Future[Result]
-  ): Future[Result] = {
+                               request: IdentifierRequest[A],
+                               block: AllowedAccessRequest[A] => Future[Result]
+                             ): Future[Result] = {
 
     implicit val hc: HeaderCarrier = HeaderCarrierConverter.fromRequestAndSession(request, request.session)
 
@@ -58,7 +60,7 @@ class AllowAccessAction(
       minimalDetails <- fetchMinimalDetails(request)
     } yield (schemeDetails, minimalDetails) match {
       case (Some(schemeDetails), Right(minimalDetails @ MinimalDetails(_, _, _, _, false, false)))
-          if validStatuses.contains(schemeDetails.schemeStatus) =>
+        if validStatuses.contains(schemeDetails.schemeStatus) =>
         block(AllowedAccessRequest(request, schemeDetails, minimalDetails, srn))
 
       case (_, Right(HasDeceasedFlag(_))) =>
@@ -81,19 +83,27 @@ class AllowAccessAction(
   }
 
   private def fetchSchemeDetails[A](request: IdentifierRequest[A], srn: Srn)(implicit
-    hc: HeaderCarrier
+                                                                             hc: HeaderCarrier
   ): Future[Option[SchemeDetails]] =
-    request.fold(
-      a => schemeDetailsConnector.details(a.psaId, srn),
-      p => schemeDetailsConnector.details(p.pspId, srn)
+    sessionService.trySchemeDetails(
+      id = request.getUserId,
+      srn = srn.value,
+      callBackFunction = request.fold(
+        a => schemeDetailsConnector.details(a.psaId, srn),
+        p => schemeDetailsConnector.details(p.pspId, srn)
+      )
     )
 
   private def fetchMinimalDetails[A](
-    request: IdentifierRequest[A]
-  )(implicit hc: HeaderCarrier): Future[Either[MinimalDetailsError, MinimalDetails]] =
-    request.fold(
-      _ => minimalDetailsConnector.fetch(loggedInAsPsa = true),
-      _ => minimalDetailsConnector.fetch(loggedInAsPsa = false)
+                                      request: IdentifierRequest[A]
+                                    )(implicit hc: HeaderCarrier): Future[Either[MinimalDetailsError, MinimalDetails]] =
+    sessionService.tryMinimalDetails(
+      id = request.getUserId,
+      srn = srn.value,
+      callBackFunction = request.fold(
+        _ => minimalDetailsConnector.fetch(loggedInAsPsa = true),
+        _ => minimalDetailsConnector.fetch(loggedInAsPsa = false)
+      )
     )
 
   private object HasRlsFlag {
@@ -107,18 +117,19 @@ class AllowAccessAction(
   }
 }
 
-@ImplementedBy(classOf[AllowAccessActionProviderImpl])
-trait AllowAccessActionProvider {
+@ImplementedBy(classOf[AllowAccessActionWithSessionCacheProviderImpl])
+trait AllowAccessActionWithSessionCacheProvider {
   def apply(srn: Srn): ActionFunction[IdentifierRequest, AllowedAccessRequest]
 }
 
-class AllowAccessActionProviderImpl @Inject() (
-  appConfig: FrontendAppConfig,
-  schemeDetailsConnector: SchemeDetailsConnector,
-  minimalDetailsConnector: MinimalDetailsConnector
-)(implicit val ec: ExecutionContext)
-    extends AllowAccessActionProvider {
+class AllowAccessActionWithSessionCacheProviderImpl @Inject() (
+                                                appConfig: FrontendAppConfig,
+                                                schemeDetailsConnector: SchemeDetailsConnector,
+                                                minimalDetailsConnector: MinimalDetailsConnector,
+                                                sessionService: SessionService
+                                              )(implicit val ec: ExecutionContext)
+  extends AllowAccessActionWithSessionCacheProvider {
 
   def apply(srn: Srn): ActionFunction[IdentifierRequest, AllowedAccessRequest] =
-    new AllowAccessAction(srn, appConfig, schemeDetailsConnector, minimalDetailsConnector)
+    new AllowAccessActionWithSessionCache(srn, appConfig, schemeDetailsConnector, minimalDetailsConnector, sessionService)
 }

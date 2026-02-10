@@ -24,6 +24,7 @@ import java.time.Instant
 
 case class SessionMinimalDetails(
   id: String, // TODO (IHTP-275) - what is the correct session cache key for this?
+  srn: String,
   minimalDetails: MinimalDetails,
   lastUpdated: Instant = Instant.now
 ) {}
@@ -32,6 +33,7 @@ object SessionMinimalDetails {
   implicit val format: OFormat[SessionMinimalDetails] =
     (__ \ "_id")
       .format[String]
+      .and((__ \ "srn").format[String])
       .and((__ \ "minimalDetails").format[MinimalDetails])
       .and((__ \ "lastUpdated").format(using MongoJavatimeFormats.instantFormat))(
         SessionMinimalDetails.apply,
