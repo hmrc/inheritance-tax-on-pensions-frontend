@@ -26,8 +26,10 @@ import scala.concurrent.{ExecutionContext, Future}
 
 import javax.inject.Inject
 
-class FakeAllowAccessActionWithSessionCacheProvider @Inject()(schemeDetails: SchemeDetails, minimalDetails: MinimalDetails)
-    extends AllowAccessActionWithSessionCacheProvider
+class FakeAllowAccessActionWithSessionCacheProvider @Inject() (
+  schemeDetails: SchemeDetails,
+  minimalDetails: MinimalDetails
+) extends AllowAccessActionWithSessionCacheProvider
     with Generators
     with OptionValues {
 

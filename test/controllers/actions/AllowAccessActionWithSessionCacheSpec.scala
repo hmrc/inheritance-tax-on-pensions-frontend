@@ -63,14 +63,14 @@ class AllowAccessActionWithSessionCacheSpec extends SpecBase with ScalaCheckProp
         id: String,
         srn: String,
         callBackFunction: => Future[Option[SchemeDetails]]
-      ): Future[Option[SchemeDetails]] =
+      )(implicit ec: ExecutionContext): Future[Option[SchemeDetails]] =
         callBackFunction
 
       override def tryMinimalDetails(
         id: String,
         srn: String,
         callBackFunction: => Future[Either[MinimalDetailsError, MinimalDetails]]
-      ): Future[Either[MinimalDetailsError, MinimalDetails]] =
+      )(implicit ec: ExecutionContext): Future[Either[MinimalDetailsError, MinimalDetails]] =
         callBackFunction
     }
 

@@ -21,8 +21,7 @@ import connectors.MinimalDetailsError
 import repositories.{SessionMinimalDetailsRepository, SessionSchemeDetailsRepository}
 import models._
 
-import scala.concurrent.Future
-import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.{ExecutionContext, Future}
 
 class SessionService @Inject() (
   sessionSchemeDetailsRepository: SessionSchemeDetailsRepository,
@@ -33,7 +32,7 @@ class SessionService @Inject() (
     id: String,
     srn: String,
     callBackFunction: => Future[Option[SchemeDetails]]
-  ): Future[Option[SchemeDetails]] =
+  )(implicit ec: ExecutionContext): Future[Option[SchemeDetails]] =
     sessionSchemeDetailsRepository.get(id).flatMap {
       case Some(sessionSchemeDetails) =>
         Future.successful(Some(sessionSchemeDetails.schemeDetails))
@@ -50,7 +49,7 @@ class SessionService @Inject() (
     id: String,
     srn: String,
     callBackFunction: => Future[Either[MinimalDetailsError, MinimalDetails]]
-  ): Future[Either[MinimalDetailsError, MinimalDetails]] =
+  )(implicit ec: ExecutionContext): Future[Either[MinimalDetailsError, MinimalDetails]] =
     sessionMinimalDetailsRepository.get(id).flatMap {
       case Some(sessionMinimalDetails) =>
         Future.successful(Right(sessionMinimalDetails.minimalDetails))
