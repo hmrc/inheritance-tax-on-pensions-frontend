@@ -40,7 +40,9 @@ class SessionServiceSpec extends SpecBase {
   val schemeDetailsApi: SchemeDetails = schemeDetailsGen.sample.value.copy(schemeName = "api")
 
   private val sessionSchemeDetails: SessionSchemeDetails =
-    SessionSchemeDetails("id", "srn", schemeDetailsCache, Instant.ofEpochSecond(1))
+    SessionSchemeDetails("id", "srn01", schemeDetailsCache, Instant.ofEpochSecond(1))
+
+  val callbackFunctionSchemeDetails: Future[Some[SchemeDetails]] = Future.successful(Some(schemeDetailsApi))
 
   val detailsNotFound: MinimalDetailsError = DetailsNotFound
 
@@ -56,7 +58,10 @@ class SessionServiceSpec extends SpecBase {
   )
 
   private val sessionMinimalDetails: SessionMinimalDetails =
-    SessionMinimalDetails("id", "srn", minimalDetailsCache, Instant.ofEpochSecond(1))
+    SessionMinimalDetails("id", "srn01", minimalDetailsCache, Instant.ofEpochSecond(1))
+
+  val callbackFunctionMinimalDetails: Future[Right[Nothing, MinimalDetails]] =
+    Future.successful(Right(minimalDetailsApi))
 
   val mockSessionSchemeDetailsRepository: SessionSchemeDetailsRepository = mock[SessionSchemeDetailsRepository]
   val mockSessionMinimalDetailsRepository: SessionMinimalDetailsRepository = mock[SessionMinimalDetailsRepository]
@@ -67,28 +72,50 @@ class SessionServiceSpec extends SpecBase {
 
     "return scheme details from the session when session data is present" in {
       when(mockSessionSchemeDetailsRepository.get(any())).thenReturn(Future.successful(Some(sessionSchemeDetails)))
+
       val result = Await.result(
-        sessionService.trySchemeDetails("id", "srn", Future.successful(Some(schemeDetailsApi))),
+        sessionService.trySchemeDetails("id", "srn01", callbackFunctionSchemeDetails),
         patienceConfig.timeout
       )
+
       result mustBe Some(schemeDetailsCache)
     }
 
     "return scheme details from the api when session data is not present" in {
       when(mockSessionSchemeDetailsRepository.get(any())).thenReturn(Future.successful(None))
+
       val result = Await.result(
-        sessionService.trySchemeDetails("id", "srn", Future.successful(Some(schemeDetailsApi))),
+        sessionService.trySchemeDetails("id", "srn01", callbackFunctionSchemeDetails),
         patienceConfig.timeout
       )
+
       result mustBe Some(schemeDetailsApi)
+      verify(mockSessionSchemeDetailsRepository, times(0)).clear(any())
+      verify(mockSessionSchemeDetailsRepository, times(1)).set(any())
+    }
+
+    "return scheme details from the api when session srn differs from the request srn" in {
+      when(mockSessionSchemeDetailsRepository.get(any())).thenReturn(Future.successful(Some(sessionSchemeDetails)))
+      when(mockSessionSchemeDetailsRepository.clear(any())).thenReturn(Future.successful(true))
+
+      val result = Await.result(
+        sessionService.trySchemeDetails("id", "srn02", callbackFunctionSchemeDetails),
+        patienceConfig.timeout
+      )
+
+      result mustBe Some(schemeDetailsApi)
+      verify(mockSessionSchemeDetailsRepository, times(1)).clear(any())
       verify(mockSessionSchemeDetailsRepository, times(1)).set(any())
     }
 
     "return none when the scheme details are not present in the session or the api" in {
       when(mockSessionSchemeDetailsRepository.get(any())).thenReturn(Future.successful(None))
+
       val result =
-        Await.result(sessionService.trySchemeDetails("id", "srn", Future.successful(None)), patienceConfig.timeout)
+        Await.result(sessionService.trySchemeDetails("id", "srn01", Future.successful(None)), patienceConfig.timeout)
+
       result mustBe None
+      verify(mockSessionSchemeDetailsRepository, times(0)).clear(any())
       verify(mockSessionSchemeDetailsRepository, times(0)).set(any())
     }
   }
@@ -97,30 +124,50 @@ class SessionServiceSpec extends SpecBase {
 
     "return minimal details from the session when session data is present" in {
       when(mockSessionMinimalDetailsRepository.get(any())).thenReturn(Future.successful(Some(sessionMinimalDetails)))
+
       val result = Await.result(
-        sessionService.tryMinimalDetails("id", "srn", Future.successful(Right(minimalDetailsApi))),
+        sessionService.tryMinimalDetails("id", "srn01", callbackFunctionMinimalDetails),
         patienceConfig.timeout
       )
+
       result mustBe Right(minimalDetailsCache)
     }
 
     "return minimal details from the api when session data is not present" in {
       when(mockSessionMinimalDetailsRepository.get(any())).thenReturn(Future.successful(None))
+
       val result = Await.result(
-        sessionService.tryMinimalDetails("id", "srn", Future.successful(Right(minimalDetailsApi))),
+        sessionService.tryMinimalDetails("id", "srn01", callbackFunctionMinimalDetails),
         patienceConfig.timeout
       )
+
       result mustBe Right(minimalDetailsApi)
+      verify(mockSessionMinimalDetailsRepository, times(1)).set(any())
+    }
+
+    "return minimal details from the api when session srn differs from the request srn" in {
+      when(mockSessionMinimalDetailsRepository.get(any())).thenReturn(Future.successful(Some(sessionMinimalDetails)))
+      when(mockSessionMinimalDetailsRepository.clear(any())).thenReturn(Future.successful(true))
+
+      val result = Await.result(
+        sessionService.tryMinimalDetails("id", "srn02", callbackFunctionMinimalDetails),
+        patienceConfig.timeout
+      )
+
+      result mustBe Right(minimalDetailsApi)
+      verify(mockSessionMinimalDetailsRepository, times(1)).clear(any())
       verify(mockSessionMinimalDetailsRepository, times(1)).set(any())
     }
 
     "return an error when the minimal details are not present in the session or the api" in {
       when(mockSessionMinimalDetailsRepository.get(any())).thenReturn(Future.successful(None))
+
       val result =
         Await.result(
-          sessionService.tryMinimalDetails("id", "srn", Future.successful(Left(detailsNotFound))),
+          sessionService.tryMinimalDetails("id", "srn01", Future.successful(Left(detailsNotFound))),
           patienceConfig.timeout
         )
+
       result mustBe Left(detailsNotFound)
       verify(mockSessionMinimalDetailsRepository, times(0)).set(any())
     }
