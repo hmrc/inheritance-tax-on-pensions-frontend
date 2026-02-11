@@ -24,39 +24,42 @@ import models._
 import scala.concurrent.Future
 import scala.concurrent.ExecutionContext.Implicits.global
 
-class SessionService @Inject() (sessionSchemeDetailsRepository: SessionSchemeDetailsRepository,
-                                sessionMinimalDetailsRepository: SessionMinimalDetailsRepository) {
+class SessionService @Inject() (
+  sessionSchemeDetailsRepository: SessionSchemeDetailsRepository,
+  sessionMinimalDetailsRepository: SessionMinimalDetailsRepository
+) {
 
-  def trySchemeDetails(id: String,
-                       srn: String,
-                       callBackFunction: => Future[Option[SchemeDetails]]): Future[Option[SchemeDetails]] = {
-    
-    sessionSchemeDetailsRepository.get(id) flatMap {
+  def trySchemeDetails(
+    id: String,
+    srn: String,
+    callBackFunction: => Future[Option[SchemeDetails]]
+  ): Future[Option[SchemeDetails]] =
+    sessionSchemeDetailsRepository.get(id).flatMap {
       case Some(sessionSchemeDetails) =>
         Future.successful(Some(sessionSchemeDetails.schemeDetails))
-      case None => callBackFunction map {
-        case Some(schemeDetails) =>
-          sessionSchemeDetailsRepository.set(SessionSchemeDetails(id, srn, schemeDetails))
-          Some(schemeDetails)
-        case _ => None
-      }
+      case None =>
+        callBackFunction.map {
+          case Some(schemeDetails) =>
+            sessionSchemeDetailsRepository.set(SessionSchemeDetails(id, srn, schemeDetails))
+            Some(schemeDetails)
+          case _ => None
+        }
     }
-  }
 
-  def tryMinimalDetails(id: String,
-                        srn: String,
-                        callBackFunction: => Future[Either[MinimalDetailsError, MinimalDetails]]):
-  Future[Either[MinimalDetailsError, MinimalDetails]] = {
-    
-    sessionMinimalDetailsRepository.get(id) flatMap {
+  def tryMinimalDetails(
+    id: String,
+    srn: String,
+    callBackFunction: => Future[Either[MinimalDetailsError, MinimalDetails]]
+  ): Future[Either[MinimalDetailsError, MinimalDetails]] =
+    sessionMinimalDetailsRepository.get(id).flatMap {
       case Some(sessionMinimalDetails) =>
         Future.successful(Right(sessionMinimalDetails.minimalDetails))
-      case None => callBackFunction map {
-        case Right(minimalDetails) =>
-          sessionMinimalDetailsRepository.set(SessionMinimalDetails(id, srn, minimalDetails))
-          Right(minimalDetails)
-        case Left(error) => Left(error)
-      }
+      case None =>
+        callBackFunction.map {
+          case Right(minimalDetails) =>
+            sessionMinimalDetailsRepository.set(SessionMinimalDetails(id, srn, minimalDetails))
+            Right(minimalDetails)
+          case Left(error) => Left(error)
+        }
     }
-  }
 }

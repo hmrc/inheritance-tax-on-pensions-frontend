@@ -56,24 +56,23 @@ class AllowAccessActionWithSessionCacheSpec extends SpecBase with ScalaCheckProp
   lazy val mockSessionSchemeDetailsRepository: SessionSchemeDetailsRepository = mock[SessionSchemeDetailsRepository]
   lazy val mockSessionMinimalDetailsRepository: SessionMinimalDetailsRepository = mock[SessionMinimalDetailsRepository]
 
-  val stubSessionService: SessionService = new SessionService(mockSessionSchemeDetailsRepository, mockSessionMinimalDetailsRepository) {
+  val stubSessionService: SessionService =
+    new SessionService(mockSessionSchemeDetailsRepository, mockSessionMinimalDetailsRepository) {
 
-    override def trySchemeDetails(
-                                   id: String,
-                                   srn: String,
-                                   callBackFunction: => Future[Option[SchemeDetails]]
-                                 ): Future[Option[SchemeDetails]] = {
-      callBackFunction
-    }
+      override def trySchemeDetails(
+        id: String,
+        srn: String,
+        callBackFunction: => Future[Option[SchemeDetails]]
+      ): Future[Option[SchemeDetails]] =
+        callBackFunction
 
-    override def tryMinimalDetails(
-                                    id: String,
-                                    srn: String,
-                                    callBackFunction: => Future[Either[MinimalDetailsError, MinimalDetails]]
-                                  ): Future[Either[MinimalDetailsError, MinimalDetails]] = {
-      callBackFunction
+      override def tryMinimalDetails(
+        id: String,
+        srn: String,
+        callBackFunction: => Future[Either[MinimalDetailsError, MinimalDetails]]
+      ): Future[Either[MinimalDetailsError, MinimalDetails]] =
+        callBackFunction
     }
-  }
 
   class Handler[A](appConfig: FrontendAppConfig, request: IdentifierRequest[A]) {
 
@@ -87,20 +86,17 @@ class AllowAccessActionWithSessionCacheSpec extends SpecBase with ScalaCheckProp
 
   def appConfig(implicit app: Application): FrontendAppConfig = injected[FrontendAppConfig]
 
-  def setupSchemeDetails(psaId: PsaId, srn: Srn, result: Future[Option[SchemeDetails]]): Unit = {
+  def setupSchemeDetails(psaId: PsaId, srn: Srn, result: Future[Option[SchemeDetails]]): Unit =
     when(mockSchemeDetailsConnector.details(meq(psaId), meq(srn))(using any(), any()))
       .thenReturn(result)
-  }
 
-  def setupSchemeDetails(pspId: PspId, srn: Srn, result: Future[Option[SchemeDetails]]): Unit = {
+  def setupSchemeDetails(pspId: PspId, srn: Srn, result: Future[Option[SchemeDetails]]): Unit =
     when(mockSchemeDetailsConnector.details(meq(pspId), meq(srn))(using any(), any()))
       .thenReturn(result)
-  }
 
-  def setupMinimalDetails(loggedInAsPsa: Boolean, result: Future[Either[MinimalDetailsError, MinimalDetails]]): Unit = {
+  def setupMinimalDetails(loggedInAsPsa: Boolean, result: Future[Either[MinimalDetailsError, MinimalDetails]]): Unit =
     when(mockMinimalDetailsConnector.fetch(meq(loggedInAsPsa))(using any(), any()))
       .thenReturn(result)
-  }
 
   override def beforeEach(): Unit = {
     reset(

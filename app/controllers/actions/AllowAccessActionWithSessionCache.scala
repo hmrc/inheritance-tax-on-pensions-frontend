@@ -38,20 +38,20 @@ import javax.inject.{Inject, Singleton}
 
 @Singleton
 class AllowAccessActionWithSessionCache(
-                         srn: Srn,
-                         appConfig: FrontendAppConfig,
-                         schemeDetailsConnector: SchemeDetailsConnector,
-                         minimalDetailsConnector: MinimalDetailsConnector,
-                         sessionService: SessionService
-                       )(implicit override val executionContext: ExecutionContext)
-  extends ActionFunction[IdentifierRequest, AllowedAccessRequest] {
+  srn: Srn,
+  appConfig: FrontendAppConfig,
+  schemeDetailsConnector: SchemeDetailsConnector,
+  minimalDetailsConnector: MinimalDetailsConnector,
+  sessionService: SessionService
+)(implicit override val executionContext: ExecutionContext)
+    extends ActionFunction[IdentifierRequest, AllowedAccessRequest] {
 
   private val validStatuses: List[SchemeStatus] = List(Open, WoundUp, Deregistered)
 
   override def invokeBlock[A](
-                               request: IdentifierRequest[A],
-                               block: AllowedAccessRequest[A] => Future[Result]
-                             ): Future[Result] = {
+    request: IdentifierRequest[A],
+    block: AllowedAccessRequest[A] => Future[Result]
+  ): Future[Result] = {
 
     implicit val hc: HeaderCarrier = HeaderCarrierConverter.fromRequestAndSession(request, request.session)
 
@@ -60,7 +60,7 @@ class AllowAccessActionWithSessionCache(
       minimalDetails <- fetchMinimalDetails(request)
     } yield (schemeDetails, minimalDetails) match {
       case (Some(schemeDetails), Right(minimalDetails @ MinimalDetails(_, _, _, _, false, false)))
-        if validStatuses.contains(schemeDetails.schemeStatus) =>
+          if validStatuses.contains(schemeDetails.schemeStatus) =>
         block(AllowedAccessRequest(request, schemeDetails, minimalDetails, srn))
 
       case (_, Right(HasDeceasedFlag(_))) =>
@@ -83,7 +83,7 @@ class AllowAccessActionWithSessionCache(
   }
 
   private def fetchSchemeDetails[A](request: IdentifierRequest[A], srn: Srn)(implicit
-                                                                             hc: HeaderCarrier
+    hc: HeaderCarrier
   ): Future[Option[SchemeDetails]] =
     sessionService.trySchemeDetails(
       id = request.getUserId,
@@ -95,8 +95,8 @@ class AllowAccessActionWithSessionCache(
     )
 
   private def fetchMinimalDetails[A](
-                                      request: IdentifierRequest[A]
-                                    )(implicit hc: HeaderCarrier): Future[Either[MinimalDetailsError, MinimalDetails]] =
+    request: IdentifierRequest[A]
+  )(implicit hc: HeaderCarrier): Future[Either[MinimalDetailsError, MinimalDetails]] =
     sessionService.tryMinimalDetails(
       id = request.getUserId,
       srn = srn.value,
@@ -123,13 +123,19 @@ trait AllowAccessActionWithSessionCacheProvider {
 }
 
 class AllowAccessActionWithSessionCacheProviderImpl @Inject() (
-                                                appConfig: FrontendAppConfig,
-                                                schemeDetailsConnector: SchemeDetailsConnector,
-                                                minimalDetailsConnector: MinimalDetailsConnector,
-                                                sessionService: SessionService
-                                              )(implicit val ec: ExecutionContext)
-  extends AllowAccessActionWithSessionCacheProvider {
+  appConfig: FrontendAppConfig,
+  schemeDetailsConnector: SchemeDetailsConnector,
+  minimalDetailsConnector: MinimalDetailsConnector,
+  sessionService: SessionService
+)(implicit val ec: ExecutionContext)
+    extends AllowAccessActionWithSessionCacheProvider {
 
   def apply(srn: Srn): ActionFunction[IdentifierRequest, AllowedAccessRequest] =
-    new AllowAccessActionWithSessionCache(srn, appConfig, schemeDetailsConnector, minimalDetailsConnector, sessionService)
+    new AllowAccessActionWithSessionCache(
+      srn,
+      appConfig,
+      schemeDetailsConnector,
+      minimalDetailsConnector,
+      sessionService
+    )
 }
