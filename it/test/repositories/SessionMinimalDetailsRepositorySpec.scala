@@ -50,7 +50,7 @@ class SessionMinimalDetailsRepositorySpec
   val minimalDetails: MinimalDetails = minimalDetailsGen.sample.value.copy(rlsFlag = false, deceasedFlag = false)
   
   private val sessionMinimalDetails: SessionMinimalDetails =
-    SessionMinimalDetails("id", minimalDetails, Instant.ofEpochSecond(1))
+    SessionMinimalDetails("id", "srn", minimalDetails, Instant.ofEpochSecond(1))
 
   private val mockAppConfig = mock[FrontendAppConfig]
   when(mockAppConfig.sessionTtl) `thenReturn` 1L

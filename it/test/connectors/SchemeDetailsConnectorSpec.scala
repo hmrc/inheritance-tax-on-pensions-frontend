@@ -35,7 +35,8 @@ class SchemeDetailsConnectorSpec extends BaseConnectorSpec {
 
   override protected def applicationBuilder(userAnswers: Option[UserAnswers] = None, isPsa: Boolean = true,
                                             schemeDetails: SchemeDetails = defaultSchemeDetails,
-                                            minimalDetails: MinimalDetails = defaultMinimalDetails
+                                            minimalDetails: MinimalDetails = defaultMinimalDetails,
+                                            usesSession: Boolean = false
                                            ): GuiceApplicationBuilder =
     super.applicationBuilder(userAnswers).configure("microservice.services.pensionsScheme.port" -> wireMockPort)
 

@@ -22,7 +22,7 @@ import org.scalatest.matchers.must.Matchers
 import org.apache.pekko.stream.Materializer
 import play.api.inject.bind
 import generators.Generators
-import controllers.actions.{FakeAllowAccessActionProvider, _}
+import controllers.actions.{FakeAllowAccessActionProvider, FakeAllowAccessActionWithSessionCacheProvider, _}
 import org.apache.pekko.actor.ActorSystem
 import models.{MinimalDetails, SchemeDetails, UserAnswers}
 import play.api.i18n.{Messages, MessagesApi}
@@ -64,7 +64,8 @@ trait SpecBase
     userAnswers: Option[UserAnswers] = None,
     isPsa: Boolean = true,
     schemeDetails: SchemeDetails = defaultSchemeDetails,
-    minimalDetails: MinimalDetails = defaultMinimalDetails
+    minimalDetails: MinimalDetails = defaultMinimalDetails,
+    usesSession: Boolean = false
   ): GuiceApplicationBuilder = {
     val identifierActionBind = if (isPsa) {
       bind[IdentifierAction].to[FakePsaIdentifierAction]
@@ -72,12 +73,20 @@ trait SpecBase
       bind[IdentifierAction].to[FakePspIdentifierAction]
     }
 
+    val allowAccessBind = if (usesSession) {
+      bind[AllowAccessActionWithSessionCacheProvider].toInstance(
+        new FakeAllowAccessActionWithSessionCacheProvider(schemeDetails, minimalDetails)
+      )
+    } else {
+      bind[AllowAccessActionProvider].toInstance(new FakeAllowAccessActionProvider(schemeDetails, minimalDetails))
+    }
+
     new GuiceApplicationBuilder()
       .overrides(
         bind[DataRequiredAction].to[DataRequiredActionImpl],
         identifierActionBind,
         bind[DataRetrievalAction].toInstance(new FakeDataRetrievalAction(userAnswers)),
-        bind[AllowAccessActionProvider].toInstance(new FakeAllowAccessActionProvider(schemeDetails, minimalDetails))
+        allowAccessBind
       )
       .configure(
         "auditing.enabled" -> false,

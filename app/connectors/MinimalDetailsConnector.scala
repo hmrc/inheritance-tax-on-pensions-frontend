@@ -37,7 +37,9 @@ class MinimalDetailsConnector @Inject() (appConfig: FrontendAppConfig, http: Htt
 
   def fetch(
     loggedInAsPsa: Boolean
-  )(implicit hc: HeaderCarrier, ec: ExecutionContext): Future[Either[MinimalDetailsError, MinimalDetails]] =
+  )(implicit hc: HeaderCarrier, ec: ExecutionContext): Future[Either[MinimalDetailsError, MinimalDetails]] = {
+    logger.info(s"[MinimalDetailsConnector][fetch] calling url:$url")
+
     http
       .get(url"$url")
       .setHeader("loggedInAsPsa" -> String.valueOf(loggedInAsPsa))
@@ -50,6 +52,7 @@ class MinimalDetailsConnector @Inject() (appConfig: FrontendAppConfig, http: Htt
         case e @ WithStatusCode(FORBIDDEN) if e.message.contains(Constants.delimitedPSA) =>
           Left(DelimitedAdmin)
       }
+  }
 }
 
 sealed trait MinimalDetailsError

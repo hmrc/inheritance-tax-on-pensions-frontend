@@ -16,6 +16,7 @@
 
 package controllers.actions
 
+import services.SessionService
 import play.api.mvc.{ActionFunction, Result}
 import com.google.inject.ImplementedBy
 import connectors.{MinimalDetailsConnector, MinimalDetailsError, SchemeDetailsConnector}
@@ -36,11 +37,12 @@ import scala.concurrent.{ExecutionContext, Future}
 import javax.inject.{Inject, Singleton}
 
 @Singleton
-class AllowAccessAction(
+class AllowAccessActionWithSessionCache(
   srn: Srn,
   appConfig: FrontendAppConfig,
   schemeDetailsConnector: SchemeDetailsConnector,
-  minimalDetailsConnector: MinimalDetailsConnector
+  minimalDetailsConnector: MinimalDetailsConnector,
+  sessionService: SessionService
 )(implicit override val executionContext: ExecutionContext)
     extends ActionFunction[IdentifierRequest, AllowedAccessRequest] {
 
@@ -83,17 +85,25 @@ class AllowAccessAction(
   private def fetchSchemeDetails[A](request: IdentifierRequest[A], srn: Srn)(implicit
     hc: HeaderCarrier
   ): Future[Option[SchemeDetails]] =
-    request.fold(
-      a => schemeDetailsConnector.details(a.psaId, srn),
-      p => schemeDetailsConnector.details(p.pspId, srn)
+    sessionService.trySchemeDetails(
+      id = request.getUserId,
+      srn = srn.value,
+      callBackFunction = request.fold(
+        a => schemeDetailsConnector.details(a.psaId, srn),
+        p => schemeDetailsConnector.details(p.pspId, srn)
+      )
     )
 
   private def fetchMinimalDetails[A](
     request: IdentifierRequest[A]
   )(implicit hc: HeaderCarrier): Future[Either[MinimalDetailsError, MinimalDetails]] =
-    request.fold(
-      _ => minimalDetailsConnector.fetch(loggedInAsPsa = true),
-      _ => minimalDetailsConnector.fetch(loggedInAsPsa = false)
+    sessionService.tryMinimalDetails(
+      id = request.getUserId,
+      srn = srn.value,
+      callBackFunction = request.fold(
+        _ => minimalDetailsConnector.fetch(loggedInAsPsa = true),
+        _ => minimalDetailsConnector.fetch(loggedInAsPsa = false)
+      )
     )
 
   private object HasRlsFlag {
@@ -107,18 +117,25 @@ class AllowAccessAction(
   }
 }
 
-@ImplementedBy(classOf[AllowAccessActionProviderImpl])
-trait AllowAccessActionProvider {
+@ImplementedBy(classOf[AllowAccessActionWithSessionCacheProviderImpl])
+trait AllowAccessActionWithSessionCacheProvider {
   def apply(srn: Srn): ActionFunction[IdentifierRequest, AllowedAccessRequest]
 }
 
-class AllowAccessActionProviderImpl @Inject() (
+class AllowAccessActionWithSessionCacheProviderImpl @Inject() (
   appConfig: FrontendAppConfig,
   schemeDetailsConnector: SchemeDetailsConnector,
-  minimalDetailsConnector: MinimalDetailsConnector
+  minimalDetailsConnector: MinimalDetailsConnector,
+  sessionService: SessionService
 )(implicit val ec: ExecutionContext)
-    extends AllowAccessActionProvider {
+    extends AllowAccessActionWithSessionCacheProvider {
 
   def apply(srn: Srn): ActionFunction[IdentifierRequest, AllowedAccessRequest] =
-    new AllowAccessAction(srn, appConfig, schemeDetailsConnector, minimalDetailsConnector)
+    new AllowAccessActionWithSessionCache(
+      srn,
+      appConfig,
+      schemeDetailsConnector,
+      minimalDetailsConnector,
+      sessionService
+    )
 }
