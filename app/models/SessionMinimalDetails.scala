@@ -23,7 +23,7 @@ import play.api.libs.functional.syntax._
 import java.time.Instant
 
 case class SessionMinimalDetails(
-  id: String, // TODO (IHTP-275) - what is the correct session cache key for this?
+  id: String, // TODO  - what is the correct session cache key for this?
   srn: String,
   minimalDetails: MinimalDetails,
   lastUpdated: Instant = Instant.now
