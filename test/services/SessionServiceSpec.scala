@@ -94,20 +94,6 @@ class SessionServiceSpec extends SpecBase {
       verify(mockSessionSchemeDetailsRepository, times(1)).set(any())
     }
 
-    "return scheme details from the api when session srn differs from the request srn" in {
-      when(mockSessionSchemeDetailsRepository.get(any())).thenReturn(Future.successful(Some(sessionSchemeDetails)))
-      when(mockSessionSchemeDetailsRepository.clear(any())).thenReturn(Future.successful(true))
-
-      val result = Await.result(
-        sessionService.trySchemeDetails("id", "srn02", callbackFunctionSchemeDetails),
-        patienceConfig.timeout
-      )
-
-      result mustBe Some(schemeDetailsApi)
-      verify(mockSessionSchemeDetailsRepository, times(1)).clear(any())
-      verify(mockSessionSchemeDetailsRepository, times(1)).set(any())
-    }
-
     "return none when the scheme details are not present in the session or the api" in {
       when(mockSessionSchemeDetailsRepository.get(any())).thenReturn(Future.successful(None))
 
@@ -117,6 +103,20 @@ class SessionServiceSpec extends SpecBase {
       result mustBe None
       verify(mockSessionSchemeDetailsRepository, times(0)).clear(any())
       verify(mockSessionSchemeDetailsRepository, times(0)).set(any())
+    }
+
+    "throw an exception when the session srn differs from the request srn" in {
+      when(mockSessionSchemeDetailsRepository.get(any())).thenReturn(Future.successful(Some(sessionSchemeDetails)))
+
+      val result = intercept[IllegalArgumentException] {
+        Await.result(
+          sessionService.trySchemeDetails("id", "srn02", callbackFunctionSchemeDetails),
+          patienceConfig.timeout
+        )
+      }
+
+      result.isInstanceOf[IllegalArgumentException] mustBe true
+      result.getMessage mustBe "The SRN provided does not match that of the cached session authorisation"
     }
   }
 
@@ -145,20 +145,6 @@ class SessionServiceSpec extends SpecBase {
       verify(mockSessionMinimalDetailsRepository, times(1)).set(any())
     }
 
-    "return minimal details from the api when session srn differs from the request srn" in {
-      when(mockSessionMinimalDetailsRepository.get(any())).thenReturn(Future.successful(Some(sessionMinimalDetails)))
-      when(mockSessionMinimalDetailsRepository.clear(any())).thenReturn(Future.successful(true))
-
-      val result = Await.result(
-        sessionService.tryMinimalDetails("id", "srn02", callbackFunctionMinimalDetails),
-        patienceConfig.timeout
-      )
-
-      result mustBe Right(minimalDetailsApi)
-      verify(mockSessionMinimalDetailsRepository, times(1)).clear(any())
-      verify(mockSessionMinimalDetailsRepository, times(1)).set(any())
-    }
-
     "return an error when the minimal details are not present in the session or the api" in {
       when(mockSessionMinimalDetailsRepository.get(any())).thenReturn(Future.successful(None))
 
@@ -170,6 +156,20 @@ class SessionServiceSpec extends SpecBase {
 
       result mustBe Left(detailsNotFound)
       verify(mockSessionMinimalDetailsRepository, times(0)).set(any())
+    }
+
+    "throw an exception when the session srn differs from the request srn" in {
+      when(mockSessionMinimalDetailsRepository.get(any())).thenReturn(Future.successful(Some(sessionMinimalDetails)))
+
+      val result = intercept[IllegalArgumentException] {
+        Await.result(
+          sessionService.tryMinimalDetails("id", "srn02", callbackFunctionMinimalDetails),
+          patienceConfig.timeout
+        )
+      }
+
+      result.isInstanceOf[IllegalArgumentException] mustBe true
+      result.getMessage mustBe "The SRN provided does not match that of the cached session authorisation"
     }
   }
 }

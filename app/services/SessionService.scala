@@ -18,6 +18,7 @@ package services
 
 import com.google.inject.Inject
 import connectors.MinimalDetailsError
+import play.api.Logging
 import repositories.{SessionMinimalDetailsRepository, SessionSchemeDetailsRepository}
 import models._
 
@@ -26,7 +27,7 @@ import scala.concurrent.{ExecutionContext, Future}
 class SessionService @Inject() (
   sessionSchemeDetailsRepository: SessionSchemeDetailsRepository,
   sessionMinimalDetailsRepository: SessionMinimalDetailsRepository
-) {
+) extends Logging {
 
   def trySchemeDetails(
     id: String,
@@ -35,17 +36,18 @@ class SessionService @Inject() (
   )(implicit ec: ExecutionContext): Future[Option[SchemeDetails]] =
     sessionSchemeDetailsRepository.get(id).flatMap {
       case Some(sessionSchemeDetails) =>
-        // If the cached srn does not match the current then invalidate the cache and call the api sequentially
         if (sessionSchemeDetails.srn != srn) {
-          for {
-            _ <- sessionSchemeDetailsRepository.clear(id)
-            maybeSchemeDetails <- schemeDetailsApiCall(id, srn, callBackFunction)
-          } yield maybeSchemeDetails
-        } else {
-          Future.successful(Some(sessionSchemeDetails.schemeDetails))
+          logger.warn(s"[SessionService] - The SRN provided does not match that of the cached session authorisation")
+          throw new IllegalArgumentException("The SRN provided does not match that of the cached session authorisation")
         }
+        Future.successful(Some(sessionSchemeDetails.schemeDetails))
       case None =>
-        schemeDetailsApiCall(id, srn, callBackFunction)
+        callBackFunction.map {
+          case Some(schemeDetails) =>
+            sessionSchemeDetailsRepository.set(SessionSchemeDetails(id, srn, schemeDetails))
+            Some(schemeDetails)
+          case _ => None
+        }
     }
 
   def tryMinimalDetails(
@@ -55,40 +57,17 @@ class SessionService @Inject() (
   )(implicit ec: ExecutionContext): Future[Either[MinimalDetailsError, MinimalDetails]] =
     sessionMinimalDetailsRepository.get(id).flatMap {
       case Some(sessionMinimalDetails) =>
-        // If the cached srn does not match the current then invalidate the cache and call the api sequentially
         if (sessionMinimalDetails.srn != srn) {
-          for {
-            _ <- sessionMinimalDetailsRepository.clear(id)
-            maybeMinimalDetails <- minimalDetailsApiCall(id, srn, callBackFunction)
-          } yield maybeMinimalDetails
-        } else {
-          Future.successful(Right(sessionMinimalDetails.minimalDetails))
+          logger.warn(s"[SessionService] - The SRN provided does not match that of the cached session authorisation")
+          throw new IllegalArgumentException("The SRN provided does not match that of the cached session authorisation")
         }
+        Future.successful(Right(sessionMinimalDetails.minimalDetails))
       case None =>
-        minimalDetailsApiCall(id, srn, callBackFunction)
-    }
-
-  private def schemeDetailsApiCall(
-    id: String,
-    srn: String,
-    callBackFunction: => Future[Option[SchemeDetails]]
-  )(implicit ec: ExecutionContext): Future[Option[SchemeDetails]] =
-    callBackFunction.map {
-      case Some(schemeDetails) =>
-        sessionSchemeDetailsRepository.set(SessionSchemeDetails(id, srn, schemeDetails))
-        Some(schemeDetails)
-      case _ => None
-    }
-
-  private def minimalDetailsApiCall(
-    id: String,
-    srn: String,
-    callBackFunction: => Future[Either[MinimalDetailsError, MinimalDetails]]
-  )(implicit ec: ExecutionContext): Future[Either[MinimalDetailsError, MinimalDetails]] =
-    callBackFunction.map {
-      case Right(minimalDetails) =>
-        sessionMinimalDetailsRepository.set(SessionMinimalDetails(id, srn, minimalDetails))
-        Right(minimalDetails)
-      case Left(error) => Left(error)
+        callBackFunction.map {
+          case Right(minimalDetails) =>
+            sessionMinimalDetailsRepository.set(SessionMinimalDetails(id, srn, minimalDetails))
+            Right(minimalDetails)
+          case Left(error) => Left(error)
+        }
     }
 }
