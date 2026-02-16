@@ -23,7 +23,7 @@ import connectors.{MinimalDetailsConnector, MinimalDetailsError, SchemeDetailsCo
 import controllers.routes
 import config.FrontendAppConfig
 import models.SchemeId.Srn
-import models._
+import models.{MinimalDetails, SchemeDetails, SchemeStatus}
 import play.api.mvc.Results.Redirect
 import connectors.MinimalDetailsError.DelimitedAdmin
 import models.SchemeStatus.{Deregistered, Open, WoundUp}
@@ -37,7 +37,7 @@ import scala.concurrent.{ExecutionContext, Future}
 import javax.inject.{Inject, Singleton}
 
 @Singleton
-class AllowAccessAction(
+class AllowAccessActionWithSessionCache(
   srn: Srn,
   appConfig: FrontendAppConfig,
   schemeDetailsConnector: SchemeDetailsConnector,
@@ -56,17 +56,13 @@ class AllowAccessAction(
     implicit val hc: HeaderCarrier = HeaderCarrierConverter.fromRequestAndSession(request, request.session)
 
     (for {
-      _ <- sessionService.clearSession(request.getUserId)
       schemeDetails <- fetchSchemeDetails(request, srn)
       minimalDetails <- fetchMinimalDetails(request)
     } yield (schemeDetails, minimalDetails) match {
       case (Some(schemeDetails), Right(minimalDetails @ MinimalDetails(_, _, _, _, false, false)))
           if validStatuses.contains(schemeDetails.schemeStatus) =>
-        sessionService.cacheAllowAccessDetails(
-          SessionSchemeDetails(request.getUserId, srn.value, schemeDetails),
-          SessionMinimalDetails(request.getUserId, srn.value, minimalDetails)
-        )
         block(AllowedAccessRequest(request, schemeDetails, minimalDetails, srn))
+
       case (_, Right(HasDeceasedFlag(_))) =>
         Future.successful(Redirect(appConfig.urls.managePensionsSchemes.contactHmrc))
 
@@ -89,17 +85,25 @@ class AllowAccessAction(
   private def fetchSchemeDetails[A](request: IdentifierRequest[A], srn: Srn)(implicit
     hc: HeaderCarrier
   ): Future[Option[SchemeDetails]] =
-    request.fold(
-      a => schemeDetailsConnector.details(a.psaId, srn),
-      p => schemeDetailsConnector.details(p.pspId, srn)
+    sessionService.trySchemeDetails(
+      id = request.getUserId,
+      srn = srn.value,
+      callBackFunction = request.fold(
+        a => schemeDetailsConnector.details(a.psaId, srn),
+        p => schemeDetailsConnector.details(p.pspId, srn)
+      )
     )
 
   private def fetchMinimalDetails[A](
     request: IdentifierRequest[A]
   )(implicit hc: HeaderCarrier): Future[Either[MinimalDetailsError, MinimalDetails]] =
-    request.fold(
-      _ => minimalDetailsConnector.fetch(loggedInAsPsa = true),
-      _ => minimalDetailsConnector.fetch(loggedInAsPsa = false)
+    sessionService.tryMinimalDetails(
+      id = request.getUserId,
+      srn = srn.value,
+      callBackFunction = request.fold(
+        _ => minimalDetailsConnector.fetch(loggedInAsPsa = true),
+        _ => minimalDetailsConnector.fetch(loggedInAsPsa = false)
+      )
     )
 
   private object HasRlsFlag {
@@ -113,19 +117,25 @@ class AllowAccessAction(
   }
 }
 
-@ImplementedBy(classOf[AllowAccessActionProviderImpl])
-trait AllowAccessActionProvider {
+@ImplementedBy(classOf[AllowAccessActionWithSessionCacheProviderImpl])
+trait AllowAccessActionWithSessionCacheProvider {
   def apply(srn: Srn): ActionFunction[IdentifierRequest, AllowedAccessRequest]
 }
 
-class AllowAccessActionProviderImpl @Inject() (
+class AllowAccessActionWithSessionCacheProviderImpl @Inject() (
   appConfig: FrontendAppConfig,
   schemeDetailsConnector: SchemeDetailsConnector,
   minimalDetailsConnector: MinimalDetailsConnector,
   sessionService: SessionService
 )(implicit val ec: ExecutionContext)
-    extends AllowAccessActionProvider {
+    extends AllowAccessActionWithSessionCacheProvider {
 
   def apply(srn: Srn): ActionFunction[IdentifierRequest, AllowedAccessRequest] =
-    new AllowAccessAction(srn, appConfig, schemeDetailsConnector, minimalDetailsConnector, sessionService)
+    new AllowAccessActionWithSessionCache(
+      srn,
+      appConfig,
+      schemeDetailsConnector,
+      minimalDetailsConnector,
+      sessionService
+    )
 }

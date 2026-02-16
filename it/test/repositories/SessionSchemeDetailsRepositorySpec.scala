@@ -52,7 +52,7 @@ class SessionSchemeDetailsRepositorySpec
     schemeDetailsGen.sample.value.copy(schemeStatus = validSchemeStatusGen.sample.value)
     
   private val sessionSchemeDetails: SessionSchemeDetails =
-    SessionSchemeDetails("id", schemeDetails, Instant.ofEpochSecond(1))
+    SessionSchemeDetails("id", "srn", schemeDetails, Instant.ofEpochSecond(1))
 
   private val mockAppConfig = mock[FrontendAppConfig]
   when(mockAppConfig.sessionTtl) `thenReturn` 1L

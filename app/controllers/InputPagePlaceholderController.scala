@@ -35,7 +35,7 @@ import javax.inject.Inject
 class InputPagePlaceholderController @Inject() (
   override val messagesApi: MessagesApi,
   identify: IdentifierAction,
-  allowAccess: AllowAccessActionProvider,
+  allowAccess: AllowAccessActionWithSessionCacheProvider,
   getData: DataRetrievalAction,
   requireData: DataRequiredAction,
   formProvider: InputPagePlaceholderFormProvider,

@@ -23,7 +23,8 @@ import play.api.libs.functional.syntax._
 import java.time.Instant
 
 case class SessionSchemeDetails(
-  id: String, // TODO (IHTP-275) - what is the correct session cache key for this?
+  id: String, // TODO - what is the correct session cache key for this?
+  srn: String,
   schemeDetails: SchemeDetails,
   lastUpdated: Instant = Instant.now
 ) {}
@@ -32,6 +33,7 @@ object SessionSchemeDetails {
   implicit val format: OFormat[SessionSchemeDetails] =
     (__ \ "_id")
       .format[String]
+      .and((__ \ "srn").format[String])
       .and((__ \ "schemeDetails").format[SchemeDetails])
       .and((__ \ "lastUpdated").format(using MongoJavatimeFormats.instantFormat))(
         SessionSchemeDetails.apply,
