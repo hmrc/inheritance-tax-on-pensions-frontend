@@ -17,6 +17,7 @@
 package controllers.actions
 
 import play.api.test.FakeRequest
+import services.SessionService
 import org.scalatestplus.scalacheck.ScalaCheckPropertyChecks
 import play.api.mvc.{Action, AnyContent, AnyContentAsEmpty}
 import connectors.{MinimalDetailsConnector, MinimalDetailsError, SchemeDetailsConnector}
@@ -25,17 +26,18 @@ import config.FrontendAppConfig
 import models.SchemeId.Srn
 import models.PensionSchemeId.{PsaId, PspId}
 import connectors.MinimalDetailsError.{DelimitedAdmin, DetailsNotFound}
-import uk.gov.hmrc.http.UpstreamErrorResponse
 import models.{MinimalDetails, SchemeDetails}
 import models.requests.IdentifierRequest
 import play.api.mvc.Results.Ok
 import org.mockito.ArgumentMatchers.{any, eq => meq}
 import play.api.test.Helpers._
-import org.mockito.Mockito.{reset, when}
+import org.mockito.Mockito._
 import base.SpecBase
 import models.requests.IdentifierRequest.{AdministratorRequest, PractitionerRequest}
 import play.api.Application
 import play.api.libs.json.Json
+import repositories.{SessionMinimalDetailsRepository, SessionSchemeDetailsRepository}
+import uk.gov.hmrc.http.UpstreamErrorResponse
 
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -45,11 +47,15 @@ class AllowAccessActionSpec extends SpecBase with ScalaCheckPropertyChecks {
     new AllowAccessActionProviderImpl(
       appConfig,
       mockSchemeDetailsConnector,
-      mockMinimalDetailsConnector
+      mockMinimalDetailsConnector,
+      mockSessionService
     )(using ExecutionContext.global)
 
   lazy val mockMinimalDetailsConnector: MinimalDetailsConnector = mock[MinimalDetailsConnector]
   lazy val mockSchemeDetailsConnector: SchemeDetailsConnector = mock[SchemeDetailsConnector]
+  lazy val mockSessionSchemeDetailsRepository: SessionSchemeDetailsRepository = mock[SessionSchemeDetailsRepository]
+  lazy val mockSessionMinimalDetailsRepository: SessionMinimalDetailsRepository = mock[SessionMinimalDetailsRepository]
+  lazy val mockSessionService: SessionService = mock[SessionService]
 
   class Handler[A](appConfig: FrontendAppConfig, request: IdentifierRequest[A]) {
 
@@ -78,6 +84,7 @@ class AllowAccessActionSpec extends SpecBase with ScalaCheckPropertyChecks {
   override def beforeEach(): Unit = {
     reset(mockSchemeDetailsConnector)
     reset(mockMinimalDetailsConnector)
+    reset(mockSessionService)
 
     // setup green path
     setupSchemeDetails(psaId, srn, Future.successful(Some(schemeDetails)))
@@ -85,6 +92,8 @@ class AllowAccessActionSpec extends SpecBase with ScalaCheckPropertyChecks {
 
     setupSchemeDetails(pspId, srn, Future.successful(Some(schemeDetails)))
     setupMinimalDetails(loggedInAsPsa = false, Future.successful(Right(minimalDetails)))
+
+    when(mockSessionService.clearSession(any())).thenReturn(Future.successful(true))
   }
 
   val psaId: PsaId = psaIdGen.sample.value
@@ -107,6 +116,7 @@ class AllowAccessActionSpec extends SpecBase with ScalaCheckPropertyChecks {
 
           status(result) mustBe OK
           contentAsJson(result) mustBe Json.toJson(schemeDetails)
+          verify(mockSessionService, times(1)).clearSession(any())
       }
 
       "psp is associated, no rls flag, no deceased flag, no DelimitedAdmin and a valid status" in runningApplication {
@@ -115,6 +125,7 @@ class AllowAccessActionSpec extends SpecBase with ScalaCheckPropertyChecks {
 
           status(result) mustBe OK
           contentAsJson(result) mustBe Json.toJson(schemeDetails)
+          verify(mockSessionService, times(1)).clearSession(any())
       }
     }
 
@@ -127,6 +138,7 @@ class AllowAccessActionSpec extends SpecBase with ScalaCheckPropertyChecks {
         val expectedUrl = routes.UnauthorisedController.onPageLoad().url
 
         redirectLocation(result) mustBe Some(expectedUrl)
+        verify(mockSessionService, times(1)).clearSession(any())
       }
 
       "psp minimal details return not found" in runningApplication { implicit app =>
@@ -136,6 +148,7 @@ class AllowAccessActionSpec extends SpecBase with ScalaCheckPropertyChecks {
         val expectedUrl = routes.UnauthorisedController.onPageLoad().url
 
         redirectLocation(result) mustBe Some(expectedUrl)
+        verify(mockSessionService, times(1)).clearSession(any())
       }
 
       "psa - scheme details not found" in runningApplication { implicit app =>
@@ -145,6 +158,7 @@ class AllowAccessActionSpec extends SpecBase with ScalaCheckPropertyChecks {
         val expectedUrl = routes.UnauthorisedController.onPageLoad().url
 
         redirectLocation(result) mustBe Some(expectedUrl)
+        verify(mockSessionService, times(1)).clearSession(any())
       }
 
       "psp - scheme details not found" in runningApplication { implicit app =>
@@ -154,6 +168,7 @@ class AllowAccessActionSpec extends SpecBase with ScalaCheckPropertyChecks {
         val expectedUrl = routes.UnauthorisedController.onPageLoad().url
 
         redirectLocation(result) mustBe Some(expectedUrl)
+        verify(mockSessionService, times(1)).clearSession(any())
       }
 
       "psa - scheme details not associated" in runningApplication { implicit app =>
@@ -163,6 +178,7 @@ class AllowAccessActionSpec extends SpecBase with ScalaCheckPropertyChecks {
         val expectedUrl = routes.UnauthorisedController.onPageLoad().url
 
         redirectLocation(result) mustBe Some(expectedUrl)
+        verify(mockSessionService, times(1)).clearSession(any())
       }
 
       "psp - scheme details not associated" in runningApplication { implicit app =>
@@ -172,27 +188,34 @@ class AllowAccessActionSpec extends SpecBase with ScalaCheckPropertyChecks {
         val expectedUrl = routes.UnauthorisedController.onPageLoad().url
 
         redirectLocation(result) mustBe Some(expectedUrl)
+        verify(mockSessionService, times(1)).clearSession(any())
       }
 
       "psa - scheme has an invalid status" in runningApplication { implicit app =>
         forAll(invalidSchemeStatusGen) { schemeStatus =>
+          reset(mockSessionService)
+          when(mockSessionService.clearSession(any())).thenReturn(Future.successful(true))
           setupSchemeDetails(psaId, srn, Future.successful(Some(schemeDetails.copy(schemeStatus = schemeStatus))))
 
           val result = handler(administratorRequest).run(srn)(FakeRequest())
           val expectedUrl = routes.UnauthorisedController.onPageLoad().url
 
           redirectLocation(result) mustBe Some(expectedUrl)
+          verify(mockSessionService, times(1)).clearSession(any())
         }
       }
 
       "psp - scheme has an invalid status" in runningApplication { implicit app =>
         forAll(invalidSchemeStatusGen) { schemeStatus =>
+          reset(mockSessionService)
+          when(mockSessionService.clearSession(any())).thenReturn(Future.successful(true))
           setupSchemeDetails(pspId, srn, Future.successful(Some(schemeDetails.copy(schemeStatus = schemeStatus))))
 
           val result = handler(practitionerRequest).run(srn)(FakeRequest())
           val expectedUrl = routes.UnauthorisedController.onPageLoad().url
 
           redirectLocation(result) mustBe Some(expectedUrl)
+          verify(mockSessionService, times(1)).clearSession(any())
         }
       }
     }
@@ -206,6 +229,7 @@ class AllowAccessActionSpec extends SpecBase with ScalaCheckPropertyChecks {
         val expectedUrl = appConfig.urls.pensionAdministrator.updateContactDetails
 
         redirectLocation(result) mustBe Some(expectedUrl)
+        verify(mockSessionService, times(1)).clearSession(any())
       }
 
       "psp rls flag is set" in runningApplication { implicit app =>
@@ -215,6 +239,7 @@ class AllowAccessActionSpec extends SpecBase with ScalaCheckPropertyChecks {
         val expectedUrl = appConfig.urls.pensionPractitioner.updateContactDetails
 
         redirectLocation(result) mustBe Some(expectedUrl)
+        verify(mockSessionService, times(1)).clearSession(any())
       }
     }
 
@@ -227,6 +252,7 @@ class AllowAccessActionSpec extends SpecBase with ScalaCheckPropertyChecks {
         val expectedUrl = appConfig.urls.managePensionsSchemes.contactHmrc
 
         redirectLocation(result) mustBe Some(expectedUrl)
+        verify(mockSessionService, times(1)).clearSession(any())
       }
 
       "psp deceased flag is set" in runningApplication { implicit app =>
@@ -236,6 +262,7 @@ class AllowAccessActionSpec extends SpecBase with ScalaCheckPropertyChecks {
         val expectedUrl = appConfig.urls.managePensionsSchemes.contactHmrc
 
         redirectLocation(result) mustBe Some(expectedUrl)
+        verify(mockSessionService, times(1)).clearSession(any())
       }
     }
 
@@ -248,6 +275,7 @@ class AllowAccessActionSpec extends SpecBase with ScalaCheckPropertyChecks {
         val expectedUrl = appConfig.urls.managePensionsSchemes.cannotAccessDeregistered
 
         redirectLocation(result) mustBe Some(expectedUrl)
+        verify(mockSessionService, times(1)).clearSession(any())
       }
 
       "psp minimal details return delimited admin" in runningApplication { implicit app =>
@@ -257,6 +285,7 @@ class AllowAccessActionSpec extends SpecBase with ScalaCheckPropertyChecks {
         val expectedUrl = appConfig.urls.managePensionsSchemes.cannotAccessDeregistered
 
         redirectLocation(result) mustBe Some(expectedUrl)
+        verify(mockSessionService, times(1)).clearSession(any())
       }
     }
   }

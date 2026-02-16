@@ -70,4 +70,10 @@ class SessionService @Inject() (
           case Left(error) => Left(error)
         }
     }
+
+  def clearSession(id: String): Future[Boolean] = {
+    sessionSchemeDetailsRepository.clear(id)
+    sessionMinimalDetailsRepository.clear(id)
+  }
+
 }

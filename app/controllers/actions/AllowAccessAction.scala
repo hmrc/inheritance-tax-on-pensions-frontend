@@ -16,6 +16,7 @@
 
 package controllers.actions
 
+import services.SessionService
 import play.api.mvc.{ActionFunction, Result}
 import com.google.inject.ImplementedBy
 import connectors.{MinimalDetailsConnector, MinimalDetailsError, SchemeDetailsConnector}
@@ -40,7 +41,8 @@ class AllowAccessAction(
   srn: Srn,
   appConfig: FrontendAppConfig,
   schemeDetailsConnector: SchemeDetailsConnector,
-  minimalDetailsConnector: MinimalDetailsConnector
+  minimalDetailsConnector: MinimalDetailsConnector,
+  sessionService: SessionService
 )(implicit override val executionContext: ExecutionContext)
     extends ActionFunction[IdentifierRequest, AllowedAccessRequest] {
 
@@ -54,6 +56,7 @@ class AllowAccessAction(
     implicit val hc: HeaderCarrier = HeaderCarrierConverter.fromRequestAndSession(request, request.session)
 
     (for {
+      _ <- sessionService.clearSession(request.getUserId)
       schemeDetails <- fetchSchemeDetails(request, srn)
       minimalDetails <- fetchMinimalDetails(request)
     } yield (schemeDetails, minimalDetails) match {
@@ -115,10 +118,11 @@ trait AllowAccessActionProvider {
 class AllowAccessActionProviderImpl @Inject() (
   appConfig: FrontendAppConfig,
   schemeDetailsConnector: SchemeDetailsConnector,
-  minimalDetailsConnector: MinimalDetailsConnector
+  minimalDetailsConnector: MinimalDetailsConnector,
+  sessionService: SessionService
 )(implicit val ec: ExecutionContext)
     extends AllowAccessActionProvider {
 
   def apply(srn: Srn): ActionFunction[IdentifierRequest, AllowedAccessRequest] =
-    new AllowAccessAction(srn, appConfig, schemeDetailsConnector, minimalDetailsConnector)
+    new AllowAccessAction(srn, appConfig, schemeDetailsConnector, minimalDetailsConnector, sessionService)
 }

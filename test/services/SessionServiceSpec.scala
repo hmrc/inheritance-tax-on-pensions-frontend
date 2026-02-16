@@ -172,4 +172,22 @@ class SessionServiceSpec extends SpecBase {
       result.getMessage mustBe "The SRN provided does not match that of the cached session authorisation"
     }
   }
+
+  "clearSession" - {
+
+    "clears the session when called" in {
+      when(mockSessionSchemeDetailsRepository.clear(any())).thenReturn(Future.successful(true))
+      when(mockSessionMinimalDetailsRepository.clear(any())).thenReturn(Future.successful(true))
+
+      val result = Await.result(
+        sessionService.clearSession("id"),
+        patienceConfig.timeout
+      )
+
+      result mustBe true
+      verify(mockSessionSchemeDetailsRepository, times(1)).clear(any())
+      verify(mockSessionSchemeDetailsRepository, times(1)).clear(any())
+    }
+
+  }
 }
