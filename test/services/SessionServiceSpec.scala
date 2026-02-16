@@ -190,4 +190,22 @@ class SessionServiceSpec extends SpecBase {
     }
 
   }
+
+  "cacheAllowAccessDetails" - {
+
+    "caches the scheme and minimal details" in {
+      when(mockSessionSchemeDetailsRepository.set(any())).thenReturn(Future.successful(true))
+      when(mockSessionMinimalDetailsRepository.set(any())).thenReturn(Future.successful(true))
+
+      val result = Await.result(
+        sessionService.cacheAllowAccessDetails(sessionSchemeDetails, sessionMinimalDetails),
+        patienceConfig.timeout
+      )
+
+      result mustBe true
+      verify(mockSessionSchemeDetailsRepository, times(1)).set(any())
+      verify(mockSessionMinimalDetailsRepository, times(1)).set(any())
+    }
+
+  }
 }

@@ -76,4 +76,12 @@ class SessionService @Inject() (
     sessionMinimalDetailsRepository.clear(id)
   }
 
+  def cacheAllowAccessDetails(
+    sessionSchemeDetails: SessionSchemeDetails,
+    sessionMinimalDetails: SessionMinimalDetails
+  ): Future[Boolean] = {
+    sessionSchemeDetailsRepository.set(sessionSchemeDetails)
+    sessionMinimalDetailsRepository.set(sessionMinimalDetails)
+  }
+
 }

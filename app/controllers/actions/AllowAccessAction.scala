@@ -23,7 +23,7 @@ import connectors.{MinimalDetailsConnector, MinimalDetailsError, SchemeDetailsCo
 import controllers.routes
 import config.FrontendAppConfig
 import models.SchemeId.Srn
-import models.{MinimalDetails, SchemeDetails, SchemeStatus}
+import models._
 import play.api.mvc.Results.Redirect
 import connectors.MinimalDetailsError.DelimitedAdmin
 import models.SchemeStatus.{Deregistered, Open, WoundUp}
@@ -62,8 +62,11 @@ class AllowAccessAction(
     } yield (schemeDetails, minimalDetails) match {
       case (Some(schemeDetails), Right(minimalDetails @ MinimalDetails(_, _, _, _, false, false)))
           if validStatuses.contains(schemeDetails.schemeStatus) =>
+        sessionService.cacheAllowAccessDetails(
+          SessionSchemeDetails(request.getUserId, srn.value, schemeDetails),
+          SessionMinimalDetails(request.getUserId, srn.value, minimalDetails)
+        )
         block(AllowedAccessRequest(request, schemeDetails, minimalDetails, srn))
-
       case (_, Right(HasDeceasedFlag(_))) =>
         Future.successful(Redirect(appConfig.urls.managePensionsSchemes.contactHmrc))
 

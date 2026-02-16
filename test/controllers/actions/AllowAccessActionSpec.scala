@@ -116,7 +116,9 @@ class AllowAccessActionSpec extends SpecBase with ScalaCheckPropertyChecks {
 
           status(result) mustBe OK
           contentAsJson(result) mustBe Json.toJson(schemeDetails)
+
           verify(mockSessionService, times(1)).clearSession(any())
+          verify(mockSessionService, times(1)).cacheAllowAccessDetails(any(), any())
       }
 
       "psp is associated, no rls flag, no deceased flag, no DelimitedAdmin and a valid status" in runningApplication {
@@ -125,7 +127,9 @@ class AllowAccessActionSpec extends SpecBase with ScalaCheckPropertyChecks {
 
           status(result) mustBe OK
           contentAsJson(result) mustBe Json.toJson(schemeDetails)
+
           verify(mockSessionService, times(1)).clearSession(any())
+          verify(mockSessionService, times(1)).cacheAllowAccessDetails(any(), any())
       }
     }
 
