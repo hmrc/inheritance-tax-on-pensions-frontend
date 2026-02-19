@@ -70,7 +70,7 @@ class FormattersSpec extends AnyFreeSpec with Matchers with Formatters {
 
     "must use custom error key with args" in {
       val customFormatter = stringFormatter("custom.error", Seq("arg1", "arg2"))
-      val result          = customFormatter.bind("key", Map.empty[String, String])
+      val result = customFormatter.bind("key", Map.empty[String, String])
       result mustBe Left(Seq(FormError("key", "custom.error", Seq("arg1", "arg2"))))
     }
 
@@ -111,7 +111,7 @@ class FormattersSpec extends AnyFreeSpec with Matchers with Formatters {
 
     "must use custom error keys with args" in {
       val customFormatter = booleanFormatter("custom.required", "custom.boolean", Seq("arg1"))
-      val result          = customFormatter.bind("key", Map("key" -> "invalid"))
+      val result = customFormatter.bind("key", Map("key" -> "invalid"))
       result mustBe Left(Seq(FormError("key", "custom.boolean", Seq("arg1"))))
     }
 
@@ -167,7 +167,7 @@ class FormattersSpec extends AnyFreeSpec with Matchers with Formatters {
 
     "must use custom error keys with args" in {
       val customFormatter = intFormatter("custom.required", "custom.wholeNumber", "custom.nonNumeric", Seq("arg1"))
-      val result          = customFormatter.bind("key", Map("key" -> "1.5"))
+      val result = customFormatter.bind("key", Map("key" -> "1.5"))
       result mustBe Left(Seq(FormError("key", "custom.wholeNumber", Seq("arg1"))))
     }
 
@@ -180,7 +180,7 @@ class FormattersSpec extends AnyFreeSpec with Matchers with Formatters {
   "enumerableFormatter" - {
 
     implicit val testEnumEnumerable: Enumerable[TestEnum] = TestEnum.testEnumEnumerable
-    val formatter                                         = enumerableFormatter[TestEnum]("error.required", "error.invalid")
+    val formatter = enumerableFormatter[TestEnum]("error.required", "error.invalid")
 
     "must bind a valid enum value" in {
       val result = formatter.bind("key", Map("key" -> "Value1"))
@@ -209,7 +209,7 @@ class FormattersSpec extends AnyFreeSpec with Matchers with Formatters {
 
     "must use custom error keys with args" in {
       val customFormatter = enumerableFormatter[TestEnum]("custom.required", "custom.invalid", Seq("arg1"))
-      val result          = customFormatter.bind("key", Map("key" -> "InvalidValue"))
+      val result = customFormatter.bind("key", Map("key" -> "InvalidValue"))
       result mustBe Left(Seq(FormError("key", "custom.invalid", Seq("arg1"))))
     }
 
@@ -291,7 +291,7 @@ class FormattersSpec extends AnyFreeSpec with Matchers with Formatters {
     "must use custom error keys with args" in {
       val customFormatter =
         currencyFormatter("custom.required", "custom.invalidNumeric", "custom.nonNumeric", Seq("arg1"))
-      val result          = customFormatter.bind("key", Map("key" -> "123.456"))
+      val result = customFormatter.bind("key", Map("key" -> "123.456"))
       result mustBe Left(Seq(FormError("key", "custom.invalidNumeric", Seq("arg1"))))
     }
 
