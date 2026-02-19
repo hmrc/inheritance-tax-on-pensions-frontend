@@ -42,6 +42,14 @@ trait ModelGenerators extends BasicGenerators {
       srn <- srnGen
     } yield AllowedAccessRequest(request, schemeDetails, minimalDetails, srn)
 
+  def allowedAccessRequestNoEstablishersGen[A](request: Request[A]): Gen[AllowedAccessRequest[A]] =
+    for {
+      request <- identifierRequestGen[A](request)
+      schemeDetails <- schemeDetailsNoEstablishersGen
+      minimalDetails <- minimalDetailsNoOrgGen
+      srn <- srnGen
+    } yield AllowedAccessRequest(request, schemeDetails, minimalDetails, srn)
+
   def practitionerRequestGen[A](request: Request[A]): Gen[PractitionerRequest[A]] =
     for {
       userId <- nonEmptyString
@@ -77,6 +85,15 @@ trait ModelGenerators extends BasicGenerators {
       deceasedFlag <- boolean
     } yield MinimalDetails(email, isSuspended, orgName, individual, rlsFlag, deceasedFlag)
 
+  lazy val minimalDetailsNoOrgGen: Gen[MinimalDetails] =
+    for {
+      email <- emailGen
+      isSuspended <- boolean
+      orgName <- Gen.option(nonEmptyString)
+      rlsFlag <- boolean
+      deceasedFlag <- boolean
+    } yield MinimalDetails(email, isSuspended, orgName, None, rlsFlag, deceasedFlag)
+
   val validSchemeStatusGen: Gen[SchemeStatus] =
     Gen.oneOf(
       Open,
@@ -110,6 +127,16 @@ trait ModelGenerators extends BasicGenerators {
       schemeType <- nonEmptyString
       authorisingPsa <- Gen.option(nonEmptyString)
       establishers <- Gen.listOfN(5, establisherGen)
+    } yield SchemeDetails(name, pstr, status, schemeType, authorisingPsa, establishers)
+
+  val schemeDetailsNoEstablishersGen: Gen[SchemeDetails] =
+    for {
+      name <- nonEmptyString
+      pstr <- nonEmptyString
+      status <- schemeStatusGen
+      schemeType <- nonEmptyString
+      authorisingPsa <- Gen.option(nonEmptyString)
+      establishers <- Gen.listOfN(0, establisherGen)
     } yield SchemeDetails(name, pstr, status, schemeType, authorisingPsa, establishers)
 
   val pstrGen: Gen[Pstr] = nonEmptyString.map(Pstr.apply)
