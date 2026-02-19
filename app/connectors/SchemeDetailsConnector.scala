@@ -40,8 +40,7 @@ class SchemeDetailsConnectorImpl @Inject() (appConfig: FrontendAppConfig, http: 
   override def details(
     psaId: PsaId,
     schemeId: SchemeId
-  )(implicit hc: HeaderCarrier, ec: ExecutionContext): Future[Option[SchemeDetails]] = {
-    logger.info(s"[SchemeDetailsConnector][details] calling url:${url(s"/pensions-scheme/scheme/${schemeId.value}")}")
+  )(implicit hc: HeaderCarrier, ec: ExecutionContext): Future[Option[SchemeDetails]] =
     http
       .get(url"${url(s"/pensions-scheme/scheme/${schemeId.value}")}")
       .transform(
@@ -53,16 +52,12 @@ class SchemeDetailsConnectorImpl @Inject() (appConfig: FrontendAppConfig, http: 
       )
       .transform(_.withRequestTimeout(appConfig.ifsTimeout))
       .execute[Option[SchemeDetails]]
-  }
 
   // API 1444 (Get scheme details)
   override def details(
     pspId: PspId,
     schemeId: Srn
-  )(implicit hc: HeaderCarrier, ec: ExecutionContext): Future[Option[SchemeDetails]] = {
-    logger.info(
-      s"[SchemeDetailsConnector][details] calling url:${url(s"/pensions-scheme/psp-scheme/${schemeId.value}")}"
-    )
+  )(implicit hc: HeaderCarrier, ec: ExecutionContext): Future[Option[SchemeDetails]] =
     http
       .get(url"${url(s"/pensions-scheme/psp-scheme/${schemeId.value}")}")
       .transform(
@@ -73,7 +68,6 @@ class SchemeDetailsConnectorImpl @Inject() (appConfig: FrontendAppConfig, http: 
       )
       .transform(_.withRequestTimeout(appConfig.ifsTimeout))
       .execute[Option[SchemeDetails]]
-  }
 }
 
 @ImplementedBy(classOf[SchemeDetailsConnectorImpl])

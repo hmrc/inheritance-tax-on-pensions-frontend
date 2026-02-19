@@ -19,7 +19,6 @@ package config
 import play.api.mvc.RequestHeader
 import com.google.inject.{Inject, Singleton}
 import play.api.Configuration
-import play.api.i18n.Lang
 
 import scala.concurrent.duration.Duration
 
@@ -67,8 +66,6 @@ class FrontendAppConfig @Inject() (configuration: Configuration) {
 
   private val exitSurveyBaseUrl: String = configuration.get[String]("feedback-frontend.host")
   val exitSurveyUrl: String = s"$exitSurveyBaseUrl/feedback/inheritance-tax-on-pensions-frontend"
-
-  def languageMap: Map[String, Lang] = Map("en" -> Lang("en"))
 
   val timeout: Int = configuration.get[Int]("timeout-dialog.timeout")
   val countdown: Int = configuration.get[Int]("timeout-dialog.countdown")
