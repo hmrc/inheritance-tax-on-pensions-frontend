@@ -11,13 +11,15 @@ object CodeCoverageSettings {
     ".*Routes.*",
     ".*controllers.testonly.*",
     ".*viewmodels.govuk.*",
-    "viewmodels*",
-    "models*"
+    ".*viewmodels.ImplicitConversions",
+    "testOnlyDoNotUseInAppConf.*",
+    "pages.Page",
+    "views.*"
   )
 
   val settings: Seq[Setting[?]] = Seq(
     ScoverageKeys.coverageExcludedPackages := coverageExcludedPackages.mkString(";"),
-    ScoverageKeys.coverageMinimumStmtTotal := 85,
+    ScoverageKeys.coverageMinimumStmtTotal := 90,
     ScoverageKeys.coverageFailOnMinimum := true,
     ScoverageKeys.coverageHighlighting := true
   )

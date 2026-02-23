@@ -34,7 +34,7 @@ class UserAnswersServiceSpec extends SpecBase {
 
   implicit val hc: HeaderCarrier = HeaderCarrier()
   implicit val allowedAccessRequestPrePopulation: AllowedAccessRequest[AnyContentAsEmpty.type] =
-    allowedAccessRequestGen(
+    allowedAccessRequestNoEstablishersGen(
       FakeRequest()
         .withSession((PREPOPULATION_FLAG, "true"))
     ).sample.value
