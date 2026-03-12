@@ -42,7 +42,7 @@ class WhatYouWillNeedControllerSpec extends SpecBase {
         contentAsString(result) mustEqual view(srn)(using request, messages(application)).toString
       }
     }
-    
+
     "must redirect to TODO list when valid data is submitted" in {
 
       val application = applicationBuilder(userAnswers = Some(emptyUserAnswers), usesSession = true).build()
