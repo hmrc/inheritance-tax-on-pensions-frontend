@@ -18,6 +18,7 @@ package controllers
 
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import controllers.actions._
+import models.NormalMode
 import views.html.WhatYouWillNeedView
 import models.SchemeId.Srn
 import play.api.i18n.{I18nSupport, MessagesApi}
@@ -38,9 +39,7 @@ class WhatYouWillNeedController @Inject() (
 
   def onPageLoad(srn: Srn): Action[AnyContent] =
     identify
-      .andThen(allowAccess(srn))
-      .andThen(getData)
-      .andThen(requireData) { implicit request =>
+      .andThen(allowAccess(srn)) { implicit request =>
         Ok(view(srn))
       }
 
@@ -49,7 +48,7 @@ class WhatYouWillNeedController @Inject() (
       .andThen(allowAccess(srn))
       .andThen(getData)
       .andThen(requireData) { implicit request =>
-        // TODO - correctly route when next step of the journey is built
-        Redirect(routes.SubmissionListController.onPageLoad(srn))
+        // TODO - repurpose InputPagePlaceholderController to the next input page within the minimal journey
+        Redirect(routes.InputPagePlaceholderController.onPageLoad(srn, NormalMode))
       }
 }

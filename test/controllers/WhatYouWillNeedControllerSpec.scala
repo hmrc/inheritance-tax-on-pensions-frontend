@@ -20,6 +20,7 @@ import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import views.html.WhatYouWillNeedView
 import base.SpecBase
+import models.NormalMode
 
 class WhatYouWillNeedControllerSpec extends SpecBase {
 
@@ -43,7 +44,8 @@ class WhatYouWillNeedControllerSpec extends SpecBase {
       }
     }
 
-    "must redirect to TODO list when valid data is submitted" in {
+    // TODO - repurpose InputPagePlaceholderController to the next input page within the minimal journey
+    "must redirect to InputPagePlaceholderController list when valid data is submitted" in {
 
       val application = applicationBuilder(userAnswers = Some(emptyUserAnswers), usesSession = true).build()
 
@@ -55,8 +57,7 @@ class WhatYouWillNeedControllerSpec extends SpecBase {
         val result = route(application, request).value
 
         status(result) mustEqual SEE_OTHER
-        // TODO - add correct redirect url when the next step of the journey is engineered
-        redirectLocation(result).value mustEqual routes.SubmissionListController.onPageLoad(srn).url
+        redirectLocation(result).value mustEqual routes.InputPagePlaceholderController.onPageLoad(srn, NormalMode).url
       }
     }
   }
