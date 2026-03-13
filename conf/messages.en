@@ -1,4 +1,4 @@
-service.name = inheritance-tax-on-pensions-frontend
+service.name = Report inheritance tax on a pension
 
 site.back = Back
 site.remove = Remove
@@ -60,3 +60,14 @@ inputPagePlaceholder.checkYourAnswersLabel = Check your answers
 inputPagePlaceholder.error.required = Enter some input!
 inputPagePlaceholder.error.length = Your input must be 100 characters or less
 inputPagePlaceholder.change.hidden = Input Page Placeholder
+
+whatYouWillNeed.title = What you will need
+whatYouWillNeed.heading = What you will need
+whatYouWillNeed.text.guidance = To complete a report you will need information usually supplied by the Legal Personal Representative (LPR) or a beneficiary.
+whatYouWillNeed.text.list = This includes:
+whatYouWillNeed.text.guidance.usecase1 = the Inheritance Tax reference number
+whatYouWillNeed.text.guidance.usecase2 = the name, birth and death dates of the deceased
+whatYouWillNeed.text.guidance.usecase3 = the name and address of the LPR
+whatYouWillNeed.text.guidance.usecase4 = beneficiary details, including names, addresses and amounts of Inheritance Tax payable
+whatYouWillNeed.text.guidance.usecase5 = the National Insurance (NI) number of the deceased and each beneficiary (if applicable)
+
