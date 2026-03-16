@@ -27,3 +27,6 @@ POST        /:srn/changeInputPagePlaceholder             controllers.InputPagePl
 
 GET        /:srn/start-report-you-will-need              controllers.WhatYouWillNeedController.onPageLoad(srn: Srn)
 POST       /:srn/start-report-you-will-need              controllers.WhatYouWillNeedController.onSubmit(srn: Srn)
+
+GET        /:srn/psa-declaration                         controllers.PsaDeclarationController.onPageLoad(srn: Srn)
+POST       /:srn/psa-declaration                         controllers.PsaDeclarationController.onSubmit(srn: Srn)
