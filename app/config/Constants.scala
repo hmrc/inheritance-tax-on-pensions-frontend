@@ -39,4 +39,36 @@ object Constants {
   val USERNAME_HEADER = "userName"
   val SCHEME_NAME_HEADER = "schemeName"
   val ROLE_HEADER = "requestRole"
+
+  object Css {
+
+    val bodyCssClass = "govuk-body"
+    val hintCssClass = "govuk-hint"
+
+    val headingXLCssClass = "govuk-heading-xl"
+    val headingLCssClass = "govuk-heading-l"
+    val headingMCssClass = "govuk-heading-m"
+
+    val numberListCssClass = "govuk-list govuk-list--number"
+    val bulletListCssClass = "govuk-list govuk-list--bullet"
+    val noBulletListCssClass = "govuk-list"
+    val dashedListItemCssClass = "dashed-list-item"
+
+    val visuallyHiddenCssClass = "govuk-visually-hidden"
+
+    val captionXLCssClass = "govuk-caption-xl"
+    val captionLCssClass = "govuk-caption-l"
+
+    val formGroupCssClass = "govuk-form-group"
+    val formGroupErrorCssClass = "govuk-form-group--error"
+
+    val linkNoVisitedStateCssClass = "govuk-link govuk-link--no-visited-state"
+
+    val jsVisibleCssClass = "hmrc-!-js-visible"
+    val displayNonePrintCssClass = "govuk-!-display-none-print"
+
+    val sectionBreakCssClass = "govuk-section-break"
+    val sectionBreakLCssClass = "govuk-section-break--l"
+    val sectionBreakVisibleCssClass = "govuk-section-break--visible"
+  }
 }

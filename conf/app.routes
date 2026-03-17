@@ -24,3 +24,6 @@ GET         /:srn/inputPagePlaceholder                   controllers.InputPagePl
 POST        /:srn/inputPagePlaceholder                   controllers.InputPagePlaceholderController.onSubmit(srn: Srn, mode: Mode = NormalMode)
 GET         /:srn/changeInputPagePlaceholder             controllers.InputPagePlaceholderController.onPageLoad(srn: Srn, mode: Mode = CheckMode)
 POST        /:srn/changeInputPagePlaceholder             controllers.InputPagePlaceholderController.onSubmit(srn: Srn, mode: Mode = CheckMode)
+
+GET        /:srn/start-report-you-will-need              controllers.WhatYouWillNeedController.onPageLoad(srn: Srn)
+POST       /:srn/start-report-you-will-need              controllers.WhatYouWillNeedController.onSubmit(srn: Srn)
