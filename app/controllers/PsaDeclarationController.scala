@@ -28,7 +28,7 @@ import javax.inject.Inject
 class PsaDeclarationController @Inject() (
   override val messagesApi: MessagesApi,
   identify: IdentifierAction,
-  allowAccess: AllowAccessActionWithSessionCacheProvider,
+  allowAccess: AllowAccessActionProvider, // Invalidate the authorisation cache on declaration and re-authenticate
   getData: DataRetrievalAction,
   requireData: DataRequiredAction,
   val controllerComponents: MessagesControllerComponents,

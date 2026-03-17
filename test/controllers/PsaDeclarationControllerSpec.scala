@@ -29,7 +29,7 @@ class PsaDeclarationControllerSpec extends SpecBase {
 
     "must return OK and the correct view for a GET" in {
 
-      val application = applicationBuilder(userAnswers = Some(emptyUserAnswers), usesSession = true).build()
+      val application = applicationBuilder(userAnswers = Some(emptyUserAnswers)).build()
 
       running(application) {
         val request = FakeRequest(GET, psaDeclarationRoute)
@@ -50,7 +50,7 @@ class PsaDeclarationControllerSpec extends SpecBase {
     // TODO - repurpose SubmissionListController to the next input page within the minimal journey
     "must redirect to SubmissionListController list when valid data is submitted" in {
 
-      val application = applicationBuilder(userAnswers = Some(emptyUserAnswers), usesSession = true).build()
+      val application = applicationBuilder(userAnswers = Some(emptyUserAnswers)).build()
 
       running(application) {
         val request =

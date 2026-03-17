@@ -28,7 +28,7 @@ import javax.inject.Inject
 class SubmissionListController @Inject() (
   val controllerComponents: MessagesControllerComponents,
   identify: IdentifierAction,
-  allowAccess: AllowAccessActionProvider,
+  allowAccess: AllowAccessActionProvider, // Invalidate the authorisation cache and re-authenticate
   view: SubmissionListView
 ) extends FrontendBaseController
     with I18nSupport {
