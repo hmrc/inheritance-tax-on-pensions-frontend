@@ -54,12 +54,12 @@ unauthorised.heading = You cannot access this service with this account
 unauthorised.paragraph =  If you think you should have access to this service, you can
 unauthorised.linkMessage = contact HMRC for pension scheme help
 
-inputPagePlaceholder.title = Input Page Placeholder
-inputPagePlaceholder.heading = Input Page Placeholder
-inputPagePlaceholder.checkYourAnswersLabel = Check your answers
-inputPagePlaceholder.error.required = Enter some input!
-inputPagePlaceholder.error.length = Your input must be 100 characters or less
-inputPagePlaceholder.change.hidden = Input Page Placeholder
+inheritanceTaxReference.title = Enter the Inheritance Tax reference number
+inheritanceTaxReference.heading = Enter the Inheritance Tax reference number
+inheritanceTaxReference.checkYourAnswersLabel = TODO
+inheritanceTaxReference.error.required = Enter the Inheritance Tax reference number
+inheritanceTaxReference.error.invalid = Enter a valid Inheritance Tax reference number
+inheritanceTaxReference.hint = For example, A123456/25A or F123456/25B
 
 whatYouWillNeed.title = What you will need
 whatYouWillNeed.heading = What you will need

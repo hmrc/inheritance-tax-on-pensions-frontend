@@ -28,4 +28,11 @@ trait StringFieldBehaviours extends FieldBehaviours {
         result.errors must contain only lengthError
       }
     }
+
+  def fieldWithRegex(form: Form[?], fieldName: String, invalidString: String, error: FormError): Unit =
+    "not bind strings invalidated by regex" in {
+      val result = form.bind(Map(fieldName -> invalidString)).apply(fieldName)
+      result.errors mustEqual Seq(error)
+    }
+
 }

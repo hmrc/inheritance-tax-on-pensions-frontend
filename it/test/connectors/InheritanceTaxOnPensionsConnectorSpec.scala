@@ -48,7 +48,7 @@ class InheritanceTaxOnPensionsConnectorSpec extends BaseConnectorSpec {
 
   val userAnswers: UserAnswers = UserAnswers(
     id = id,
-    data = JsObject(Seq("inputPagePlaceholder" -> Json.toJson("placeholder"))),
+    data = JsObject(Seq("inheritanceTaxReference" -> Json.toJson("foo"))),
     lastUpdated = Instant.now(clock)
   )
 

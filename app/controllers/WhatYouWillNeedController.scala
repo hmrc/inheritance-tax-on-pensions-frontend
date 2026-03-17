@@ -48,7 +48,6 @@ class WhatYouWillNeedController @Inject() (
       .andThen(allowAccess(srn))
       .andThen(getData)
       .andThen(requireData) { implicit request =>
-        // TODO - repurpose InputPagePlaceholderController to the next input page within the minimal journey
-        Redirect(routes.InputPagePlaceholderController.onPageLoad(srn, NormalMode))
+        Redirect(routes.InheritanceTaxReferenceController.onPageLoad(srn, NormalMode))
       }
 }

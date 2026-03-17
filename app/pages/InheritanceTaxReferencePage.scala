@@ -14,18 +14,13 @@
  * limitations under the License.
  */
 
-package forms
+package pages
 
-import forms.mappings.Mappings
-import play.api.data.Form
+import play.api.libs.json.JsPath
 
-import javax.inject.Inject
+case object InheritanceTaxReferencePage extends QuestionPage[String] {
 
-class InputPagePlaceholderFormProvider @Inject() extends Mappings {
+  override def path: JsPath = JsPath \ toString
 
-  def apply(): Form[String] =
-    Form(
-      "value" -> text("inputPagePlaceholder.error.required")
-        .verifying(maxLength(100, "inputPagePlaceholder.error.length"))
-    )
+  override def toString: String = "inheritanceTaxReference"
 }

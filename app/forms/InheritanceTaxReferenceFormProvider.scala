@@ -14,13 +14,23 @@
  * limitations under the License.
  */
 
-package pages
+package forms
 
-import play.api.libs.json.JsPath
+import forms.mappings.Mappings
+import play.api.data.Form
 
-case object InputPagePlaceholderPage extends QuestionPage[String] {
+import scala.util.matching.Regex
 
-  override def path: JsPath = JsPath \ toString
+import javax.inject.Inject
 
-  override def toString: String = "inputPagePlaceholder"
+class InheritanceTaxReferenceFormProvider @Inject() extends Mappings {
+
+  val regex: Regex = "^[A-Z]\\d{6}/\\d{2}[A-Z]$".r
+
+  def apply(): Form[String] =
+    Form(
+      "value" -> text("inheritanceTaxReference.error.required")
+        .verifying(maxLength(11, "inheritanceTaxReference.error.length"))
+        .verifying(regexp(regex.toString(), "inheritanceTaxReference.error.invalid"))
+    )
 }

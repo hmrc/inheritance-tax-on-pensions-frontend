@@ -20,10 +20,11 @@ GET         /unauthorised                                controllers.Unauthorise
 
 GET         /:srn/submission-list                        controllers.SubmissionListController.onPageLoad(srn: Srn)
 
-GET         /:srn/inputPagePlaceholder                   controllers.InputPagePlaceholderController.onPageLoad(srn: Srn, mode: Mode = NormalMode)
-POST        /:srn/inputPagePlaceholder                   controllers.InputPagePlaceholderController.onSubmit(srn: Srn, mode: Mode = NormalMode)
-GET         /:srn/changeInputPagePlaceholder             controllers.InputPagePlaceholderController.onPageLoad(srn: Srn, mode: Mode = CheckMode)
-POST        /:srn/changeInputPagePlaceholder             controllers.InputPagePlaceholderController.onSubmit(srn: Srn, mode: Mode = CheckMode)
-
 GET        /:srn/start-report-you-will-need              controllers.WhatYouWillNeedController.onPageLoad(srn: Srn)
 POST       /:srn/start-report-you-will-need              controllers.WhatYouWillNeedController.onSubmit(srn: Srn)
+
+GET         /:srn/enter-inheritance-tax-reference        controllers.InheritanceTaxReferenceController.onPageLoad(srn: Srn, mode: Mode = NormalMode)
+POST        /:srn/enter-inheritance-tax-reference        controllers.InheritanceTaxReferenceController.onSubmit(srn: Srn, mode: Mode = NormalMode)
+GET         /:srn/enter-inheritance-tax-reference        controllers.InheritanceTaxReferenceController.onPageLoad(srn: Srn, mode: Mode = CheckMode)
+POST        /:srn/enter-inheritance-tax-reference        controllers.InheritanceTaxReferenceController.onSubmit(srn: Srn, mode: Mode = CheckMode)
+

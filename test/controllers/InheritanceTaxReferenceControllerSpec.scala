@@ -19,37 +19,38 @@ package controllers
 import play.api.test.FakeRequest
 import connectors.InheritanceTaxOnPensionsConnector
 import play.api.inject.bind
-import views.html.InputPagePlaceholderView
+import views.html.InheritanceTaxReferenceView
 import base.SpecBase
 import models.NormalMode
 import play.api.data.Form
 import org.mockito.ArgumentMatchers.any
 import play.api.test.Helpers._
 import org.mockito.Mockito._
-import forms.InputPagePlaceholderFormProvider
+import forms.InheritanceTaxReferenceFormProvider
 import uk.gov.hmrc.http.HttpResponse
 
 import scala.concurrent.Future
 
-class InputPagePlaceholderControllerSpec extends SpecBase {
+class InheritanceTaxReferenceControllerSpec extends SpecBase {
 
-  val formProvider = new InputPagePlaceholderFormProvider()
+  val formProvider = new InheritanceTaxReferenceFormProvider()
   val form: Form[String] = formProvider()
 
-  lazy val inputPagePlaceholderRoute: String = routes.InputPagePlaceholderController.onPageLoad(srn, NormalMode).url
+  lazy val inheritanceTaxReferenceRoute: String =
+    routes.InheritanceTaxReferenceController.onPageLoad(srn, NormalMode).url
 
-  "InputPagePlaceholder Controller" - {
+  "InheritanceTaxReferenceController Controller" - {
 
     "must return OK and the correct view for a GET" in {
 
       val application = applicationBuilder(userAnswers = Some(emptyUserAnswers), usesSession = true).build()
 
       running(application) {
-        val request = FakeRequest(GET, inputPagePlaceholderRoute)
+        val request = FakeRequest(GET, inheritanceTaxReferenceRoute)
 
         val result = route(application, request).value
 
-        val view = application.injector.instanceOf[InputPagePlaceholderView]
+        val view = application.injector.instanceOf[InheritanceTaxReferenceView]
 
         status(result) mustEqual OK
         contentAsString(result) mustEqual view(form, srn, NormalMode)(using request, messages(application)).toString
@@ -70,7 +71,7 @@ class InputPagePlaceholderControllerSpec extends SpecBase {
 
       running(application) {
         val request =
-          FakeRequest(POST, inputPagePlaceholderRoute)
+          FakeRequest(POST, inheritanceTaxReferenceRoute)
             .withFormUrlEncodedBody(("value", "answer"))
 
         val result = route(application, request).value
@@ -89,12 +90,12 @@ class InputPagePlaceholderControllerSpec extends SpecBase {
 
       running(application) {
         val request =
-          FakeRequest(POST, inputPagePlaceholderRoute)
+          FakeRequest(POST, inheritanceTaxReferenceRoute)
             .withFormUrlEncodedBody(("value", ""))
 
         val boundForm = form.bind(Map("value" -> ""))
 
-        val view = application.injector.instanceOf[InputPagePlaceholderView]
+        val view = application.injector.instanceOf[InheritanceTaxReferenceView]
 
         val result = route(application, request).value
 
