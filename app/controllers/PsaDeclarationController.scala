@@ -25,24 +25,22 @@ import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
 
 import javax.inject.Inject
 
-class PsaDeclarationController @Inject()(
-                                       override val messagesApi: MessagesApi,
-                                       identify: IdentifierAction,
-                                       allowAccess: AllowAccessActionWithSessionCacheProvider,
-                                       getData: DataRetrievalAction,
-                                       requireData: DataRequiredAction,
-                                       val controllerComponents: MessagesControllerComponents,
-                                       view: PsaDeclarationView
-                                     ) extends FrontendBaseController with I18nSupport {
+class PsaDeclarationController @Inject() (
+  override val messagesApi: MessagesApi,
+  identify: IdentifierAction,
+  allowAccess: AllowAccessActionWithSessionCacheProvider,
+  getData: DataRetrievalAction,
+  requireData: DataRequiredAction,
+  val controllerComponents: MessagesControllerComponents,
+  view: PsaDeclarationView
+) extends FrontendBaseController
+    with I18nSupport {
 
   def onPageLoad(srn: Srn): Action[AnyContent] = identify
     .andThen(allowAccess(srn))
     .andThen(getData)
-    .andThen(requireData) {
-      {
-        implicit request =>
-          Ok(view(srn, request.request.schemeDetails.schemeName))
-      }
+    .andThen(requireData) { implicit request =>
+      Ok(view(srn, request.request.schemeDetails.schemeName))
     }
 
   def onSubmit(srn: Srn): Action[AnyContent] =

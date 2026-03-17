@@ -40,8 +40,8 @@ class PsaDeclarationControllerSpec extends SpecBase {
 
         status(result) mustEqual OK
 
-        contentAsString(result) mustEqual view(srn, schemeName)(
-          using request,
+        contentAsString(result) mustEqual view(srn, schemeName)(using
+          request,
           messages(application)
         ).toString
       }
