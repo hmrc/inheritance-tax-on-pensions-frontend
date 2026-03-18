@@ -16,11 +16,14 @@
 
 @import viewmodels.InputWidth._
 @import models.SchemeId.Srn
+@import components.PageHeading
+@import config.Constants.Css
 
 @this(
     layout: templates.Layout,
     formHelper: FormWithCSRF,
     govukErrorSummary: GovukErrorSummary,
+    pageHeading: PageHeading,
     govukInput: GovukInput,
     govukButton: GovukButton
 )
@@ -29,7 +32,7 @@
 
 @layout(pageTitle = title(form, messages("inheritanceTaxReference.title"))) {
 
-    @formHelper(action = routes.InheritanceTaxReferenceController.onSubmit(srn, mode)) {
+    @formHelper(action = routes.InheritanceTaxReferenceController.onSubmit(srn, mode), Symbol("autoComplete") -> "off") {
 
         @if(form.errors.nonEmpty) {
             @govukErrorSummary(ErrorSummaryViewModel(form))
@@ -38,7 +41,9 @@
         @govukInput(
             InputViewModel(
                 field = form("value"),
-                label = LabelViewModel(messages("inheritanceTaxReference.heading")).asPageHeading()
+                label = LabelViewModel(messages("inheritanceTaxReference.heading"))
+                    .withCssClass(Css.labelCssLargeClass)
+                    .asPageHeading()
             )
             .withWidth(Full)
             .withHint(Hint(content = messages("inheritanceTaxReference.hint")))
