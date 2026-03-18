@@ -73,7 +73,7 @@ class InheritanceTaxReferenceController @Inject() (
               for {
                 updatedAnswers <- Future.fromTry(request.userAnswers.set(InheritanceTaxReferencePage, value))
                 _ <- userAnswersService.set(updatedAnswers)(using hc, request.request)
-              } yield Redirect(routes.SubmissionListController.onPageLoad(srn))
+              } yield Redirect(routes.CheckYourAnswersController.onPageLoad(srn))
           )
       }
 }

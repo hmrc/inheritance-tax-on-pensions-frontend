@@ -14,16 +14,30 @@
  * limitations under the License.
  *@
 
+@import components.PageHeading
+@import models.SchemeId.Srn
+
 @this(
     layout: templates.Layout,
-    govukSummaryList: GovukSummaryList
+    formHelper: FormWithCSRF,
+    pageHeading: PageHeading,
+    govukSummaryList: GovukSummaryList,
+    govukButton: GovukButton
 )
 
-@(list: SummaryList)(implicit request: Request[?], messages: Messages)
+@(srn: Srn, list: SummaryList)(implicit request: Request[?], messages: Messages)
 
 @layout(pageTitle = titleNoForm(messages("checkYourAnswers.title"))) {
 
-    <h1 class="govuk-heading-xl">@messages("checkYourAnswers.heading")</h1>
+    @formHelper(action = routes.CheckYourAnswersController.onSubmit(srn), Symbol("autoComplete") -> "off") {
 
-    @govukSummaryList(list)
+        @pageHeading(messages("checkYourAnswers.heading"))
+
+        @govukSummaryList(list)
+
+        @govukButton(
+            ButtonViewModel(messages("site.continue"))
+        )
+    }
+
 }

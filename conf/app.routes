@@ -10,8 +10,6 @@ GET         /refresh-session                             controllers.KeepAliveCo
 
 GET         /there-is-a-problem                          controllers.JourneyRecoveryController.onPageLoad(continueUrl: Option[RedirectUrl] ?= None)
 
-GET         /:srn/check-your-answers                     controllers.CheckYourAnswersController.onPageLoad(srn: Srn)
-
 GET         /account/sign-out-survey                     controllers.auth.AuthController.signOut()
 GET         /account/sign-out                            controllers.auth.AuthController.signOutNoSurvey()
 GET         /account/signed-out                          controllers.auth.SignedOutController.onPageLoad()
@@ -30,4 +28,7 @@ POST        /:srn/enter-inheritance-tax-reference        controllers.Inheritance
 
 GET        /:srn/psa-declaration                         controllers.PsaDeclarationController.onPageLoad(srn: Srn)
 POST       /:srn/psa-declaration                         controllers.PsaDeclarationController.onSubmit(srn: Srn)
+
+GET         /:srn/check-your-answers                     controllers.CheckYourAnswersController.onPageLoad(srn: Srn)
+POST        /:srn/check-your-answers                     controllers.CheckYourAnswersController.onSubmit(srn: Srn)
 
