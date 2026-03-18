@@ -27,6 +27,8 @@ error.title.prefix = Error:
 error.prefix = Error
 error.summary.title = There is a problem
 
+section.visuallyHidden = This section is:
+
 index.title = inheritance-tax-on-pensions-frontend
 index.heading = inheritance-tax-on-pensions-frontend
 index.guidance = Welcome to your new frontend. Please see the README file for a guide to getting started.
@@ -70,4 +72,11 @@ whatYouWillNeed.text.guidance.usecase2 = the name, birth and death dates of the 
 whatYouWillNeed.text.guidance.usecase3 = the name and address of the LPR
 whatYouWillNeed.text.guidance.usecase4 = beneficiary details, including names, addresses and amounts of Inheritance Tax payable
 whatYouWillNeed.text.guidance.usecase5 = the National Insurance (NI) number of the deceased and each beneficiary (if applicable)
+
+psaDeclaration.title = Declaration
+psaDeclaration.heading = Declaration
+psaDeclaration.text.list = By continuing you declare that:
+psaDeclaration.text.guidance.usecase1 = you have received and checked the information in the notice
+psaDeclaration.text.guidance.usecase2 = the information you have provided in this return is correct and complete to the best of your knowledge and belief
+psaDeclaration.agreeAndSubmit = Agree and submit
 
