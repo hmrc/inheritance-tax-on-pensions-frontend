@@ -30,7 +30,6 @@ class InheritanceTaxReferenceFormProvider @Inject() extends Mappings {
   def apply(): Form[String] =
     Form(
       "value" -> text("inheritanceTaxReference.error.required")
-        .verifying(maxLength(11, "inheritanceTaxReference.error.length"))
         .verifying(regexp(regex.toString(), "inheritanceTaxReference.error.invalid"))
     )
 }

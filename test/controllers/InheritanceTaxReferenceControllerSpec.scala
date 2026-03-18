@@ -72,7 +72,7 @@ class InheritanceTaxReferenceControllerSpec extends SpecBase {
       running(application) {
         val request =
           FakeRequest(POST, inheritanceTaxReferenceRoute)
-            .withFormUrlEncodedBody(("value", "answer"))
+            .withFormUrlEncodedBody(("value", "A123456/25A"))
 
         val result = route(application, request).value
 
