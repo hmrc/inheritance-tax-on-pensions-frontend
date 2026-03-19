@@ -19,13 +19,17 @@ package forms
 import forms.mappings.Mappings
 import play.api.data.Form
 
+import scala.util.matching.Regex
+
 import javax.inject.Inject
 
-class InputPagePlaceholderFormProvider @Inject() extends Mappings {
+class InheritanceTaxReferenceFormProvider @Inject() extends Mappings {
+
+  val regex: Regex = "^[A-Z]\\d{6}/\\d{2}[A-Z]$".r
 
   def apply(): Form[String] =
     Form(
-      "value" -> text("inputPagePlaceholder.error.required")
-        .verifying(maxLength(100, "inputPagePlaceholder.error.length"))
+      "value" -> text("inheritanceTaxReference.error.required")
+        .verifying(regexp(regex.toString(), "inheritanceTaxReference.error.invalid"))
     )
 }

@@ -44,8 +44,7 @@ class WhatYouWillNeedControllerSpec extends SpecBase {
       }
     }
 
-    // TODO - repurpose InputPagePlaceholderController to the next input page within the minimal journey
-    "must redirect to InputPagePlaceholderController list when valid data is submitted" in {
+    "must redirect to InheritanceTaxReferenceController list when valid data is submitted" in {
 
       val application = applicationBuilder(userAnswers = Some(emptyUserAnswers), usesSession = true).build()
 
@@ -57,7 +56,9 @@ class WhatYouWillNeedControllerSpec extends SpecBase {
         val result = route(application, request).value
 
         status(result) mustEqual SEE_OTHER
-        redirectLocation(result).value mustEqual routes.InputPagePlaceholderController.onPageLoad(srn, NormalMode).url
+        redirectLocation(result).value mustEqual routes.InheritanceTaxReferenceController
+          .onPageLoad(srn, NormalMode)
+          .url
       }
     }
   }

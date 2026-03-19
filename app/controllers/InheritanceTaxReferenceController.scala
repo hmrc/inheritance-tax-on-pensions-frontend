@@ -18,12 +18,12 @@ package controllers
 
 import services.UserAnswersService
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
-import pages.InputPagePlaceholderPage
+import pages.InheritanceTaxReferencePage
 import controllers.actions._
-import forms.InputPagePlaceholderFormProvider
+import forms.InheritanceTaxReferenceFormProvider
 import models.Mode
 import play.api.data.Form
-import views.html.InputPagePlaceholderView
+import views.html.InheritanceTaxReferenceView
 import models.SchemeId.Srn
 import play.api.i18n.{I18nSupport, MessagesApi}
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
@@ -32,16 +32,16 @@ import scala.concurrent.{ExecutionContext, Future}
 
 import javax.inject.Inject
 
-class InputPagePlaceholderController @Inject() (
+class InheritanceTaxReferenceController @Inject() (
   override val messagesApi: MessagesApi,
   identify: IdentifierAction,
   allowAccess: AllowAccessActionWithSessionCacheProvider,
   getData: DataRetrievalAction,
   requireData: DataRequiredAction,
-  formProvider: InputPagePlaceholderFormProvider,
+  formProvider: InheritanceTaxReferenceFormProvider,
   val controllerComponents: MessagesControllerComponents,
   userAnswersService: UserAnswersService,
-  view: InputPagePlaceholderView
+  view: InheritanceTaxReferenceView
 )(implicit ec: ExecutionContext)
     extends FrontendBaseController
     with I18nSupport {
@@ -53,7 +53,7 @@ class InputPagePlaceholderController @Inject() (
       .andThen(allowAccess(srn))
       .andThen(getData)
       .andThen(requireData) { implicit request =>
-        request.userAnswers.get(InputPagePlaceholderPage) match {
+        request.userAnswers.get(InheritanceTaxReferencePage) match {
           case Some(input) => Ok(view(form.fill(input), srn, mode))
           case _ => Ok(view(form, srn, mode))
         }
@@ -71,7 +71,7 @@ class InputPagePlaceholderController @Inject() (
             formWithErrors => Future.successful(BadRequest(view(formWithErrors, srn, mode))),
             value =>
               for {
-                updatedAnswers <- Future.fromTry(request.userAnswers.set(InputPagePlaceholderPage, value))
+                updatedAnswers <- Future.fromTry(request.userAnswers.set(InheritanceTaxReferencePage, value))
                 _ <- userAnswersService.set(updatedAnswers)(using hc, request.request)
               } yield Redirect(routes.SubmissionListController.onPageLoad(srn))
           )

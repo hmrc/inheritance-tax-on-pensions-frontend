@@ -19,13 +19,14 @@ package forms
 import forms.behaviours.StringFieldBehaviours
 import play.api.data.FormError
 
-class InputPagePlaceholderFormProviderSpec extends StringFieldBehaviours {
+class InheritanceTaxReferenceFormProviderSpec extends StringFieldBehaviours {
 
-  val requiredKey = "inputPagePlaceholder.error.required"
-  val lengthKey = "inputPagePlaceholder.error.length"
-  val maxLength = 100
+  val requiredKey = "inheritanceTaxReference.error.required"
+  val lengthKey = "inheritanceTaxReference.error.length"
+  val invalidCharactersKey = "inheritanceTaxReference.error.invalid"
+  val maxLength = 11
 
-  val form = new InputPagePlaceholderFormProvider()()
+  val form = new InheritanceTaxReferenceFormProvider()()
 
   ".value" - {
 
@@ -35,16 +36,7 @@ class InputPagePlaceholderFormProviderSpec extends StringFieldBehaviours {
       fieldThatBindsValidData(
         form,
         fieldName,
-        stringsWithMaxLength(maxLength)
-      )
-    )
-
-    behave.like(
-      fieldWithMaxLength(
-        form,
-        fieldName,
-        maxLength = maxLength,
-        lengthError = FormError(fieldName, lengthKey, Seq(maxLength))
+        "A123456/25A"
       )
     )
 
@@ -53,6 +45,15 @@ class InputPagePlaceholderFormProviderSpec extends StringFieldBehaviours {
         form,
         fieldName,
         requiredError = FormError(fieldName, requiredKey)
+      )
+    )
+
+    behave.like(
+      fieldWithRegex(
+        form,
+        fieldName,
+        "random",
+        error = FormError(fieldName, invalidCharactersKey, Seq(validCharacterRegex))
       )
     )
   }
