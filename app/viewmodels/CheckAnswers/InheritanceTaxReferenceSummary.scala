@@ -26,18 +26,17 @@ import models.{CheckMode, UserAnswers}
 import play.api.i18n.Messages
 import viewmodels.govuk.summarylist._
 
-object InheritanceTaxReferenceSummary  {
+object InheritanceTaxReferenceSummary {
 
   def row(srn: Srn, answers: UserAnswers)(implicit messages: Messages): Option[SummaryListRow] =
-    answers.get(InheritanceTaxReferencePage).map {
-      answer =>
-        SummaryListRowViewModel(
-          key     = "inheritanceTaxReference.checkYourAnswersLabel",
-          value   = ValueViewModel(HtmlFormat.escape(answer).toString),
-          actions = Seq(
-            ActionItemViewModel("site.change", routes.InheritanceTaxReferenceController.onPageLoad(srn, CheckMode).url)
-              .withVisuallyHiddenText(messages("inheritanceTaxReference.change.hidden"))
-          )
+    answers.get(InheritanceTaxReferencePage).map { answer =>
+      SummaryListRowViewModel(
+        key = "inheritanceTaxReference.checkYourAnswersLabel",
+        value = ValueViewModel(HtmlFormat.escape(answer).toString),
+        actions = Seq(
+          ActionItemViewModel("site.change", routes.InheritanceTaxReferenceController.onPageLoad(srn, CheckMode).url)
+            .withVisuallyHiddenText(messages("inheritanceTaxReference.change.hidden"))
         )
+      )
     }
 }
