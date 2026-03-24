@@ -58,7 +58,8 @@ unauthorised.linkMessage = contact HMRC for pension scheme help
 
 inheritanceTaxReference.title = Enter the Inheritance Tax reference number
 inheritanceTaxReference.heading = Enter the Inheritance Tax reference number
-inheritanceTaxReference.checkYourAnswersLabel = TODO
+inheritanceTaxReference.checkYourAnswersLabel = Inheritance Tax reference number
+inheritanceTaxReference.change.hidden = inheritance Tax reference number
 inheritanceTaxReference.error.required = Enter the Inheritance Tax reference number
 inheritanceTaxReference.error.invalid = Enter a valid Inheritance Tax reference number
 inheritanceTaxReference.hint = For example, A123456/25A or F123456/25B
@@ -80,3 +81,5 @@ psaDeclaration.text.guidance.usecase1 = you have received and checked the inform
 psaDeclaration.text.guidance.usecase2 = the information you have provided in this return is correct and complete to the best of your knowledge and belief
 psaDeclaration.agreeAndSubmit = Agree and submit
 
+checkYourAnswers.title = Check and submit the report
+checkYourAnswers.heading = Check and submit the report

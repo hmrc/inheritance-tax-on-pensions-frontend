@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 HM Revenue & Customs
+ * Copyright 2026 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,17 +18,20 @@ package controllers
 
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
+import pages.InheritanceTaxReferencePage
 import views.html.CheckYourAnswersView
 import base.SpecBase
-import viewmodels.govuk.SummaryListFluency
+import viewmodels.govuk.all.SummaryListViewModel
+import viewmodels.CheckAnswers.InheritanceTaxReferenceSummary
 
-class CheckYourAnswersControllerSpec extends SpecBase with SummaryListFluency {
+class CheckYourAnswersControllerSpec extends SpecBase {
 
-  "Check Your Answers Controller" - {
+  "CheckYourAnswers Controller" - {
 
     "must return OK and the correct view for a GET" in {
 
-      val application = applicationBuilder(userAnswers = Some(emptyUserAnswers)).build()
+      val userAnswers = emptyUserAnswers.set(InheritanceTaxReferencePage, "A123456/25A").get
+      val application = applicationBuilder(userAnswers = Some(userAnswers)).build()
 
       running(application) {
         val request = FakeRequest(GET, routes.CheckYourAnswersController.onPageLoad(srn).url)
@@ -36,10 +39,15 @@ class CheckYourAnswersControllerSpec extends SpecBase with SummaryListFluency {
         val result = route(application, request).value
 
         val view = application.injector.instanceOf[CheckYourAnswersView]
-        val list = SummaryListViewModel(Seq.empty)
+
+        val summaryList = SummaryListViewModel(
+          rows = Seq(
+            InheritanceTaxReferenceSummary.row(srn, userAnswers)(using messages(application)).get
+          )
+        )
 
         status(result) mustEqual OK
-        contentAsString(result) mustEqual view(list)(using request, messages(application)).toString
+        contentAsString(result) mustEqual view(srn, summaryList)(using request, messages(application)).toString
       }
     }
 
@@ -54,6 +62,33 @@ class CheckYourAnswersControllerSpec extends SpecBase with SummaryListFluency {
 
         status(result) mustEqual SEE_OTHER
         redirectLocation(result).value mustEqual routes.JourneyRecoveryController.onPageLoad().url
+      }
+    }
+
+    "must redirect to the psa confirmation page on post for psa" in {
+
+      val application = applicationBuilder(userAnswers = Some(emptyUserAnswers)).build()
+
+      running(application) {
+        val request = FakeRequest(POST, routes.CheckYourAnswersController.onSubmit(srn).url)
+
+        val result = route(application, request).value
+
+        status(result) mustEqual SEE_OTHER
+        redirectLocation(result).value mustEqual routes.PsaDeclarationController.onPageLoad(srn).url
+      }
+    }
+
+    "must redirect to the psp confirmation page on post for psp" in {
+
+      val application = applicationBuilder(userAnswers = Some(emptyUserAnswers), isPsa = false).build()
+
+      running(application) {
+        val request = FakeRequest(POST, routes.CheckYourAnswersController.onSubmit(srn).url)
+
+        intercept[RuntimeException] { // TODO - implement psp declaration and routing
+          await(route(application, request).get)
+        }
       }
     }
   }

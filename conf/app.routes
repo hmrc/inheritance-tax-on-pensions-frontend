@@ -10,8 +10,6 @@ GET         /refresh-session                             controllers.KeepAliveCo
 
 GET         /there-is-a-problem                          controllers.JourneyRecoveryController.onPageLoad(continueUrl: Option[RedirectUrl] ?= None)
 
-GET         /:srn/check-your-answers                     controllers.CheckYourAnswersController.onPageLoad(srn: Srn)
-
 GET         /account/sign-out-survey                     controllers.auth.AuthController.signOut()
 GET         /account/sign-out                            controllers.auth.AuthController.signOutNoSurvey()
 GET         /account/signed-out                          controllers.auth.SignedOutController.onPageLoad()
@@ -23,11 +21,14 @@ GET         /:srn/submission-list                        controllers.SubmissionL
 GET        /:srn/start-report-you-will-need              controllers.WhatYouWillNeedController.onPageLoad(srn: Srn)
 POST       /:srn/start-report-you-will-need              controllers.WhatYouWillNeedController.onSubmit(srn: Srn)
 
-GET         /:srn/enter-inheritance-tax-reference        controllers.InheritanceTaxReferenceController.onPageLoad(srn: Srn, mode: Mode = NormalMode)
-POST        /:srn/enter-inheritance-tax-reference        controllers.InheritanceTaxReferenceController.onSubmit(srn: Srn, mode: Mode = NormalMode)
-GET         /:srn/enter-inheritance-tax-reference        controllers.InheritanceTaxReferenceController.onPageLoad(srn: Srn, mode: Mode = CheckMode)
-POST        /:srn/enter-inheritance-tax-reference        controllers.InheritanceTaxReferenceController.onSubmit(srn: Srn, mode: Mode = CheckMode)
+GET        /:srn/enter-inheritance-tax-reference         controllers.InheritanceTaxReferenceController.onPageLoad(srn: Srn, mode: Mode = NormalMode)
+POST       /:srn/enter-inheritance-tax-reference         controllers.InheritanceTaxReferenceController.onSubmit(srn: Srn, mode: Mode = NormalMode)
+GET        /:srn/change-inheritance-tax-reference        controllers.InheritanceTaxReferenceController.onPageLoad(srn: Srn, mode: Mode = CheckMode)
+POST       /:srn/change-inheritance-tax-reference        controllers.InheritanceTaxReferenceController.onSubmit(srn: Srn, mode: Mode = CheckMode)
 
 GET        /:srn/psa-declaration                         controllers.PsaDeclarationController.onPageLoad(srn: Srn)
 POST       /:srn/psa-declaration                         controllers.PsaDeclarationController.onSubmit(srn: Srn)
+
+GET        /:srn/check-your-answers                      controllers.CheckYourAnswersController.onPageLoad(srn: Srn)
+POST       /:srn/check-your-answers                      controllers.CheckYourAnswersController.onSubmit(srn: Srn)
 

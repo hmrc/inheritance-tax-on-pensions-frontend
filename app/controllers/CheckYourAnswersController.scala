@@ -19,11 +19,13 @@ package controllers
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import com.google.inject.Inject
 import controllers.actions._
-import viewmodels.govuk.summarylist._
+import models.UserAnswers
 import views.html.CheckYourAnswersView
 import models.SchemeId.Srn
 import play.api.i18n.{I18nSupport, MessagesApi}
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
+import viewmodels.CheckAnswers.InheritanceTaxReferenceSummary
+import viewmodels.govuk.summarylist._
 
 class CheckYourAnswersController @Inject() (
   override val messagesApi: MessagesApi,
@@ -39,10 +41,23 @@ class CheckYourAnswersController @Inject() (
   def onPageLoad(srn: Srn): Action[AnyContent] =
     identify.andThen(allowAccess(srn)).andThen(getData).andThen(requireData) { implicit request =>
 
+      val userAnswers: UserAnswers = request.userAnswers
+
       val list = SummaryListViewModel(
-        rows = Seq.empty
+        rows = Seq(
+          InheritanceTaxReferenceSummary.row(srn, userAnswers)
+        ).flatten
       )
 
-      Ok(view(list))
+      Ok(view(srn, list))
+    }
+
+  def onSubmit(srn: Srn): Action[AnyContent] =
+    identify.andThen(allowAccess(srn)).andThen(getData).andThen(requireData) { implicit request =>
+      if (request.request.pensionSchemeId.isPSP) {
+        throw new RuntimeException("PSP journey not yet implemented")
+      } else {
+        Redirect(routes.PsaDeclarationController.onPageLoad(srn))
+      }
     }
 }
