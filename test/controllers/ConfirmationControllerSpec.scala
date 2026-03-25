@@ -37,7 +37,10 @@ class ConfirmationControllerSpec extends SpecBase {
         val view = application.injector.instanceOf[ConfirmationView]
 
         status(result) mustEqual OK
-        contentAsString(result) mustEqual view(paymentReference, email, srn)(using request, messages(application)).toString
+        contentAsString(result) mustEqual view(paymentReference, email, srn)(using
+          request,
+          messages(application)
+        ).toString
       }
     }
   }

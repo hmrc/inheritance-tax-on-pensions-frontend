@@ -25,21 +25,22 @@ import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
 
 import javax.inject.Inject
 
-class ConfirmationController @Inject()(
-                                       override val messagesApi: MessagesApi,
-                                       identify: IdentifierAction,
-                                       allowAccess: AllowAccessActionWithSessionCacheProvider,
-                                       val controllerComponents: MessagesControllerComponents,
-                                       view: ConfirmationView
-                                     ) extends FrontendBaseController with I18nSupport {
+class ConfirmationController @Inject() (
+  override val messagesApi: MessagesApi,
+  identify: IdentifierAction,
+  allowAccess: AllowAccessActionWithSessionCacheProvider,
+  val controllerComponents: MessagesControllerComponents,
+  view: ConfirmationView
+) extends FrontendBaseController
+    with I18nSupport {
 
-  // TODO - get payment reference and email from the cache (session) once available
+  // TODO - get payment reference from the cache (session) once available
   def onPageLoad(srn: Srn): Action[AnyContent] = identify
     .andThen(allowAccess(srn)) { implicit request =>
       Ok(
         view(
           "A123456/25A629671",
-          "testEmail@test.com",
+          request.minimalDetails.email,
           srn
         )
       )
