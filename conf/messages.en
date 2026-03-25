@@ -10,6 +10,7 @@ site.start = Start now
 site.startAgain = Start again
 site.signIn = Sign in
 site.govuk = GOV.UK
+site.stop = .
 
 date.day = Day
 date.month = Month
@@ -83,3 +84,17 @@ psaDeclaration.agreeAndSubmit = Agree and submit
 
 checkYourAnswers.title = Check and submit the report
 checkYourAnswers.heading = Check and submit the report
+
+confirmation.title = Report submitted
+confirmation.heading = Report submitted
+confirmation.panel.body.reference = Your payment reference
+confirmation.email = We have sent a confirmation email to {0}.
+confirmation.what.happens.next = What happens next
+confirmation.what.happens.next.p1 = HMRC will process this report.
+confirmation.what.happens.next.p2 = Once payment has been made, HMRC will use the payment reference to match payment to this report.
+confirmation.information.pretext = Find information on
+confirmation.information.link.text = paying tax as a pension scheme (opens in new tab)
+confirmation.information.link.url =  https://www.gov.uk/guidance/pension-scheme-administrators-paying-tax
+confirmation.progress.pretext = Check the progress of this report and previous reports on the
+confirmation.progress.link.text = overview page
+confirmation.corrections = Any errors in the report can be corrected up to 7 days after submission.

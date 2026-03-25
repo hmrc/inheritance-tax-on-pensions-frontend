@@ -18,36 +18,30 @@ package controllers
 
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import controllers.actions._
-import views.html.PsaDeclarationView
+import views.html.ConfirmationView
 import models.SchemeId.Srn
 import play.api.i18n.{I18nSupport, MessagesApi}
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
 
 import javax.inject.Inject
 
-class PsaDeclarationController @Inject() (
-  override val messagesApi: MessagesApi,
-  identify: IdentifierAction,
-  allowAccess: AllowAccessActionProvider, // Invalidate the authorisation cache on declaration and re-authenticate
-  getData: DataRetrievalAction,
-  requireData: DataRequiredAction,
-  val controllerComponents: MessagesControllerComponents,
-  view: PsaDeclarationView
-) extends FrontendBaseController
-    with I18nSupport {
+class ConfirmationController @Inject()(
+                                       override val messagesApi: MessagesApi,
+                                       identify: IdentifierAction,
+                                       allowAccess: AllowAccessActionWithSessionCacheProvider,
+                                       val controllerComponents: MessagesControllerComponents,
+                                       view: ConfirmationView
+                                     ) extends FrontendBaseController with I18nSupport {
 
+  // TODO - get payment reference and email from the cache (session) once available
   def onPageLoad(srn: Srn): Action[AnyContent] = identify
-    .andThen(allowAccess(srn))
-    .andThen(getData)
-    .andThen(requireData) { implicit request =>
-      Ok(view(srn, request.request.schemeDetails.schemeName))
+    .andThen(allowAccess(srn)) { implicit request =>
+      Ok(
+        view(
+          "A123456/25A629671",
+          "testEmail@test.com",
+          srn
+        )
+      )
     }
-
-  def onSubmit(srn: Srn): Action[AnyContent] =
-    identify
-      .andThen(allowAccess(srn))
-      .andThen(getData)
-      .andThen(requireData) { implicit request =>
-        Redirect(routes.ConfirmationController.onPageLoad(srn))
-      }
 }

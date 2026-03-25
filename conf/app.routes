@@ -32,3 +32,5 @@ POST       /:srn/psa-declaration                         controllers.PsaDeclarat
 GET        /:srn/check-your-answers                      controllers.CheckYourAnswersController.onPageLoad(srn: Srn)
 POST       /:srn/check-your-answers                      controllers.CheckYourAnswersController.onSubmit(srn: Srn)
 
+
+GET        /:srn/confirmation                            controllers.ConfirmationController.onPageLoad(srn: Srn)
