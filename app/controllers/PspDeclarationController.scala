@@ -27,16 +27,17 @@ import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
 
 import javax.inject.Inject
 
-class PspDeclarationController @Inject()(
-                                        override val messagesApi: MessagesApi,
-                                        identify: IdentifierAction,
-                                        allowAccess: AllowAccessActionProvider, // Invalidate the authorisation cache on declaration and re-authenticate
-                                        getData: DataRetrievalAction,
-                                        requireData: DataRequiredAction,
-                                        formProvider: PspDeclarationFormProvider,
-                                        val controllerComponents: MessagesControllerComponents,
-                                        view: PspDeclarationView
-                                    ) extends FrontendBaseController with I18nSupport {
+class PspDeclarationController @Inject() (
+  override val messagesApi: MessagesApi,
+  identify: IdentifierAction,
+  allowAccess: AllowAccessActionProvider, // Invalidate the authorisation cache on declaration and re-authenticate
+  getData: DataRetrievalAction,
+  requireData: DataRequiredAction,
+  formProvider: PspDeclarationFormProvider,
+  val controllerComponents: MessagesControllerComponents,
+  view: PspDeclarationView
+) extends FrontendBaseController
+    with I18nSupport {
 
   def onPageLoad(srn: Srn): Action[AnyContent] = identify
     .andThen(allowAccess(srn))
@@ -52,19 +53,19 @@ class PspDeclarationController @Inject()(
       Ok(view(preparedForm, srn, request.request.schemeDetails.schemeName))
     }
 
-  def onSubmit(srn: Srn): Action[AnyContent] =   identify
+  def onSubmit(srn: Srn): Action[AnyContent] = identify
     .andThen(allowAccess(srn))
     .andThen(getData)
-    .andThen(requireData) {
-    implicit request =>
+    .andThen(requireData) { implicit request =>
       val form = formProvider(request.request.schemeDetails.authorisingPSAID)
 
-      form.bindFromRequest().fold(
-        formWithErrors =>
-          BadRequest(view(formWithErrors, srn, request.request.schemeDetails.schemeName)),
-        _ =>
-          // TODO - correctly route when next step of the journey is built
-          Redirect(routes.SubmissionListController.onPageLoad(srn))
-      )
-  }
+      form
+        .bindFromRequest()
+        .fold(
+          formWithErrors => BadRequest(view(formWithErrors, srn, request.request.schemeDetails.schemeName)),
+          _ =>
+            // TODO - correctly route when next step of the journey is built
+            Redirect(routes.SubmissionListController.onPageLoad(srn))
+        )
+    }
 }

@@ -22,19 +22,51 @@ import play.api.data.FormError
 class PspDeclarationFormProviderSpec extends StringFieldBehaviours {
 
   val requiredKey = "schemeAdminId.error.required"
+  val invalidCharactersKey = "schemeAdminId.error.invalid"
+  val noMatchKey = "schemeAdminId.error.noMatch"
+  val maxLength = 8
+  val validCharacterRegex = "^(A[0-9]{7})$"
 
   val form = new PspDeclarationFormProvider()(Some("A1234567"))
 
   ".value" - {
 
-    // TODO - add tests for all scenarios
-
     val fieldName = "value"
 
-    behave like mandatoryField(
-      form,
-      fieldName,
-      requiredError = FormError(fieldName, requiredKey)
+    behave.like(
+      fieldThatBindsValidData(
+        form,
+        fieldName,
+        "A1234567"
+      )
     )
+
+    "must bind valid SchemeAdminId and ignore whitespace and lowercase" in {
+      val result = form.bind(Map("value" -> "a12  34567"))
+      result.errors mustBe empty
+      result.value mustBe Some("A1234567")
+    }
+
+    behave.like(
+      mandatoryField(
+        form,
+        fieldName,
+        requiredError = FormError(fieldName, requiredKey)
+      )
+    )
+
+    behave.like(
+      fieldContainsRegexError(
+        form,
+        fieldName,
+        "random",
+        error = FormError(fieldName, invalidCharactersKey, Seq(validCharacterRegex))
+      )
+    )
+
+    "not bind strings where the SchemeAdminId does not match" in {
+      val result = form.bind(Map("value" -> "A1234557"))
+      result.errors mustBe Seq(FormError(fieldName, noMatchKey))
+    }
   }
 }

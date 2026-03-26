@@ -64,7 +64,11 @@ class PspDeclarationControllerSpec extends SpecBase with MockitoSugar {
         val result = route(application, request).value
 
         status(result) mustEqual OK
-        contentAsString(result) mustEqual view(form.fill(defaultSchemeDetails.authorisingPSAID.get), srn, schemeName)(using request, messages(application)).toString
+        contentAsString(result) mustEqual view(form.fill(defaultSchemeDetails.authorisingPSAID.get), srn, schemeName)(
+          using
+          request,
+          messages(application)
+        ).toString
       }
     }
 
@@ -102,11 +106,35 @@ class PspDeclarationControllerSpec extends SpecBase with MockitoSugar {
         val result = route(application, request).value
 
         status(result) mustEqual BAD_REQUEST
-        contentAsString(result) mustEqual view(boundForm, srn, schemeName)(using request, messages(application)).toString
+        contentAsString(result) mustEqual view(boundForm, srn, schemeName)(using
+          request,
+          messages(application)
+        ).toString
       }
     }
-    
-    // TODO - add spec to cover auth scheme admin id fail
+
+    "must return a Bad Request and errors when authorisingPSAID not matched" in {
+
+      val application = applicationBuilder(userAnswers = Some(emptyUserAnswers)).build()
+
+      running(application) {
+        val request =
+          FakeRequest(POST, pspDeclarationRoute)
+            .withFormUrlEncodedBody(("value", "A1234557"))
+
+        val boundForm = form.bind(Map("value" -> "A1234557"))
+
+        val view = application.injector.instanceOf[PspDeclarationView]
+
+        val result = route(application, request).value
+
+        status(result) mustEqual BAD_REQUEST
+        contentAsString(result) mustEqual view(boundForm, srn, schemeName)(using
+          request,
+          messages(application)
+        ).toString
+      }
+    }
 
     "must redirect to Journey Recovery for a GET if no existing data is found" in {
 

@@ -25,6 +25,7 @@ class InheritanceTaxReferenceFormProviderSpec extends StringFieldBehaviours {
   val lengthKey = "inheritanceTaxReference.error.length"
   val invalidCharactersKey = "inheritanceTaxReference.error.invalid"
   val maxLength = 11
+  val validCharacterRegex = "^[A-Z]\\d{6}/\\d{2}[A-Z]$"
 
   val form = new InheritanceTaxReferenceFormProvider()()
 

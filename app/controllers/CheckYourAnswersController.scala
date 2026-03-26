@@ -55,7 +55,7 @@ class CheckYourAnswersController @Inject() (
   def onSubmit(srn: Srn): Action[AnyContent] =
     identify.andThen(allowAccess(srn)).andThen(getData).andThen(requireData) { implicit request =>
       if (request.request.pensionSchemeId.isPSP) {
-        throw new RuntimeException("PSP journey not yet implemented")
+        Redirect(routes.PspDeclarationController.onPageLoad(srn))
       } else {
         Redirect(routes.PsaDeclarationController.onPageLoad(srn))
       }
