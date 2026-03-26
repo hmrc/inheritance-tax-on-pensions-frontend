@@ -25,12 +25,12 @@ trait TestValues extends Generators {
   val email = "testEmail"
 
   val defaultSchemeDetails: SchemeDetails = SchemeDetails(
-    schemeName,
-    "testPSTR",
-    SchemeStatus.Open,
-    "testSchemeType",
-    Some("A1234567"),
-    List(Establisher("testFirstName testLastName", EstablisherKind.Individual))
+    schemeName = schemeName,
+    pstr = "testPSTR",
+    schemeStatus = SchemeStatus.Open,
+    schemeType = "testSchemeType",
+    authorisingPSAID = Some("A1234567"),
+    establishers = List(Establisher("testFirstName testLastName", EstablisherKind.Individual))
   )
 
   val individualDetails: IndividualDetails = IndividualDetails("testFirstName", Some("testMiddleName"), "testLastName")

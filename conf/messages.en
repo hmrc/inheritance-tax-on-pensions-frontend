@@ -83,3 +83,10 @@ psaDeclaration.agreeAndSubmit = Agree and submit
 
 checkYourAnswers.title = Check and submit the report
 checkYourAnswers.heading = Check and submit the report
+
+pspDeclaration.title = pspDeclaration
+pspDeclaration.heading = pspDeclaration
+pspDeclaration.checkYourAnswersLabel = pspDeclaration
+pspDeclaration.error.required = Enter pspDeclaration
+pspDeclaration.error.length = PspDeclaration must be 100 characters or less
+pspDeclaration.change.hidden = PspDeclaration
