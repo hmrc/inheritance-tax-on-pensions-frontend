@@ -18,11 +18,9 @@ package controllers
 
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
-import pages.PspDeclarationPage
 import views.html.PspDeclarationView
 import base.SpecBase
 import forms.PspDeclarationFormProvider
-import models.UserAnswers
 import play.api.data.Form
 import org.scalatestplus.mockito.MockitoSugar
 
@@ -47,28 +45,6 @@ class PspDeclarationControllerSpec extends SpecBase with MockitoSugar {
 
         status(result) mustEqual OK
         contentAsString(result) mustEqual view(form, srn, schemeName)(using request, messages(application)).toString
-      }
-    }
-
-    "must populate the view correctly on a GET when the question has previously been answered" in {
-
-      val userAnswers = UserAnswers(userAnswersId).set(PspDeclarationPage, "A1234567").success.value
-
-      val application = applicationBuilder(userAnswers = Some(userAnswers)).build()
-
-      running(application) {
-        val request = FakeRequest(GET, pspDeclarationRoute)
-
-        val view = application.injector.instanceOf[PspDeclarationView]
-
-        val result = route(application, request).value
-
-        status(result) mustEqual OK
-        contentAsString(result) mustEqual view(form.fill(defaultSchemeDetails.authorisingPSAID.get), srn, schemeName)(
-          using
-          request,
-          messages(application)
-        ).toString
       }
     }
 

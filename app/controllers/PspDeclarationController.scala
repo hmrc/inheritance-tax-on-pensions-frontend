@@ -17,7 +17,6 @@
 package controllers
 
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
-import pages.PspDeclarationPage
 import controllers.actions._
 import forms.PspDeclarationFormProvider
 import views.html.PspDeclarationView
@@ -44,13 +43,7 @@ class PspDeclarationController @Inject() (
     .andThen(getData)
     .andThen(requireData) { implicit request =>
       val form = formProvider(request.request.schemeDetails.authorisingPSAID)
-
-      val preparedForm = request.userAnswers.get(PspDeclarationPage) match {
-        case None => form
-        case Some(value) => form.fill(value)
-      }
-
-      Ok(view(preparedForm, srn, request.request.schemeDetails.schemeName))
+      Ok(view(form, srn, request.request.schemeDetails.schemeName))
     }
 
   def onSubmit(srn: Srn): Action[AnyContent] = identify
