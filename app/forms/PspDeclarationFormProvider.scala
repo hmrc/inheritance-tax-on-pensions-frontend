@@ -36,9 +36,9 @@ class PspDeclarationFormProvider @Inject() extends Mappings {
 
   def apply(authorisingPSAID: Option[String]): Form[String] =
     Form(
-      "value" -> text("schemeAdminId.error.required")
+      "value" -> text("pspDeclaration.schemeAdminId.error.required")
         .transform[String](sanitiseSchemeAdminId, identity)
-        .verifying(regexp(schemeAdminIdRegex.regex, "schemeAdminId.error.invalid"))
-        .verifying(isEqual(authorisingPSAID, "schemeAdminId.error.noMatch"))
+        .verifying(regexp(schemeAdminIdRegex.regex, "pspDeclaration.schemeAdminId.error.invalid"))
+        .verifying(isEqual(authorisingPSAID, "pspDeclaration.schemeAdminId.error.noMatch"))
     )
 }

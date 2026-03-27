@@ -21,9 +21,9 @@ import play.api.data.FormError
 
 class PspDeclarationFormProviderSpec extends StringFieldBehaviours {
 
-  val requiredKey = "schemeAdminId.error.required"
-  val invalidCharactersKey = "schemeAdminId.error.invalid"
-  val noMatchKey = "schemeAdminId.error.noMatch"
+  val requiredKey = "pspDeclaration.schemeAdminId.error.required"
+  val invalidCharactersKey = "pspDeclaration.schemeAdminId.error.invalid"
+  val noMatchKey = "pspDeclaration.schemeAdminId.error.noMatch"
   val maxLength = 8
   val validCharacterRegex = "^(A[0-9]{7})$"
 

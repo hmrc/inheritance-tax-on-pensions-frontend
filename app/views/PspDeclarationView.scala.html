@@ -18,11 +18,13 @@
 @import components.{BulletList, Caption, PageHeading, Paragraph}
 @import models.SchemeId.Srn
 @import config.Constants.Css
+@import viewmodels.LabelSize.Medium
 
 @this(
     layout: templates.Layout,
     formHelper: FormWithCSRF,
     caption: Caption,
+    pageHeading: PageHeading,
     paragraph: Paragraph,
     bulletList: BulletList,
     govukErrorSummary: GovukErrorSummary,
@@ -45,12 +47,22 @@
             @govukErrorSummary(ErrorSummaryViewModel(form))
         }
 
+        @pageHeading(messages("pspDeclaration.heading"))
+
+        @paragraph(messages("pspDeclaration.text.list"))
+
+        @bulletList(Seq(
+            messages("pspDeclaration.text.guidance.usecase1"),
+            messages("pspDeclaration.text.guidance.usecase2"),
+            messages("pspDeclaration.text.guidance.usecase3")
+        ))
+
         @govukInput(
             InputViewModel(
                 field = form("value"),
-                label = LabelViewModel(messages("pspDeclaration.heading"))
+                label = LabelViewModel(messages("pspDeclaration.question"))
                     .withCssClass(Css.labelCssLargeClass)
-                    .asPageHeading()
+                    .asPageHeading(size = Medium)
             )
             .withWidth(Fixed10)
         )
