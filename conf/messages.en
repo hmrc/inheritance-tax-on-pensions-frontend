@@ -98,3 +98,5 @@ confirmation.information.link.url =  https://www.gov.uk/guidance/pension-scheme-
 confirmation.progress.pretext = Check the progress of this report and previous reports on the
 confirmation.progress.link.text = overview page
 confirmation.corrections = Any errors in the report can be corrected up to 7 days after submission.
+confirmation.feedback = What did you think of this service?
+confirmation.feedback.append = (takes 30 seconds)

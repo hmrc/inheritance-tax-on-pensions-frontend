@@ -33,4 +33,4 @@ GET        /:srn/check-your-answers                      controllers.CheckYourAn
 POST       /:srn/check-your-answers                      controllers.CheckYourAnswersController.onSubmit(srn: Srn)
 
 
-GET        /:srn/confirmation                            controllers.ConfirmationController.onPageLoad(srn: Srn)
+GET        /:srn/ihtp-report-submitted                   controllers.ConfirmationController.onPageLoad(srn: Srn)
