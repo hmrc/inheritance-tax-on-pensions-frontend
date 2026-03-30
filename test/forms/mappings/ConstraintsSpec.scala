@@ -216,4 +216,22 @@ class ConstraintsSpec extends AnyFreeSpec with Matchers with ScalaCheckPropertyC
       result mustEqual Invalid("error.max", CurrencyFormatter.currencyFormat(1))
     }
   }
+
+  "isEqual" - {
+
+    "must return Valid for a match on the string" in {
+      val result = isEqual(Some("A1234567"), "pspDeclaration.schemeAdminId.error.noMatch").apply("A1234567")
+      result `mustEqual` Valid
+    }
+
+    "must return invalid for an empty string" in {
+      val result = isEqual(Some("A1234567"), "pspDeclaration.schemeAdminId.error.noMatch").apply("")
+      result mustEqual Invalid("pspDeclaration.schemeAdminId.error.noMatch")
+    }
+
+    "must return invalid when no expected value" in {
+      val result = isEqual(None, "pspDeclaration.schemeAdminId.error.noMatch").apply("A1234567")
+      result mustEqual Invalid("pspDeclaration.schemeAdminId.error.noMatch")
+    }
+  }
 }

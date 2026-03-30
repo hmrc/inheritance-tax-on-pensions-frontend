@@ -127,7 +127,7 @@ trait Constraints {
 
   protected def isEqual(expectedValue: Option[String], errorKey: String): Constraint[String] =
     Constraint {
-      case _ if expectedValue.isEmpty => Valid
+      case _ if expectedValue.isEmpty => Invalid(errorKey)
       case s if expectedValue.contains(s) => Valid
       case _ => Invalid(errorKey)
     }

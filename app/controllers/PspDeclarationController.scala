@@ -29,7 +29,7 @@ import javax.inject.Inject
 class PspDeclarationController @Inject() (
   override val messagesApi: MessagesApi,
   identify: IdentifierAction,
-  allowAccess: AllowAccessActionProvider, // Invalidate the authorisation cache on declaration and re-authenticate
+  allowAccess: AllowAccessActionProvider, // Invalidate the authorisation cache on declaration
   getData: DataRetrievalAction,
   requireData: DataRequiredAction,
   formProvider: PspDeclarationFormProvider,

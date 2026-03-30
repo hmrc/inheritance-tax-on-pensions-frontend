@@ -60,11 +60,10 @@
         @govukInput(
             InputViewModel(
                 field = form("value"),
-                label = LabelViewModel(messages("pspDeclaration.question"))
-                    .withCssClass(Css.labelCssLargeClass)
-                    .asPageHeading(size = Medium)
+                label = LabelViewModel(messages("pspDeclaration.question")).asSubheading,
             )
             .withWidth(Fixed10)
+            .withAttribute("inputmode", "text")
         )
 
         @govukButton(
