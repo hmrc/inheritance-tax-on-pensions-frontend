@@ -25,11 +25,19 @@ import javax.inject.Inject
 
 class InheritanceTaxReferenceFormProvider @Inject() extends Mappings {
 
-  val regex: Regex = "^[A-Z]\\d{6}/\\d{2}[A-Z]$".r
+  private val referenceNumberRegex: Regex = "^[A-Z]\\d{6}/\\d{2}[A-Z]$".r
+
+  private def sanitiseReferenceNumber(referenceNumber: String) =
+    if (referenceNumber.matches(referenceNumberRegex.regex)) {
+      referenceNumber
+    } else {
+      referenceNumber.replaceAll("\\s+", "").toUpperCase
+    }
 
   def apply(): Form[String] =
     Form(
       "value" -> text("inheritanceTaxReference.error.required")
-        .verifying(regexp(regex.toString(), "inheritanceTaxReference.error.invalid"))
+        .transform[String](sanitiseReferenceNumber, identity)
+        .verifying(regexp(referenceNumberRegex.regex, "inheritanceTaxReference.error.invalid"))
     )
 }

@@ -40,6 +40,12 @@ class InheritanceTaxReferenceFormProviderSpec extends StringFieldBehaviours {
       )
     )
 
+    "must bind valid reference number and ignore whitespace and lowercase" in {
+      val result = form.bind(Map("value" -> "a12  3456/25  A  "))
+      result.errors mustBe empty
+      result.value mustBe Some("A123456/25A")
+    }
+
     behave.like(
       mandatoryField(
         form,
