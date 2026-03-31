@@ -15,41 +15,59 @@
  *@
 
 @import viewmodels.InputWidth._
+@import components.{BulletList, Caption, PageHeading, Paragraph}
 @import models.SchemeId.Srn
 @import config.Constants.Css
+@import viewmodels.LabelSize.Medium
 
 @this(
     layout: templates.Layout,
     formHelper: FormWithCSRF,
+    caption: Caption,
+    pageHeading: PageHeading,
+    paragraph: Paragraph,
+    bulletList: BulletList,
     govukErrorSummary: GovukErrorSummary,
     govukInput: GovukInput,
     govukButton: GovukButton
 )
 
-@(form: Form[?], srn: Srn, mode: Mode)(implicit request: Request[?], messages: Messages)
+@(form: Form[?], srn: Srn, schemeName: String)(implicit request: Request[?], messages: Messages)
 
-@layout(pageTitle = title(form, messages("inheritanceTaxReference.title"))) {
+@layout(pageTitle = title(form, messages("pspDeclaration.title"))) {
 
-    @formHelper(action = routes.InheritanceTaxReferenceController.onSubmit(srn, mode), Symbol("autoComplete") -> "off") {
+    @formHelper(action = routes.PspDeclarationController.onSubmit(srn)) {
+
+        @caption(
+            id = "psp-declaration-caption",
+            text = schemeName
+        )
 
         @if(form.errors.nonEmpty) {
             @govukErrorSummary(ErrorSummaryViewModel(form))
         }
 
+        @pageHeading(messages("pspDeclaration.heading"))
+
+        @paragraph(messages("pspDeclaration.text.list"))
+
+        @bulletList(Seq(
+            messages("pspDeclaration.text.guidance.usecase1"),
+            messages("pspDeclaration.text.guidance.usecase2"),
+            messages("pspDeclaration.text.guidance.usecase3")
+        ))
+
         @govukInput(
             InputViewModel(
                 field = form("value"),
-                label = LabelViewModel(messages("inheritanceTaxReference.heading"))
-                    .withCssClass(Css.labelCssLargeClass)
-                    .asPageHeading()
+                label = LabelViewModel(messages("pspDeclaration.question")).asSubheading,
             )
             .withWidth(Fixed10)
             .withAttribute("inputmode", "text")
-            .withHint(Hint(content = messages("inheritanceTaxReference.hint")))
         )
 
         @govukButton(
-            ButtonViewModel(messages("site.continue"))
+            ButtonViewModel(messages("pspDeclaration.agreeAndSubmit"))
         )
     }
 }

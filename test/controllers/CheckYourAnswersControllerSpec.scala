@@ -86,9 +86,10 @@ class CheckYourAnswersControllerSpec extends SpecBase {
       running(application) {
         val request = FakeRequest(POST, routes.CheckYourAnswersController.onSubmit(srn).url)
 
-        intercept[RuntimeException] { // TODO - implement psp declaration and routing
-          await(route(application, request).get)
-        }
+        val result = route(application, request).value
+
+        status(result) mustEqual SEE_OTHER
+        redirectLocation(result).value mustEqual routes.PspDeclarationController.onPageLoad(srn).url
       }
     }
   }

@@ -19,15 +19,15 @@ package forms
 import forms.behaviours.StringFieldBehaviours
 import play.api.data.FormError
 
-class InheritanceTaxReferenceFormProviderSpec extends StringFieldBehaviours {
+class PspDeclarationFormProviderSpec extends StringFieldBehaviours {
 
-  val requiredKey = "inheritanceTaxReference.error.required"
-  val lengthKey = "inheritanceTaxReference.error.length"
-  val invalidCharactersKey = "inheritanceTaxReference.error.invalid"
-  val maxLength = 11
-  val validCharacterRegex = "^[A-Z]\\d{6}/\\d{2}[A-Z]$"
+  val requiredKey = "pspDeclaration.schemeAdminId.error.required"
+  val invalidCharactersKey = "pspDeclaration.schemeAdminId.error.invalid"
+  val noMatchKey = "pspDeclaration.schemeAdminId.error.noMatch"
+  val maxLength = 8
+  val validCharacterRegex = "^(A[0-9]{7})$"
 
-  val form = new InheritanceTaxReferenceFormProvider()()
+  val form = new PspDeclarationFormProvider()(Some("A1234567"))
 
   ".value" - {
 
@@ -37,14 +37,14 @@ class InheritanceTaxReferenceFormProviderSpec extends StringFieldBehaviours {
       fieldThatBindsValidData(
         form,
         fieldName,
-        "A123456/25A"
+        "A1234567"
       )
     )
 
-    "must bind valid reference number and ignore whitespace and lowercase" in {
-      val result = form.bind(Map("value" -> "a12  3456/25  A  "))
+    "must bind valid SchemeAdminId and ignore whitespace and lowercase" in {
+      val result = form.bind(Map("value" -> "a12  34567"))
       result.errors mustBe empty
-      result.value mustBe Some("A123456/25A")
+      result.value mustBe Some("A1234567")
     }
 
     behave.like(
@@ -56,12 +56,17 @@ class InheritanceTaxReferenceFormProviderSpec extends StringFieldBehaviours {
     )
 
     behave.like(
-      fieldWithRegex(
+      fieldContainsRegexError(
         form,
         fieldName,
         "random",
         error = FormError(fieldName, invalidCharactersKey, Seq(validCharacterRegex))
       )
     )
+
+    "not bind strings where the SchemeAdminId does not match" in {
+      val result = form.bind(Map("value" -> "A1234557"))
+      result.errors mustBe Seq(FormError(fieldName, noMatchKey))
+    }
   }
 }

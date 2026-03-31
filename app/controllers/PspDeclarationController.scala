@@ -18,21 +18,23 @@ package controllers
 
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import controllers.actions._
-import views.html.PsaDeclarationView
+import forms.PspDeclarationFormProvider
+import views.html.PspDeclarationView
 import models.SchemeId.Srn
 import play.api.i18n.{I18nSupport, MessagesApi}
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
 
 import javax.inject.Inject
 
-class PsaDeclarationController @Inject() (
+class PspDeclarationController @Inject() (
   override val messagesApi: MessagesApi,
   identify: IdentifierAction,
   allowAccess: AllowAccessActionProvider, // Invalidate the authorisation cache on declaration
   getData: DataRetrievalAction,
   requireData: DataRequiredAction,
+  formProvider: PspDeclarationFormProvider,
   val controllerComponents: MessagesControllerComponents,
-  view: PsaDeclarationView
+  view: PspDeclarationView
 ) extends FrontendBaseController
     with I18nSupport {
 
@@ -40,14 +42,21 @@ class PsaDeclarationController @Inject() (
     .andThen(allowAccess(srn))
     .andThen(getData)
     .andThen(requireData) { implicit request =>
-      Ok(view(srn, request.request.schemeDetails.schemeName))
+      val form = formProvider(request.request.schemeDetails.authorisingPSAID)
+      Ok(view(form, srn, request.request.schemeDetails.schemeName))
     }
 
-  def onSubmit(srn: Srn): Action[AnyContent] =
-    identify
-      .andThen(allowAccess(srn))
-      .andThen(getData)
-      .andThen(requireData) { implicit request =>
-        Redirect(routes.ConfirmationController.onPageLoad(srn))
-      }
+  def onSubmit(srn: Srn): Action[AnyContent] = identify
+    .andThen(allowAccess(srn))
+    .andThen(getData)
+    .andThen(requireData) { implicit request =>
+      val form = formProvider(request.request.schemeDetails.authorisingPSAID)
+
+      form
+        .bindFromRequest()
+        .fold(
+          formWithErrors => BadRequest(view(formWithErrors, srn, request.request.schemeDetails.schemeName)),
+          _ => Redirect(routes.ConfirmationController.onPageLoad(srn))
+        )
+    }
 }

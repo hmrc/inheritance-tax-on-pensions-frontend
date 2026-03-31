@@ -18,6 +18,7 @@ package viewmodels.govuk
 
 import uk.gov.hmrc.govukfrontend.views.viewmodels.label.Label
 import uk.gov.hmrc.govukfrontend.views.viewmodels.content.Content
+import config.Constants.Css
 import viewmodels.LabelSize
 
 object label extends LabelFluency
@@ -36,6 +37,9 @@ trait LabelFluency {
       label
         .copy(isPageHeading = true)
         .withCssClass(size.toString)
+
+    def asSubheading: Label =
+      label.withCssClass(s"${Css.labelMCssClass} ${Css.marginBottom0CssClass}")
 
     def withCssClass(className: String): Label =
       label.copy(classes = s"${label.classes} $className")

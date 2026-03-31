@@ -50,6 +50,9 @@ object Constants {
     val headingMCssClass = "govuk-heading-m"
 
     val labelCssLargeClass = "govuk-label--l"
+    val labelMCssClass = "govuk-label--m"
+
+    val marginBottom0CssClass = "govuk-!-margin-bottom-0"
 
     val numberListCssClass = "govuk-list govuk-list--number"
     val bulletListCssClass = "govuk-list govuk-list--bullet"
