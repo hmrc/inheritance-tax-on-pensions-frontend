@@ -18,45 +18,31 @@ package controllers
 
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import controllers.actions._
-import forms.PspDeclarationFormProvider
-import views.html.PspDeclarationView
+import views.html.ConfirmationView
 import models.SchemeId.Srn
 import play.api.i18n.{I18nSupport, MessagesApi}
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
 
 import javax.inject.Inject
 
-class PspDeclarationController @Inject() (
+class ConfirmationController @Inject() (
   override val messagesApi: MessagesApi,
   identify: IdentifierAction,
-  allowAccess: AllowAccessActionProvider, // Invalidate the authorisation cache on declaration
-  getData: DataRetrievalAction,
-  requireData: DataRequiredAction,
-  formProvider: PspDeclarationFormProvider,
+  allowAccess: AllowAccessActionWithSessionCacheProvider,
   val controllerComponents: MessagesControllerComponents,
-  view: PspDeclarationView
+  view: ConfirmationView
 ) extends FrontendBaseController
     with I18nSupport {
 
+  // TODO - get payment reference from the cache (session) once available
   def onPageLoad(srn: Srn): Action[AnyContent] = identify
-    .andThen(allowAccess(srn))
-    .andThen(getData)
-    .andThen(requireData) { implicit request =>
-      val form = formProvider(request.request.schemeDetails.authorisingPSAID)
-      Ok(view(form, srn, request.request.schemeDetails.schemeName))
-    }
-
-  def onSubmit(srn: Srn): Action[AnyContent] = identify
-    .andThen(allowAccess(srn))
-    .andThen(getData)
-    .andThen(requireData) { implicit request =>
-      val form = formProvider(request.request.schemeDetails.authorisingPSAID)
-
-      form
-        .bindFromRequest()
-        .fold(
-          formWithErrors => BadRequest(view(formWithErrors, srn, request.request.schemeDetails.schemeName)),
-          _ => Redirect(routes.ConfirmationController.onPageLoad(srn))
+    .andThen(allowAccess(srn)) { implicit request =>
+      Ok(
+        view(
+          "A123456/25A629671",
+          request.minimalDetails.email,
+          srn
         )
+      )
     }
 }

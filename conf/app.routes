@@ -33,3 +33,5 @@ GET        /:srn/psa-declaration                         controllers.PsaDeclarat
 POST       /:srn/psa-declaration                         controllers.PsaDeclarationController.onSubmit(srn: Srn)
 GET        /:srn/pspDeclaration                          controllers.PspDeclarationController.onPageLoad(srn: Srn)
 POST       /:srn/pspDeclaration                          controllers.PspDeclarationController.onSubmit(srn: Srn)
+
+GET        /:srn/ihtp-report-submitted                   controllers.ConfirmationController.onPageLoad(srn: Srn)

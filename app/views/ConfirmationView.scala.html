@@ -1,0 +1,96 @@
+@*
+ * Copyright 2026 HM Revenue & Customs
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *@
+
+@import components.{Link, PageHeading, Paragraph, StrongPanelText, SubHeading}
+@import models.SchemeId.Srn
+
+@this(
+        layout: templates.Layout,
+        govukPanel: GovukPanel,
+        paragraph: Paragraph,
+        strongPanelText: StrongPanelText,
+        subHeading: SubHeading,
+        link: Link,
+)
+
+@(paymentReference: String, email: String, srn: Srn)(implicit request: Request[?], messages: Messages)
+
+@panelContent = {
+    @paragraph(
+        content = HtmlContent(HtmlFormat.fill(Seq(
+            Html(messages("confirmation.panel.body.reference")),
+            strongPanelText(paymentReference)
+        ))),
+    classes = ""
+    )
+}
+
+@layout(pageTitle = titleNoForm(messages("confirmation.title"))) {
+
+    @govukPanel(Panel(
+        title = Text((messages("confirmation.heading"))),
+        content = HtmlContent(panelContent)
+    ))
+
+    @paragraph(messages("confirmation.email", email))
+
+    @subHeading(messages("confirmation.what.happens.next"))
+
+    @paragraph(messages("confirmation.what.happens.next.p1"))
+
+    @paragraph(messages("confirmation.what.happens.next.p2"))
+
+    @paragraph(
+        content = HtmlContent(HtmlFormat.fill(Seq(
+            Html(messages("confirmation.information.pretext")),
+                link(
+                    id = "find-information-link",
+                    text = messages("confirmation.information.link.text"),
+                    href = messages("confirmation.information.link.url"),
+                    newTab = true
+            ),
+            Html(messages("site.stop"))
+            )),
+        ))
+
+    @paragraph(
+        content = HtmlContent(HtmlFormat.fill(Seq(
+            Html(messages("confirmation.progress.pretext")),
+                link(
+                    id = "progress-link",
+                    text = messages("confirmation.progress.link.text"),
+                    href = controllers.routes.SubmissionListController.onPageLoad(srn).url
+            ),
+            Html(messages("site.stop"))
+            )),
+        )
+    )
+
+    @paragraph(messages("confirmation.corrections"))
+
+    @paragraph(
+        content = HtmlContent(HtmlFormat.fill(Seq(
+            link(
+                id = "feedback-link",
+                text = messages("confirmation.feedback"),
+                href = controllers.auth.routes.AuthController.signOut().url
+            ),
+            Html(messages("confirmation.feedback.append"))
+            )),
+        )
+    )
+
+}

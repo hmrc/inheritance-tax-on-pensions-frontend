@@ -48,8 +48,7 @@ class PspDeclarationControllerSpec extends SpecBase with MockitoSugar {
       }
     }
 
-    // TODO - repurpose SubmissionListController to the next input page within the minimal journey
-    "must redirect to SubmissionListController list when valid data is submitted" in {
+    "must redirect to ConfirmationController list when valid data is submitted" in {
 
       val application =
         applicationBuilder(userAnswers = Some(emptyUserAnswers)).build()
@@ -62,7 +61,7 @@ class PspDeclarationControllerSpec extends SpecBase with MockitoSugar {
         val result = route(application, request).value
 
         status(result) mustEqual SEE_OTHER
-        redirectLocation(result).value mustEqual routes.SubmissionListController.onPageLoad(srn).url
+        redirectLocation(result).value mustEqual routes.ConfirmationController.onPageLoad(srn).url
       }
     }
 

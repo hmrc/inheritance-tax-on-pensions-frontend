@@ -48,7 +48,6 @@ class PsaDeclarationController @Inject() (
       .andThen(allowAccess(srn))
       .andThen(getData)
       .andThen(requireData) { implicit request =>
-        // TODO - correctly route when next step of the journey is built
-        Redirect(routes.SubmissionListController.onPageLoad(srn))
+        Redirect(routes.ConfirmationController.onPageLoad(srn))
       }
 }

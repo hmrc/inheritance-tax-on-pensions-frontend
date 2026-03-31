@@ -22,7 +22,8 @@ import models._
 trait TestValues extends Generators {
   val srn: SchemeId.Srn = srnGen.sample.get
   val schemeName = "testSchemeName"
-  val email = "testEmail"
+  val email = "testEmail@test.com"
+  val paymentReference = "A123456/25A629671"
 
   val defaultSchemeDetails: SchemeDetails = SchemeDetails(
     schemeName = schemeName,
