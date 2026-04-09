@@ -92,8 +92,8 @@ pspDeclaration.text.guidance.usecase1 = you have received and checked the inform
 pspDeclaration.text.guidance.usecase2 = the information you have provided in this return is correct and complete to the best of your knowledge and belief
 pspDeclaration.text.guidance.usecase3 = the authorising scheme administrator has authorised you to submit this return
 pspDeclaration.schemeAdminId.error.required = Enter the authorising scheme administrator's ID
-pspDeclaration.schemeAdminId.error.noMatch = The authorising scheme administrator ID does not match
-pspDeclaration.schemeAdminId.error.invalid = Enter a valid authorising scheme administrator ID
+pspDeclaration.schemeAdminId.error.noMatch = The authorising scheme administrator's ID does not match
+pspDeclaration.schemeAdminId.error.invalid = Enter a valid authorising scheme administrator's ID
 pspDeclaration.question = What is the authorising scheme administrator's ID?
 pspDeclaration.agreeAndSubmit = Agree and submit
 
