@@ -39,7 +39,7 @@ trait LabelFluency {
         .withCssClass(size.toString)
 
     def asSubheading: Label =
-      label.withCssClass(s"${Css.labelMCssClass} ${Css.marginBottom0CssClass}")
+      label.withCssClass(s"${Css.labelMCssClass} ${Css.marginBottom3CssClass}")
 
     def withCssClass(className: String): Label =
       label.copy(classes = s"${label.classes} $className")
