@@ -52,7 +52,7 @@ object Constants {
     val labelCssLargeClass = "govuk-label--l"
     val labelMCssClass = "govuk-label--m"
 
-    val marginBottom0CssClass = "govuk-!-margin-bottom-0"
+    val marginBottom3CssClass = "govuk-!-margin-bottom-3"
 
     val numberListCssClass = "govuk-list govuk-list--number"
     val bulletListCssClass = "govuk-list govuk-list--bullet"
