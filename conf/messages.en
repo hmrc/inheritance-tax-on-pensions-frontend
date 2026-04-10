@@ -5,7 +5,8 @@ site.remove = Remove
 site.change = Change
 site.no = No
 site.yes = Yes
-site.continue = Save and continue
+site.continue = Continue
+site.saveAndContinue = Save and continue
 site.start = Start now
 site.startAgain = Start again
 site.signIn = Sign in
@@ -67,12 +68,12 @@ inheritanceTaxReference.hint = For example, A123456/25A or F123456/25B
 
 whatYouWillNeed.title = What you will need
 whatYouWillNeed.heading = What you will need
-whatYouWillNeed.text.guidance = To complete a report you will need information usually supplied by the Legal Personal Representative (LPR) or a beneficiary.
+whatYouWillNeed.text.guidance = To complete a report you will need information supplied by the Legal Personal Representative (LPR) or a beneficiary.
 whatYouWillNeed.text.list = This includes:
 whatYouWillNeed.text.guidance.usecase1 = the Inheritance Tax reference number
 whatYouWillNeed.text.guidance.usecase2 = the name, birth and death dates of the deceased
 whatYouWillNeed.text.guidance.usecase3 = the name and address of the LPR
-whatYouWillNeed.text.guidance.usecase4 = beneficiary details, including names, addresses and amounts of Inheritance Tax payable
+whatYouWillNeed.text.guidance.usecase4 = beneficiary details and amounts of Inheritance Tax payable
 whatYouWillNeed.text.guidance.usecase5 = the National Insurance (NI) number of the deceased and each beneficiary (if applicable)
 
 checkYourAnswers.title = Check and submit the report
