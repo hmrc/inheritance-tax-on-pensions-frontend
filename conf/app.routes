@@ -26,6 +26,11 @@ POST       /:srn/enter-inheritance-tax-reference         controllers.Inheritance
 GET        /:srn/change-inheritance-tax-reference        controllers.InheritanceTaxReferenceController.onPageLoad(srn: Srn, mode: Mode = CheckMode)
 POST       /:srn/change-inheritance-tax-reference        controllers.InheritanceTaxReferenceController.onSubmit(srn: Srn, mode: Mode = CheckMode)
 
+GET        /:srn/ni-or-reason                            controllers.NinoOrReasonController.onPageLoad(srn: Srn, mode: Mode = NormalMode)
+POST       /:srn/ni-or-reason                            controllers.NinoOrReasonController.onSubmit(srn: Srn, mode: Mode = NormalMode)
+GET        /:srn/change-ni-or-reason                     controllers.NinoOrReasonController.onPageLoad(srn: Srn, mode: Mode = CheckMode)
+POST       /:srn/change-ni-or-reason                     controllers.NinoOrReasonController.onSubmit(srn: Srn, mode: Mode = CheckMode)
+
 GET        /:srn/check-your-answers                      controllers.CheckYourAnswersController.onPageLoad(srn: Srn)
 POST       /:srn/check-your-answers                      controllers.CheckYourAnswersController.onSubmit(srn: Srn)
 

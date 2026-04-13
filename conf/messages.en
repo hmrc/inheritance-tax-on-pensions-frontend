@@ -114,3 +114,17 @@ confirmation.corrections = Any errors in the report can be corrected up to 7 day
 confirmation.feedback = What did you think of this service?
 confirmation.feedback.append = (takes 30 seconds)
 
+ninoOrReason.title = Does the deceased have a National Insurance number?
+ninoOrReason.heading = Does {0} have a National Insurance number?
+ninoOrReason.yes = Yes
+ninoOrReason.no = No
+ninoOrReason.checkYourAnswersLabel = National Insurance number
+ninoOrReason.error.required = Select if there is a National Insurance number
+ninoOrReason.nino.label = Enter the National Insurance number, for example, NW123456C
+ninoOrReason.nino.error.required = Enter the National Insurance number
+ninoOrReason.nino.error.invalid = Enter the National Insurance number in the correct format
+ninoOrReason.reasonForNoNino.label = Enter a reason, for example, the deceased was not a UK citizen
+ninoOrReason.reasonForNoNino.error.required = Enter a reason for no National Insurance number
+ninoOrReason.reasonForNoNino.error.length = Reason must be 160 characters or fewer
+ninoOrReason.reasonForNoNino.error.invalid = Reason must not include new lines
+ninoOrReason.change.hidden = national insurance number

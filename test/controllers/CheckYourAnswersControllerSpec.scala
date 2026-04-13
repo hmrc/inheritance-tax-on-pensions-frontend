@@ -18,11 +18,13 @@ package controllers
 
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
-import pages.InheritanceTaxReferencePage
+import pages.{InheritanceTaxReferencePage, NinoOrReasonPage}
 import views.html.CheckYourAnswersView
 import base.SpecBase
 import viewmodels.govuk.all.SummaryListViewModel
-import viewmodels.CheckAnswers.InheritanceTaxReferenceSummary
+import forms.NinoOrReasonFormData
+import models.NinoOrReason
+import viewmodels.CheckAnswers._
 
 class CheckYourAnswersControllerSpec extends SpecBase {
 
@@ -30,7 +32,11 @@ class CheckYourAnswersControllerSpec extends SpecBase {
 
     "must return OK and the correct view for a GET" in {
 
-      val userAnswers = emptyUserAnswers.set(InheritanceTaxReferencePage, "A123456/25A").get
+      val userAnswers = emptyUserAnswers
+        .set(InheritanceTaxReferencePage, "A123456/25A")
+        .get
+        .set(NinoOrReasonPage, NinoOrReasonFormData(NinoOrReason.Yes, Some("QQ123456C"), None))
+        .get
       val application = applicationBuilder(userAnswers = Some(userAnswers)).build()
 
       running(application) {
@@ -42,7 +48,8 @@ class CheckYourAnswersControllerSpec extends SpecBase {
 
         val summaryList = SummaryListViewModel(
           rows = Seq(
-            InheritanceTaxReferenceSummary.row(srn, userAnswers)(using messages(application)).get
+            InheritanceTaxReferenceSummary.row(srn, userAnswers)(using messages(application)).get,
+            NinoOrReasonSummary.row(srn, userAnswers)(using messages(application)).get
           )
         )
 
