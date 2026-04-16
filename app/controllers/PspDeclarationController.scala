@@ -16,13 +16,18 @@
 
 package controllers
 
+import services.ReportSubmissionService
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import controllers.actions._
-import forms.PspDeclarationFormProvider
+import uk.gov.hmrc.play.http.HeaderCarrierConverter
 import views.html.PspDeclarationView
 import models.SchemeId.Srn
+import forms.PspDeclarationFormProvider
+import uk.gov.hmrc.http.HeaderCarrier
 import play.api.i18n.{I18nSupport, MessagesApi}
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
+
+import scala.concurrent.{ExecutionContext, Future}
 
 import javax.inject.Inject
 
@@ -33,9 +38,11 @@ class PspDeclarationController @Inject() (
   getData: DataRetrievalAction,
   requireData: DataRequiredAction,
   formProvider: PspDeclarationFormProvider,
+  reportSubmissionService: ReportSubmissionService,
   val controllerComponents: MessagesControllerComponents,
   view: PspDeclarationView
-) extends FrontendBaseController
+)(implicit ec: ExecutionContext)
+    extends FrontendBaseController
     with I18nSupport {
 
   def onPageLoad(srn: Srn): Action[AnyContent] = identify
@@ -49,14 +56,21 @@ class PspDeclarationController @Inject() (
   def onSubmit(srn: Srn): Action[AnyContent] = identify
     .andThen(allowAccess(srn))
     .andThen(getData)
-    .andThen(requireData) { implicit request =>
+    .andThen(requireData)
+    .async { implicit request =>
+      implicit val hc: HeaderCarrier = HeaderCarrierConverter.fromRequestAndSession(request, request.session)
       val form = formProvider(request.request.schemeDetails.authorisingPSAID)
 
       form
         .bindFromRequest()
         .fold(
-          formWithErrors => BadRequest(view(formWithErrors, srn, request.request.schemeDetails.schemeName)),
-          _ => Redirect(routes.ConfirmationController.onPageLoad(srn))
+          formWithErrors =>
+            Future.successful(BadRequest(view(formWithErrors, srn, request.request.schemeDetails.schemeName))),
+          _ =>
+            reportSubmissionService.submitReport(request.userAnswers.id)(using hc, request.request).map {
+              case Right(_) => Redirect(routes.ConfirmationController.onPageLoad(srn))
+              case Left(_) => Redirect(routes.JourneyRecoveryController.onPageLoad())
+            }
         )
     }
 }

@@ -17,12 +17,22 @@
 package controllers
 
 import play.api.test.FakeRequest
-import play.api.test.Helpers._
+import services.ReportSubmissionService
+import play.api.inject.bind
 import views.html.PspDeclarationView
 import base.SpecBase
-import forms.PspDeclarationFormProvider
+import models.IhtpReportSubmissionResponse
 import play.api.data.Form
 import org.scalatestplus.mockito.MockitoSugar
+import org.mockito.ArgumentMatchers.any
+import play.api.test.Helpers._
+import org.mockito.Mockito._
+import forms.PspDeclarationFormProvider
+import uk.gov.hmrc.http.UpstreamErrorResponse
+
+import scala.concurrent.Future
+
+import java.time.Instant
 
 class PspDeclarationControllerSpec extends SpecBase with MockitoSugar {
 
@@ -48,10 +58,15 @@ class PspDeclarationControllerSpec extends SpecBase with MockitoSugar {
       }
     }
 
-    "must redirect to ConfirmationController list when valid data is submitted" in {
+    "must redirect to ConfirmationController when submission is successful" in {
+      val mockReportSubmissionService = mock[ReportSubmissionService]
+      val response = IhtpReportSubmissionResponse(Instant.now(), "formBundle", "paymentRef")
+      when(mockReportSubmissionService.submitReport(any())(using any(), any()))
+        .thenReturn(Future.successful(Right(response)))
 
-      val application =
-        applicationBuilder(userAnswers = Some(emptyUserAnswers)).build()
+      val application = applicationBuilder(userAnswers = Some(emptyUserAnswers))
+        .overrides(bind[ReportSubmissionService].toInstance(mockReportSubmissionService))
+        .build()
 
       running(application) {
         val request =
@@ -62,6 +77,28 @@ class PspDeclarationControllerSpec extends SpecBase with MockitoSugar {
 
         status(result) mustEqual SEE_OTHER
         redirectLocation(result).value mustEqual routes.ConfirmationController.onPageLoad(srn).url
+      }
+    }
+
+    "must redirect to JourneyRecoveryController when submission fails" in {
+      val mockReportSubmissionService = mock[ReportSubmissionService]
+      val errorResponse = UpstreamErrorResponse("Submission failed", 500)
+      when(mockReportSubmissionService.submitReport(any())(using any(), any()))
+        .thenReturn(Future.successful(Left(errorResponse)))
+
+      val application = applicationBuilder(userAnswers = Some(emptyUserAnswers))
+        .overrides(bind[ReportSubmissionService].toInstance(mockReportSubmissionService))
+        .build()
+
+      running(application) {
+        val request =
+          FakeRequest(POST, pspDeclarationRoute)
+            .withFormUrlEncodedBody(("value", "A1234567"))
+
+        val result = route(application, request).value
+
+        status(result) mustEqual SEE_OTHER
+        redirectLocation(result).value mustEqual routes.JourneyRecoveryController.onPageLoad().url
       }
     }
 

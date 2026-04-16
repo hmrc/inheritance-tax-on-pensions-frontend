@@ -81,6 +81,9 @@ class FrontendAppConfig @Inject() (configuration: Configuration) {
   def setUserAnswersUrl(): String =
     s"$inheritanceTaxOnPensionsHost/inheritance-tax-on-pensions/user-answers"
 
+  def getSubmitReportUrl(pstr: String, userAnswersId: String): String =
+    s"$inheritanceTaxOnPensionsHost/inheritance-tax-on-pensions/$pstr/submit-report/$userAnswersId"
+
   private val inheritanceTaxOnPensionsHost: String =
     configuration.get[Service]("microservice.services.inheritanceTaxOnPensions").baseUrl
 

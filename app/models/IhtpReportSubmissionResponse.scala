@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 HM Revenue & Customs
+ * Copyright 2026 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,8 +18,10 @@ package models
 
 import play.api.libs.json.{Json, OFormat}
 
-case class ErrorModel(statusCode: Int, message: String)
+import java.time.Instant
 
-object ErrorModel {
-  implicit val formats: OFormat[ErrorModel] = Json.format[ErrorModel]
+case class IhtpReportSubmissionResponse(processingDateTime: Instant, formBundleNumber: String, paymentReference: String)
+
+object IhtpReportSubmissionResponse {
+  implicit val formats: OFormat[IhtpReportSubmissionResponse] = Json.format[IhtpReportSubmissionResponse]
 }
