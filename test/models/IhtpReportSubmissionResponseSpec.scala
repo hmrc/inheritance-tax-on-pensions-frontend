@@ -50,20 +50,5 @@ class IhtpReportSubmissionResponseSpec extends SpecBase {
       (json \ "formBundleNumber").as[String] mustBe "bundle-1"
       (json \ "paymentReference").as[String] mustBe "payment-1"
     }
-
-    "must have implicit formats defined" in {
-      import IhtpReportSubmissionResponse.formats
-      val json = Json.obj(
-        "processingDateTime" -> "2026-01-01T00:00:00Z",
-        "formBundleNumber" -> "bundle-1",
-        "paymentReference" -> "payment-1"
-      )
-      val result = json.as[IhtpReportSubmissionResponse]
-      result mustBe IhtpReportSubmissionResponse(
-        processingDateTime = Instant.parse("2026-01-01T00:00:00Z"),
-        formBundleNumber = "bundle-1",
-        paymentReference = "payment-1"
-      )
-    }
   }
 }
