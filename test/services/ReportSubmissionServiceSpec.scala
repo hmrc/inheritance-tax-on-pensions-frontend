@@ -21,8 +21,8 @@ import org.mockito.Mockito._
 import play.api.mvc.AnyContentAsEmpty
 import connectors.InheritanceTaxOnPensionsConnector
 import base.SpecBase
-import uk.gov.hmrc.http.{HeaderCarrier, UpstreamErrorResponse}
-import models.IhtpReportSubmissionResponse
+import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse, UpstreamErrorResponse}
+import models.{IhtpReportSubmissionResponse, UserAnswers}
 import models.requests.AllowedAccessRequest
 import org.mockito.ArgumentMatchers.any
 
@@ -55,6 +55,24 @@ class ReportSubmissionServiceSpec extends SpecBase {
 
       whenReady(testService.submitReport("userAnswersId")) {
         _ mustBe Left(errorResponse)
+      }
+    }
+
+    "must save payment reference to user answers on successful submission" in new Setup {
+      val response = IhtpReportSubmissionResponse(Instant.now(), "formBundle", "paymentRef")
+      val userAnswers: UserAnswers = emptyUserAnswers
+
+      when(mockConnector.submitReport(any(), any(), any(), any(), any(), any())(using any()))
+        .thenReturn(Future.successful(Right(response)))
+
+      when(mockUserAnswersService.fetch(any())(using any(), any()))
+        .thenReturn(Future.successful(Right(userAnswers)))
+
+      when(mockUserAnswersService.set(any())(using any(), any()))
+        .thenReturn(Future.successful(HttpResponse(200)))
+
+      whenReady(testService.submitReport("userAnswersId")) { _ =>
+        succeed
       }
     }
   }
