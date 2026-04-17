@@ -17,6 +17,7 @@
 package controllers
 
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
+import pages.PaymentReferencePage
 import controllers.actions._
 import views.html.ConfirmationView
 import models.SchemeId.Srn
@@ -29,18 +30,20 @@ class ConfirmationController @Inject() (
   override val messagesApi: MessagesApi,
   identify: IdentifierAction,
   allowAccess: AllowAccessActionWithSessionCacheProvider,
+  getData: DataRetrievalAction,
   val controllerComponents: MessagesControllerComponents,
   view: ConfirmationView
 ) extends FrontendBaseController
     with I18nSupport {
 
-  // TODO - get payment reference from the cache (session) once available
   def onPageLoad(srn: Srn): Action[AnyContent] = identify
-    .andThen(allowAccess(srn)) { implicit request =>
+    .andThen(allowAccess(srn))
+    .andThen(getData) { implicit request =>
+      val paymentReference = request.userAnswers.flatMap(_.get(PaymentReferencePage)).getOrElse("A123456/25A629671")
       Ok(
         view(
-          "A123456/25A629671",
-          request.minimalDetails.email,
+          paymentReference,
+          request.request.minimalDetails.email,
           srn
         )
       )

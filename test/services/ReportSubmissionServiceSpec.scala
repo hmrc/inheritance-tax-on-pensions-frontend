@@ -61,6 +61,7 @@ class ReportSubmissionServiceSpec extends SpecBase {
 
   class Setup {
     val mockConnector: InheritanceTaxOnPensionsConnector = mock[InheritanceTaxOnPensionsConnector]
-    val testService: ReportSubmissionService = new ReportSubmissionService(mockConnector)
+    val mockUserAnswersService: UserAnswersService = mock[UserAnswersService]
+    val testService: ReportSubmissionService = new ReportSubmissionService(mockConnector, mockUserAnswersService)
   }
 }

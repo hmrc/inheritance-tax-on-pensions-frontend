@@ -18,6 +18,7 @@ package controllers
 
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
+import pages.PaymentReferencePage
 import views.html.ConfirmationView
 import base.SpecBase
 
@@ -38,6 +39,44 @@ class ConfirmationControllerSpec extends SpecBase {
 
         status(result) mustEqual OK
         contentAsString(result) mustEqual view(paymentReference, email, srn)(using
+          request,
+          messages(application)
+        ).toString
+      }
+    }
+
+    "must return OK and the correct view for a GET when payment reference is present in user answers" in {
+      val userAnswersWithPaymentRef = emptyUserAnswers.set(PaymentReferencePage, "000012345321").success.value
+
+      val application = applicationBuilder(userAnswers = Some(userAnswersWithPaymentRef), usesSession = true).build()
+
+      running(application) {
+        val request = FakeRequest(GET, routes.ConfirmationController.onPageLoad(srn).url)
+
+        val result = route(application, request).value
+
+        val view = application.injector.instanceOf[ConfirmationView]
+
+        status(result) mustEqual OK
+        contentAsString(result) mustEqual view("000012345321", email, srn)(using
+          request,
+          messages(application)
+        ).toString
+      }
+    }
+
+    "must return OK and the correct view for a GET when payment reference is not present in user answers (fallback)" in {
+      val application = applicationBuilder(userAnswers = Some(emptyUserAnswers), usesSession = true).build()
+
+      running(application) {
+        val request = FakeRequest(GET, routes.ConfirmationController.onPageLoad(srn).url)
+
+        val result = route(application, request).value
+
+        val view = application.injector.instanceOf[ConfirmationView]
+
+        status(result) mustEqual OK
+        contentAsString(result) mustEqual view("A123456/25A629671", email, srn)(using
           request,
           messages(application)
         ).toString

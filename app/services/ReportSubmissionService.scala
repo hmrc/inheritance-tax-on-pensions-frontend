@@ -18,14 +18,21 @@ package services
 
 import com.google.inject.Inject
 import connectors.InheritanceTaxOnPensionsConnector
+import pages.PaymentReferencePage
+import play.api.Logging
 import uk.gov.hmrc.http.{HeaderCarrier, UpstreamErrorResponse}
 import models.IhtpReportSubmissionResponse
 import models.requests.AllowedAccessRequest
 
 import scala.concurrent.Future
+import scala.util.Success
 
-class ReportSubmissionService @Inject() (inheritanceTaxOnPensionsConnector: InheritanceTaxOnPensionsConnector)
-    extends BaseService {
+class ReportSubmissionService @Inject() (
+  inheritanceTaxOnPensionsConnector: InheritanceTaxOnPensionsConnector,
+  userAnswersService: UserAnswersService
+)(implicit ec: scala.concurrent.ExecutionContext)
+    extends BaseService
+    with Logging {
 
   def submitReport(
     userAnswersId: String
@@ -33,12 +40,23 @@ class ReportSubmissionService @Inject() (inheritanceTaxOnPensionsConnector: Inhe
     hc: HeaderCarrier,
     request: AllowedAccessRequest[?]
   ): Future[Either[UpstreamErrorResponse, IhtpReportSubmissionResponse]] =
-    inheritanceTaxOnPensionsConnector.submitReport(
-      request.schemeDetails.pstr,
-      userAnswersId,
-      schemeAdministratorOrPractitionerName,
-      schemeName,
-      srnVal,
-      role
-    )
+    inheritanceTaxOnPensionsConnector
+      .submitReport(
+        request.schemeDetails.pstr,
+        userAnswersId,
+        schemeAdministratorOrPractitionerName,
+        schemeName,
+        srnVal,
+        role
+      )
+      .andThen { case Success(Right(response)) =>
+        userAnswersService.fetch(userAnswersId).foreach {
+          case Right(userAnswers) =>
+            userAnswers.set(PaymentReferencePage, response.paymentReference).foreach { updatedAnswers =>
+              userAnswersService.set(updatedAnswers)
+            }
+          case Left(_) =>
+            logger.warn(s"[ReportSubmissionService] Failed to fetch user answers - payment reference not saved")
+        }
+      }
 }
