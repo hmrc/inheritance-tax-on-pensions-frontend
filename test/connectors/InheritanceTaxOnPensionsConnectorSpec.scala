@@ -20,7 +20,7 @@ import org.mockito.Mockito._
 import config.FrontendAppConfig
 import base.SpecBase
 import play.api.libs.json.Json
-import models.UserAnswers
+import models.{IhtpReportSubmissionResponse, UserAnswers}
 import uk.gov.hmrc.http.client.{HttpClientV2, RequestBuilder}
 import org.mockito.ArgumentMatchers.{any, eq => eqTo}
 import play.api.http.Status.INTERNAL_SERVER_ERROR
@@ -99,6 +99,62 @@ class InheritanceTaxOnPensionsConnectorSpec extends SpecBase {
       connector.setUserAnswers(expectedUserAnswers, schemeAdministratorOrPractitionerName, schemeName, srnVal, role)
 
       verify(connector.httpClient, atLeastOnce).put(eqTo(url"$putUrl"))(using any())
+    }
+  }
+
+  "submitReport" - {
+
+    "must successfully submit report" in new SetUp {
+      val pstr = "12345678"
+      val userAnswersId = "user-answers-id"
+      val expectedResponse = IhtpReportSubmissionResponse(
+        processingDateTime = java.time.Instant.now(),
+        formBundleNumber = "bundle-1",
+        paymentReference = "payment-1"
+      )
+      val mockUrl = s"http://inheritance-tax-on-pensions/inheritance-tax-on-pensions/$pstr/submit-report/$userAnswersId"
+
+      when(mockConfig.getSubmitReportUrl(eqTo(pstr), eqTo(userAnswersId))).thenReturn(mockUrl)
+
+      when(requestBuilder.execute[Either[UpstreamErrorResponse, IhtpReportSubmissionResponse]](using any(), any()))
+        .thenReturn(Future.successful(Right(expectedResponse)))
+
+      when(requestBuilder.transform(any()))
+        .thenReturn(requestBuilder)
+
+      when(connector.httpClient.post(any())(using any())).thenReturn(requestBuilder)
+
+      whenReady(
+        connector.submitReport(pstr, userAnswersId, schemeAdministratorOrPractitionerName, schemeName, srnVal, role)
+      ) {
+        _ mustBe Right(expectedResponse)
+      }
+
+      verify(connector.httpClient).post(eqTo(url"$mockUrl"))(using any())
+      verify(requestBuilder).transform(any())
+    }
+
+    "must return error when submission fails" in new SetUp {
+      val pstr = "12345678"
+      val userAnswersId = "user-answers-id"
+      val errorResponse = UpstreamErrorResponse("Submission failed", INTERNAL_SERVER_ERROR)
+      val mockUrl = s"http://inheritance-tax-on-pensions/inheritance-tax-on-pensions/$pstr/submit-report/$userAnswersId"
+
+      when(mockConfig.getSubmitReportUrl(eqTo(pstr), eqTo(userAnswersId))).thenReturn(mockUrl)
+
+      when(requestBuilder.execute[Either[UpstreamErrorResponse, IhtpReportSubmissionResponse]](using any(), any()))
+        .thenReturn(Future.successful(Left(errorResponse)))
+
+      when(requestBuilder.transform(any()))
+        .thenReturn(requestBuilder)
+
+      when(connector.httpClient.post(any())(using any())).thenReturn(requestBuilder)
+
+      whenReady(
+        connector.submitReport(pstr, userAnswersId, schemeAdministratorOrPractitionerName, schemeName, srnVal, role)
+      ) {
+        _ mustBe Left(errorResponse)
+      }
     }
   }
 

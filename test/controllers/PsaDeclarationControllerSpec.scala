@@ -17,11 +17,22 @@
 package controllers
 
 import play.api.test.FakeRequest
-import play.api.test.Helpers._
+import services.ReportSubmissionService
+import play.api.inject.bind
 import views.html.PsaDeclarationView
 import base.SpecBase
+import uk.gov.hmrc.http.UpstreamErrorResponse
+import models.IhtpReportSubmissionResponse
+import org.scalatestplus.mockito.MockitoSugar
+import org.mockito.ArgumentMatchers.any
+import play.api.test.Helpers._
+import org.mockito.Mockito._
 
-class PsaDeclarationControllerSpec extends SpecBase {
+import scala.concurrent.Future
+
+import java.time.Instant
+
+class PsaDeclarationControllerSpec extends SpecBase with MockitoSugar {
 
   lazy val psaDeclarationRoute: String = routes.PsaDeclarationController.onPageLoad(srn).url
 
@@ -47,19 +58,43 @@ class PsaDeclarationControllerSpec extends SpecBase {
       }
     }
 
-    "must redirect to ConfirmationController when valid data is submitted" in {
+    "must redirect to ConfirmationController when submission is successful" in {
+      val mockReportSubmissionService = mock[ReportSubmissionService]
+      val response = IhtpReportSubmissionResponse(Instant.now(), "formBundle", "paymentRef")
+      when(mockReportSubmissionService.submitReport(any())(using any(), any()))
+        .thenReturn(Future.successful(Right(response)))
 
-      val application = applicationBuilder(userAnswers = Some(emptyUserAnswers)).build()
+      val application = applicationBuilder(userAnswers = Some(emptyUserAnswers))
+        .overrides(bind[ReportSubmissionService].toInstance(mockReportSubmissionService))
+        .build()
 
       running(application) {
-        val request =
-          FakeRequest(POST, psaDeclarationRoute)
-            .withFormUrlEncodedBody(("value", "answer"))
+        val request = FakeRequest(POST, psaDeclarationRoute)
 
         val result = route(application, request).value
 
         status(result) mustEqual SEE_OTHER
         redirectLocation(result).value mustEqual routes.ConfirmationController.onPageLoad(srn).url
+      }
+    }
+
+    "must redirect to JourneyRecoveryController when submission fails" in {
+      val mockReportSubmissionService = mock[ReportSubmissionService]
+      val errorResponse = UpstreamErrorResponse("Submission failed", 500)
+      when(mockReportSubmissionService.submitReport(any())(using any(), any()))
+        .thenReturn(Future.successful(Left(errorResponse)))
+
+      val application = applicationBuilder(userAnswers = Some(emptyUserAnswers))
+        .overrides(bind[ReportSubmissionService].toInstance(mockReportSubmissionService))
+        .build()
+
+      running(application) {
+        val request = FakeRequest(POST, psaDeclarationRoute)
+
+        val result = route(application, request).value
+
+        status(result) mustEqual SEE_OTHER
+        redirectLocation(result).value mustEqual routes.JourneyRecoveryController.onPageLoad().url
       }
     }
   }

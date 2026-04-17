@@ -16,12 +16,17 @@
 
 package controllers
 
+import services.ReportSubmissionService
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import controllers.actions._
+import uk.gov.hmrc.http.HeaderCarrier
+import uk.gov.hmrc.play.http.HeaderCarrierConverter
 import views.html.PsaDeclarationView
 import models.SchemeId.Srn
 import play.api.i18n.{I18nSupport, MessagesApi}
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
+
+import scala.concurrent.ExecutionContext
 
 import javax.inject.Inject
 
@@ -31,9 +36,11 @@ class PsaDeclarationController @Inject() (
   allowAccess: AllowAccessActionProvider, // Invalidate the authorisation cache on declaration
   getData: DataRetrievalAction,
   requireData: DataRequiredAction,
+  reportSubmissionService: ReportSubmissionService,
   val controllerComponents: MessagesControllerComponents,
   view: PsaDeclarationView
-) extends FrontendBaseController
+)(implicit ec: ExecutionContext)
+    extends FrontendBaseController
     with I18nSupport {
 
   def onPageLoad(srn: Srn): Action[AnyContent] = identify
@@ -47,7 +54,12 @@ class PsaDeclarationController @Inject() (
     identify
       .andThen(allowAccess(srn))
       .andThen(getData)
-      .andThen(requireData) { implicit request =>
-        Redirect(routes.ConfirmationController.onPageLoad(srn))
+      .andThen(requireData)
+      .async { implicit request =>
+        implicit val hc: HeaderCarrier = HeaderCarrierConverter.fromRequestAndSession(request, request.session)
+        reportSubmissionService.submitReport(request.userAnswers)(using hc, request.request).map {
+          case Right(_) => Redirect(routes.ConfirmationController.onPageLoad(srn))
+          case Left(_) => Redirect(routes.JourneyRecoveryController.onPageLoad())
+        }
       }
 }

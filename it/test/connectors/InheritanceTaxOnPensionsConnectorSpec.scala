@@ -17,7 +17,7 @@
 package connectors
 
 import com.github.tomakehurst.wiremock.client.WireMock.*
-import models.{MinimalDetails, SchemeDetails, UserAnswers}
+import models.{IhtpReportSubmissionResponse, MinimalDetails, SchemeDetails, UserAnswers}
 import play.api.Application
 import play.api.http.Status.*
 import play.api.inject.guice.GuiceApplicationBuilder
@@ -41,6 +41,8 @@ class InheritanceTaxOnPensionsConnectorSpec extends BaseConnectorSpec {
   val id = "some_id"
   val fetchUrl = s"/inheritance-tax-on-pensions/user-answers/$id"
   val setUrl = "/inheritance-tax-on-pensions/user-answers"
+  val pstr = "12345678"
+  val submitUrl = s"/inheritance-tax-on-pensions/$pstr/submit-report/$id"
   val clock: Clock    = Clock.fixed(Instant.ofEpochMilli(1718118467838L), ZoneId.of("Europe/London"))
   val schemeAdministratorOrPractitionerName: String = "name"
   val srnVal: String = "testSrn"
@@ -104,6 +106,37 @@ class InheritanceTaxOnPensionsConnectorSpec extends BaseConnectorSpec {
 
         whenReady(connector.setUserAnswers(userAnswers, schemeAdministratorOrPractitionerName, schemeName, srnVal, role)) { result =>
           result.status mustBe SERVICE_UNAVAILABLE
+        }
+      }
+    }
+
+    "submitReport must" - {
+      "successfully submit report" in runningApplication { implicit app =>
+        val response = IhtpReportSubmissionResponse(
+          processingDateTime = Instant.now(clock),
+          formBundleNumber = "bundle-1",
+          paymentReference = "payment-1"
+        )
+        val jsonResponse: String = Json.toJson(response).toString()
+        wireMockServer.stubFor(
+          post(urlMatching(submitUrl))
+            .willReturn(aResponse().withStatus(OK).withBody(jsonResponse))
+        )
+
+        whenReady(connector.submitReport(pstr, id, schemeAdministratorOrPractitionerName, schemeName, srnVal, role)) { result =>
+          result mustBe Right(response)
+        }
+      }
+
+      "return an error when the upstream service returns an error" in runningApplication { implicit app =>
+        wireMockServer.stubFor(
+          post(urlMatching(submitUrl))
+            .willReturn(aResponse().withStatus(INTERNAL_SERVER_ERROR))
+        )
+
+        whenReady(connector.submitReport(pstr, id, schemeAdministratorOrPractitionerName, schemeName, srnVal, role)) { result =>
+          result.isLeft mustBe true
+          result.swap.toOption.get.statusCode mustBe INTERNAL_SERVER_ERROR
         }
       }
     }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 HM Revenue & Customs
+ * Copyright 2026 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,12 +14,13 @@
  * limitations under the License.
  */
 
-package models
+package pages
 
-import play.api.libs.json.{Json, OFormat}
+import play.api.libs.json.JsPath
 
-case class ErrorModel(statusCode: Int, message: String)
+object PaymentReferencePage extends QuestionPage[String] {
 
-object ErrorModel {
-  implicit val formats: OFormat[ErrorModel] = Json.format[ErrorModel]
+  override def path: JsPath = JsPath \ toString
+
+  override def toString: String = "paymentReference"
 }
