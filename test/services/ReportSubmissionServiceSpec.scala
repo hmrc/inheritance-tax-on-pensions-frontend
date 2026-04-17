@@ -40,20 +40,22 @@ class ReportSubmissionServiceSpec extends SpecBase {
 
     "must return success if connector returns success" in new Setup {
       val response = IhtpReportSubmissionResponse(Instant.now(), "formBundle", "paymentRef")
+      val userAnswers: UserAnswers = emptyUserAnswers
       when(mockConnector.submitReport(any(), any(), any(), any(), any(), any())(using any()))
         .thenReturn(Future.successful(Right(response)))
 
-      whenReady(testService.submitReport("userAnswersId")) {
+      whenReady(testService.submitReport(userAnswers)) {
         _ mustBe Right(response)
       }
     }
 
     "must return error if connector returns error" in new Setup {
       val errorResponse = UpstreamErrorResponse("Submission failed", 500)
+      val userAnswers: UserAnswers = emptyUserAnswers
       when(mockConnector.submitReport(any(), any(), any(), any(), any(), any())(using any()))
         .thenReturn(Future.successful(Left(errorResponse)))
 
-      whenReady(testService.submitReport("userAnswersId")) {
+      whenReady(testService.submitReport(userAnswers)) {
         _ mustBe Left(errorResponse)
       }
     }
@@ -65,13 +67,10 @@ class ReportSubmissionServiceSpec extends SpecBase {
       when(mockConnector.submitReport(any(), any(), any(), any(), any(), any())(using any()))
         .thenReturn(Future.successful(Right(response)))
 
-      when(mockUserAnswersService.fetch(any())(using any(), any()))
-        .thenReturn(Future.successful(Right(userAnswers)))
-
       when(mockUserAnswersService.set(any())(using any(), any()))
         .thenReturn(Future.successful(HttpResponse(200)))
 
-      whenReady(testService.submitReport("userAnswersId")) { _ =>
+      whenReady(testService.submitReport(userAnswers)) { _ =>
         succeed
       }
     }

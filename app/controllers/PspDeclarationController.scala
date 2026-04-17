@@ -67,7 +67,7 @@ class PspDeclarationController @Inject() (
           formWithErrors =>
             Future.successful(BadRequest(view(formWithErrors, srn, request.request.schemeDetails.schemeName))),
           _ =>
-            reportSubmissionService.submitReport(request.userAnswers.id)(using hc, request.request).map {
+            reportSubmissionService.submitReport(request.userAnswers)(using hc, request.request).map {
               case Right(_) => Redirect(routes.ConfirmationController.onPageLoad(srn))
               case Left(_) => Redirect(routes.JourneyRecoveryController.onPageLoad())
             }

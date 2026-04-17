@@ -57,7 +57,7 @@ class PsaDeclarationController @Inject() (
       .andThen(requireData)
       .async { implicit request =>
         implicit val hc: HeaderCarrier = HeaderCarrierConverter.fromRequestAndSession(request, request.session)
-        reportSubmissionService.submitReport(request.userAnswers.id)(using hc, request.request).map {
+        reportSubmissionService.submitReport(request.userAnswers)(using hc, request.request).map {
           case Right(_) => Redirect(routes.ConfirmationController.onPageLoad(srn))
           case Left(_) => Redirect(routes.JourneyRecoveryController.onPageLoad())
         }

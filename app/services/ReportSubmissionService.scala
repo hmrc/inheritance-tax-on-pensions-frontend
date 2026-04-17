@@ -21,7 +21,7 @@ import connectors.InheritanceTaxOnPensionsConnector
 import pages.PaymentReferencePage
 import play.api.Logging
 import uk.gov.hmrc.http.{HeaderCarrier, UpstreamErrorResponse}
-import models.IhtpReportSubmissionResponse
+import models.{IhtpReportSubmissionResponse, UserAnswers}
 import models.requests.AllowedAccessRequest
 
 import scala.concurrent.Future
@@ -35,7 +35,7 @@ class ReportSubmissionService @Inject() (
     with Logging {
 
   def submitReport(
-    userAnswersId: String
+    userAnswers: UserAnswers
   )(implicit
     hc: HeaderCarrier,
     request: AllowedAccessRequest[?]
@@ -43,20 +43,15 @@ class ReportSubmissionService @Inject() (
     inheritanceTaxOnPensionsConnector
       .submitReport(
         request.schemeDetails.pstr,
-        userAnswersId,
+        userAnswers.id,
         schemeAdministratorOrPractitionerName,
         schemeName,
         srnVal,
         role
       )
       .andThen { case Success(Right(response)) =>
-        userAnswersService.fetch(userAnswersId).foreach {
-          case Right(userAnswers) =>
-            userAnswers.set(PaymentReferencePage, response.paymentReference).foreach { updatedAnswers =>
-              userAnswersService.set(updatedAnswers)
-            }
-          case Left(_) =>
-            logger.warn(s"[ReportSubmissionService] Failed to fetch user answers - payment reference not saved")
+        userAnswers.set(PaymentReferencePage, response.paymentReference).foreach { updatedAnswers =>
+          userAnswersService.set(updatedAnswers)
         }
       }
 }
