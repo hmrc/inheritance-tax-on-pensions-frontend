@@ -24,7 +24,7 @@ import views.html.CheckYourAnswersView
 import models.SchemeId.Srn
 import play.api.i18n.{I18nSupport, MessagesApi}
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
-import viewmodels.CheckAnswers.InheritanceTaxReferenceSummary
+import viewmodels.CheckAnswers._
 import viewmodels.govuk.summarylist._
 
 class CheckYourAnswersController @Inject() (
@@ -45,7 +45,8 @@ class CheckYourAnswersController @Inject() (
 
       val list = SummaryListViewModel(
         rows = Seq(
-          InheritanceTaxReferenceSummary.row(srn, userAnswers)
+          InheritanceTaxReferenceSummary.row(srn, userAnswers),
+          NinoOrReasonSummary.row(srn, userAnswers)
         ).flatten
       )
 

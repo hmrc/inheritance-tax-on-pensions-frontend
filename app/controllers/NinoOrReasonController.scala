@@ -18,12 +18,12 @@ package controllers
 
 import services.UserAnswersService
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
-import pages.InheritanceTaxReferencePage
+import pages.NinoOrReasonPage
 import controllers.actions._
-import forms.InheritanceTaxReferenceFormProvider
+import forms.{NinoOrReasonFormData, NinoOrReasonFormProvider}
 import models.Mode
 import play.api.data.Form
-import views.html.InheritanceTaxReferenceView
+import views.html.NinoOrReasonView
 import models.SchemeId.Srn
 import play.api.i18n.{I18nSupport, MessagesApi}
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
@@ -32,31 +32,38 @@ import scala.concurrent.{ExecutionContext, Future}
 
 import javax.inject.Inject
 
-class InheritanceTaxReferenceController @Inject() (
+class NinoOrReasonController @Inject() (
   override val messagesApi: MessagesApi,
   identify: IdentifierAction,
   allowAccess: AllowAccessActionWithSessionCacheProvider,
   getData: DataRetrievalAction,
   requireData: DataRequiredAction,
-  formProvider: InheritanceTaxReferenceFormProvider,
+  formProvider: NinoOrReasonFormProvider,
   val controllerComponents: MessagesControllerComponents,
   userAnswersService: UserAnswersService,
-  view: InheritanceTaxReferenceView
+  view: NinoOrReasonView
 )(implicit ec: ExecutionContext)
     extends FrontendBaseController
     with I18nSupport {
 
-  val form: Form[String] = formProvider()
+  val form: Form[NinoOrReasonFormData] = formProvider()
+
+  private def deceasedName(implicit request: models.requests.DataRequest[?]): String =
+    request.request.minimalDetails.individualDetails
+      .map(_.fullName.trim.replaceAll("\\s+", " "))
+      .orElse(request.request.minimalDetails.organisationName)
+      .fold("")(identity)
 
   def onPageLoad(srn: Srn, mode: Mode): Action[AnyContent] =
     identify
       .andThen(allowAccess(srn))
       .andThen(getData)
       .andThen(requireData) { implicit request =>
-        request.userAnswers.get(InheritanceTaxReferencePage) match {
-          case Some(input) => Ok(view(form.fill(input), srn, mode))
-          case _ => Ok(view(form, srn, mode))
+        val preparedForm = request.userAnswers.get(NinoOrReasonPage) match {
+          case None => form
+          case Some(value) => form.fill(value)
         }
+        Ok(view(preparedForm, srn, mode, deceasedName))
       }
 
   def onSubmit(srn: Srn, mode: Mode): Action[AnyContent] =
@@ -65,15 +72,15 @@ class InheritanceTaxReferenceController @Inject() (
       .andThen(getData)
       .andThen(requireData)
       .async { implicit request =>
-        form
-          .bindFromRequest()
-          .fold(
-            formWithErrors => Future.successful(BadRequest(view(formWithErrors, srn, mode))),
-            value =>
-              for {
-                updatedAnswers <- Future.fromTry(request.userAnswers.set(InheritanceTaxReferencePage, value))
-                _ <- userAnswersService.set(updatedAnswers)(using hc, request.request)
-              } yield Redirect(routes.NinoOrReasonController.onPageLoad(srn, mode))
-          )
+        val boundForm = formProvider.validate(form.bindFromRequest())
+
+        boundForm.fold(
+          formWithErrors => Future.successful(BadRequest(view(formWithErrors, srn, mode, deceasedName))),
+          value =>
+            for {
+              updatedAnswers <- Future.fromTry(request.userAnswers.set(NinoOrReasonPage, value))
+              _ <- userAnswersService.set(updatedAnswers)(using hc, request.request)
+            } yield Redirect(routes.CheckYourAnswersController.onPageLoad(srn))
+        )
       }
 }

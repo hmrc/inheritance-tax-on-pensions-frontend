@@ -19,14 +19,55 @@ package forms.mappings
 import play.api.data.Forms.of
 import models.Enumerable
 import play.api.i18n.Messages
-import play.api.data.FieldMapping
+import play.api.data.{FieldMapping, Mapping}
 
 import java.time.LocalDate
 
 trait Mappings extends Formatters with Constraints {
 
+  private val ninoRegex = """^[A-Z]{2}\d{6}[A-Z]$"""
+  private val reasonForNoNinoRegex = """^[a-zA-Z0-9\-’`'" \t,.@/&()]+$"""
+  private val reasonForNoNinoMaxLength = 160
+
   protected def text(errorKey: String = "error.required", args: Seq[String] = Seq.empty): FieldMapping[String] =
     of(using stringFormatter(errorKey, args))
+
+  protected def nino(
+    requiredKey: String,
+    invalidKey: String,
+    args: Seq[String] = Seq.empty
+  ): Mapping[String] =
+    text(requiredKey, args)
+      .transform[String](_.replaceAll("\\s+", "").toUpperCase, identity)
+      .verifying(regexp(ninoRegex, invalidKey))
+
+  protected def validatedText(
+    requiredKey: String,
+    invalidKey: String,
+    maxLengthKey: String,
+    regex: String,
+    maximum: Int,
+    args: Seq[String] = Seq.empty
+  ): Mapping[String] =
+    text(requiredKey, args)
+      .transform[String](_.trim, identity)
+      .verifying(maxLength(maximum, maxLengthKey))
+      .verifying(regexp(regex, invalidKey))
+
+  protected def reasonForNoNino(
+    requiredKey: String,
+    invalidKey: String,
+    maxLengthKey: String,
+    args: Seq[String] = Seq.empty
+  ): Mapping[String] =
+    validatedText(
+      requiredKey = requiredKey,
+      invalidKey = invalidKey,
+      maxLengthKey = maxLengthKey,
+      regex = reasonForNoNinoRegex,
+      maximum = reasonForNoNinoMaxLength,
+      args = args
+    )
 
   protected def int(
     requiredKey: String = "error.required",
