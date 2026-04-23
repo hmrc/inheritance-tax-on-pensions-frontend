@@ -1,0 +1,81 @@
+@*
+ * Copyright 2026 HM Revenue & Customs
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *@
+
+@import uk.gov.hmrc.govukfrontend.views.Aliases.Text
+@import uk.gov.hmrc.govukfrontend.views.html.components.{FormWithCSRF, GovukButton, GovukErrorSummary, GovukInput}
+@import viewmodels.InputWidth._
+@import viewmodels.govuk.all._
+@import views.ViewUtils.title
+@import models.SchemeId.Srn
+
+@this(
+    layout: templates.Layout,
+    formHelper: FormWithCSRF,
+    govukErrorSummary: GovukErrorSummary,
+    govukInput: GovukInput,
+    govukButton: GovukButton
+)
+
+@(form: Form[?], srn: Srn, mode: Mode)(implicit request: Request[?], messages: Messages)
+
+@layout(pageTitle = title(form, messages("nameOfDeceased.title"))) {
+
+    @formHelper(action = routes.NameOfDeceasedController.onSubmit(srn, mode), Symbol("autoComplete") -> "off") {
+
+        @if(form.errors.nonEmpty) {
+            @govukErrorSummary(ErrorSummaryViewModel(form))
+        }
+
+        <h1 class="govuk-heading-l">@messages("nameOfDeceased.heading")</h1>
+
+        @govukInput(
+            InputViewModel(
+                field = form("title"),
+                label = LabelViewModel(Text(messages("common.nameInput.title")))
+            )
+            .withHint(HintViewModel(Text(messages("common.nameInput.titleHint"))))
+            .withWidth(Fixed4)
+        )
+
+        @govukInput(
+            InputViewModel(
+                field = form("firstForename"),
+                label = LabelViewModel(Text(messages("common.nameInput.firstName")))
+            )
+            .withWidth(OneHalf)
+        )
+
+        @govukInput(
+            InputViewModel(
+                field = form("secondForename"),
+                label = LabelViewModel(Text(messages("common.nameInput.middleName")))
+            )
+            .withWidth(OneHalf)
+        )
+
+        @govukInput(
+            InputViewModel(
+                field = form("surname"),
+                label = LabelViewModel(Text(messages("common.nameInput.lastName")))
+            )
+            .withWidth(OneHalf)
+        )
+
+        @govukButton(
+            ButtonViewModel(Text(messages("site.saveAndContinue")))
+        )
+    }
+}

@@ -18,12 +18,12 @@ package controllers
 
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
-import pages.{InheritanceTaxReferencePage, NinoOrReasonPage}
+import pages.{InheritanceTaxReferencePage, NameOfDeceasedPage, NinoOrReasonPage}
 import views.html.CheckYourAnswersView
 import base.SpecBase
 import viewmodels.govuk.all.SummaryListViewModel
 import forms.NinoOrReasonFormData
-import models.NinoOrReason
+import models.{NameOfDeceased, NinoOrReason}
 import viewmodels.CheckAnswers._
 
 class CheckYourAnswersControllerSpec extends SpecBase {
@@ -31,12 +31,32 @@ class CheckYourAnswersControllerSpec extends SpecBase {
   "CheckYourAnswers Controller" - {
 
     "must return OK and the correct view for a GET" in {
-
       val userAnswers = emptyUserAnswers
         .set(InheritanceTaxReferencePage, "A123456/25A")
-        .get
-        .set(NinoOrReasonPage, NinoOrReasonFormData(NinoOrReason.Yes, Some("QQ123456C"), None))
-        .get
+        .success
+        .value
+        .set(
+          NameOfDeceasedPage,
+          NameOfDeceased(
+            title = Some("Mr"),
+            firstForename = "John",
+            secondForename = Some("William"),
+            surname = "Doe"
+          )
+        )
+        .success
+        .value
+        .set(
+          NinoOrReasonPage,
+          NinoOrReasonFormData(
+            NinoOrReason.Yes,
+            Some("QQ123456C"),
+            None
+          )
+        )
+        .success
+        .value
+
       val application = applicationBuilder(userAnswers = Some(userAnswers)).build()
 
       running(application) {
@@ -49,6 +69,7 @@ class CheckYourAnswersControllerSpec extends SpecBase {
         val summaryList = SummaryListViewModel(
           rows = Seq(
             InheritanceTaxReferenceSummary.row(srn, userAnswers)(using messages(application)).get,
+            NameOfDeceasedSummary.row(srn, userAnswers)(using messages(application)).get,
             NinoOrReasonSummary.row(srn, userAnswers)(using messages(application)).get
           )
         )

@@ -46,6 +46,7 @@ class CheckYourAnswersController @Inject() (
       val list = SummaryListViewModel(
         rows = Seq(
           InheritanceTaxReferenceSummary.row(srn, userAnswers),
+          NameOfDeceasedSummary.row(srn, userAnswers),
           NinoOrReasonSummary.row(srn, userAnswers)
         ).flatten
       )

@@ -57,7 +57,7 @@ class InheritanceTaxReferenceControllerSpec extends SpecBase {
       }
     }
 
-    "must redirect to submission list when valid data is submitted" in {
+    "must redirect to name-of-deceased when valid data is submitted" in {
 
       val mockInheritanceTaxOnPensionsConnector = mock[InheritanceTaxOnPensionsConnector]
       when(mockInheritanceTaxOnPensionsConnector.setUserAnswers(any(), any(), any(), any(), any())(using any()))
@@ -77,7 +77,7 @@ class InheritanceTaxReferenceControllerSpec extends SpecBase {
         val result = route(application, request).value
 
         status(result) mustEqual SEE_OTHER
-        redirectLocation(result).value mustEqual routes.NinoOrReasonController.onPageLoad(srn, NormalMode).url
+        redirectLocation(result).value mustEqual routes.NameOfDeceasedController.onPageLoad(srn, NormalMode).url
 
         verify(mockInheritanceTaxOnPensionsConnector, times(1))
           .setUserAnswers(any(), any(), any(), any(), any())(using any())
