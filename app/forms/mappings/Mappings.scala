@@ -25,7 +25,7 @@ import java.time.LocalDate
 
 trait Mappings extends Formatters with Constraints {
 
-  private val ninoRegex = """^[A-Z]{2}\d{6}[A-Z]$"""
+  private val ninoRegex = """^(?!BG|GB|KN|NK|NT|TN|ZZ)[ABCEGHJKLMNOPRSTWXYZ][ABCEGHJKLMNPRSTWXYZ][0-9]{6}[ABCD]$"""
   private val reasonForNoNinoRegex = """^[a-zA-Z0-9\-’`'" \t,.@/&()]+$"""
   private val reasonForNoNinoMaxLength = 160
 

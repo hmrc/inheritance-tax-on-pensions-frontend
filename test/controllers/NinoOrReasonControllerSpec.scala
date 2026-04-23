@@ -18,11 +18,11 @@ package controllers
 
 import play.api.test.FakeRequest
 import connectors.InheritanceTaxOnPensionsConnector
-import pages.NinoOrReasonPage
+import pages.{NameOfDeceasedPage, NinoOrReasonPage}
 import play.api.inject.bind
 import views.html.NinoOrReasonView
 import base.SpecBase
-import models.{NinoOrReason, NormalMode, UserAnswers}
+import models._
 import play.api.data.Form
 import org.mockito.ArgumentMatchers.any
 import play.api.test.Helpers._
@@ -40,13 +40,25 @@ class NinoOrReasonControllerSpec extends SpecBase with MockitoSugar {
 
   val formProvider = new NinoOrReasonFormProvider()
   val form: Form[NinoOrReasonFormData] = formProvider()
-  val deceasedName: String = individualDetails.fullName.trim.replaceAll("\\s+", " ")
+  val nameOfDeceased: NameOfDeceased = NameOfDeceased(
+    title = Some("Mr"),
+    firstForename = "John",
+    secondForename = Some("William"),
+    surname = "Doe"
+  )
+  val deceasedName: String = s"${nameOfDeceased.firstForename} ${nameOfDeceased.surname}"
+  val userAnswersWithDeceasedName: UserAnswers = emptyUserAnswers
+    .set(NameOfDeceasedPage, nameOfDeceased)
+    .success
+    .value
+  val validNino: String = ninoGen.sample.value
+  val validNinoWithSpacesAndLowercase: String = validNino.toLowerCase.grouped(2).mkString(" ")
 
   "NinoOrReason Controller" - {
 
     "must return OK and the correct view for a GET" in {
 
-      val application = applicationBuilder(userAnswers = Some(emptyUserAnswers), usesSession = true).build()
+      val application = applicationBuilder(userAnswers = Some(userAnswersWithDeceasedName), usesSession = true).build()
 
       running(application) {
         val request = FakeRequest(GET, ninoOrReasonRoute)
@@ -65,8 +77,8 @@ class NinoOrReasonControllerSpec extends SpecBase with MockitoSugar {
 
     "must populate the view correctly on a GET when the question has previously been answered" in {
 
-      val userAnswers = UserAnswers(userAnswersId)
-        .set(NinoOrReasonPage, NinoOrReasonFormData(NinoOrReason.values.head, Some("QQ123456C"), None))
+      val userAnswers = userAnswersWithDeceasedName
+        .set(NinoOrReasonPage, NinoOrReasonFormData(NinoOrReason.values.head, Some(validNino), None))
         .success
         .value
 
@@ -81,7 +93,7 @@ class NinoOrReasonControllerSpec extends SpecBase with MockitoSugar {
 
         status(result) mustEqual OK
         contentAsString(result) mustEqual view(
-          form.fill(NinoOrReasonFormData(NinoOrReason.values.head, Some("QQ123456C"), None)),
+          form.fill(NinoOrReasonFormData(NinoOrReason.values.head, Some(validNino), None)),
           srn,
           NormalMode,
           deceasedName
@@ -94,7 +106,7 @@ class NinoOrReasonControllerSpec extends SpecBase with MockitoSugar {
 
     "must return a Bad Request and errors when invalid data is submitted" in {
 
-      val application = applicationBuilder(userAnswers = Some(emptyUserAnswers), usesSession = true).build()
+      val application = applicationBuilder(userAnswers = Some(userAnswersWithDeceasedName), usesSession = true).build()
 
       running(application) {
         val request =
@@ -117,7 +129,7 @@ class NinoOrReasonControllerSpec extends SpecBase with MockitoSugar {
 
     "must return a Bad Request when yes is selected and the National Insurance number is empty" in {
 
-      val application = applicationBuilder(userAnswers = Some(emptyUserAnswers), usesSession = true).build()
+      val application = applicationBuilder(userAnswers = Some(userAnswersWithDeceasedName), usesSession = true).build()
 
       running(application) {
         val request =
@@ -145,7 +157,7 @@ class NinoOrReasonControllerSpec extends SpecBase with MockitoSugar {
 
     "must return a Bad Request when yes is selected and the National Insurance number is not in the correct format" in {
 
-      val application = applicationBuilder(userAnswers = Some(emptyUserAnswers), usesSession = true).build()
+      val application = applicationBuilder(userAnswers = Some(userAnswersWithDeceasedName), usesSession = true).build()
 
       running(application) {
         val request =
@@ -173,7 +185,7 @@ class NinoOrReasonControllerSpec extends SpecBase with MockitoSugar {
 
     "must return a Bad Request when yes is selected and the National Insurance number contains invalid characters" in {
 
-      val application = applicationBuilder(userAnswers = Some(emptyUserAnswers), usesSession = true).build()
+      val application = applicationBuilder(userAnswers = Some(userAnswersWithDeceasedName), usesSession = true).build()
 
       running(application) {
         val request =
@@ -205,7 +217,7 @@ class NinoOrReasonControllerSpec extends SpecBase with MockitoSugar {
       when(mockInheritanceTaxOnPensionsConnector.setUserAnswers(any(), any(), any(), any(), any())(using any()))
         .thenReturn(Future.successful(mock[HttpResponse]))
 
-      val application = applicationBuilder(userAnswers = Some(emptyUserAnswers), usesSession = true)
+      val application = applicationBuilder(userAnswers = Some(userAnswersWithDeceasedName), usesSession = true)
         .overrides(
           bind[InheritanceTaxOnPensionsConnector].toInstance(mockInheritanceTaxOnPensionsConnector)
         )
@@ -216,22 +228,49 @@ class NinoOrReasonControllerSpec extends SpecBase with MockitoSugar {
           FakeRequest(POST, ninoOrReasonRoute)
             .withFormUrlEncodedBody(
               "value" -> NinoOrReason.Yes.toString,
-              "nino" -> "nw 12 34 56 c"
+              "nino" -> validNinoWithSpacesAndLowercase
             )
 
         val result = route(application, request).value
 
         status(result) mustEqual SEE_OTHER
-        redirectLocation(result).value mustEqual routes.CheckYourAnswersController.onPageLoad(srn).url
+        redirectLocation(result).value mustEqual routes.BirthDeathDatesController.onPageLoad(srn, NormalMode).url
 
         verify(mockInheritanceTaxOnPensionsConnector, times(1))
           .setUserAnswers(any(), any(), any(), any(), any())(using any())
       }
     }
 
+    "must redirect to Check Your Answers when valid data is submitted in CheckMode" in {
+
+      val mockInheritanceTaxOnPensionsConnector = mock[InheritanceTaxOnPensionsConnector]
+      when(mockInheritanceTaxOnPensionsConnector.setUserAnswers(any(), any(), any(), any(), any())(using any()))
+        .thenReturn(Future.successful(mock[HttpResponse]))
+
+      val application = applicationBuilder(userAnswers = Some(userAnswersWithDeceasedName), usesSession = true)
+        .overrides(
+          bind[InheritanceTaxOnPensionsConnector].toInstance(mockInheritanceTaxOnPensionsConnector)
+        )
+        .build()
+
+      running(application) {
+        val request =
+          FakeRequest(POST, routes.NinoOrReasonController.onSubmit(srn, CheckMode).url)
+            .withFormUrlEncodedBody(
+              "value" -> NinoOrReason.Yes.toString,
+              "nino" -> validNino
+            )
+
+        val result = route(application, request).value
+
+        status(result) mustEqual SEE_OTHER
+        redirectLocation(result).value mustEqual routes.CheckYourAnswersController.onPageLoad(srn).url
+      }
+    }
+
     "must clear a previously entered reason when yes is submitted" in {
 
-      val existingAnswers = UserAnswers(userAnswersId)
+      val existingAnswers = userAnswersWithDeceasedName
         .set(NinoOrReasonPage, NinoOrReasonFormData(NinoOrReason.No, None, Some("Existing reason")))
         .success
         .value
@@ -251,7 +290,7 @@ class NinoOrReasonControllerSpec extends SpecBase with MockitoSugar {
           FakeRequest(POST, ninoOrReasonRoute)
             .withFormUrlEncodedBody(
               "value" -> NinoOrReason.Yes.toString,
-              "nino" -> "NW123456C",
+              "nino" -> validNino,
               "reasonForNoNino" -> "Existing reason"
             )
 
@@ -264,14 +303,14 @@ class NinoOrReasonControllerSpec extends SpecBase with MockitoSugar {
           .setUserAnswers(userAnswersCaptor.capture(), any(), any(), any(), any())(using any())
 
         val savedAnswer = (userAnswersCaptor.getValue.data \ "ninoOrReason").as[NinoOrReasonFormData]
-        savedAnswer mustEqual NinoOrReasonFormData(NinoOrReason.Yes, Some("NW123456C"), None)
+        savedAnswer mustEqual NinoOrReasonFormData(NinoOrReason.Yes, Some(validNino), None)
       }
     }
 
     "must clear a previously entered nino when no is submitted" in {
 
-      val existingAnswers = UserAnswers(userAnswersId)
-        .set(NinoOrReasonPage, NinoOrReasonFormData(NinoOrReason.Yes, Some("NW123456C"), None))
+      val existingAnswers = userAnswersWithDeceasedName
+        .set(NinoOrReasonPage, NinoOrReasonFormData(NinoOrReason.Yes, Some(validNino), None))
         .success
         .value
 
@@ -290,7 +329,7 @@ class NinoOrReasonControllerSpec extends SpecBase with MockitoSugar {
           FakeRequest(POST, ninoOrReasonRoute)
             .withFormUrlEncodedBody(
               "value" -> NinoOrReason.No.toString,
-              "nino" -> "NW123456C",
+              "nino" -> validNino,
               "reasonForNoNino" -> "The deceased was not a UK citizen"
             )
 
@@ -313,7 +352,7 @@ class NinoOrReasonControllerSpec extends SpecBase with MockitoSugar {
 
     "must return a Bad Request when no is selected and the reason is empty" in {
 
-      val application = applicationBuilder(userAnswers = Some(emptyUserAnswers), usesSession = true).build()
+      val application = applicationBuilder(userAnswers = Some(userAnswersWithDeceasedName), usesSession = true).build()
 
       running(application) {
         val request =
@@ -341,7 +380,7 @@ class NinoOrReasonControllerSpec extends SpecBase with MockitoSugar {
 
     "must return a Bad Request when no is selected and the reason is longer than 160 characters" in {
 
-      val application = applicationBuilder(userAnswers = Some(emptyUserAnswers), usesSession = true).build()
+      val application = applicationBuilder(userAnswers = Some(userAnswersWithDeceasedName), usesSession = true).build()
 
       running(application) {
         val reason = "a" * 161
@@ -370,7 +409,7 @@ class NinoOrReasonControllerSpec extends SpecBase with MockitoSugar {
 
     "must return a Bad Request when no is selected and the reason contains a new line" in {
 
-      val application = applicationBuilder(userAnswers = Some(emptyUserAnswers), usesSession = true).build()
+      val application = applicationBuilder(userAnswers = Some(userAnswersWithDeceasedName), usesSession = true).build()
 
       running(application) {
         val reason = "first line\nsecond line"
@@ -411,6 +450,20 @@ class NinoOrReasonControllerSpec extends SpecBase with MockitoSugar {
       }
     }
 
+    "must redirect to Journey Recovery for a GET if the deceased name has not been answered" in {
+
+      val application = applicationBuilder(userAnswers = Some(emptyUserAnswers), usesSession = true).build()
+
+      running(application) {
+        val request = FakeRequest(GET, ninoOrReasonRoute)
+
+        val result = route(application, request).value
+
+        status(result) mustEqual SEE_OTHER
+        redirectLocation(result).value mustEqual routes.JourneyRecoveryController.onPageLoad().url
+      }
+    }
+
     "redirect to Journey Recovery for a POST if no existing data is found" in {
 
       val application = applicationBuilder(userAnswers = None, usesSession = true).build()
@@ -424,6 +477,22 @@ class NinoOrReasonControllerSpec extends SpecBase with MockitoSugar {
 
         status(result) mustEqual SEE_OTHER
 
+        redirectLocation(result).value mustEqual routes.JourneyRecoveryController.onPageLoad().url
+      }
+    }
+
+    "must redirect to Journey Recovery for a POST if the deceased name has not been answered" in {
+
+      val application = applicationBuilder(userAnswers = Some(emptyUserAnswers), usesSession = true).build()
+
+      running(application) {
+        val request =
+          FakeRequest(POST, ninoOrReasonRoute)
+            .withFormUrlEncodedBody(("value", NinoOrReason.values.head.toString))
+
+        val result = route(application, request).value
+
+        status(result) mustEqual SEE_OTHER
         redirectLocation(result).value mustEqual routes.JourneyRecoveryController.onPageLoad().url
       }
     }

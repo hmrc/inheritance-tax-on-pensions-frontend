@@ -47,7 +47,8 @@ class CheckYourAnswersController @Inject() (
         rows = Seq(
           InheritanceTaxReferenceSummary.row(srn, userAnswers),
           NameOfDeceasedSummary.row(srn, userAnswers),
-          NinoOrReasonSummary.row(srn, userAnswers)
+          NinoOrReasonSummary.row(srn, userAnswers),
+          BirthDeathDatesSummary.row(srn, userAnswers)
         ).flatten
       )
 

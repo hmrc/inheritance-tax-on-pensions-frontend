@@ -21,7 +21,7 @@ import connectors.InheritanceTaxOnPensionsConnector
 import play.api.inject.bind
 import views.html.InheritanceTaxReferenceView
 import base.SpecBase
-import models.NormalMode
+import models.{CheckMode, NormalMode}
 import play.api.data.Form
 import org.mockito.ArgumentMatchers.any
 import play.api.test.Helpers._
@@ -78,6 +78,33 @@ class InheritanceTaxReferenceControllerSpec extends SpecBase {
 
         status(result) mustEqual SEE_OTHER
         redirectLocation(result).value mustEqual routes.NameOfDeceasedController.onPageLoad(srn, NormalMode).url
+
+        verify(mockInheritanceTaxOnPensionsConnector, times(1))
+          .setUserAnswers(any(), any(), any(), any(), any())(using any())
+      }
+    }
+
+    "must redirect to Check Your Answers when valid data is submitted in CheckMode" in {
+
+      val mockInheritanceTaxOnPensionsConnector = mock[InheritanceTaxOnPensionsConnector]
+      when(mockInheritanceTaxOnPensionsConnector.setUserAnswers(any(), any(), any(), any(), any())(using any()))
+        .thenReturn(Future.successful(mock[HttpResponse]))
+
+      val application = applicationBuilder(userAnswers = Some(emptyUserAnswers), usesSession = true)
+        .overrides(
+          bind[InheritanceTaxOnPensionsConnector].toInstance(mockInheritanceTaxOnPensionsConnector)
+        )
+        .build()
+
+      running(application) {
+        val request =
+          FakeRequest(POST, routes.InheritanceTaxReferenceController.onSubmit(srn, CheckMode).url)
+            .withFormUrlEncodedBody(("value", "A123456/25A"))
+
+        val result = route(application, request).value
+
+        status(result) mustEqual SEE_OTHER
+        redirectLocation(result).value mustEqual routes.CheckYourAnswersController.onPageLoad(srn).url
 
         verify(mockInheritanceTaxOnPensionsConnector, times(1))
           .setUserAnswers(any(), any(), any(), any(), any())(using any())
