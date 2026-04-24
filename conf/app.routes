@@ -40,3 +40,8 @@ GET        /:srn/pspDeclaration                          controllers.PspDeclarat
 POST       /:srn/pspDeclaration                          controllers.PspDeclarationController.onSubmit(srn: Srn)
 
 GET        /:srn/ihtp-report-submitted                   controllers.ConfirmationController.onPageLoad(srn: Srn)
+
+GET        /:srn/name-of-deceased                     controllers.NameOfDeceasedController.onPageLoad(srn: Srn, mode: Mode = NormalMode)
+POST       /:srn/name-of-deceased                     controllers.NameOfDeceasedController.onSubmit(srn: Srn, mode: Mode = NormalMode)
+GET        /:srn/change-name-of-deceased               controllers.NameOfDeceasedController.onPageLoad(srn: Srn, mode: Mode = CheckMode)
+POST       /:srn/change-name-of-deceased               controllers.NameOfDeceasedController.onSubmit(srn: Srn, mode: Mode = CheckMode)

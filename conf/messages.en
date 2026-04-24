@@ -29,6 +29,12 @@ error.title.prefix = Error:
 error.prefix = Error
 error.summary.title = There is a problem
 
+common.nameInput.title = Title (optional)
+common.nameInput.titleHint = For example, Ms or Dr
+common.nameInput.firstName = First name
+common.nameInput.middleName = Middle names
+common.nameInput.lastName = Last name
+
 section.visuallyHidden = This section is:
 
 index.title = inheritance-tax-on-pensions-frontend
@@ -128,3 +134,20 @@ ninoOrReason.reasonForNoNino.error.required = Enter a reason for no National Ins
 ninoOrReason.reasonForNoNino.error.length = Reason must be 160 characters or fewer
 ninoOrReason.reasonForNoNino.error.invalid = Reason must not include new lines
 ninoOrReason.change.hidden = national insurance number
+
+nameOfDeceased.title = Enter the full name of the deceased person
+nameOfDeceased.heading = Enter the full name of the deceased person
+nameOfDeceased.checkYourAnswersLabel = Name of deceased
+nameOfDeceased.error.title.length = Title must be 4 characters or less
+nameOfDeceased.error.title.pattern = Enter a valid title
+nameOfDeceased.error.firstForename.required = Enter the deceased''s first name
+nameOfDeceased.error.firstForename.length = First name must be 35 characters or less
+nameOfDeceased.error.firstForename.pattern = Enter a valid first name
+nameOfDeceased.error.secondForename.length = Middle names must be 35 characters or less
+nameOfDeceased.error.secondForename.pattern = Enter a valid middle name
+nameOfDeceased.error.surname.required = Enter the deceased''s last name
+nameOfDeceased.error.surname.length = Last name must be 35 characters or less
+nameOfDeceased.error.surname.pattern = Enter a valid last name
+nameOfDeceased.firstForename.change.hidden = First name
+nameOfDeceased.surname.change.hidden = Last name
+nameOfDeceased.checkYourAnswersLabel.hidden = Name of deceased

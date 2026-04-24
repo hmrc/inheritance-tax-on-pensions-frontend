@@ -29,6 +29,8 @@ trait Mappings extends Formatters with Constraints {
   private val reasonForNoNinoRegex = """^[a-zA-Z0-9\-’`'" \t,.@/&()]+$"""
   private val reasonForNoNinoMaxLength = 160
 
+  protected val nameRegex: String = "^[A-Za-zÀ-ÖØ-öø-ÿ]+(?:[ '-][A-Za-zÀ-ÖØ-öø-ÿ]+)*$"
+
   protected def text(errorKey: String = "error.required", args: Seq[String] = Seq.empty): FieldMapping[String] =
     of(using stringFormatter(errorKey, args))
 
