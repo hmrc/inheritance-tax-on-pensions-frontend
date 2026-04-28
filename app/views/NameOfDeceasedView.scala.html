@@ -45,6 +45,7 @@
             InputViewModel(
                 field = form("title"),
                 label = LabelViewModel(Text(messages("common.nameInput.title")))
+                .withCssClass("govuk-!-font-weight-bold")
             )
             .withHint(HintViewModel(Text(messages("common.nameInput.titleHint"))))
             .withWidth(Fixed4)
@@ -54,24 +55,27 @@
             InputViewModel(
                 field = form("firstForename"),
                 label = LabelViewModel(Text(messages("common.nameInput.firstName")))
+                .withCssClass("govuk-!-font-weight-bold")
             )
-            .withWidth(OneHalf)
+            .withWidth(ThreeQuarters)
         )
 
         @govukInput(
             InputViewModel(
                 field = form("secondForename"),
                 label = LabelViewModel(Text(messages("common.nameInput.middleName")))
+                .withCssClass("govuk-!-font-weight-bold")
             )
-            .withWidth(OneHalf)
+            .withWidth(ThreeQuarters)
         )
 
         @govukInput(
             InputViewModel(
                 field = form("surname"),
                 label = LabelViewModel(Text(messages("common.nameInput.lastName")))
+                .withCssClass("govuk-!-font-weight-bold")
             )
-            .withWidth(OneHalf)
+            .withWidth(ThreeQuarters)
         )
 
         @govukButton(
