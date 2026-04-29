@@ -23,7 +23,7 @@ import views.html.CheckYourAnswersView
 import base.SpecBase
 import viewmodels.govuk.all.SummaryListViewModel
 import forms.NinoOrReasonFormData
-import models.{BirthDeathDates, NameOfDeceased, NinoOrReason}
+import models._
 import viewmodels.CheckAnswers._
 
 class CheckYourAnswersControllerSpec extends SpecBase {
@@ -51,6 +51,8 @@ class CheckYourAnswersControllerSpec extends SpecBase {
         .get
         .set(BirthDeathDatesPage, BirthDeathDates(testDateOfBirth, testDateOfDeath))
         .get
+        .set(LprTypePage, LprType.Individual)
+        .get
       val application = applicationBuilder(userAnswers = Some(userAnswers)).build()
 
       running(application) {
@@ -65,7 +67,8 @@ class CheckYourAnswersControllerSpec extends SpecBase {
             InheritanceTaxReferenceSummary.row(srn, userAnswers)(using messages(application)).get,
             NameOfDeceasedSummary.row(srn, userAnswers)(using messages(application)).get,
             NinoOrReasonSummary.row(srn, userAnswers)(using messages(application)).get,
-            BirthDeathDatesSummary.row(srn, userAnswers)(using messages(application)).get
+            BirthDeathDatesSummary.row(srn, userAnswers)(using messages(application)).get,
+            LprTypeSummary.row(srn, userAnswers)(using messages(application)).get
           )
         )
 
