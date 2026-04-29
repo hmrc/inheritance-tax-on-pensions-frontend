@@ -156,7 +156,11 @@ class DateMappingsSpec
 
     val result = form.bind(Map.empty[String, String])
 
-    result.errors must contain only FormError("value", "error.required.all", List.empty)
+    result.errors must contain only FormError(
+      "value",
+      "error.required.all",
+      List.empty
+    )
   }
 
   "must fail to bind a date with a missing day" in {

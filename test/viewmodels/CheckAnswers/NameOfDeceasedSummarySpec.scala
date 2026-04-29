@@ -68,9 +68,9 @@ class NameOfDeceasedSummarySpec extends AnyFreeSpec with SpecBase {
         .set(
           NameOfDeceasedPage,
           NameOfDeceased(
-            title = Some("Dr"),
-            firstForename = "Jane",
-            secondForename = Some("Marie"),
+            title = Some("Mr"),
+            firstForename = "John",
+            secondForename = Some("William"),
             surname = "Doe"
           )
         )
@@ -80,7 +80,7 @@ class NameOfDeceasedSummarySpec extends AnyFreeSpec with SpecBase {
       val result = NameOfDeceasedSummary.row(srn, userAnswers)
 
       result mustBe defined
-      result.get.value.content mustBe Text("Dr Jane Marie Doe")
+      result.get.value.content mustBe Text("Mr John William Doe")
     }
 
     "must format full name correctly without title" in {

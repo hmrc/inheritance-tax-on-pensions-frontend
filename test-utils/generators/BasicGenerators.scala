@@ -102,6 +102,23 @@ trait BasicGenerators {
   def numericStringLengthBetween(minLength: Int, maxLength: Int): Gen[String] =
     stringLengthBetween(minLength, maxLength, numChar)
 
+  val ninoGen: Gen[String] = {
+    val firstLetters = "ABCEGHJKLMNOPRSTWXYZ"
+    val secondLetters = "ABCEGHJKLMNPRSTWXYZ"
+    val suffixGen = Gen.oneOf("ABCD".toSeq)
+    val forbiddenPrefixes = Set("BG", "GB", "KN", "NK", "NT", "TN", "ZZ")
+    val validPrefixes =
+      firstLetters.toSeq
+        .flatMap(first => secondLetters.toSeq.map(second => s"$first$second"))
+        .filterNot(forbiddenPrefixes.contains)
+
+    for {
+      prefix <- Gen.oneOf(validPrefixes)
+      digits <- numericStringLength(6)
+      suffix <- suffixGen
+    } yield s"$prefix$digits$suffix"
+  }
+
   def stringsWithMaxLength(maxLength: Int): Gen[String] =
     for {
       length <- choose(1, maxLength)

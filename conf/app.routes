@@ -31,6 +31,11 @@ POST       /:srn/ni-or-reason                            controllers.NinoOrReaso
 GET        /:srn/change-ni-or-reason                     controllers.NinoOrReasonController.onPageLoad(srn: Srn, mode: Mode = CheckMode)
 POST       /:srn/change-ni-or-reason                     controllers.NinoOrReasonController.onSubmit(srn: Srn, mode: Mode = CheckMode)
 
+GET        /:srn/enter-birth-death-date                  controllers.BirthDeathDatesController.onPageLoad(srn: Srn, mode: Mode = NormalMode)
+POST       /:srn/enter-birth-death-date                  controllers.BirthDeathDatesController.onSubmit(srn: Srn, mode: Mode = NormalMode)
+GET        /:srn/change-birth-death-date                 controllers.BirthDeathDatesController.onPageLoad(srn: Srn, mode: Mode = CheckMode)
+POST       /:srn/change-birth-death-date                 controllers.BirthDeathDatesController.onSubmit(srn: Srn, mode: Mode = CheckMode)
+
 GET        /:srn/check-your-answers                      controllers.CheckYourAnswersController.onPageLoad(srn: Srn)
 POST       /:srn/check-your-answers                      controllers.CheckYourAnswersController.onSubmit(srn: Srn)
 

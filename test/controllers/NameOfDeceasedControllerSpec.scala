@@ -22,7 +22,7 @@ import pages.NameOfDeceasedPage
 import play.api.inject.bind
 import views.html.NameOfDeceasedView
 import base.SpecBase
-import models.{NameOfDeceased, NormalMode, UserAnswers}
+import models._
 import play.api.data.Form
 import org.mockito.ArgumentMatchers._
 import play.api.test.Helpers._
@@ -121,6 +121,33 @@ class NameOfDeceasedControllerSpec extends SpecBase {
 
         status(result) mustEqual SEE_OTHER
         redirectLocation(result).value mustEqual routes.NinoOrReasonController.onPageLoad(srn, NormalMode).url
+      }
+    }
+
+    "must redirect to Check Your Answers when valid data is submitted in CheckMode" in {
+
+      val mockConnector = mock[InheritanceTaxOnPensionsConnector]
+      when(mockConnector.setUserAnswers(any(), any(), any(), any(), any())(using any()))
+        .thenReturn(Future.successful(mock[HttpResponse]))
+
+      val application = applicationBuilder(userAnswers = Some(emptyUserAnswers), usesSession = true)
+        .overrides(bind[InheritanceTaxOnPensionsConnector].toInstance(mockConnector))
+        .build()
+
+      running(application) {
+        val request =
+          FakeRequest(POST, routes.NameOfDeceasedController.onSubmit(srn, CheckMode).url)
+            .withFormUrlEncodedBody(
+              "title" -> "Mr",
+              "firstForename" -> "John",
+              "secondForename" -> "William",
+              "surname" -> "Doe"
+            )
+
+        val result = route(application, request).value
+
+        status(result) mustEqual SEE_OTHER
+        redirectLocation(result).value mustEqual routes.CheckYourAnswersController.onPageLoad(srn).url
       }
     }
 

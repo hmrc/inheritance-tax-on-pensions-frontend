@@ -19,12 +19,11 @@ package controllers
 import services.UserAnswersService
 import utils.DeceasedNameHelper
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
-import pages.NinoOrReasonPage
+import pages.BirthDeathDatesPage
 import controllers.actions._
-import forms.{NinoOrReasonFormData, NinoOrReasonFormProvider}
-import models._
-import play.api.data.Form
-import views.html.NinoOrReasonView
+import forms.BirthDeathDatesFormProvider
+import models.{CheckMode, Mode, NormalMode}
+import views.html.BirthDeathDatesView
 import models.SchemeId.Srn
 import play.api.i18n.{I18nSupport, MessagesApi}
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
@@ -33,21 +32,19 @@ import scala.concurrent.{ExecutionContext, Future}
 
 import javax.inject.Inject
 
-class NinoOrReasonController @Inject() (
+class BirthDeathDatesController @Inject() (
   override val messagesApi: MessagesApi,
   identify: IdentifierAction,
   allowAccess: AllowAccessActionWithSessionCacheProvider,
   getData: DataRetrievalAction,
   requireData: DataRequiredAction,
-  formProvider: NinoOrReasonFormProvider,
+  formProvider: BirthDeathDatesFormProvider,
   val controllerComponents: MessagesControllerComponents,
   userAnswersService: UserAnswersService,
-  view: NinoOrReasonView
+  view: BirthDeathDatesView
 )(implicit ec: ExecutionContext)
     extends FrontendBaseController
     with I18nSupport {
-
-  val form: Form[NinoOrReasonFormData] = formProvider()
 
   def onPageLoad(srn: Srn, mode: Mode): Action[AnyContent] =
     identify
@@ -56,10 +53,13 @@ class NinoOrReasonController @Inject() (
       .andThen(requireData) { implicit request =>
         DeceasedNameHelper.withName(request.userAnswers)(Redirect(routes.JourneyRecoveryController.onPageLoad())) {
           deceasedName =>
-            val preparedForm = request.userAnswers.get(NinoOrReasonPage) match {
+            val form = formProvider()
+
+            val preparedForm = request.userAnswers.get(BirthDeathDatesPage) match {
               case None => form
               case Some(value) => form.fill(value)
             }
+
             Ok(view(preparedForm, srn, mode, deceasedName))
         }
       }
@@ -73,22 +73,24 @@ class NinoOrReasonController @Inject() (
         DeceasedNameHelper.withName(request.userAnswers) {
           Future.successful(Redirect(routes.JourneyRecoveryController.onPageLoad()))
         } { deceasedName =>
-          val boundForm = formProvider.validate(form.bindFromRequest())
+          val form = formProvider()
 
-          boundForm.fold(
-            formWithErrors => Future.successful(BadRequest(view(formWithErrors, srn, mode, deceasedName))),
-            value =>
-              for {
-                updatedAnswers <- Future.fromTry(request.userAnswers.set(NinoOrReasonPage, value))
-                _ <- userAnswersService.set(updatedAnswers)(using hc, request.request)
-              } yield Redirect(nextPage(srn, mode))
-          )
+          formProvider
+            .validate(form.bindFromRequest())
+            .fold(
+              formWithErrors => Future.successful(BadRequest(view(formWithErrors, srn, mode, deceasedName))),
+              value =>
+                for {
+                  updatedAnswers <- Future.fromTry(request.userAnswers.set(BirthDeathDatesPage, value))
+                  _ <- userAnswersService.set(updatedAnswers)(using hc, request.request)
+                } yield Redirect(nextPage(srn, mode))
+            )
         }
       }
 
   private def nextPage(srn: Srn, mode: Mode) =
     mode match {
-      case NormalMode => routes.BirthDeathDatesController.onPageLoad(srn, mode)
+      case NormalMode => routes.CheckYourAnswersController.onPageLoad(srn)
       case CheckMode => routes.CheckYourAnswersController.onPageLoad(srn)
     }
 }

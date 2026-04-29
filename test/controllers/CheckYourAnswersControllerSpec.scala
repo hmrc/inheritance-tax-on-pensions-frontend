@@ -18,15 +18,17 @@ package controllers
 
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
-import pages.{InheritanceTaxReferencePage, NameOfDeceasedPage, NinoOrReasonPage}
+import pages._
 import views.html.CheckYourAnswersView
 import base.SpecBase
 import viewmodels.govuk.all.SummaryListViewModel
 import forms.NinoOrReasonFormData
-import models.{NameOfDeceased, NinoOrReason}
+import models.{BirthDeathDates, NameOfDeceased, NinoOrReason}
 import viewmodels.CheckAnswers._
 
 class CheckYourAnswersControllerSpec extends SpecBase {
+
+  private val validNino: String = ninoGen.sample.value
 
   "CheckYourAnswers Controller" - {
 
@@ -44,19 +46,11 @@ class CheckYourAnswersControllerSpec extends SpecBase {
             surname = "Doe"
           )
         )
-        .success
-        .value
-        .set(
-          NinoOrReasonPage,
-          NinoOrReasonFormData(
-            NinoOrReason.Yes,
-            Some("QQ123456C"),
-            None
-          )
-        )
-        .success
-        .value
-
+        .get
+        .set(NinoOrReasonPage, NinoOrReasonFormData(NinoOrReason.Yes, Some(validNino), None))
+        .get
+        .set(BirthDeathDatesPage, BirthDeathDates(testDateOfBirth, testDateOfDeath))
+        .get
       val application = applicationBuilder(userAnswers = Some(userAnswers)).build()
 
       running(application) {
@@ -70,7 +64,8 @@ class CheckYourAnswersControllerSpec extends SpecBase {
           rows = Seq(
             InheritanceTaxReferenceSummary.row(srn, userAnswers)(using messages(application)).get,
             NameOfDeceasedSummary.row(srn, userAnswers)(using messages(application)).get,
-            NinoOrReasonSummary.row(srn, userAnswers)(using messages(application)).get
+            NinoOrReasonSummary.row(srn, userAnswers)(using messages(application)).get,
+            BirthDeathDatesSummary.row(srn, userAnswers)(using messages(application)).get
           )
         )
 
