@@ -26,15 +26,25 @@ POST       /:srn/enter-inheritance-tax-reference         controllers.Inheritance
 GET        /:srn/change-inheritance-tax-reference        controllers.InheritanceTaxReferenceController.onPageLoad(srn: Srn, mode: Mode = CheckMode)
 POST       /:srn/change-inheritance-tax-reference        controllers.InheritanceTaxReferenceController.onSubmit(srn: Srn, mode: Mode = CheckMode)
 
-GET        /:srn/ni-or-reason                            controllers.NinoOrReasonController.onPageLoad(srn: Srn, mode: Mode = NormalMode)
-POST       /:srn/ni-or-reason                            controllers.NinoOrReasonController.onSubmit(srn: Srn, mode: Mode = NormalMode)
-GET        /:srn/change-ni-or-reason                     controllers.NinoOrReasonController.onPageLoad(srn: Srn, mode: Mode = CheckMode)
-POST       /:srn/change-ni-or-reason                     controllers.NinoOrReasonController.onSubmit(srn: Srn, mode: Mode = CheckMode)
+GET        /:srn/name-of-deceased                        controllers.NameOfDeceasedController.onPageLoad(srn: Srn, mode: Mode = NormalMode)
+POST       /:srn/name-of-deceased                        controllers.NameOfDeceasedController.onSubmit(srn: Srn, mode: Mode = NormalMode)
+GET        /:srn/change-name-of-deceased                 controllers.NameOfDeceasedController.onPageLoad(srn: Srn, mode: Mode = CheckMode)
+POST       /:srn/change-name-of-deceased                 controllers.NameOfDeceasedController.onSubmit(srn: Srn, mode: Mode = CheckMode)
+
+GET        /:srn/enter-national-insurance-number         controllers.NinoOrReasonController.onPageLoad(srn: Srn, mode: Mode = NormalMode)
+POST       /:srn/enter-national-insurance-number         controllers.NinoOrReasonController.onSubmit(srn: Srn, mode: Mode = NormalMode)
+GET        /:srn/change-national-insurance-number        controllers.NinoOrReasonController.onPageLoad(srn: Srn, mode: Mode = CheckMode)
+POST       /:srn/change-national-insurance-number        controllers.NinoOrReasonController.onSubmit(srn: Srn, mode: Mode = CheckMode)
 
 GET        /:srn/enter-birth-death-date                  controllers.BirthDeathDatesController.onPageLoad(srn: Srn, mode: Mode = NormalMode)
 POST       /:srn/enter-birth-death-date                  controllers.BirthDeathDatesController.onSubmit(srn: Srn, mode: Mode = NormalMode)
 GET        /:srn/change-birth-death-date                 controllers.BirthDeathDatesController.onPageLoad(srn: Srn, mode: Mode = CheckMode)
 POST       /:srn/change-birth-death-date                 controllers.BirthDeathDatesController.onSubmit(srn: Srn, mode: Mode = CheckMode)
+
+GET        /:srn/lpr-individual-or-organisation          controllers.LprTypeController.onPageLoad(srn: Srn, mode: Mode = NormalMode)
+POST       /:srn/lpr-individual-or-organisation          controllers.LprTypeController.onSubmit(srn: Srn, mode: Mode = NormalMode)
+GET        /:srn/change-lpr-individual-or-organisation   controllers.LprTypeController.onPageLoad(srn: Srn, mode: Mode = CheckMode)
+POST       /:srn/change-lpr-individual-or-organisation   controllers.LprTypeController.onSubmit(srn: Srn, mode: Mode = CheckMode)
 
 GET        /:srn/check-your-answers                      controllers.CheckYourAnswersController.onPageLoad(srn: Srn)
 POST       /:srn/check-your-answers                      controllers.CheckYourAnswersController.onSubmit(srn: Srn)
@@ -45,8 +55,3 @@ GET        /:srn/pspDeclaration                          controllers.PspDeclarat
 POST       /:srn/pspDeclaration                          controllers.PspDeclarationController.onSubmit(srn: Srn)
 
 GET        /:srn/ihtp-report-submitted                   controllers.ConfirmationController.onPageLoad(srn: Srn)
-
-GET        /:srn/name-of-deceased                     controllers.NameOfDeceasedController.onPageLoad(srn: Srn, mode: Mode = NormalMode)
-POST       /:srn/name-of-deceased                     controllers.NameOfDeceasedController.onSubmit(srn: Srn, mode: Mode = NormalMode)
-GET        /:srn/change-name-of-deceased               controllers.NameOfDeceasedController.onPageLoad(srn: Srn, mode: Mode = CheckMode)
-POST       /:srn/change-name-of-deceased               controllers.NameOfDeceasedController.onSubmit(srn: Srn, mode: Mode = CheckMode)

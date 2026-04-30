@@ -17,6 +17,7 @@
 @import models.SchemeId.Srn
 @import models.NinoOrReason
 @import viewmodels.InputWidth._
+@import viewmodels.LegendSize
 
 @this(
     layout: templates.Layout,
@@ -68,7 +69,8 @@
         @govukRadios(
             RadiosViewModel(
                 field  = form("value"),
-                legend = LegendViewModel(messages("ninoOrReason.heading", deceasedName)).asPageHeading(),
+                legend = LegendViewModel(messages("ninoOrReason.heading", deceasedName))
+                    .asPageHeading(LegendSize.Large),
                 items  = Seq(
                     RadioItem(
                         content = Text(messages("ninoOrReason.yes")),

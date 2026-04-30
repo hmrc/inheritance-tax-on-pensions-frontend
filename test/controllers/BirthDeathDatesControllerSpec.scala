@@ -54,7 +54,7 @@ class BirthDeathDatesControllerSpec extends SpecBase with MockitoSugar {
     dateOfDeath = testDateOfDeath
   )
 
-  lazy val birthDeathDatesRoute = routes.BirthDeathDatesController.onPageLoad(srn, NormalMode).url
+  lazy val birthDeathDatesRoute: String = routes.BirthDeathDatesController.onPageLoad(srn, NormalMode).url
 
   override val emptyUserAnswers = UserAnswers(userAnswersId)
   private val userAnswersWithDeceasedName = emptyUserAnswers
@@ -114,7 +114,7 @@ class BirthDeathDatesControllerSpec extends SpecBase with MockitoSugar {
       }
     }
 
-    "must redirect to the next page when valid data is submitted" in {
+    "must redirect to LPR type when valid data is submitted" in {
 
       val mockInheritanceTaxOnPensionsConnector = mock[InheritanceTaxOnPensionsConnector]
 
@@ -132,7 +132,7 @@ class BirthDeathDatesControllerSpec extends SpecBase with MockitoSugar {
         val result = route(application, postRequest()).value
 
         status(result) mustEqual SEE_OTHER
-        redirectLocation(result).value mustEqual routes.CheckYourAnswersController.onPageLoad(srn).url
+        redirectLocation(result).value mustEqual routes.LprTypeController.onPageLoad(srn, NormalMode).url
       }
     }
 
