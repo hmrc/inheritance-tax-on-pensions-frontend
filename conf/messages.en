@@ -140,6 +140,22 @@ lprType.error.required = You must select individual or organisation
 lprType.checkYourAnswersLabel = LPR is an
 lprType.change.hidden = legal personal representative type
 
+lprIndividualName.title = Enter the full name of the person managing the estate
+lprIndividualName.heading = Enter the full name of the person managing the estate
+lprIndividualName.hint = If multiple people manage the estate, nominate the lead person
+lprIndividualName.checkYourAnswersLabel = Name of LPR
+lprIndividualName.error.title.length = Title must be 4 characters or less
+lprIndividualName.error.title.pattern = Enter a valid title
+lprIndividualName.error.firstForename.required = Enter the legal personal representative''s first name
+lprIndividualName.error.firstForename.length = First name must be 35 characters or less
+lprIndividualName.error.firstForename.pattern = Enter a valid first name
+lprIndividualName.error.secondForename.length = Middle names must be 35 characters or less
+lprIndividualName.error.secondForename.pattern = Enter a valid middle name
+lprIndividualName.error.surname.required = Enter the legal personal representative''s last name
+lprIndividualName.error.surname.length = Last name must be 35 characters or less
+lprIndividualName.error.surname.pattern = Enter a valid last name
+lprIndividualName.checkYourAnswersLabel.hidden = name of legal personal representative
+
 checkYourAnswers.title = Check and submit the report
 checkYourAnswers.heading = Check and submit the report
 

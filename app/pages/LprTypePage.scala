@@ -17,11 +17,19 @@
 package pages
 
 import play.api.libs.json.JsPath
-import models.LprType
+import models.{JourneyRole, LprType, UserAnswers}
+
+import scala.util.Try
 
 case object LprTypePage extends QuestionPage[LprType] {
 
   override def path: JsPath = JsPath \ toString
 
   override def toString: String = "lprType"
+
+  override def cleanup(value: Option[LprType], userAnswers: UserAnswers): Try[UserAnswers] =
+    value match {
+      case Some(LprType.Organisation) => userAnswers.remove(IndividualNamePage(JourneyRole.LprIndividual))
+      case _ => super.cleanup(value, userAnswers)
+    }
 }

@@ -75,7 +75,8 @@ class InheritanceTaxReferenceController @Inject() (
                 _ <- userAnswersService.set(updatedAnswers)(using hc, request.request)
               } yield mode match {
                 case CheckMode => Redirect(routes.CheckYourAnswersController.onPageLoad(srn))
-                case NormalMode => Redirect(routes.NameOfDeceasedController.onPageLoad(srn, NormalMode))
+                case NormalMode =>
+                  Redirect(routes.IndividualNameController.onPageLoad(srn, NormalMode, JourneyRole.Deceased))
               }
           )
       }

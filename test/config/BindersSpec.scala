@@ -19,6 +19,7 @@ package config
 import org.scalatestplus.scalacheck.ScalaCheckPropertyChecks
 import models.SchemeId.Srn
 import org.scalatest.EitherValues
+import models.JourneyRole
 import org.scalacheck.Gen.alphaNumStr
 import base.SpecBase
 
@@ -41,6 +42,18 @@ class BindersSpec extends SpecBase with ScalaCheckPropertyChecks with EitherValu
           }
         }
       }
+    }
+  }
+
+  "JourneyRole binder" - {
+    "return a valid journey role" in {
+      JourneyRole.values.foreach { journeyRole =>
+        Binders.journeyRoleBinder.bind("journeyRole", journeyRole.name) mustBe Right(journeyRole)
+      }
+    }
+
+    "return Unknown when journey role is invalid" in {
+      Binders.journeyRoleBinder.bind("journeyRole", "invalid") mustBe Right(JourneyRole.Unknown)
     }
   }
 }

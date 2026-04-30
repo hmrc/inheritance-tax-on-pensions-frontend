@@ -38,8 +38,8 @@ class CheckYourAnswersControllerSpec extends SpecBase {
         .success
         .value
         .set(
-          NameOfDeceasedPage,
-          NameOfDeceased(
+          IndividualNamePage(JourneyRole.Deceased),
+          IndividualName(
             title = Some("Mr"),
             firstForename = "John",
             secondForename = Some("William"),
@@ -52,6 +52,16 @@ class CheckYourAnswersControllerSpec extends SpecBase {
         .set(BirthDeathDatesPage, BirthDeathDates(testDateOfBirth, testDateOfDeath))
         .get
         .set(LprTypePage, LprType.Individual)
+        .get
+        .set(
+          IndividualNamePage(JourneyRole.LprIndividual),
+          IndividualName(
+            title = Some("Mr"),
+            firstForename = "John",
+            secondForename = Some("William"),
+            surname = "Doe"
+          )
+        )
         .get
       val application = applicationBuilder(userAnswers = Some(userAnswers)).build()
 
@@ -68,7 +78,8 @@ class CheckYourAnswersControllerSpec extends SpecBase {
             NameOfDeceasedSummary.row(srn, userAnswers)(using messages(application)).get,
             NinoOrReasonSummary.row(srn, userAnswers)(using messages(application)).get,
             BirthDeathDatesSummary.row(srn, userAnswers)(using messages(application)).get,
-            LprTypeSummary.row(srn, userAnswers)(using messages(application)).get
+            LprTypeSummary.row(srn, userAnswers)(using messages(application)).get,
+            LprIndividualNameSummary.row(srn, userAnswers)(using messages(application)).get
           )
         )
 

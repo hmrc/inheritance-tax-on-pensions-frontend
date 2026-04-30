@@ -18,10 +18,10 @@ package controllers
 
 import services.UserAnswersService
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
-import pages.LprTypePage
+import pages.{IndividualNamePage, LprTypePage}
 import controllers.actions._
 import forms.LprTypeFormProvider
-import models.{CheckMode, Mode, NormalMode}
+import models._
 import views.html.LprTypeView
 import models.SchemeId.Srn
 import play.api.i18n.{I18nSupport, MessagesApi}
@@ -54,7 +54,7 @@ class LprTypeController @Inject() (
       .andThen(requireData) { implicit request =>
         val preparedForm = request.userAnswers.get(LprTypePage) match {
           case None => form
-          case Some(value) => form.fill(value)
+          case Some(lprType) => form.fill(lprType)
         }
 
         Ok(view(preparedForm, srn, mode))
@@ -70,17 +70,29 @@ class LprTypeController @Inject() (
           .bindFromRequest()
           .fold(
             formWithErrors => Future.successful(BadRequest(view(formWithErrors, srn, mode))),
-            value =>
+            lprType =>
               for {
-                updatedAnswers <- Future.fromTry(request.userAnswers.set(LprTypePage, value))
+                updatedAnswers <- Future.fromTry(request.userAnswers.set(LprTypePage, lprType))
                 _ <- userAnswersService.set(updatedAnswers)(using hc, request.request)
-              } yield Redirect(nextPage(srn, mode))
+              } yield Redirect(nextPage(srn, mode, lprType, updatedAnswers))
           )
       }
 
-  private def nextPage(srn: Srn, mode: Mode) =
+  private def nextPage(srn: Srn, mode: Mode, answer: LprType, userAnswers: UserAnswers) =
     mode match {
-      case NormalMode => routes.CheckYourAnswersController.onPageLoad(srn)
-      case CheckMode => routes.CheckYourAnswersController.onPageLoad(srn)
+      case NormalMode =>
+        answer match {
+          case LprType.Individual =>
+            routes.IndividualNameController.onPageLoad(srn, NormalMode, JourneyRole.LprIndividual)
+          case LprType.Organisation =>
+            routes.CheckYourAnswersController.onPageLoad(srn)
+        }
+      case CheckMode =>
+        answer match {
+          case LprType.Individual if userAnswers.get(IndividualNamePage(JourneyRole.LprIndividual)).isEmpty =>
+            routes.IndividualNameController.onPageLoad(srn, NormalMode, JourneyRole.LprIndividual)
+          case _ =>
+            routes.CheckYourAnswersController.onPageLoad(srn)
+        }
     }
 }

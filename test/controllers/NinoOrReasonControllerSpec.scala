@@ -18,7 +18,7 @@ package controllers
 
 import play.api.test.FakeRequest
 import connectors.InheritanceTaxOnPensionsConnector
-import pages.{NameOfDeceasedPage, NinoOrReasonPage}
+import pages.{IndividualNamePage, NinoOrReasonPage}
 import play.api.inject.bind
 import views.html.NinoOrReasonView
 import base.SpecBase
@@ -40,7 +40,7 @@ class NinoOrReasonControllerSpec extends SpecBase with MockitoSugar {
 
   val formProvider = new NinoOrReasonFormProvider()
   val form: Form[NinoOrReasonFormData] = formProvider()
-  val nameOfDeceased: NameOfDeceased = NameOfDeceased(
+  val nameOfDeceased: IndividualName = IndividualName(
     title = Some("Mr"),
     firstForename = "John",
     secondForename = Some("William"),
@@ -48,7 +48,7 @@ class NinoOrReasonControllerSpec extends SpecBase with MockitoSugar {
   )
   val deceasedName: String = s"${nameOfDeceased.firstForename} ${nameOfDeceased.surname}"
   val userAnswersWithDeceasedName: UserAnswers = emptyUserAnswers
-    .set(NameOfDeceasedPage, nameOfDeceased)
+    .set(IndividualNamePage(JourneyRole.Deceased), nameOfDeceased)
     .success
     .value
   val validNino: String = ninoGen.sample.value

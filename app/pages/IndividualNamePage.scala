@@ -17,11 +17,16 @@
 package pages
 
 import play.api.libs.json.JsPath
-import models.NameOfDeceased
+import models.{IndividualName, JourneyRole}
 
-case object NameOfDeceasedPage extends QuestionPage[NameOfDeceased] {
+case class IndividualNamePage(journeyRole: JourneyRole) extends QuestionPage[IndividualName] {
 
-  override def path: JsPath = JsPath \ toString
+  override def path: JsPath =
+    journeyRole match {
+      case JourneyRole.Deceased => JsPath \ "nameOfDeceased"
+      case JourneyRole.LprIndividual => JsPath \ "lprDetails" \ "individual"
+      case JourneyRole.Unknown => JsPath \ "unknown" \ toString
+    }
 
-  override def toString: String = "nameOfDeceased"
+  override def toString: String = journeyRole.key
 }
