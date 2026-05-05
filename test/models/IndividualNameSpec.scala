@@ -19,9 +19,9 @@ package models
 import base.SpecBase
 import play.api.libs.json.{JsError, JsSuccess, Json}
 
-class NameOfDeceasedSpec extends SpecBase {
+class IndividualNameSpec extends SpecBase {
 
-  "NameOfDeceased" - {
+  "IndividualName" - {
 
     "must successfully read from json" in {
 
@@ -32,10 +32,10 @@ class NameOfDeceasedSpec extends SpecBase {
         "surname" -> "Doe"
       )
 
-      val result = json.validate[NameOfDeceased]
+      val result = json.validate[IndividualName]
 
       result mustBe JsSuccess(
-        NameOfDeceased(
+        IndividualName(
           title = Some("Mr"),
           firstForename = "John",
           secondForename = Some("William"),
@@ -46,14 +46,14 @@ class NameOfDeceasedSpec extends SpecBase {
 
     "must successfully write to json" in {
 
-      val nameOfDeceased = NameOfDeceased(
+      val individualName = IndividualName(
         title = Some("Mr"),
         firstForename = "John",
         secondForename = Some("William"),
         surname = "Doe"
       )
 
-      val json = Json.toJson(nameOfDeceased)
+      val json = Json.toJson(individualName)
 
       (json \ "title").as[String] mustBe "Mr"
       (json \ "firstForename").as[String] mustBe "John"
@@ -68,10 +68,10 @@ class NameOfDeceasedSpec extends SpecBase {
         "surname" -> "Doe"
       )
 
-      val result = json.validate[NameOfDeceased]
+      val result = json.validate[IndividualName]
 
       result mustBe JsSuccess(
-        NameOfDeceased(
+        IndividualName(
           title = None,
           firstForename = "John",
           secondForename = None,
@@ -87,7 +87,7 @@ class NameOfDeceasedSpec extends SpecBase {
         "surname" -> "Doe"
       )
 
-      val result = json.validate[NameOfDeceased]
+      val result = json.validate[IndividualName]
 
       result mustBe a[JsError]
     }
@@ -99,7 +99,7 @@ class NameOfDeceasedSpec extends SpecBase {
         "firstForename" -> "John"
       )
 
-      val result = json.validate[NameOfDeceased]
+      val result = json.validate[IndividualName]
 
       result mustBe a[JsError]
     }
@@ -112,7 +112,7 @@ class NameOfDeceasedSpec extends SpecBase {
         "surname" -> "Doe"
       )
 
-      val result = json.validate[NameOfDeceased]
+      val result = json.validate[IndividualName]
 
       result mustBe a[JsError]
     }
@@ -125,7 +125,7 @@ class NameOfDeceasedSpec extends SpecBase {
         "surname" -> 123
       )
 
-      val result = json.validate[NameOfDeceased]
+      val result = json.validate[IndividualName]
 
       result mustBe a[JsError]
     }
@@ -138,10 +138,10 @@ class NameOfDeceasedSpec extends SpecBase {
         "surname" -> "Doe"
       )
 
-      val result = json.validate[NameOfDeceased]
+      val result = json.validate[IndividualName]
 
       result mustBe JsSuccess(
-        NameOfDeceased(
+        IndividualName(
           title = Some(""),
           firstForename = "John",
           secondForename = None,
@@ -158,10 +158,10 @@ class NameOfDeceasedSpec extends SpecBase {
         "surname" -> "Doe"
       )
 
-      val result = json.validate[NameOfDeceased]
+      val result = json.validate[IndividualName]
 
       result mustBe JsSuccess(
-        NameOfDeceased(
+        IndividualName(
           title = None,
           firstForename = "John",
           secondForename = Some(""),
@@ -172,14 +172,14 @@ class NameOfDeceasedSpec extends SpecBase {
 
     "must write to json with only present fields" in {
 
-      val nameOfDeceased = NameOfDeceased(
+      val individualName = IndividualName(
         title = None,
         firstForename = "John",
         secondForename = None,
         surname = "Doe"
       )
 
-      val json = Json.toJson(nameOfDeceased)
+      val json = Json.toJson(individualName)
 
       (json \ "firstForename").as[String] mustBe "John"
       (json \ "surname").as[String] mustBe "Doe"

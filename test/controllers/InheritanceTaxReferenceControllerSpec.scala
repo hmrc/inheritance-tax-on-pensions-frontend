@@ -21,7 +21,7 @@ import connectors.InheritanceTaxOnPensionsConnector
 import play.api.inject.bind
 import views.html.InheritanceTaxReferenceView
 import base.SpecBase
-import models.{CheckMode, NormalMode}
+import models.{CheckMode, JourneyRole, NormalMode}
 import play.api.data.Form
 import org.mockito.ArgumentMatchers.any
 import play.api.test.Helpers._
@@ -77,7 +77,9 @@ class InheritanceTaxReferenceControllerSpec extends SpecBase {
         val result = route(application, request).value
 
         status(result) mustEqual SEE_OTHER
-        redirectLocation(result).value mustEqual routes.NameOfDeceasedController.onPageLoad(srn, NormalMode).url
+        redirectLocation(result).value mustEqual routes.IndividualNameController
+          .onPageLoad(srn, NormalMode, JourneyRole.Deceased)
+          .url
 
         verify(mockInheritanceTaxOnPensionsConnector, times(1))
           .setUserAnswers(any(), any(), any(), any(), any())(using any())

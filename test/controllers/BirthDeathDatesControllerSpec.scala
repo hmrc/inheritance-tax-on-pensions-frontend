@@ -19,7 +19,7 @@ package controllers
 import play.api.test.FakeRequest
 import play.api.mvc.{AnyContentAsEmpty, AnyContentAsFormUrlEncoded}
 import connectors.InheritanceTaxOnPensionsConnector
-import pages.{BirthDeathDatesPage, NameOfDeceasedPage}
+import pages.{BirthDeathDatesPage, IndividualNamePage}
 import play.api.inject.bind
 import views.html.BirthDeathDatesView
 import base.SpecBase
@@ -41,7 +41,7 @@ class BirthDeathDatesControllerSpec extends SpecBase with MockitoSugar {
 
   private val formProvider = new BirthDeathDatesFormProvider()
   private def form = formProvider()
-  private val nameOfDeceased = NameOfDeceased(
+  private val nameOfDeceased = IndividualName(
     title = Some("Mr"),
     firstForename = "John",
     secondForename = Some("William"),
@@ -58,7 +58,7 @@ class BirthDeathDatesControllerSpec extends SpecBase with MockitoSugar {
 
   override val emptyUserAnswers = UserAnswers(userAnswersId)
   private val userAnswersWithDeceasedName = emptyUserAnswers
-    .set(NameOfDeceasedPage, nameOfDeceased)
+    .set(IndividualNamePage(JourneyRole.Deceased), nameOfDeceased)
     .success
     .value
 

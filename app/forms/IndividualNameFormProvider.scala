@@ -18,38 +18,38 @@ package forms
 
 import forms.mappings.Mappings
 import play.api.data.Forms.{mapping, optional}
-import models.NameOfDeceased
+import models.{IndividualName, JourneyRole}
 import play.api.data.Form
 
 import javax.inject.Inject
 
-class NameOfDeceasedFormProvider @Inject() extends Mappings {
+class IndividualNameFormProvider @Inject() extends Mappings {
 
-  def apply(): Form[NameOfDeceased] =
+  def apply(journeyRole: JourneyRole): Form[IndividualName] =
     Form(
       mapping(
         "title" -> optional(
           text()
             .transform[String](input => input.trim, identity)
-            .verifying(maxLength(4, "nameOfDeceased.error.title.length"))
-            .verifying(regexp(nameRegex, "nameOfDeceased.error.title.pattern"))
+            .verifying(maxLength(4, s"${journeyRole.key}.error.title.length"))
+            .verifying(regexp(nameRegex, s"${journeyRole.key}.error.title.pattern"))
         ),
-        "firstForename" -> text("nameOfDeceased.error.firstForename.required")
+        "firstForename" -> text(s"${journeyRole.key}.error.firstForename.required")
           .transform[String](input => input.trim, identity)
-          .verifying(maxLength(35, "nameOfDeceased.error.firstForename.length"))
-          .verifying(regexp(nameRegex, "nameOfDeceased.error.firstForename.pattern")),
+          .verifying(maxLength(35, s"${journeyRole.key}.error.firstForename.length"))
+          .verifying(regexp(nameRegex, s"${journeyRole.key}.error.firstForename.pattern")),
         "secondForename" -> optional(
           text()
             .transform[String](input => input.trim, identity)
-            .verifying(maxLength(35, "nameOfDeceased.error.secondForename.length"))
-            .verifying(regexp(nameRegex, "nameOfDeceased.error.secondForename.pattern"))
+            .verifying(maxLength(35, s"${journeyRole.key}.error.secondForename.length"))
+            .verifying(regexp(nameRegex, s"${journeyRole.key}.error.secondForename.pattern"))
         ),
-        "surname" -> text("nameOfDeceased.error.surname.required")
+        "surname" -> text(s"${journeyRole.key}.error.surname.required")
           .transform[String](input => input.trim, identity)
-          .verifying(maxLength(35, "nameOfDeceased.error.surname.length"))
-          .verifying(regexp(nameRegex, "nameOfDeceased.error.surname.pattern"))
+          .verifying(maxLength(35, s"${journeyRole.key}.error.surname.length"))
+          .verifying(regexp(nameRegex, s"${journeyRole.key}.error.surname.pattern"))
       )((title, firstForename, secondForename, surname) =>
-        NameOfDeceased(title, firstForename, secondForename, surname)
-      )(deceased => Some((deceased.title, deceased.firstForename, deceased.secondForename, deceased.surname)))
+        IndividualName(title, firstForename, secondForename, surname)
+      )(name => Some((name.title, name.firstForename, name.secondForename, name.surname)))
     )
 }

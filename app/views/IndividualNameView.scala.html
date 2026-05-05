@@ -1,0 +1,66 @@
+@*
+ * Copyright 2026 HM Revenue & Customs
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *@
+
+@import components.{PageHeading, Paragraph}
+@import config.Constants.Css
+@import uk.gov.hmrc.govukfrontend.views.html.components.{FormWithCSRF, GovukButton, GovukErrorSummary, GovukInput}
+@import viewmodels.govuk.all._
+@import views.ViewUtils.title
+@import models.{JourneyRole, SchemeId}
+@import models.SchemeId.Srn
+@import viewmodels.IndividualNamePageViewModel
+
+@this(
+    layout: templates.Layout,
+    formHelper: FormWithCSRF,
+    pageHeading: PageHeading,
+    paragraph: Paragraph,
+    govukErrorSummary: GovukErrorSummary,
+    govukInput: GovukInput,
+    govukButton: GovukButton
+)
+
+@(form: Form[?], srn: Srn, mode: Mode, journeyRole: JourneyRole)(implicit request: Request[?], messages: Messages)
+
+@viewModel = @{ IndividualNamePageViewModel(form, journeyRole) }
+
+@layout(pageTitle = title(form, viewModel.title)) {
+
+    @formHelper(action = routes.IndividualNameController.onSubmit(srn, mode, journeyRole), Symbol("autoComplete") -> "off") {
+
+        @if(form.errors.nonEmpty) {
+            @govukErrorSummary(ErrorSummaryViewModel(form))
+        }
+
+        @pageHeading(
+            viewModel.heading,
+            classes = s"${Css.headingLCssClass} ${Css.marginBottom3CssClass}"
+        )
+
+        @viewModel.hint.map { hint =>
+            @paragraph(
+                hint,
+                classes = "govuk-body govuk-!-margin-bottom-6"
+            )
+        }
+
+        @viewModel.inputs.map { input =>
+            @govukInput(input)
+        }
+
+        @govukButton(viewModel.button)
+    }
+}

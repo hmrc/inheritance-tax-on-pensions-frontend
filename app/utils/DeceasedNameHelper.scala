@@ -16,17 +16,17 @@
 
 package utils
 
-import pages.NameOfDeceasedPage
-import models.{NameOfDeceased, UserAnswers}
+import pages.IndividualNamePage
+import models.{IndividualName, JourneyRole, UserAnswers}
 
 object DeceasedNameHelper {
 
   def fromUserAnswers(userAnswers: UserAnswers): Option[String] =
-    userAnswers.get(NameOfDeceasedPage).map(displayName)
+    userAnswers.get(IndividualNamePage(JourneyRole.Deceased)).map(displayName)
 
   def withName[A](userAnswers: UserAnswers)(ifMissing: => A)(f: String => A): A =
     fromUserAnswers(userAnswers).fold(ifMissing)(f)
 
-  def displayName(name: NameOfDeceased): String =
+  def displayName(name: IndividualName): String =
     s"${name.firstForename} ${name.surname}"
 }

@@ -25,10 +25,10 @@ import models._
 import play.api.i18n.Messages
 import viewmodels.govuk.summarylist._
 
-object NameOfDeceasedSummary {
+object LprIndividualNameSummary {
 
   def row(srn: SchemeId.Srn, answers: UserAnswers)(implicit messages: Messages): Option[SummaryListRow] =
-    answers.get(IndividualNamePage(JourneyRole.Deceased)).map { answer =>
+    answers.get(IndividualNamePage(JourneyRole.LprIndividual)).map { answer =>
       val fullName = Seq(
         answer.title,
         Some(answer.firstForename),
@@ -37,14 +37,13 @@ object NameOfDeceasedSummary {
       ).flatten.mkString(" ")
 
       SummaryListRowViewModel(
-        key = "nameOfDeceased.checkYourAnswersLabel",
+        key = "lprIndividualName.checkYourAnswersLabel",
         value = ValueViewModel(HtmlFormat.escape(fullName).toString),
         actions = Seq(
           ActionItemViewModel(
             "site.change",
-            routes.IndividualNameController.onPageLoad(srn, CheckMode, JourneyRole.Deceased).url
-          )
-            .withVisuallyHiddenText(messages("nameOfDeceased.checkYourAnswersLabel.hidden"))
+            routes.IndividualNameController.onPageLoad(srn, CheckMode, JourneyRole.LprIndividual).url
+          ).withVisuallyHiddenText(messages("lprIndividualName.checkYourAnswersLabel.hidden"))
         )
       )
     }

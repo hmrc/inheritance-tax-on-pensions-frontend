@@ -16,8 +16,8 @@
 
 package viewmodels.CheckAnswers
 
-import pages.NameOfDeceasedPage
-import models.{CheckMode, NameOfDeceased}
+import pages.IndividualNamePage
+import models.{CheckMode, IndividualName, JourneyRole}
 import play.api.i18n.Messages
 import play.api.test.Helpers.stubMessages
 import org.scalatest.freespec.AnyFreeSpec
@@ -42,8 +42,8 @@ class NameOfDeceasedSummarySpec extends AnyFreeSpec with SpecBase {
 
       val userAnswers = emptyUserAnswers
         .set(
-          NameOfDeceasedPage,
-          NameOfDeceased(
+          IndividualNamePage(JourneyRole.Deceased),
+          IndividualName(
             title = Some("Mr"),
             firstForename = "John",
             secondForename = Some("William"),
@@ -59,15 +59,15 @@ class NameOfDeceasedSummarySpec extends AnyFreeSpec with SpecBase {
       result.get.key.content mustBe Text(messages("nameOfDeceased.checkYourAnswersLabel"))
       result.get.value.content mustBe Text("Mr John William Doe")
       result.get.actions.get.items.head.href mustBe
-        controllers.routes.NameOfDeceasedController.onPageLoad(srn, CheckMode).url
+        controllers.routes.IndividualNameController.onPageLoad(srn, CheckMode, JourneyRole.Deceased).url
     }
 
     "must format full name correctly with all fields" in {
 
       val userAnswers = emptyUserAnswers
         .set(
-          NameOfDeceasedPage,
-          NameOfDeceased(
+          IndividualNamePage(JourneyRole.Deceased),
+          IndividualName(
             title = Some("Mr"),
             firstForename = "John",
             secondForename = Some("William"),
@@ -87,8 +87,8 @@ class NameOfDeceasedSummarySpec extends AnyFreeSpec with SpecBase {
 
       val userAnswers = emptyUserAnswers
         .set(
-          NameOfDeceasedPage,
-          NameOfDeceased(
+          IndividualNamePage(JourneyRole.Deceased),
+          IndividualName(
             title = None,
             firstForename = "John",
             secondForename = Some("William"),
@@ -108,8 +108,8 @@ class NameOfDeceasedSummarySpec extends AnyFreeSpec with SpecBase {
 
       val userAnswers = emptyUserAnswers
         .set(
-          NameOfDeceasedPage,
-          NameOfDeceased(
+          IndividualNamePage(JourneyRole.Deceased),
+          IndividualName(
             title = Some("Mr"),
             firstForename = "John",
             secondForename = None,
@@ -129,8 +129,8 @@ class NameOfDeceasedSummarySpec extends AnyFreeSpec with SpecBase {
 
       val userAnswers = emptyUserAnswers
         .set(
-          NameOfDeceasedPage,
-          NameOfDeceased(
+          IndividualNamePage(JourneyRole.Deceased),
+          IndividualName(
             title = None,
             firstForename = "John",
             secondForename = None,

@@ -18,6 +18,7 @@ package config
 
 import play.api.mvc.PathBindable
 import models.SchemeId.Srn
+import models.JourneyRole
 
 object Binders {
 
@@ -27,5 +28,13 @@ object Binders {
       Srn(value).toRight("Invalid scheme reference number")
 
     override def unbind(key: String, value: Srn): String = value.value
+  }
+
+  implicit val journeyRoleBinder: PathBindable[JourneyRole] = new PathBindable[JourneyRole] {
+
+    override def bind(key: String, value: String): Either[String, JourneyRole] =
+      Right(JourneyRole.withNameWithDefault(value))
+
+    override def unbind(key: String, value: JourneyRole): String = value.name
   }
 }

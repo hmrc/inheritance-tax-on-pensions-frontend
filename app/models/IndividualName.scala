@@ -18,13 +18,13 @@ package models
 
 import play.api.libs.json.{Json, OFormat}
 
-case class NameOfDeceased(
+case class IndividualName(
   title: Option[String],
   firstForename: String,
   secondForename: Option[String],
   surname: String
 )
 
-object NameOfDeceased {
-  implicit val format: OFormat[NameOfDeceased] = Json.format[NameOfDeceased]
+object IndividualName {
+  implicit val format: OFormat[IndividualName] = Json.format[IndividualName]
 }

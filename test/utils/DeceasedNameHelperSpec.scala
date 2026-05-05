@@ -17,10 +17,10 @@
 package utils
 
 import org.scalatest.freespec.AnyFreeSpec
-import pages.NameOfDeceasedPage
+import pages.IndividualNamePage
 import base.SpecBase
 import utils.DeceasedNameHelper.fromUserAnswers
-import models.NameOfDeceased
+import models.{IndividualName, JourneyRole}
 
 class DeceasedNameHelperSpec extends AnyFreeSpec with SpecBase {
 
@@ -30,8 +30,8 @@ class DeceasedNameHelperSpec extends AnyFreeSpec with SpecBase {
 
       val userAnswers = emptyUserAnswers
         .set(
-          NameOfDeceasedPage,
-          NameOfDeceased(
+          IndividualNamePage(JourneyRole.Deceased),
+          IndividualName(
             title = Some("Dr"),
             firstForename = "John",
             secondForename = Some("William"),
@@ -56,8 +56,8 @@ class DeceasedNameHelperSpec extends AnyFreeSpec with SpecBase {
 
       val userAnswers = emptyUserAnswers
         .set(
-          NameOfDeceasedPage,
-          NameOfDeceased(
+          IndividualNamePage(JourneyRole.Deceased),
+          IndividualName(
             title = Some("Mr"),
             firstForename = "John",
             secondForename = Some("William"),
