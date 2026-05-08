@@ -51,6 +51,11 @@ POST        /:srn/enter-name-lpr                         controllers.IndividualN
 GET         /:srn/change-name-lpr                        controllers.IndividualNameController.onPageLoad(srn: Srn, mode: Mode = CheckMode, journeyRole: JourneyRole = JourneyRole.LprIndividual)
 POST        /:srn/change-name-lpr                        controllers.IndividualNameController.onSubmit(srn: Srn, mode: Mode = CheckMode, journeyRole: JourneyRole = JourneyRole.LprIndividual)
 
+GET         /:srn/enter-name-organisation                controllers.OrganisationNameController.onPageLoad(srn: Srn, mode: Mode = NormalMode)
+POST        /:srn/enter-name-organisation                  controllers.OrganisationNameController.onSubmit(srn: Srn, mode: Mode = NormalMode)
+GET         /:srn/change-name-organisation                  controllers.OrganisationNameController.onPageLoad(srn: Srn, mode: Mode = CheckMode)
+POST        /:srn/change-name-organisation                    controllers.OrganisationNameController.onSubmit(srn: Srn, mode: Mode = CheckMode)
+
 GET         /:srn/check-your-answers                     controllers.CheckYourAnswersController.onPageLoad(srn: Srn)
 POST        /:srn/check-your-answers                     controllers.CheckYourAnswersController.onSubmit(srn: Srn)
 

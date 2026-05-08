@@ -156,6 +156,13 @@ lprIndividualName.error.surname.length = Last name must be 35 characters or less
 lprIndividualName.error.surname.pattern = Enter a valid last name
 lprIndividualName.checkYourAnswersLabel.hidden = name of legal personal representative
 
+organisationName.title = Enter the name of the organisation
+organisationName.heading = Enter the name of the organisation
+organisationName.checkYourAnswersLabel = Organisation name
+organisationName.error.required = Enter the name of the organisation
+organisationName.error.length = The name of the organisation must be 160 characters or less
+organisationName.change.hidden = Organisation name
+
 checkYourAnswers.title = Check and submit the report
 checkYourAnswers.heading = Check and submit the report
 
