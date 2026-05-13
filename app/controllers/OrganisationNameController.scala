@@ -18,12 +18,12 @@ package controllers
 
 import services.UserAnswersService
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
-import pages.{IndividualNamePage, LprTypePage, OrganisationNamePage}
+import pages.OrganisationNamePage
 import controllers.actions._
-import forms.LprTypeFormProvider
-import models._
+import forms.OrganisationNameFormProvider
+import models.{CheckMode, Mode, NormalMode}
 import play.api.data.Form
-import views.html.LprTypeView
+import views.html.OrganisationNameView
 import models.SchemeId.Srn
 import play.api.i18n.{I18nSupport, MessagesApi}
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
@@ -32,30 +32,30 @@ import scala.concurrent.{ExecutionContext, Future}
 
 import javax.inject.Inject
 
-class LprTypeController @Inject() (
+class OrganisationNameController @Inject() (
   override val messagesApi: MessagesApi,
   identify: IdentifierAction,
   allowAccess: AllowAccessActionWithSessionCacheProvider,
   getData: DataRetrievalAction,
   requireData: DataRequiredAction,
-  formProvider: LprTypeFormProvider,
+  formProvider: OrganisationNameFormProvider,
   val controllerComponents: MessagesControllerComponents,
   userAnswersService: UserAnswersService,
-  view: LprTypeView
+  view: OrganisationNameView
 )(implicit ec: ExecutionContext)
     extends FrontendBaseController
     with I18nSupport {
 
-  val form: Form[LprType] = formProvider()
+  val form: Form[String] = formProvider()
 
   def onPageLoad(srn: Srn, mode: Mode): Action[AnyContent] =
     identify
       .andThen(allowAccess(srn))
       .andThen(getData)
       .andThen(requireData) { implicit request =>
-        val preparedForm = request.userAnswers.get(LprTypePage) match {
+        val preparedForm = request.userAnswers.get(OrganisationNamePage) match {
           case None => form
-          case Some(lprType) => form.fill(lprType)
+          case Some(value) => form.fill(value)
         }
 
         Ok(view(preparedForm, srn, mode))
@@ -71,31 +71,17 @@ class LprTypeController @Inject() (
           .bindFromRequest()
           .fold(
             formWithErrors => Future.successful(BadRequest(view(formWithErrors, srn, mode))),
-            lprType =>
+            value =>
               for {
-                updatedAnswers <- Future.fromTry(request.userAnswers.set(LprTypePage, lprType))
+                updatedAnswers <- Future.fromTry(request.userAnswers.set(OrganisationNamePage, value))
                 _ <- userAnswersService.set(updatedAnswers)(using hc, request.request)
-              } yield Redirect(nextPage(srn, mode, lprType, updatedAnswers))
+              } yield Redirect(nextPage(srn, mode))
           )
       }
 
-  private def nextPage(srn: Srn, mode: Mode, answer: LprType, userAnswers: UserAnswers) =
+  private def nextPage(srn: Srn, mode: Mode) =
     mode match {
-      case NormalMode =>
-        answer match {
-          case LprType.Individual =>
-            routes.IndividualNameController.onPageLoad(srn, NormalMode, JourneyRole.LprIndividual)
-          case LprType.Organisation =>
-            routes.OrganisationNameController.onPageLoad(srn, NormalMode)
-        }
-      case CheckMode =>
-        answer match {
-          case LprType.Individual if userAnswers.get(IndividualNamePage(JourneyRole.LprIndividual)).isEmpty =>
-            routes.IndividualNameController.onPageLoad(srn, NormalMode, JourneyRole.LprIndividual)
-          case LprType.Organisation if userAnswers.get(OrganisationNamePage).isEmpty =>
-            routes.OrganisationNameController.onPageLoad(srn, NormalMode)
-          case _ =>
-            routes.CheckYourAnswersController.onPageLoad(srn)
-        }
+      case NormalMode => routes.CheckYourAnswersController.onPageLoad(srn)
+      case CheckMode => routes.CheckYourAnswersController.onPageLoad(srn)
     }
 }

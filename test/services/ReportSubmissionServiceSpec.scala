@@ -22,9 +22,9 @@ import play.api.mvc.AnyContentAsEmpty
 import connectors.InheritanceTaxOnPensionsConnector
 import base.SpecBase
 import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse, UpstreamErrorResponse}
-import models.{IhtpReportSubmissionResponse, UserAnswers}
+import models._
 import models.requests.AllowedAccessRequest
-import org.mockito.ArgumentMatchers.any
+import org.mockito.ArgumentMatchers.{any, argThat}
 
 import scala.concurrent.Future
 
@@ -72,6 +72,64 @@ class ReportSubmissionServiceSpec extends SpecBase {
 
       whenReady(testService.submitReport(userAnswers)) { _ =>
         succeed
+      }
+    }
+
+    "must handle organisation name correctly" in new Setup {
+      val response = IhtpReportSubmissionResponse(Instant.now(), "formBundle", "paymentRef")
+      val userAnswers: UserAnswers = emptyUserAnswers
+
+      val orgOnlyMinimalDetails: MinimalDetails = defaultMinimalDetails.copy(
+        organisationName = Some("Test Organisation"),
+        individualDetails = None
+      )
+
+      implicit val orgOnlyAllowedAccessRequest: AllowedAccessRequest[AnyContentAsEmpty.type] =
+        allowedAccessRequestNoEstablishersGen(FakeRequest()).sample.value.copy(
+          minimalDetails = orgOnlyMinimalDetails
+        )
+
+      when(mockConnector.submitReport(any(), any(), any(), any(), any(), any())(using any()))
+        .thenReturn(Future.successful(Right(response)))
+
+      whenReady(testService.submitReport(userAnswers)) { _ =>
+        verify(mockConnector).submitReport(
+          any(),
+          any(),
+          argThat(name => name == "Test Organisation"),
+          any(),
+          any(),
+          any()
+        )(using any())
+      }
+    }
+
+    "must handle individual name correctly" in new Setup {
+      val response = IhtpReportSubmissionResponse(Instant.now(), "formBundle", "paymentRef")
+      val userAnswers: UserAnswers = emptyUserAnswers
+
+      val individualOnlyMinimalDetails: MinimalDetails = defaultMinimalDetails.copy(
+        organisationName = None,
+        individualDetails = Some(IndividualDetails("John", Some("William"), "Doe"))
+      )
+
+      implicit val individualOnlyAllowedAccessRequest: AllowedAccessRequest[AnyContentAsEmpty.type] =
+        allowedAccessRequestNoEstablishersGen(FakeRequest()).sample.value.copy(
+          minimalDetails = individualOnlyMinimalDetails
+        )
+
+      when(mockConnector.submitReport(any(), any(), any(), any(), any(), any())(using any()))
+        .thenReturn(Future.successful(Right(response)))
+
+      whenReady(testService.submitReport(userAnswers)) { _ =>
+        verify(mockConnector).submitReport(
+          any(),
+          any(),
+          argThat(name => name == "John William Doe"),
+          any(),
+          any(),
+          any()
+        )(using any())
       }
     }
   }

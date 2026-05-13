@@ -50,7 +50,8 @@ class CheckYourAnswersController @Inject() (
           NinoOrReasonSummary.row(srn, userAnswers),
           BirthDeathDatesSummary.row(srn, userAnswers),
           LprTypeSummary.row(srn, userAnswers),
-          LprIndividualNameSummary.row(srn, userAnswers)
+          LprIndividualNameSummary.row(srn, userAnswers),
+          LprOrganisationNameSummary.row(srn, userAnswers)
         ).flatten
       )
 

@@ -18,16 +18,17 @@ package controllers
 
 import play.api.test.FakeRequest
 import connectors.InheritanceTaxOnPensionsConnector
-import pages.{IndividualNamePage, LprTypePage}
+import pages.{IndividualNamePage, LprTypePage, OrganisationNamePage}
 import play.api.inject.bind
 import views.html.LprTypeView
 import base.SpecBase
 import models._
 import play.api.data.Form
 import org.mockito.ArgumentCaptor
-import org.mockito.ArgumentMatchers.any
+import org.mockito.ArgumentMatchers.{any, argThat}
 import play.api.test.Helpers._
 import org.mockito.Mockito.{times, verify, when}
+import repositories.SessionMinimalDetailsRepository
 import forms.LprTypeFormProvider
 import uk.gov.hmrc.http.HttpResponse
 
@@ -109,7 +110,7 @@ class LprTypeControllerSpec extends SpecBase {
       }
     }
 
-    "must redirect to Check Your Answers when Organisation is submitted" in {
+    "must redirect to Organisation name page when Organisation is submitted" in {
 
       val mockInheritanceTaxOnPensionsConnector = mock[InheritanceTaxOnPensionsConnector]
       when(mockInheritanceTaxOnPensionsConnector.setUserAnswers(any(), any(), any(), any(), any())(using any()))
@@ -129,7 +130,7 @@ class LprTypeControllerSpec extends SpecBase {
         val result = route(application, request).value
 
         status(result) mustEqual SEE_OTHER
-        redirectLocation(result).value mustEqual routes.CheckYourAnswersController.onPageLoad(srn).url
+        redirectLocation(result).value mustEqual routes.OrganisationNameController.onPageLoad(srn, NormalMode).url
       }
     }
 
@@ -173,7 +174,12 @@ class LprTypeControllerSpec extends SpecBase {
       when(mockInheritanceTaxOnPensionsConnector.setUserAnswers(any(), any(), any(), any(), any())(using any()))
         .thenReturn(Future.successful(mock[HttpResponse]))
 
-      val application = applicationBuilder(userAnswers = Some(emptyUserAnswers), usesSession = true)
+      val userAnswersWithOrgName = emptyUserAnswers
+        .set(OrganisationNamePage, "Test Organisation")
+        .success
+        .value
+
+      val application = applicationBuilder(userAnswers = Some(userAnswersWithOrgName), usesSession = true)
         .overrides(
           bind[InheritanceTaxOnPensionsConnector].toInstance(mockInheritanceTaxOnPensionsConnector)
         )
@@ -214,6 +220,52 @@ class LprTypeControllerSpec extends SpecBase {
         redirectLocation(result).value mustEqual routes.IndividualNameController
           .onPageLoad(srn, NormalMode, JourneyRole.LprIndividual)
           .url
+      }
+    }
+
+    "must clear OrganisationNamePage when switching from Organisation to Individual" in {
+      val mockSessionRepository = mock[SessionMinimalDetailsRepository]
+      val mockConnector = mock[InheritanceTaxOnPensionsConnector]
+
+      when(mockSessionRepository.set(any())).thenReturn(Future.successful(true))
+      when(mockConnector.setUserAnswers(any(), any(), any(), any(), any())(using any()))
+        .thenReturn(Future.successful(HttpResponse(200)))
+
+      val userAnswersWithOrgName = emptyUserAnswers
+        .set(OrganisationNamePage, "Test Organisation")
+        .success
+        .value
+        .set(LprTypePage, LprType.Organisation)
+        .success
+        .value
+
+      val application = applicationBuilder(userAnswers = Some(userAnswersWithOrgName), usesSession = true)
+        .overrides(
+          bind[SessionMinimalDetailsRepository].toInstance(mockSessionRepository),
+          bind[InheritanceTaxOnPensionsConnector].toInstance(mockConnector)
+        )
+        .build()
+
+      running(application) {
+        val request = FakeRequest(POST, routes.LprTypeController.onPageLoad(srn, NormalMode).url)
+          .withFormUrlEncodedBody(("value", "individual"))
+
+        val result = route(application, request).value
+
+        status(result) mustEqual SEE_OTHER
+        redirectLocation(result).value mustEqual routes.IndividualNameController
+          .onPageLoad(srn, NormalMode, JourneyRole.LprIndividual)
+          .url
+
+        verify(mockConnector).setUserAnswers(
+          argThat { userAnswers =>
+            userAnswers.get(OrganisationNamePage).isEmpty
+          },
+          any(),
+          any(),
+          any(),
+          any()
+        )(using any())
       }
     }
 
