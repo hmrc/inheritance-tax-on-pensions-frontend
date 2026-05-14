@@ -16,20 +16,34 @@
 
 package models
 
-import play.api.libs.json.{Json, Reads, Writes}
+import play.api.libs.json._
 
 case class MinimalDetails(
-  email: String,
+  email: SensitiveString,
   isPsaSuspended: Boolean,
   organisationName: Option[String],
-  individualDetails: Option[IndividualDetails],
+  individualDetails: Option[SensitiveIndividualDetails],
   rlsFlag: Boolean,
   deceasedFlag: Boolean
 )
 
 object MinimalDetails {
-  implicit val reads: Reads[MinimalDetails] = Json.reads[MinimalDetails]
-  implicit val writes: Writes[MinimalDetails] = Json.writes[MinimalDetails]
+  implicit val reads: Reads[MinimalDetails] = {
+    import SensitiveDetails.{sensitiveStringReads, sensitiveIndividualDetailsReads}
+    Json.reads[MinimalDetails]
+  }
+
+  implicit val writes: Writes[MinimalDetails] = {
+    import SensitiveDetails.{sensitiveStringWrites, sensitiveIndividualDetailsWrites}
+    Json.writes[MinimalDetails]
+  }
+
+  def encryptedFormat(implicit
+    crypto: uk.gov.hmrc.crypto.Encrypter & uk.gov.hmrc.crypto.Decrypter
+  ): Format[MinimalDetails] = {
+    import SensitiveDetails.{sensitiveStringFormat, sensitiveIndividualDetailsFormat}
+    Format(Json.reads[MinimalDetails], Json.writes[MinimalDetails])
+  }
 }
 
 case class IndividualDetails(

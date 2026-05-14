@@ -16,7 +16,7 @@
 
 package repositories
 
-import config.FrontendAppConfig
+import config.{EncryptedFormats, FrontendAppConfig}
 import generators.Generators
 import models.{MinimalDetails, SessionMinimalDetails}
 import org.mockito.Mockito.when
@@ -30,6 +30,8 @@ import org.scalatestplus.mockito.MockitoSugar
 import org.slf4j.MDC
 import uk.gov.hmrc.mdc.MdcExecutionContext
 import uk.gov.hmrc.mongo.test.DefaultPlayMongoRepositorySupport
+import play.api.Configuration
+import com.typesafe.config.ConfigFactory
 
 import java.time.temporal.ChronoUnit
 import java.time.{Clock, Instant, ZoneId}
@@ -57,10 +59,20 @@ class SessionMinimalDetailsRepositorySpec
 
   implicit val productionLikeTestMdcExecutionContext: ExecutionContext = MdcExecutionContext()
 
+  private val encryptedFormats = new EncryptedFormats(
+    Configuration(ConfigFactory.parseString(
+      """
+        |mongodb.encryption.enabled = false
+        |mongodb.encryption.key = "teStTesttE5TtesT3TEsTtEsttESTTest5TEsTtE5t1="
+        |""".stripMargin
+    ))
+  )
+
   protected override val repository: SessionMinimalDetailsRepository = new SessionMinimalDetailsRepository(
     mongoComponent = mongoComponent,
     appConfig      = mockAppConfig,
-    clock          = stubClock
+    clock          = stubClock,
+    encryptedFormats = encryptedFormats
   )
 
   ".set" - {

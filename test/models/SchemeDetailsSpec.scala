@@ -17,6 +17,7 @@
 package models
 
 import org.scalatestplus.scalacheck.ScalaCheckPropertyChecks
+import config.NoOpCrypto
 import base.SpecBase
 import play.api.libs.json.{JsString, Json}
 
@@ -25,37 +26,48 @@ class SchemeDetailsSpec extends SpecBase with ScalaCheckPropertyChecks {
   "SchemeDetails" - {
 
     "successfully read from json" in {
-
       forAll(schemeDetailsGen) { details =>
-        val json = Json.toJson(details)
-        val ob = json.as[SchemeDetails]
-        ob mustBe details
+        val json = Json.toJson(details)(using SchemeDetails.writes(using NoOpCrypto))
+        val ob = json.as[SchemeDetails](using SchemeDetails.reads)
+
+        ob.schemeName mustBe details.schemeName
+        ob.pstr mustBe details.pstr
+        ob.schemeStatus mustBe details.schemeStatus
+        ob.schemeType mustBe details.schemeType
+        ob.authorisingPSAID mustBe details.authorisingPSAID
+
+        val obNames =
+          ob.establishers.map(_.name.decryptedValue.split(" ").map(_.replaceAll("^\"|\"$", "")).mkString(" "))
+        val detailsNames = details.establishers.map(_.name.decryptedValue)
+        obNames mustBe detailsNames
+
+        ob.establishers.map(_.kind) mustBe details.establishers.map(_.kind)
       }
     }
-  }
 
-  "SchemeStatus" - {
+    "SchemeStatus" - {
 
-    "successfully read from json" in {
-      forAll(schemeStatusGen) { status =>
-        Json.toJson(status).as[SchemeStatus] mustBe status
+      "successfully read from json" in {
+        forAll(schemeStatusGen) { status =>
+          Json.toJson(status).as[SchemeStatus] mustBe status
+        }
       }
-    }
 
-    "return a JsError" - {
-      "Scheme status is unknown" in {
-        forAll(nonEmptyString) { status =>
-          JsString(status).asOpt[SchemeStatus] mustBe None
+      "return a JsError" - {
+        "Scheme status is unknown" in {
+          forAll(nonEmptyString) { status =>
+            JsString(status).asOpt[SchemeStatus] mustBe None
+          }
         }
       }
     }
-  }
 
-  "ListSchemeDetails" - {
+    "ListSchemeDetails" - {
 
-    "successfully read from json" in {
-      forAll(listMinimalSchemeDetailsGen) { listMinimalSchemeDetails =>
-        Json.toJson(listMinimalSchemeDetails).as[ListMinimalSchemeDetails] mustBe listMinimalSchemeDetails
+      "successfully read from json" in {
+        forAll(listMinimalSchemeDetailsGen) { listMinimalSchemeDetails =>
+          Json.toJson(listMinimalSchemeDetails).as[ListMinimalSchemeDetails] mustBe listMinimalSchemeDetails
+        }
       }
     }
   }

@@ -30,7 +30,10 @@ case class SessionSchemeDetails(
 ) {}
 
 object SessionSchemeDetails {
-  implicit val format: OFormat[SessionSchemeDetails] =
+  def format(implicit
+    crypto: uk.gov.hmrc.crypto.Encrypter & uk.gov.hmrc.crypto.Decrypter
+  ): OFormat[SessionSchemeDetails] = {
+    implicit val schemeDetailsFormat: Format[SchemeDetails] = SchemeDetails.encryptedFormat
     (__ \ "_id")
       .format[String]
       .and((__ \ "srn").format[String])
@@ -39,4 +42,5 @@ object SessionSchemeDetails {
         SessionSchemeDetails.apply,
         o => Tuple.fromProductTyped(o)
       )
+  }
 }

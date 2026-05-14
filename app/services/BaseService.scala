@@ -36,5 +36,5 @@ trait BaseService {
   def role(implicit req: AllowedAccessRequest[?]): String = if (req.pensionSchemeId.isPSP) PSP else PSA
 
   def schemeAdministratorOrPractitionerName(implicit req: AllowedAccessRequest[?]): String =
-    req.schemeDetails.establishers.headOption.fold(loggedInUserNameOrBlank)(e => e.name)
+    req.schemeDetails.establishers.headOption.fold(loggedInUserNameOrBlank)(e => e.name.decryptedValue)
 }

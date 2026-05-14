@@ -30,7 +30,11 @@ case class SessionMinimalDetails(
 ) {}
 
 object SessionMinimalDetails {
-  implicit val format: OFormat[SessionMinimalDetails] =
+  def format(implicit
+    crypto: uk.gov.hmrc.crypto.Encrypter & uk.gov.hmrc.crypto.Decrypter
+  ): OFormat[SessionMinimalDetails] = {
+    implicit val minimalDetailsFormat: Format[MinimalDetails] = MinimalDetails.encryptedFormat
+
     (__ \ "_id")
       .format[String]
       .and((__ \ "srn").format[String])
@@ -39,4 +43,5 @@ object SessionMinimalDetails {
         SessionMinimalDetails.apply,
         o => Tuple.fromProductTyped(o)
       )
+  }
 }

@@ -26,6 +26,7 @@ import play.api.Application
 import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.libs.json.Json
 import uk.gov.hmrc.http.{HeaderCarrier, UpstreamErrorResponse}
+import config.NoOpCrypto
 
 import scala.concurrent.Await
 
@@ -39,6 +40,19 @@ class SchemeDetailsConnectorSpec extends BaseConnectorSpec {
                                             usesSession: Boolean = false
                                            ): GuiceApplicationBuilder =
     super.applicationBuilder(userAnswers).configure("microservice.services.pensionsScheme.port" -> wireMockPort)
+
+  private def assertSchemeDetailsEqual(actual: SchemeDetails, expected: SchemeDetails): Unit = {
+    actual.schemeName mustBe expected.schemeName
+    actual.pstr mustBe expected.pstr
+    actual.schemeStatus mustBe expected.schemeStatus
+    actual.schemeType mustBe expected.schemeType
+    actual.authorisingPSAID mustBe expected.authorisingPSAID
+    actual.establishers.size mustBe expected.establishers.size
+    actual.establishers.zip(expected.establishers).foreach { case (actualEst, expectedEst) =>
+      actualEst.name.toString mustBe expectedEst.name.toString
+      actualEst.kind.value mustBe expectedEst.kind.value
+    }
+  }
 
   object PsaSchemeDetailsHelper {
 
@@ -78,11 +92,12 @@ class SchemeDetailsConnectorSpec extends BaseConnectorSpec {
     val expectedResult = schemeDetailsGen.sample.value
 
     "return scheme details" in runningApplication { implicit app =>
-      PsaSchemeDetailsHelper.stubGet(psaId, schemeId, ok(Json.toJson(expectedResult).toString))
+      PsaSchemeDetailsHelper.stubGet(psaId, schemeId, ok(Json.toJson(expectedResult)(using SchemeDetails.writes(using NoOpCrypto)).toString))
 
       val result = connector.details(psaId, schemeId).futureValue
 
-      result mustBe Some(expectedResult)
+      result.isDefined mustBe true
+      assertSchemeDetailsEqual(result.get, expectedResult)
     }
 
     "return none when 404 is sent" in runningApplication { implicit app =>
@@ -129,11 +144,12 @@ class SchemeDetailsConnectorSpec extends BaseConnectorSpec {
     val expectedResult = schemeDetailsGen.sample.value
 
     "return scheme details" in runningApplication { implicit app =>
-      PspSchemeDetailsHelper.stubGet(pspId, srn, ok(Json.toJson(expectedResult).toString()))
+      PspSchemeDetailsHelper.stubGet(pspId, srn, ok(Json.toJson(expectedResult)(using SchemeDetails.writes(using NoOpCrypto)).toString))
 
       val result = connector.details(pspId, srn).futureValue
 
-      result mustBe Some(expectedResult)
+      result.isDefined mustBe true
+      assertSchemeDetailsEqual(result.get, expectedResult)
     }
 
     "return none when 404 is sent" in runningApplication { implicit app =>

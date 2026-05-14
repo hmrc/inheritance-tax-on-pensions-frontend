@@ -43,7 +43,7 @@ class ConfirmationController @Inject() (
       Ok(
         view(
           paymentReference,
-          request.request.minimalDetails.email,
+          request.request.minimalDetails.email.decryptedValue,
           srn
         )
       )
