@@ -52,9 +52,14 @@ GET         /:srn/change-name-lpr                        controllers.IndividualN
 POST        /:srn/change-name-lpr                        controllers.IndividualNameController.onSubmit(srn: Srn, mode: Mode = CheckMode, journeyRole: JourneyRole = JourneyRole.LprIndividual)
 
 GET         /:srn/enter-organisation-name                controllers.OrganisationNameController.onPageLoad(srn: Srn, mode: Mode = NormalMode)
-POST        /:srn/enter-organisation-name                  controllers.OrganisationNameController.onSubmit(srn: Srn, mode: Mode = NormalMode)
-GET         /:srn/change-organisation-name                 controllers.OrganisationNameController.onPageLoad(srn: Srn, mode: Mode = CheckMode)
-POST        /:srn/change-organisation-name                    controllers.OrganisationNameController.onSubmit(srn: Srn, mode: Mode = CheckMode)
+POST        /:srn/enter-organisation-name                controllers.OrganisationNameController.onSubmit(srn: Srn, mode: Mode = NormalMode)
+GET         /:srn/change-organisation-name               controllers.OrganisationNameController.onPageLoad(srn: Srn, mode: Mode = CheckMode)
+POST        /:srn/change-organisation-name               controllers.OrganisationNameController.onSubmit(srn: Srn, mode: Mode = CheckMode)
+
+GET         /:srn/enter-lpr-address                      controllers.AddressLookupStartController.start(srn: Srn, mode: Mode = NormalMode)
+GET         /:srn/change-lpr-address                     controllers.AddressLookupStartController.start(srn: Srn, mode: Mode = CheckMode)
+GET         /:srn/address-lookup-continue/normalmode     controllers.AddressLookupContinueController.continue(srn: Srn, mode: Mode = NormalMode, id: String ?= "")
+GET         /:srn/address-lookup-continue/checkmode      controllers.AddressLookupContinueController.continue(srn: Srn, mode: Mode = CheckMode, id: String ?= "")
 
 GET         /:srn/check-your-answers                     controllers.CheckYourAnswersController.onPageLoad(srn: Srn)
 POST        /:srn/check-your-answers                     controllers.CheckYourAnswersController.onSubmit(srn: Srn)

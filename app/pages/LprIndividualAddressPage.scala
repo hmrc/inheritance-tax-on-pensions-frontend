@@ -14,20 +14,13 @@
  * limitations under the License.
  */
 
-package models
+package pages
 
-import play.api.libs.json.{Json, OFormat}
+import queries.Gettable
+import play.api.libs.json.JsPath
+import models.LprAddress
 
-case class IndividualName(
-  title: Option[String],
-  firstForename: String,
-  secondForename: Option[String],
-  surname: String
-) {
-  val displayFullNameAndTitle: String =
-    Seq(title, Some(firstForename), secondForename, Some(surname)).flatten.filter(_.nonEmpty).mkString(" ")
-}
+case object LprIndividualAddressPage extends Page with Gettable[LprAddress] {
 
-object IndividualName {
-  implicit val format: OFormat[IndividualName] = Json.format[IndividualName]
+  override def path: JsPath = JsPath \ "lprDetails" \ "individual"
 }
