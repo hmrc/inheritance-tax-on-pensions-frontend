@@ -18,7 +18,10 @@ package config
 
 import play.api.mvc.RequestHeader
 import com.google.inject.{Inject, Singleton}
+import controllers.routes
+import models.SchemeId.Srn
 import play.api.Configuration
+import models.Mode
 
 import scala.concurrent.duration.Duration
 
@@ -26,6 +29,7 @@ import scala.concurrent.duration.Duration
 class FrontendAppConfig @Inject() (configuration: Configuration) {
 
   private val host: String = configuration.get[String]("host")
+  private val servicePath: String = configuration.get[String]("service.path")
   private val contactHost = configuration.get[String]("contact-frontend.host")
   private val contactFormServiceIdentifier = "inheritance-tax-on-pensions-frontend"
 
@@ -83,6 +87,15 @@ class FrontendAppConfig @Inject() (configuration: Configuration) {
 
   def getSubmitReportUrl(pstr: String, userAnswersId: String): String =
     s"$inheritanceTaxOnPensionsHost/inheritance-tax-on-pensions/$pstr/submit-report/$userAnswersId"
+
+  val addressLookupFrontendBaseUrl: String =
+    configuration.get[Service]("microservice.services.addressLookupFrontend").baseUrl
+
+  def addressLookupContinueUrl(srn: Srn, mode: Mode): String =
+    s"$host${routes.AddressLookupContinueController.continue(srn, mode).url}"
+
+  val signOutSurveyUrl: String =
+    s"$host$servicePath${controllers.auth.routes.AuthController.signOut().url}"
 
   private val inheritanceTaxOnPensionsHost: String =
     configuration.get[Service]("microservice.services.inheritanceTaxOnPensions").baseUrl

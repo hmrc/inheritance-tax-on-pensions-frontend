@@ -16,6 +16,7 @@
 
 package controllers
 
+import services.CountryService
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import com.google.inject.Inject
 import controllers.actions._
@@ -34,7 +35,8 @@ class CheckYourAnswersController @Inject() (
   getData: DataRetrievalAction,
   requireData: DataRequiredAction,
   val controllerComponents: MessagesControllerComponents,
-  view: CheckYourAnswersView
+  view: CheckYourAnswersView,
+  countryService: CountryService
 ) extends FrontendBaseController
     with I18nSupport {
 
@@ -51,7 +53,8 @@ class CheckYourAnswersController @Inject() (
           BirthDeathDatesSummary.row(srn, userAnswers),
           LprTypeSummary.row(srn, userAnswers),
           LprIndividualNameSummary.row(srn, userAnswers),
-          LprOrganisationNameSummary.row(srn, userAnswers)
+          LprOrganisationNameSummary.row(srn, userAnswers),
+          LprIndividualAddressSummary.row(srn, userAnswers, countryService.nameForCode)
         ).flatten
       )
 

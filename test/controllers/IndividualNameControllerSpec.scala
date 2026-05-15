@@ -22,6 +22,7 @@ import pages.IndividualNamePage
 import play.api.inject.bind
 import views.html.IndividualNameView
 import base.SpecBase
+import play.api.libs.json.Json
 import models._
 import org.mockito.ArgumentMatchers._
 import play.api.test.Helpers._
@@ -54,7 +55,7 @@ class IndividualNameControllerSpec extends SpecBase {
     ),
     JourneyRoleTestCase(
       JourneyRole.LprIndividual,
-      routes.CheckYourAnswersController.onPageLoad(srn).url
+      routes.AddressLookupStartController.start(srn, NormalMode).url
     )
   )
 
@@ -223,6 +224,51 @@ class IndividualNameControllerSpec extends SpecBase {
 
         controller.nextPage(srn, NormalMode, JourneyRole.Unknown) mustEqual routes.JourneyRecoveryController
           .onPageLoad()
+      }
+    }
+
+    "must preserve the LPR individual address when updating the LPR individual name" in {
+
+      val existingAnswers = UserAnswers(
+        userAnswersId,
+        Json.obj(
+          "lprDetails" -> Json.obj(
+            "individual" -> Json.obj(
+              "title" -> "Mr",
+              "firstForename" -> "John",
+              "secondForename" -> "William",
+              "surname" -> "Doe",
+              "addressLine1" -> "1 ABCDE Street",
+              "addressLine2" -> "FGHIJ Town",
+              "ukPostcode" -> "ZZ99 1AA",
+              "country" -> "GB"
+            )
+          )
+        )
+      )
+
+      val updatedName = IndividualName(
+        title = Some("Dr"),
+        firstForename = "Jane",
+        secondForename = None,
+        surname = "Doe"
+      )
+
+      val application = applicationBuilder(userAnswers = Some(existingAnswers), usesSession = true).build()
+
+      running(application) {
+        val controller = application.injector.instanceOf[IndividualNameController]
+
+        val result = controller.addIndividualName(existingAnswers, JourneyRole.LprIndividual, updatedName).success.value
+
+        (result.data \ "lprDetails" \ "individual" \ "title").as[String] mustEqual "Dr"
+        (result.data \ "lprDetails" \ "individual" \ "firstForename").as[String] mustEqual "Jane"
+        (result.data \ "lprDetails" \ "individual" \ "secondForename").asOpt[String] mustBe None
+        (result.data \ "lprDetails" \ "individual" \ "surname").as[String] mustEqual "Doe"
+        (result.data \ "lprDetails" \ "individual" \ "addressLine1").as[String] mustEqual "1 ABCDE Street"
+        (result.data \ "lprDetails" \ "individual" \ "addressLine2").as[String] mustEqual "FGHIJ Town"
+        (result.data \ "lprDetails" \ "individual" \ "ukPostcode").as[String] mustEqual "ZZ99 1AA"
+        (result.data \ "lprDetails" \ "individual" \ "country").as[String] mustEqual "GB"
       }
     }
 

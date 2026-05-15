@@ -163,6 +163,40 @@ organisationName.error.required = Enter the name of the organisation
 organisationName.error.length = The name of the organisation must be 160 characters or less
 organisationName.change.hidden = Organisation name
 
+lprIndividualAddress.checkYourAnswersLabel = Address of LPR
+lprIndividualAddress.checkYourAnswersLabel.hidden = address of legal personal representative
+
+addressLookup.countryPicker.title = Select the country or territory
+addressLookup.countryPicker.heading = Select the country or territory where {0} resides
+addressLookup.countryPicker.countryLabel = Select country or territory, for example, United Kingdom
+addressLookup.phaseBannerHtml = This is a new service. Help us improve it and <a href="$link" class="govuk-link" target="_blank" rel="noopener noreferrer">give your feedback (opens in new tab)</a>.
+addressLookup.lookup.title = Look up the address of the LPR
+addressLookup.lookup.heading = Look up the address of {0}
+addressLookup.lookup.postcode = <b>Search by postcode</b>
+addressLookup.lookup.filterLabel = <b>Building number or name (optional)</b>
+addressLookup.select.title = Choose the address
+addressLookup.select.heading = Choose the address of {0}
+addressLookup.select.editAddressLinkText = Enter the address manually
+addressLookup.confirm.title = Review and confirm
+addressLookup.confirm.heading = Review and confirm
+addressLookup.confirm.submitLabel = Confirm address
+addressLookup.edit.title = Enter the address of the LPR
+addressLookup.edit.heading = Enter the address of {0}
+addressLookup.edit.line1Label = <b>Address line 1</b>
+addressLookup.edit.line2Label = <b>Address line 2</b>
+addressLookup.edit.line3Label = <b>Address line 3</b>
+addressLookup.edit.townLabel = <b>Address line 4</b>
+addressLookup.edit.postcodeLabel = <b>Postcode</b>
+addressLookup.edit.countryLabel = <b>Country</b>
+addressLookup.international.edit.title = Enter the address of the LPR
+addressLookup.international.edit.heading = Enter the address of {0}
+addressLookup.international.edit.line1Label = <b>Address line 1</b>
+addressLookup.international.edit.line2Label = <b>Address line 2</b>
+addressLookup.international.edit.line3Label = <b>Address line 3</b>
+addressLookup.international.edit.townLabel = <b>Address line 4</b>
+addressLookup.international.edit.postcodeLabel = <b>Postal code</b>
+addressLookup.international.edit.countryLabel = <b>Country</b>
+
 checkYourAnswers.title = Check and submit the report
 checkYourAnswers.heading = Check and submit the report
 

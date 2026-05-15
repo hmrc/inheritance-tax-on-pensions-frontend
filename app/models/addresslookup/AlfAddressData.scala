@@ -14,20 +14,31 @@
  * limitations under the License.
  */
 
-package models
+package models.addresslookup
 
 import play.api.libs.json.{Json, OFormat}
 
-case class IndividualName(
-  title: Option[String],
-  firstForename: String,
-  secondForename: Option[String],
-  surname: String
-) {
-  val displayFullNameAndTitle: String =
-    Seq(title, Some(firstForename), secondForename, Some(surname)).flatten.filter(_.nonEmpty).mkString(" ")
+final case class AlfAddressData(id: Option[String], address: AlfAddress)
+
+object AlfAddressData {
+  implicit val format: OFormat[AlfAddressData] = Json.format[AlfAddressData]
 }
 
-object IndividualName {
-  implicit val format: OFormat[IndividualName] = Json.format[IndividualName]
+final case class AlfAddress(
+  organisation: Option[String],
+  lines: Seq[String],
+  town: Option[String],
+  postcode: Option[String],
+  country: AlfCountry,
+  poBox: Option[String] = None
+)
+
+object AlfAddress {
+  implicit val format: OFormat[AlfAddress] = Json.format[AlfAddress]
+}
+
+final case class AlfCountry(code: String, name: String)
+
+object AlfCountry {
+  implicit val format: OFormat[AlfCountry] = Json.format[AlfCountry]
 }

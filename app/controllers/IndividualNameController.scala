@@ -20,6 +20,7 @@ import services.UserAnswersService
 import play.api.mvc._
 import pages.IndividualNamePage
 import controllers.actions._
+import play.api.libs.json._
 import forms.IndividualNameFormProvider
 import models._
 import views.html.IndividualNameView
@@ -28,6 +29,7 @@ import play.api.i18n.{I18nSupport, MessagesApi}
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
 
 import scala.concurrent.{ExecutionContext, Future}
+import scala.util.{Success, Try}
 
 import javax.inject.Inject
 
@@ -83,12 +85,42 @@ class IndividualNameController @Inject() (
                 individualName =>
                   for {
                     updatedAnswers <- Future
-                      .fromTry(request.userAnswers.set(IndividualNamePage(journeyRole), individualName))
+                      .fromTry(addIndividualName(request.userAnswers, journeyRole, individualName))
                     _ <- userAnswersService.set(updatedAnswers)(using hc, request.request)
                   } yield Redirect(nextPage(srn, mode, journeyRole))
               )
         }
       }
+
+  private[controllers] def addIndividualName(
+    userAnswers: UserAnswers,
+    journeyRole: JourneyRole,
+    individualName: IndividualName
+  ): Try[UserAnswers] =
+    journeyRole match {
+      case JourneyRole.LprIndividual =>
+        Success(
+          userAnswers.copy(
+            data = userAnswers.data.deepMerge(
+              Json.obj(
+                "lprDetails" -> Json.obj(
+                  "individual" -> Json.obj(
+                    "title" -> optionalString(individualName.title),
+                    "firstForename" -> individualName.firstForename,
+                    "secondForename" -> optionalString(individualName.secondForename),
+                    "surname" -> individualName.surname
+                  )
+                )
+              )
+            )
+          )
+        )
+      case _ =>
+        userAnswers.set(IndividualNamePage(journeyRole), individualName)
+    }
+
+  private def optionalString(value: Option[String]): JsValue =
+    value.filter(_.nonEmpty).map(JsString.apply).getOrElse(JsNull)
 
   private[controllers] def nextPage(srn: Srn, mode: Mode, journeyRole: JourneyRole): Call =
     mode match {
@@ -96,7 +128,7 @@ class IndividualNameController @Inject() (
       case NormalMode if journeyRole == JourneyRole.Deceased =>
         routes.NinoOrReasonController.onPageLoad(srn, NormalMode)
       case NormalMode if journeyRole == JourneyRole.LprIndividual =>
-        routes.CheckYourAnswersController.onPageLoad(srn)
+        routes.AddressLookupStartController.start(srn, NormalMode)
       case _ => routes.JourneyRecoveryController.onPageLoad()
     }
 }

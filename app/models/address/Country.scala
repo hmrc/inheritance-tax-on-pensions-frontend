@@ -14,20 +14,16 @@
  * limitations under the License.
  */
 
-package models
+package models.address
 
-import play.api.libs.json.{Json, OFormat}
+import play.api.libs.json._
+import play.api.libs.functional.syntax._
 
-case class IndividualName(
-  title: Option[String],
-  firstForename: String,
-  secondForename: Option[String],
-  surname: String
-) {
-  val displayFullNameAndTitle: String =
-    Seq(title, Some(firstForename), secondForename, Some(surname)).flatten.filter(_.nonEmpty).mkString(" ")
-}
+final case class Country(code: String, name: String)
 
-object IndividualName {
-  implicit val format: OFormat[IndividualName] = Json.format[IndividualName]
+object Country {
+  implicit val format: OFormat[Country] =
+    (__ \ "code")
+      .format[String]
+      .and((__ \ "country").format[String])(Country.apply, country => Tuple.fromProductTyped(country))
 }
