@@ -79,12 +79,12 @@ class LprAddressSpec extends SpecBase {
           town = Some("Fakeville"),
           postcode = Some("ZZ1 1ZZ"),
           country = AlfCountry("GB", "United Kingdom"),
-          poBox = Some("16651")
+          poBox = Some("999")
         )
       )
 
       LprAddress.fromAlfAddressData(addressData) mustBe LprAddress(
-        addressLine1 = "PO Box 16651",
+        addressLine1 = "PO Box 999",
         addressLine2 = Some("33 Fake Street"),
         addressLine3 = Some("Fake Area"),
         addressLine4 = Some("Fakeville"),
@@ -99,16 +99,16 @@ class LprAddressSpec extends SpecBase {
         id = Some("GB123"),
         address = AlfAddress(
           organisation = None,
-          lines = Seq("PO Box 16651", "Fake Area"),
+          lines = Seq("PO Box 999", "Fake Area"),
           town = Some("Fakeville"),
           postcode = Some("ZZ1 1ZZ"),
           country = AlfCountry("GB", "United Kingdom"),
-          poBox = Some("16651")
+          poBox = Some("999")
         )
       )
 
       LprAddress.fromAlfAddressData(addressData) mustBe LprAddress(
-        addressLine1 = "PO Box 16651",
+        addressLine1 = "PO Box 999",
         addressLine2 = Some("Fake Area"),
         addressLine3 = None,
         addressLine4 = Some("Fakeville"),
@@ -127,12 +127,58 @@ class LprAddressSpec extends SpecBase {
           town = Some("Fakeville"),
           postcode = Some("ZZ1 1ZZ"),
           country = AlfCountry("GB", "United Kingdom"),
-          poBox = Some("PO Box 16651")
+          poBox = Some("PO Box 999")
         )
       )
 
       LprAddress.fromAlfAddressData(addressData) mustBe LprAddress(
-        addressLine1 = "PO Box 16651",
+        addressLine1 = "PO Box 999",
+        addressLine2 = Some("Fakeville"),
+        addressLine3 = None,
+        addressLine4 = None,
+        ukPostcode = Some("ZZ1 1ZZ"),
+        country = "GB"
+      )
+    }
+
+    "must not duplicate ALF town when it is used to populate address line 2" in {
+
+      val addressData = AlfAddressData(
+        id = Some("GB123"),
+        address = AlfAddress(
+          organisation = None,
+          lines = Seq("PO Box 999"),
+          town = Some("Fakeville"),
+          postcode = Some("ZZ1 1ZZ"),
+          country = AlfCountry("GB", "United Kingdom")
+        )
+      )
+
+      LprAddress.fromAlfAddressData(addressData) mustBe LprAddress(
+        addressLine1 = "PO Box 999",
+        addressLine2 = Some("Fakeville"),
+        addressLine3 = None,
+        addressLine4 = None,
+        ukPostcode = Some("ZZ1 1ZZ"),
+        country = "GB"
+      )
+    }
+
+    "must not duplicate ALF town when it is already returned as the last address line" in {
+
+      val addressData = AlfAddressData(
+        id = Some("GB123"),
+        address = AlfAddress(
+          organisation = None,
+          lines = Seq("33 Fake Street", "Fakeville"),
+          town = Some("Fakeville"),
+          postcode = Some("ZZ1 1ZZ"),
+          country = AlfCountry("GB", "United Kingdom")
+        )
+      )
+
+      LprAddress.fromAlfAddressData(addressData) mustBe LprAddress(
+        addressLine1 = "33 Fake Street",
         addressLine2 = Some("Fakeville"),
         addressLine3 = None,
         addressLine4 = None,
@@ -170,7 +216,7 @@ class LprAddressSpec extends SpecBase {
           town = Some("Fakeville"),
           postcode = Some("ZZ1 1ZZ"),
           country = AlfCountry("GB", "United Kingdom"),
-          poBox = Some("16651")
+          poBox = Some("999")
         )
       )
 

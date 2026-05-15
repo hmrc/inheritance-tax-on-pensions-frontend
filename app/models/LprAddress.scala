@@ -36,26 +36,33 @@ object LprAddress {
 
   def fromAlfAddressData(addressData: AlfAddressData): LprAddress = {
     val lines = addressLines(addressData)
-    val addressLine2 = lines.lift(1)
+    val addressLine2 = lines.lift(1).orElse(addressData.address.town)
+    val addressLine4 = lines.lift(3).orElse(addressData.address.town.filterNot(addressLine2.contains))
 
     LprAddress(
       addressLine1 = lines.headOption.map(_.trim).getOrElse(""),
-      addressLine2 = addressLine2.orElse(addressData.address.town),
+      addressLine2 = addressLine2,
       addressLine3 = lines.lift(2),
-      addressLine4 = lines.lift(3).orElse(addressData.address.town.filter(_ => addressLine2.isDefined)),
+      addressLine4 = addressLine4,
       ukPostcode = addressData.address.postcode,
       country = addressData.address.country.code
     )
   }
 
   private def addressLines(addressData: AlfAddressData): Seq[String] = {
-    val lines = addressData.address.lines.map(_.trim).filter(_.nonEmpty)
+    val lines = removeTrailingTown(addressData.address.lines.map(_.trim).filter(_.nonEmpty), addressData.address.town)
 
     addressData.address.poBox.map(formatPoBox).filterNot(poBox => lines.exists(line => samePoBox(line, poBox))) match {
       case Some(poBox) => poBox +: lines
       case None => lines
     }
   }
+
+  private def removeTrailingTown(lines: Seq[String], town: Option[String]): Seq[String] =
+    (lines, town.map(_.trim).filter(_.nonEmpty)) match {
+      case (init :+ last, Some(town)) if sameAddressLine(last, town) => init
+      case _ => lines
+    }
 
   private def formatPoBox(poBox: String): String = {
     val formattedPoBox = poBox.trim
@@ -68,5 +75,8 @@ object LprAddress {
   }
 
   private def samePoBox(line: String, poBox: String): Boolean =
-    line.replaceAll("\\s+", "").equalsIgnoreCase(poBox.replaceAll("\\s+", ""))
+    sameAddressLine(line, poBox)
+
+  private def sameAddressLine(left: String, right: String): Boolean =
+    left.replaceAll("\\s+", "").equalsIgnoreCase(right.replaceAll("\\s+", ""))
 }
