@@ -203,8 +203,8 @@ checkYourAnswers.heading = Check and submit the report
 psaDeclaration.title = Declaration
 psaDeclaration.heading = Declaration
 psaDeclaration.text.list = By continuing you declare that:
-psaDeclaration.text.guidance.usecase1 = you have received and checked the information in the payment notice
-psaDeclaration.text.guidance.usecase2 = the information you have provided in this return is correct and complete to the best of your knowledge and belief
+psaDeclaration.text.guidance.usecase1 = the payment notice you received is complete and valid
+psaDeclaration.text.guidance.usecase2 = the information you have provided in this return matches the payment notice
 psaDeclaration.agreeAndSubmit = Agree and submit
 
 pspDeclaration.title = Declaration
