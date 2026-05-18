@@ -16,7 +16,8 @@
 
 package repositories
 
-import config.FrontendAppConfig
+import com.typesafe.config.ConfigFactory
+import config.{EncryptedFormats, FrontendAppConfig}
 import generators.Generators
 import models.{SchemeDetails, SessionSchemeDetails}
 import org.mockito.Mockito.when
@@ -28,6 +29,7 @@ import org.scalatest.freespec.AnyFreeSpec
 import org.scalatest.matchers.must.Matchers
 import org.scalatestplus.mockito.MockitoSugar
 import org.slf4j.MDC
+import play.api.Configuration
 import uk.gov.hmrc.mdc.MdcExecutionContext
 import uk.gov.hmrc.mongo.test.DefaultPlayMongoRepositorySupport
 
@@ -59,11 +61,41 @@ class SessionSchemeDetailsRepositorySpec
 
   implicit val productionLikeTestMdcExecutionContext: ExecutionContext = MdcExecutionContext()
 
+  private val encryptedFormats = new EncryptedFormats(
+    Configuration(ConfigFactory.parseString(
+      """
+        |mongodb.encryption.enabled = true
+        |mongodb.encryption.key = "teStTesttE5TtesT3TEsTtEsttESTTest5TEsTtE5t1="
+        |""".stripMargin
+    ))
+  )
+
   protected override val repository: SessionSchemeDetailsRepository = new SessionSchemeDetailsRepository(
     mongoComponent = mongoComponent,
     appConfig      = mockAppConfig,
-    clock          = stubClock
+    clock          = stubClock,
+    encryptedFormats = encryptedFormats
   )
+  
+  private def assertSessionSchemeDetailsEqual(actual: SessionSchemeDetails, expected: SessionSchemeDetails): Unit = {
+    actual.id mustBe expected.id
+    actual.srn mustBe expected.srn
+    actual.lastUpdated mustBe expected.lastUpdated
+    assertSchemeDetailsEqual(actual.schemeDetails, expected.schemeDetails)
+  }
+  
+  private def assertSchemeDetailsEqual(actual: SchemeDetails, expected: SchemeDetails): Unit = {
+    actual.schemeName mustBe expected.schemeName
+    actual.pstr mustBe expected.pstr
+    actual.schemeStatus mustBe expected.schemeStatus
+    actual.schemeType mustBe expected.schemeType
+    actual.authorisingPSAID mustBe expected.authorisingPSAID
+    actual.establishers.size mustBe expected.establishers.size
+    actual.establishers.zip(expected.establishers).foreach { case (actualEst, expectedEst) =>
+      actualEst.name.toString mustBe expectedEst.name.toString
+      actualEst.kind.value mustBe expectedEst.kind.value
+    }
+  }
 
   ".set" - {
 
@@ -74,7 +106,7 @@ class SessionSchemeDetailsRepositorySpec
       repository.set(sessionSchemeDetails).futureValue
       val updatedRecord = find(Filters.equal("_id", sessionSchemeDetails.id)).futureValue.headOption.value
 
-      updatedRecord.mustEqual(expectedResult)
+      assertSessionSchemeDetailsEqual(updatedRecord, expectedResult)
     }
 
     mustPreserveMdc(repository.set(sessionSchemeDetails))
@@ -91,7 +123,7 @@ class SessionSchemeDetailsRepositorySpec
         val result         = repository.get(sessionSchemeDetails.id).futureValue
         val expectedResult = sessionSchemeDetails.copy(lastUpdated = instant)
 
-        result.value.mustEqual(expectedResult)
+        assertSessionSchemeDetailsEqual(result.value, expectedResult)
       }
     }
 
@@ -139,7 +171,7 @@ class SessionSchemeDetailsRepositorySpec
         val expectedUpdatedAnswers = sessionSchemeDetails.copy(lastUpdated = instant)
 
         val updatedAnswers = find(Filters.equal("_id", sessionSchemeDetails.id)).futureValue.headOption.value
-        updatedAnswers.mustEqual(expectedUpdatedAnswers)
+        assertSessionSchemeDetailsEqual(updatedAnswers, expectedUpdatedAnswers)
       }
     }
 

@@ -22,7 +22,7 @@ import org.scalatestplus.scalacheck.ScalaCheckPropertyChecks
 import play.api.mvc.{Action, AnyContent, AnyContentAsEmpty}
 import connectors.{MinimalDetailsConnector, MinimalDetailsError, SchemeDetailsConnector}
 import controllers.routes
-import config.FrontendAppConfig
+import config.{FrontendAppConfig, NoOpCrypto}
 import models.SchemeId.Srn
 import models.PensionSchemeId.{PsaId, PspId}
 import connectors.MinimalDetailsError.{DelimitedAdmin, DetailsNotFound}
@@ -56,12 +56,13 @@ class AllowAccessActionSpec extends SpecBase with ScalaCheckPropertyChecks {
   lazy val mockSessionSchemeDetailsRepository: SessionSchemeDetailsRepository = mock[SessionSchemeDetailsRepository]
   lazy val mockSessionMinimalDetailsRepository: SessionMinimalDetailsRepository = mock[SessionMinimalDetailsRepository]
   lazy val mockSessionService: SessionService = mock[SessionService]
+  implicit val crypto: uk.gov.hmrc.crypto.Encrypter & uk.gov.hmrc.crypto.Decrypter = NoOpCrypto
 
   class Handler[A](appConfig: FrontendAppConfig, request: IdentifierRequest[A]) {
 
     def run(srn: Srn): Action[AnyContent] = new FakeActionBuilder(request).andThen(allowAccessAction(appConfig)(srn)) {
       request =>
-        Ok(Json.toJson(request.schemeDetails))
+        Ok(Json.toJson(request.schemeDetails)(using SchemeDetails.encryptedFormat))
     }
   }
 
@@ -115,7 +116,7 @@ class AllowAccessActionSpec extends SpecBase with ScalaCheckPropertyChecks {
           val result = handler(administratorRequest).run(srn)(FakeRequest())
 
           status(result) mustBe OK
-          contentAsJson(result) mustBe Json.toJson(schemeDetails)
+          contentAsJson(result) mustBe Json.toJson(schemeDetails)(using SchemeDetails.encryptedFormat)
 
           verify(mockSessionService, times(1)).clearSession(any())
           verify(mockSessionService, times(1)).cacheAllowAccessDetails(any(), any())
@@ -126,7 +127,7 @@ class AllowAccessActionSpec extends SpecBase with ScalaCheckPropertyChecks {
           val result = handler(practitionerRequest).run(srn)(FakeRequest())
 
           status(result) mustBe OK
-          contentAsJson(result) mustBe Json.toJson(schemeDetails)
+          contentAsJson(result) mustBe Json.toJson(schemeDetails)(using SchemeDetails.encryptedFormat)
 
           verify(mockSessionService, times(1)).clearSession(any())
           verify(mockSessionService, times(1)).cacheAllowAccessDetails(any(), any())

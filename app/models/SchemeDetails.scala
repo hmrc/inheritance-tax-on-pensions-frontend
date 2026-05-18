@@ -35,9 +35,18 @@ case class SchemeDetails(
 )
 
 case class Establisher(
-  name: String,
+  name: SensitiveString,
   kind: EstablisherKind
-)
+) {
+  override def equals(obj: Any): Boolean = obj match {
+    case other: Establisher =>
+      this.name.decryptedValue == other.name.decryptedValue &&
+      this.kind == other.kind
+    case _ => false
+  }
+
+  override def hashCode(): Int = (name.decryptedValue, kind).hashCode
+}
 
 sealed class EstablisherKind(val value: String)
 
@@ -58,10 +67,14 @@ object EstablisherKind {
 object Establisher {
 
   private val companyEstablisherReads: Reads[Establisher] =
-    (__ \ "companyDetails" \ "companyName").read[String].map(name => Establisher(name, EstablisherKind.Company))
+    (__ \ "companyDetails" \ "companyName")
+      .read[String]
+      .map(name => Establisher(SensitiveString(name), EstablisherKind.Company))
 
   private val partnershipEstablisherReads: Reads[Establisher] =
-    (__ \ "partnershipDetails" \ "name").read[String].map(name => Establisher(name, EstablisherKind.Partnership))
+    (__ \ "partnershipDetails" \ "name")
+      .read[String]
+      .map(name => Establisher(SensitiveString(name), EstablisherKind.Partnership))
 
   private val individualEstablisherReads: Reads[Establisher] =
     (__ \ "establisherDetails" \ "firstName")
@@ -69,7 +82,7 @@ object Establisher {
       .and((__ \ "establisherDetails" \ "middleName").readNullable[String])
       .and((__ \ "establisherDetails" \ "lastName").read[String]) { (first, middle, last) =>
         val name = s"$first ${middle.fold("")(m => s"$m ")}$last"
-        Establisher(name, EstablisherKind.Individual)
+        Establisher(SensitiveString(name), EstablisherKind.Individual)
       }
 
   implicit val reads: Reads[Establisher] =
@@ -81,26 +94,30 @@ object Establisher {
         Reads(_ => JsError(s"Unsupported establisher kind: $unknown"))
     }
 
-  implicit val writes: Writes[Establisher] = establisher =>
-    (establisher.kind match {
-      case EstablisherKind.Company =>
-        Json.obj("companyDetails" -> Json.obj("companyName" -> establisher.name))
-      case EstablisherKind.Partnership =>
-        Json.obj("partnershipDetails" -> Json.obj("name" -> establisher.name))
-      case EstablisherKind.Individual =>
-        val first :: rest = establisher.name.split(" ").toList: @unchecked
-        val last :: middles = rest.reverse: @unchecked
-        val middle = middles.iterator.reduceOption((a, b) => s"$a $b")
-        Json.obj(
-          "establisherDetails" -> Json
-            .obj(
-              "firstName" -> first,
-              "lastName" -> last
-            )
-            .++(middle.fold(Json.obj())(m => Json.obj("middleName" -> m)))
-        )
-      case _: EstablisherKind => throw new IllegalArgumentException("Unrecognised EstablisherKind value")
-    }) ++ Json.obj("establisherKind" -> establisher.kind.value)
+  def writes(implicit crypto: uk.gov.hmrc.crypto.Encrypter & uk.gov.hmrc.crypto.Decrypter): Writes[Establisher] = {
+    implicit val sensitiveFormat: Format[SensitiveString] = SensitiveDetails.sensitiveStringFormat
+
+    establisher =>
+      (establisher.kind match {
+        case EstablisherKind.Company =>
+          Json.obj("companyDetails" -> Json.obj("companyName" -> Json.toJson(establisher.name)))
+        case EstablisherKind.Partnership =>
+          Json.obj("partnershipDetails" -> Json.obj("name" -> Json.toJson(establisher.name)))
+        case EstablisherKind.Individual =>
+          val first :: rest = establisher.name.decryptedValue.split(" ").toList: @unchecked
+          val last :: middles = rest.reverse: @unchecked
+          val middle = middles.iterator.reduceOption((a, b) => s"$a $b")
+          Json.obj(
+            "establisherDetails" -> Json
+              .obj(
+                "firstName" -> Json.toJson(SensitiveString(first)),
+                "lastName" -> Json.toJson(SensitiveString(last))
+              )
+              .++(middle.fold(Json.obj())(m => Json.obj("middleName" -> Json.toJson(SensitiveString(m)))))
+          )
+        case _: EstablisherKind => throw new IllegalArgumentException("Unrecognised EstablisherKind value")
+      }) ++ Json.obj("establisherKind" -> establisher.kind.value)
+  }
 }
 
 object SchemeDetails {
@@ -124,21 +141,27 @@ object SchemeDetails {
           )
       )(SchemeDetails.apply)
 
-  implicit val writeListEstablishers: Writes[ListEstablishers] = Json.writes[ListEstablishers]
+  def writes(implicit crypto: uk.gov.hmrc.crypto.Encrypter & uk.gov.hmrc.crypto.Decrypter): Writes[SchemeDetails] = {
+    implicit val establisherWrites: Writes[Establisher] = Establisher.writes
 
-  implicit val writes: Writes[SchemeDetails] = { details =>
-    val authorisingPSAID: JsObject = details.authorisingPSAID.fold(Json.obj())(psaId =>
-      Json.obj("pspDetails" -> Json.obj("authorisingPSAID" -> psaId))
-    )
+    details =>
+      val authorisingPSAID: JsObject = details.authorisingPSAID.fold(Json.obj())(psaId =>
+        Json.obj("pspDetails" -> Json.obj("authorisingPSAID" -> psaId))
+      )
 
-    Json.obj(
-      "schemeName" -> details.schemeName,
-      "pstr" -> details.pstr,
-      "schemeStatus" -> details.schemeStatus,
-      "schemeType" -> Json.obj("name" -> details.schemeType),
-      "establishers" -> details.establishers
-    ) ++ authorisingPSAID
+      Json.obj(
+        "schemeName" -> details.schemeName,
+        "pstr" -> details.pstr,
+        "schemeStatus" -> details.schemeStatus,
+        "schemeType" -> Json.obj("name" -> details.schemeType),
+        "establishers" -> details.establishers
+      ) ++ authorisingPSAID
   }
+
+  def encryptedFormat(implicit
+    crypto: uk.gov.hmrc.crypto.Encrypter & uk.gov.hmrc.crypto.Decrypter
+  ): Format[SchemeDetails] =
+    Format(reads, writes)
 }
 
 sealed trait SchemeStatus

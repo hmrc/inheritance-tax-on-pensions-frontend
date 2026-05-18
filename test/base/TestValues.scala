@@ -35,16 +35,22 @@ trait TestValues extends Generators {
     schemeStatus = SchemeStatus.Open,
     schemeType = "testSchemeType",
     authorisingPSAID = Some("A1234567"),
-    establishers = List(Establisher("testFirstName testLastName", EstablisherKind.Individual))
+    establishers = List(Establisher(SensitiveString("testFirstName testLastName"), EstablisherKind.Individual))
   )
 
   val individualDetails: IndividualDetails = IndividualDetails("testFirstName", Some("testMiddleName"), "testLastName")
 
   val defaultMinimalDetails: MinimalDetails = MinimalDetails(
-    email,
+    SensitiveString(email),
     isPsaSuspended = false,
-    Some("testOrganisation"),
-    Some(individualDetails),
+    None,
+    Some(
+      SensitiveIndividualDetails(
+        SensitiveString(individualDetails.firstName),
+        individualDetails.middleName.map(SensitiveString(_)),
+        SensitiveString(individualDetails.lastName)
+      )
+    ),
     rlsFlag = false,
     deceasedFlag = false
   )

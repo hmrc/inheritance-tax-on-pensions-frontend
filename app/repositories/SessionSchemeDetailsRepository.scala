@@ -24,7 +24,7 @@ import play.api.libs.json.Format
 import models.SessionSchemeDetails
 import uk.gov.hmrc.mongo.play.json.formats.MongoJavatimeFormats
 import uk.gov.hmrc.mongo.play.json.PlayMongoRepository
-import config.FrontendAppConfig
+import config.{EncryptedFormats, FrontendAppConfig}
 
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -36,12 +36,13 @@ import javax.inject.{Inject, Singleton}
 class SessionSchemeDetailsRepository @Inject() (
   mongoComponent: MongoComponent,
   appConfig: FrontendAppConfig,
-  clock: Clock
+  clock: Clock,
+  encryptedFormats: EncryptedFormats
 )(implicit ec: ExecutionContext)
     extends PlayMongoRepository[SessionSchemeDetails](
       collectionName = "scheme-details",
       mongoComponent = mongoComponent,
-      domainFormat = SessionSchemeDetails.format,
+      domainFormat = SessionSchemeDetails.format(using encryptedFormats.crypto),
       indexes = Seq(
         IndexModel(
           Indexes.ascending("lastUpdated"),

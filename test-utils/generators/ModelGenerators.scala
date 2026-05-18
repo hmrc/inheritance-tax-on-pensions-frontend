@@ -83,7 +83,20 @@ trait ModelGenerators extends BasicGenerators {
       individual <- Gen.option(individualDetailsGen)
       rlsFlag <- boolean
       deceasedFlag <- boolean
-    } yield MinimalDetails(email, isSuspended, orgName, individual, rlsFlag, deceasedFlag)
+    } yield MinimalDetails(
+      SensitiveString(email),
+      isSuspended,
+      orgName,
+      individual.map(individual =>
+        SensitiveIndividualDetails(
+          SensitiveString(individual.firstName),
+          individual.middleName.map(SensitiveString(_)),
+          SensitiveString(individual.lastName)
+        )
+      ),
+      rlsFlag,
+      deceasedFlag
+    )
 
   lazy val minimalDetailsNoOrgGen: Gen[MinimalDetails] =
     for {
@@ -92,7 +105,7 @@ trait ModelGenerators extends BasicGenerators {
       orgName <- Gen.option(nonEmptyString)
       rlsFlag <- boolean
       deceasedFlag <- boolean
-    } yield MinimalDetails(email, isSuspended, orgName, None, rlsFlag, deceasedFlag)
+    } yield MinimalDetails(SensitiveString(email), isSuspended, orgName, None, rlsFlag, deceasedFlag)
 
   val validSchemeStatusGen: Gen[SchemeStatus] =
     Gen.oneOf(
@@ -117,7 +130,7 @@ trait ModelGenerators extends BasicGenerators {
     for {
       name <- Gen.listOfN(3, nonEmptyString).map(_.mkString(" "))
       kind <- Gen.oneOf(EstablisherKind.Company, EstablisherKind.Individual, EstablisherKind.Partnership)
-    } yield Establisher(name, kind)
+    } yield Establisher(SensitiveString(name), kind)
 
   val schemeDetailsGen: Gen[SchemeDetails] =
     for {

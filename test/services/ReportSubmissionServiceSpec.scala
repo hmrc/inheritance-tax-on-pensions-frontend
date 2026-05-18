@@ -110,7 +110,13 @@ class ReportSubmissionServiceSpec extends SpecBase {
 
       val individualOnlyMinimalDetails: MinimalDetails = defaultMinimalDetails.copy(
         organisationName = None,
-        individualDetails = Some(IndividualDetails("John", Some("William"), "Doe"))
+        individualDetails = Some(
+          SensitiveIndividualDetails(
+            SensitiveString("John"),
+            Some(SensitiveString("William")),
+            SensitiveString("Doe")
+          )
+        )
       )
 
       implicit val individualOnlyAllowedAccessRequest: AllowedAccessRequest[AnyContentAsEmpty.type] =
