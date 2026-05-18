@@ -140,4 +140,47 @@ class MinimalDetailsSpec extends SpecBase {
       result.deceasedFlag mustBe true
     }
   }
+
+  "IndividualDetails" - {
+
+    "must serialize and deserialize" in {
+      val details = IndividualDetails(
+        firstName = "Jane",
+        middleName = Some("Marie"),
+        lastName = "Doe"
+      )
+
+      val json = Json.toJson(details)(using IndividualDetails.writes)
+      val result = json.as[IndividualDetails](using IndividualDetails.reads)
+
+      result.firstName mustBe "Jane"
+      result.middleName mustBe Some("Marie")
+      result.lastName mustBe "Doe"
+    }
+
+    "must generate full name" in {
+      val details = IndividualDetails(
+        firstName = "Jane",
+        middleName = Some("Marie"),
+        lastName = "Doe"
+      )
+
+      details.fullName mustBe "Jane Marie Doe"
+    }
+
+    "must serialize and deserialize without middle name" in {
+      val details = IndividualDetails(
+        firstName = "Jane",
+        middleName = None,
+        lastName = "Doe"
+      )
+
+      val json = Json.toJson(details)(using IndividualDetails.writes)
+      val result = json.as[IndividualDetails](using IndividualDetails.reads)
+
+      result.firstName mustBe "Jane"
+      result.middleName mustBe None
+      result.lastName mustBe "Doe"
+    }
+  }
 }

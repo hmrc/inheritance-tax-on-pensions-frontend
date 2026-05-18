@@ -62,7 +62,7 @@ class SessionMinimalDetailsRepositorySpec
   private val encryptedFormats = new EncryptedFormats(
     Configuration(ConfigFactory.parseString(
       """
-        |mongodb.encryption.enabled = false
+        |mongodb.encryption.enabled = true
         |mongodb.encryption.key = "teStTesttE5TtesT3TEsTtEsttESTTest5TEsTtE5t1="
         |""".stripMargin
     ))

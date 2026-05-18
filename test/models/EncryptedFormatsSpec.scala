@@ -88,5 +88,12 @@ class EncryptedFormatsSpec extends SpecBase {
 
       new String(bytes.value) mustBe "Doe"
     }
+
+    "must pass through values unchanged on encrypt with PlainBytes" in {
+      val plainBytes = uk.gov.hmrc.crypto.PlainBytes("john doe".getBytes)
+      val encrypted = NoOpCrypto.encrypt(plainBytes)
+
+      encrypted.value mustBe "john doe"
+    }
   }
 }
