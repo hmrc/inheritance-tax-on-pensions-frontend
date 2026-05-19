@@ -24,7 +24,12 @@ import org.scalacheck.Gen
 import org.scalatest.OptionValues
 import play.api.libs.json.{JsError, JsString, Json}
 
-class NinoOrReasonSpec extends AnyFreeSpec with Matchers with ScalaCheckPropertyChecks with OptionValues {
+class NinoOrReasonSpec
+    extends AnyFreeSpec
+    with Matchers
+    with ScalaCheckPropertyChecks
+    with OptionValues
+    with org.scalatestplus.mockito.MockitoSugar {
 
   "NinoOrReason" - {
 
@@ -53,6 +58,11 @@ class NinoOrReasonSpec extends AnyFreeSpec with Matchers with ScalaCheckProperty
       forAll(gen) { ninoOrReason =>
         Json.toJson(ninoOrReason) mustEqual JsString(ninoOrReason.toString)
       }
+    }
+
+    "must generate options" in {
+      val messages = mock[play.api.i18n.Messages]
+      NinoOrReason.options(using messages)
     }
   }
 }

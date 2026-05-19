@@ -68,6 +68,30 @@ class LprIndividualAddressSummarySpec extends SpecBase {
         controllers.routes.AddressLookupStartController.start(srn, CheckMode).url
     }
 
+    "must use country code as-is when no lookup function is provided" in {
+
+      val address = LprAddress(
+        addressLine1 = "33 Fake Street",
+        addressLine2 = None,
+        addressLine3 = None,
+        addressLine4 = None,
+        ukPostcode = None,
+        country = "GB"
+      )
+
+      val userAnswers = emptyUserAnswers.copy(
+        data = Json.obj(
+          "lprDetails" -> Json.obj(
+            "individual" -> Json.toJson(address)
+          )
+        )
+      )
+
+      val result = LprIndividualAddressSummary.row(srn, userAnswers)
+
+      result mustBe defined
+    }
+
     "must fall back to the country code when a country name cannot be found" in {
 
       val address = LprAddress(

@@ -45,6 +45,65 @@ class SchemeDetailsSpec extends SpecBase with ScalaCheckPropertyChecks {
       }
     }
 
+    "must handle empty establishers" in {
+      val json = Json.obj(
+        "schemeName" -> "Test Scheme",
+        "pstr" -> "12345678",
+        "schemeStatus" -> "Open",
+        "schemeType" -> Json.obj("name" -> "trust"),
+        "pspDetails" -> Json.obj("authorisingPSAID" -> "PSA123"),
+        "establishers" -> Json.arr()
+      )
+      val result = json.as[SchemeDetails]
+
+      result.establishers mustBe Nil
+    }
+
+    "Establisher" - {
+
+      "must implement equals correctly" in {
+        val establisher1 = Establisher(SensitiveString("Test Company"), EstablisherKind.Company)
+        val establisher2 = Establisher(SensitiveString("Test Company"), EstablisherKind.Company)
+        val establisher3 = Establisher(SensitiveString("Different Company"), EstablisherKind.Company)
+
+        establisher1.equals(establisher2) mustBe true
+        establisher1.equals(establisher3) mustBe false
+        establisher1.equals("some string") mustBe false
+      }
+
+      "must implement hashCode correctly" in {
+        val establisher1 = Establisher(SensitiveString("Test Company"), EstablisherKind.Company)
+        val establisher2 = Establisher(SensitiveString("Test Company"), EstablisherKind.Company)
+        val establisher3 = Establisher(SensitiveString("Different Company"), EstablisherKind.Company)
+
+        establisher1.hashCode mustEqual establisher2.hashCode
+        (establisher1.hashCode must not).equal(establisher3.hashCode)
+      }
+
+      "must write Company establisher" in {
+        val establisher = Establisher(SensitiveString("Test Company"), EstablisherKind.Company)
+        val json = Json.toJson(establisher)(using Establisher.writes(using NoOpCrypto))
+
+        (json \ "companyDetails" \ "companyName").as[String] mustBe "Test Company"
+      }
+
+      "must write Partnership establisher" in {
+        val establisher = Establisher(SensitiveString("Test Partnership"), EstablisherKind.Partnership)
+        val json = Json.toJson(establisher)(using Establisher.writes(using NoOpCrypto))
+
+        (json \ "partnershipDetails" \ "name").as[String] mustBe "Test Partnership"
+      }
+
+      "must write Individual establisher" in {
+        val establisher = Establisher(SensitiveString("John Middle Doe"), EstablisherKind.Individual)
+        val json = Json.toJson(establisher)(using Establisher.writes(using NoOpCrypto))
+
+        (json \ "establisherDetails" \ "firstName").as[String] mustBe "John"
+        (json \ "establisherDetails" \ "lastName").as[String] mustBe "Doe"
+        (json \ "establisherDetails" \ "middleName").as[String] mustBe "Middle"
+      }
+    }
+
     "SchemeStatus" - {
 
       "successfully read from json" in {

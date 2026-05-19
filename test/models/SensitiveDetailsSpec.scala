@@ -23,8 +23,6 @@ import play.api.libs.json.{JsString, Json}
 class SensitiveDetailsSpec extends SpecBase {
 
   private val testKey = "teStTesttE5TtesT3TEsTtEsttESTTest5TEsTtE5t1="
-  private implicit val crypto: uk.gov.hmrc.crypto.Encrypter & uk.gov.hmrc.crypto.Decrypter =
-    SymmetricCryptoFactory.aesGcmCrypto(testKey)
 
   "SensitiveString" - {
 
@@ -38,6 +36,8 @@ class SensitiveDetailsSpec extends SpecBase {
     }
 
     "must serialize and deserialize with encrypted format" in {
+      implicit val crypto: uk.gov.hmrc.crypto.Encrypter & uk.gov.hmrc.crypto.Decrypter =
+        SymmetricCryptoFactory.aesGcmCrypto(testKey)
       val sensitiveString = SensitiveString("test@example.com")
       val json = Json.toJson(sensitiveString)(using SensitiveDetails.sensitiveStringFormat)
       val result = json.as[SensitiveString](using SensitiveDetails.sensitiveStringFormat)
@@ -47,6 +47,8 @@ class SensitiveDetailsSpec extends SpecBase {
     }
 
     "must encrypt different values differently" in {
+      implicit val crypto: uk.gov.hmrc.crypto.Encrypter & uk.gov.hmrc.crypto.Decrypter =
+        SymmetricCryptoFactory.aesGcmCrypto(testKey)
       val string1 = SensitiveString("jane doe")
       val string2 = SensitiveString("john doe")
 
@@ -54,6 +56,26 @@ class SensitiveDetailsSpec extends SpecBase {
       val json2 = Json.toJson(string2)(using SensitiveDetails.sensitiveStringFormat)
 
       (json1 must not).equal(json2)
+    }
+
+    "must implement equals correctly" in {
+      val string1 = SensitiveString("test@example.com")
+      val string2 = SensitiveString("test@example.com")
+      val string3 = SensitiveString("different@example.com")
+
+      string1.equals(string2) mustBe true
+      string1.equals(string3) mustBe false
+      string1.equals("some string") mustBe false
+      string1.equals(null) mustBe false
+    }
+
+    "must implement hashCode correctly" in {
+      val string1 = SensitiveString("test@example.com")
+      val string2 = SensitiveString("test@example.com")
+      val string3 = SensitiveString("different@example.com")
+
+      string1.hashCode mustEqual string2.hashCode
+      (string1.hashCode must not).equal(string3.hashCode)
     }
   }
 
@@ -75,6 +97,8 @@ class SensitiveDetailsSpec extends SpecBase {
     }
 
     "must serialize and deserialize with encrypted format" in {
+      implicit val crypto: uk.gov.hmrc.crypto.Encrypter & uk.gov.hmrc.crypto.Decrypter =
+        SymmetricCryptoFactory.aesGcmCrypto(testKey)
       val details = SensitiveIndividualDetails(
         firstName = SensitiveString("John"),
         middleName = Some(SensitiveString("Robert")),
@@ -96,6 +120,8 @@ class SensitiveDetailsSpec extends SpecBase {
     }
 
     "must handle missing middle name" in {
+      implicit val crypto: uk.gov.hmrc.crypto.Encrypter & uk.gov.hmrc.crypto.Decrypter =
+        SymmetricCryptoFactory.aesGcmCrypto(testKey)
       val details = SensitiveIndividualDetails(
         firstName = SensitiveString("John"),
         middleName = None,
@@ -108,6 +134,76 @@ class SensitiveDetailsSpec extends SpecBase {
       result.firstName.decryptedValue mustBe "John"
       result.middleName mustBe None
       result.lastName.decryptedValue mustBe "Doe"
+    }
+
+    "must generate full name" in {
+      val details = SensitiveIndividualDetails(
+        firstName = SensitiveString("John"),
+        middleName = Some(SensitiveString("Robert")),
+        lastName = SensitiveString("Doe")
+      )
+      details.fullName mustBe "John Robert Doe"
+    }
+
+    "must generate full name without middle name" in {
+      val details = SensitiveIndividualDetails(
+        firstName = SensitiveString("John"),
+        middleName = None,
+        lastName = SensitiveString("Doe")
+      )
+      details.fullName mustBe "John  Doe"
+    }
+
+    "must implement equals correctly" in {
+      val details1 = SensitiveIndividualDetails(
+        firstName = SensitiveString("John"),
+        middleName = None,
+        lastName = SensitiveString("Doe")
+      )
+      val details2 = SensitiveIndividualDetails(
+        firstName = SensitiveString("John"),
+        middleName = None,
+        lastName = SensitiveString("Doe")
+      )
+      val details3 = SensitiveIndividualDetails(
+        firstName = SensitiveString("Jane"),
+        middleName = None,
+        lastName = SensitiveString("Doe")
+      )
+
+      details1 mustEqual details2
+      (details1 must not).equal(details3)
+    }
+
+    "must not equal non-SensitiveIndividualDetails" in {
+      val details = SensitiveIndividualDetails(
+        firstName = SensitiveString("John"),
+        middleName = None,
+        lastName = SensitiveString("Doe")
+      )
+      (details must not).equal("some string")
+      (details must not).equal(null)
+    }
+
+    "must implement hashCode correctly" in {
+      val details1 = SensitiveIndividualDetails(
+        firstName = SensitiveString("John"),
+        middleName = None,
+        lastName = SensitiveString("Doe")
+      )
+      val details2 = SensitiveIndividualDetails(
+        firstName = SensitiveString("John"),
+        middleName = None,
+        lastName = SensitiveString("Doe")
+      )
+      val details3 = SensitiveIndividualDetails(
+        firstName = SensitiveString("Jane"),
+        middleName = None,
+        lastName = SensitiveString("Doe")
+      )
+
+      details1.hashCode mustEqual details2.hashCode
+      (details1.hashCode must not).equal(details3.hashCode)
     }
   }
 }
