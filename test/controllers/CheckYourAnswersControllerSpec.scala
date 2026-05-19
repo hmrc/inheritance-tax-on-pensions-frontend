@@ -88,6 +88,62 @@ class CheckYourAnswersControllerSpec extends SpecBase {
       }
     }
 
+    "must return OK and the correct view for a GET with No Nino reason" in {
+      val userAnswers = emptyUserAnswers
+        .set(InheritanceTaxReferencePage, "A123456/25A")
+        .success
+        .value
+        .set(
+          IndividualNamePage(JourneyRole.Deceased),
+          IndividualName(
+            title = Some("Mr"),
+            firstForename = "John",
+            secondForename = Some("William"),
+            surname = "Doe"
+          )
+        )
+        .get
+        .set(NinoOrReasonPage, NinoOrReasonFormData(NinoOrReason.No, None, Some("John Doe reason")))
+        .get
+        .set(BirthDeathDatesPage, BirthDeathDates(testDateOfBirth, testDateOfDeath))
+        .get
+        .set(LprTypePage, LprType.Individual)
+        .get
+        .set(
+          IndividualNamePage(JourneyRole.LprIndividual),
+          IndividualName(
+            title = Some("Mr"),
+            firstForename = "John",
+            secondForename = Some("William"),
+            surname = "Doe"
+          )
+        )
+        .get
+      val application = applicationBuilder(userAnswers = Some(userAnswers)).build()
+
+      running(application) {
+        val request = FakeRequest(GET, routes.CheckYourAnswersController.onPageLoad(srn).url)
+
+        val result = route(application, request).value
+
+        val view = application.injector.instanceOf[CheckYourAnswersView]
+
+        val summaryList = SummaryListViewModel(
+          rows = Seq(
+            InheritanceTaxReferenceSummary.row(srn, userAnswers)(using messages(application)).get,
+            NameOfDeceasedSummary.row(srn, userAnswers)(using messages(application)).get,
+            NinoOrReasonSummary.row(srn, userAnswers)(using messages(application)).get,
+            BirthDeathDatesSummary.row(srn, userAnswers)(using messages(application)).get,
+            LprTypeSummary.row(srn, userAnswers)(using messages(application)).get,
+            LprIndividualNameSummary.row(srn, userAnswers)(using messages(application)).get
+          )
+        )
+
+        status(result) mustEqual OK
+        contentAsString(result) mustEqual view(srn, summaryList)(using request, messages(application)).toString
+      }
+    }
+
     "must redirect to Journey Recovery for a GET if no existing data is found" in {
 
       val application = applicationBuilder(userAnswers = None).build()

@@ -54,4 +54,23 @@ class SchemeIdSpec extends SpecBase with ScalaCheckPropertyChecks {
       Srn.fromSession(mockSession) mustBe ""
     }
   }
+
+  "asSrn" - {
+
+    "must extract Srn from valid string" in {
+      val validSrn = "S1234567890"
+      validSrn match {
+        case SchemeId.asSrn(srn) => srn.value mustBe validSrn
+        case _ => fail("Should have matched asSrn")
+      }
+    }
+
+    "must not extract Srn from invalid string" in {
+      val invalidSrn = "INVALID"
+      invalidSrn match {
+        case SchemeId.asSrn(_) => fail("Should not have matched")
+        case _ => succeed
+      }
+    }
+  }
 }
