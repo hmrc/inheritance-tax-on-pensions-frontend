@@ -21,6 +21,7 @@ import services.{AddressLookupFrontendService, UserAnswersService}
 import play.api.inject.bind
 import models.addresslookup.{AlfAddress, AlfAddressData, AlfCountry}
 import base.SpecBase
+import play.api.libs.json.{JsObject, Json}
 import uk.gov.hmrc.http.HttpResponse
 import models.{LprAddress, NormalMode, UserAnswers}
 import org.mockito.ArgumentCaptor
@@ -83,6 +84,75 @@ class AddressLookupContinueControllerSpec extends SpecBase {
             ukPostcode = Some("ZZ1 1ZZ"),
             country = "GB"
           )
+      }
+    }
+
+    "must replace stale address fields when changing to an address with fewer lines" in {
+
+      val mockAddressLookupFrontendService = mock[AddressLookupFrontendService]
+      val mockUserAnswersService = mock[UserAnswersService]
+
+      val existingUserAnswers = emptyUserAnswers.copy(
+        data = Json.obj(
+          "lprDetails" -> Json.obj(
+            "individual" -> Json.obj(
+              "firstForename" -> "John",
+              "surname" -> "Doe",
+              "addressLine1" -> "33 Fake Street",
+              "addressLine2" -> "Fake Area",
+              "addressLine3" -> "Some District",
+              "addressLine4" -> "Anytown",
+              "ukPostcode" -> "ZZ1 1ZZ",
+              "country" -> "GB"
+            )
+          )
+        )
+      )
+
+      val newAddressData = AlfAddressData(
+        id = Some(addressId),
+        address = AlfAddress(
+          organisation = None,
+          lines = Seq("11 A Boulevard", "Fakeville"),
+          town = Some("Fakeville"),
+          postcode = Some("ZZ1 1ZZ"),
+          country = AlfCountry("GB", "United Kingdom")
+        )
+      )
+
+      when(mockAddressLookupFrontendService.getAddress(any())(using any()))
+        .thenReturn(Future.successful(newAddressData))
+      when(mockUserAnswersService.set(any())(using any(), any()))
+        .thenReturn(Future.successful(mock[HttpResponse]))
+
+      val application = applicationBuilder(userAnswers = Some(existingUserAnswers), usesSession = true)
+        .overrides(
+          bind[AddressLookupFrontendService].toInstance(mockAddressLookupFrontendService),
+          bind[UserAnswersService].toInstance(mockUserAnswersService)
+        )
+        .build()
+
+      running(application) {
+        val request = FakeRequest(GET, routes.AddressLookupContinueController.continue(srn, NormalMode, addressId).url)
+
+        val result = route(application, request).value
+
+        status(result) mustEqual SEE_OTHER
+        redirectLocation(result).value mustEqual routes.CheckYourAnswersController.onPageLoad(srn).url
+
+        val userAnswersCaptor: ArgumentCaptor[UserAnswers] = ArgumentCaptor.forClass(classOf[UserAnswers])
+        verify(mockUserAnswersService).set(userAnswersCaptor.capture())(using any(), any())
+
+        val updatedIndividual = (userAnswersCaptor.getValue.data \ "lprDetails" \ "individual").as[JsObject]
+
+        updatedIndividual mustBe Json.obj(
+          "firstForename" -> "John",
+          "surname" -> "Doe",
+          "addressLine1" -> "11 A Boulevard",
+          "addressLine2" -> "Fakeville",
+          "ukPostcode" -> "ZZ1 1ZZ",
+          "country" -> "GB"
+        )
       }
     }
 

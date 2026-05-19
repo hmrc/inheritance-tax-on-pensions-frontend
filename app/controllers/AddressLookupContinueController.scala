@@ -18,9 +18,10 @@ package controllers
 
 import services.{AddressLookupFrontendService, UserAnswersService}
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
+import pages.LprIndividualAddressPage
 import models.SchemeId.Srn
 import controllers.actions._
-import play.api.libs.json.Json
+import play.api.libs.json.{JsObject, JsSuccess, Json}
 import models._
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
 
@@ -72,13 +73,26 @@ class AddressLookupContinueController @Inject() (
     }
 
   private[controllers] def addLprIndividualAddress(userAnswers: UserAnswers, address: LprAddress): UserAnswers =
-    userAnswers.copy(
-      data = userAnswers.data.deepMerge(
-        Json.obj(
-          "lprDetails" -> Json.obj(
-            "individual" -> Json.toJson(address)
-          )
-        )
-      )
-    )
+    userAnswers.data
+      .setObject(
+        LprIndividualAddressPage.path,
+        individualWithoutAddressFields(userAnswers) ++ Json.toJsObject(address)
+      ) match {
+      case JsSuccess(data, _) => userAnswers.copy(data = data)
+      case _ => userAnswers
+    }
+
+  private def individualWithoutAddressFields(userAnswers: UserAnswers): JsObject =
+    Seq(
+      "addressLine1",
+      "addressLine2",
+      "addressLine3",
+      "addressLine4",
+      "ukPostcode",
+      "country"
+    ).foldLeft(
+      (userAnswers.data \ "lprDetails" \ "individual")
+        .asOpt[JsObject]
+        .getOrElse(Json.obj())
+    )(_ - _)
 }
