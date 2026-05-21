@@ -46,17 +46,13 @@
             classes = s"${Css.headingLCssClass} ${Css.marginBottom3CssClass}"
         )
 
-        @paragraph(
-            messages("birthDeathDates.hint"),
-            classes = "govuk-body govuk-!-margin-bottom-6"
-        )
-
         @govukDateInput(
             DateViewModel(
                 field = form("dateOfBirth"),
                 legend = LegendViewModel(messages("birthDeathDates.dateOfBirth.label"))
                     .withCssClass("govuk-fieldset__legend--s")
             )
+            .withHint(Hint(content = messages("birthDeathDates.dateOfBirth.hint")))
             .asDateOfBirth()
         )
 
@@ -66,6 +62,7 @@
                 legend = LegendViewModel(messages("birthDeathDates.dateOfDeath.label"))
                     .withCssClass("govuk-fieldset__legend--s")
             )
+            .withHint(Hint(content = messages("birthDeathDates.dateOfDeath.hint")))
         )
 
         @govukButton(
