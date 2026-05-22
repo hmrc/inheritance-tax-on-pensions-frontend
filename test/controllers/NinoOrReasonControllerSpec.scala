@@ -22,13 +22,12 @@ import pages.{IndividualNamePage, NinoOrReasonPage}
 import play.api.inject.bind
 import views.html.NinoOrReasonView
 import base.SpecBase
+import forms.{NinoOrReasonFormData, NinoOrReasonFormProvider}
 import models._
 import play.api.data.Form
 import org.mockito.ArgumentMatchers.any
 import play.api.test.Helpers._
 import org.mockito.Mockito.{times, verify, when}
-import forms.{NinoOrReasonFormData, NinoOrReasonFormProvider}
-import uk.gov.hmrc.http.HttpResponse
 import org.mockito.ArgumentCaptor
 import org.scalatestplus.mockito.MockitoSugar
 
@@ -215,7 +214,7 @@ class NinoOrReasonControllerSpec extends SpecBase with MockitoSugar {
 
       val mockInheritanceTaxOnPensionsConnector = mock[InheritanceTaxOnPensionsConnector]
       when(mockInheritanceTaxOnPensionsConnector.setUserAnswers(any(), any(), any(), any(), any())(using any()))
-        .thenReturn(Future.successful(mock[HttpResponse]))
+        .thenReturn(Future.successful(Right(emptyUserAnswers)))
 
       val application = applicationBuilder(userAnswers = Some(userAnswersWithDeceasedName), usesSession = true)
         .overrides(
@@ -245,7 +244,7 @@ class NinoOrReasonControllerSpec extends SpecBase with MockitoSugar {
 
       val mockInheritanceTaxOnPensionsConnector = mock[InheritanceTaxOnPensionsConnector]
       when(mockInheritanceTaxOnPensionsConnector.setUserAnswers(any(), any(), any(), any(), any())(using any()))
-        .thenReturn(Future.successful(mock[HttpResponse]))
+        .thenReturn(Future.successful(Right(emptyUserAnswers)))
 
       val application = applicationBuilder(userAnswers = Some(userAnswersWithDeceasedName), usesSession = true)
         .overrides(
@@ -277,7 +276,7 @@ class NinoOrReasonControllerSpec extends SpecBase with MockitoSugar {
 
       val mockInheritanceTaxOnPensionsConnector = mock[InheritanceTaxOnPensionsConnector]
       when(mockInheritanceTaxOnPensionsConnector.setUserAnswers(any(), any(), any(), any(), any())(using any()))
-        .thenReturn(Future.successful(mock[HttpResponse]))
+        .thenReturn(Future.successful(Right(emptyUserAnswers)))
 
       val application = applicationBuilder(userAnswers = Some(existingAnswers), usesSession = true)
         .overrides(
@@ -316,7 +315,7 @@ class NinoOrReasonControllerSpec extends SpecBase with MockitoSugar {
 
       val mockInheritanceTaxOnPensionsConnector = mock[InheritanceTaxOnPensionsConnector]
       when(mockInheritanceTaxOnPensionsConnector.setUserAnswers(any(), any(), any(), any(), any())(using any()))
-        .thenReturn(Future.successful(mock[HttpResponse]))
+        .thenReturn(Future.successful(Right(emptyUserAnswers)))
 
       val application = applicationBuilder(userAnswers = Some(existingAnswers), usesSession = true)
         .overrides(

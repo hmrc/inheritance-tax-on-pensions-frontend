@@ -21,7 +21,7 @@ import org.mockito.Mockito._
 import play.api.mvc.AnyContentAsEmpty
 import connectors.InheritanceTaxOnPensionsConnector
 import base.SpecBase
-import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse, UpstreamErrorResponse}
+import uk.gov.hmrc.http.{HeaderCarrier, UpstreamErrorResponse}
 import models._
 import models.requests.AllowedAccessRequest
 import org.mockito.ArgumentMatchers.{any, argThat}
@@ -68,7 +68,7 @@ class ReportSubmissionServiceSpec extends SpecBase {
         .thenReturn(Future.successful(Right(response)))
 
       when(mockUserAnswersService.set(any())(using any(), any()))
-        .thenReturn(Future.successful(HttpResponse(200)))
+        .thenReturn(Future.successful(Right(userAnswers)))
 
       whenReady(testService.submitReport(userAnswers)) { _ =>
         succeed

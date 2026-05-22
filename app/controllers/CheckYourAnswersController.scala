@@ -43,30 +43,47 @@ class CheckYourAnswersController @Inject() (
   def onPageLoad(srn: Srn): Action[AnyContent] =
     identify.andThen(allowAccess(srn)).andThen(getData).andThen(requireData) { implicit request =>
 
-      val userAnswers: UserAnswers = request.userAnswers
+      val uuidFromQuery = request.request.getQueryString("uuid")
+      val uuidFromSession = request.session.get("uuid")
 
-      val list = SummaryListViewModel(
-        rows = Seq(
-          InheritanceTaxReferenceSummary.row(srn, userAnswers),
-          NameOfDeceasedSummary.row(srn, userAnswers),
-          NinoOrReasonSummary.row(srn, userAnswers),
-          BirthDeathDatesSummary.row(srn, userAnswers),
-          LprTypeSummary.row(srn, userAnswers),
-          LprIndividualNameSummary.row(srn, userAnswers),
-          LprOrganisationNameSummary.row(srn, userAnswers),
-          LprIndividualAddressSummary.row(srn, userAnswers, countryService.nameForCode)
-        ).flatten
-      )
+      (uuidFromQuery, uuidFromSession) match {
+        case (None, Some(uuid)) =>
+          Redirect(routes.CheckYourAnswersController.onPageLoad(srn).url + s"?uuid=$uuid")
+        case _ =>
+          val userAnswers: UserAnswers = request.userAnswers
 
-      Ok(view(srn, list))
+          val list = SummaryListViewModel(
+            rows = Seq(
+              InheritanceTaxReferenceSummary.row(srn, userAnswers),
+              NameOfDeceasedSummary.row(srn, userAnswers),
+              NinoOrReasonSummary.row(srn, userAnswers),
+              BirthDeathDatesSummary.row(srn, userAnswers),
+              LprTypeSummary.row(srn, userAnswers),
+              LprIndividualNameSummary.row(srn, userAnswers),
+              LprOrganisationNameSummary.row(srn, userAnswers),
+              LprIndividualAddressSummary.row(srn, userAnswers, countryService.nameForCode)
+            ).flatten
+          )
+
+          val result = Ok(view(srn, list))
+          uuidFromQuery match {
+            case Some(uuid) => result.addingToSession("uuid" -> uuid)
+            case None => result
+          }
+      }
     }
 
   def onSubmit(srn: Srn): Action[AnyContent] =
     identify.andThen(allowAccess(srn)).andThen(getData).andThen(requireData) { implicit request =>
-      if (request.request.pensionSchemeId.isPSP) {
+      val uuidFromQuery = request.request.getQueryString("uuid")
+      val redirect = if (request.request.pensionSchemeId.isPSP) {
         Redirect(routes.PspDeclarationController.onPageLoad(srn))
       } else {
         Redirect(routes.PsaDeclarationController.onPageLoad(srn))
+      }
+      uuidFromQuery match {
+        case Some(uuid) => redirect.addingToSession("uuid" -> uuid)
+        case None => redirect
       }
     }
 }

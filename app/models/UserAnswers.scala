@@ -27,6 +27,8 @@ import java.time.Instant
 
 final case class UserAnswers(
   id: String,
+  srn: String,
+  uuid: String,
   data: JsObject = Json.obj(),
   lastUpdated: Instant = Instant.now
 ) {
@@ -70,14 +72,20 @@ object UserAnswers {
   val reads: Reads[UserAnswers] =
     (__ \ "_id")
       .read[String]
+      .and((__ \ "srn").read[String])
+      .and((__ \ "uuid").read[String])
       .and((__ \ "data").read[JsObject])
       .and((__ \ "lastUpdated").read(using MongoJavatimeFormats.instantFormat))(UserAnswers.apply)
 
   val writes: OWrites[UserAnswers] =
     (__ \ "_id")
       .write[String]
+      .and((__ \ "srn").write[String])
+      .and((__ \ "uuid").write[String])
       .and((__ \ "data").write[JsObject])
-      .and((__ \ "lastUpdated").write(using MongoJavatimeFormats.instantFormat))(ua => (ua.id, ua.data, ua.lastUpdated))
+      .and((__ \ "lastUpdated").write(using MongoJavatimeFormats.instantFormat))(ua =>
+        (ua.id, ua.srn, ua.uuid, ua.data, ua.lastUpdated)
+      )
 
   implicit val format: OFormat[UserAnswers] = OFormat(reads, writes)
 }

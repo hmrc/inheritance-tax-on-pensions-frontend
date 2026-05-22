@@ -51,7 +51,7 @@ class ReportSubmissionService @Inject() (
       )
       .andThen { case Success(Right(response)) =>
         userAnswers.set(PaymentReferencePage, response.paymentReference).foreach { updatedAnswers =>
-          userAnswersService.set(updatedAnswers)
+          userAnswersService.set(updatedAnswers).map { _ => }
         }
       }
 }

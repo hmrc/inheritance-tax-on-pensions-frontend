@@ -23,13 +23,12 @@ import pages.{BirthDeathDatesPage, IndividualNamePage}
 import play.api.inject.bind
 import views.html.BirthDeathDatesView
 import base.SpecBase
+import forms.BirthDeathDatesFormProvider
 import models._
 import play.api.i18n.Messages
 import org.mockito.ArgumentMatchers.any
 import play.api.test.Helpers._
 import org.mockito.Mockito.{times, verify, when}
-import forms.BirthDeathDatesFormProvider
-import uk.gov.hmrc.http.HttpResponse
 import org.mockito.ArgumentCaptor
 import org.scalatestplus.mockito.MockitoSugar
 
@@ -56,7 +55,7 @@ class BirthDeathDatesControllerSpec extends SpecBase with MockitoSugar {
 
   lazy val birthDeathDatesRoute: String = routes.BirthDeathDatesController.onPageLoad(srn, NormalMode).url
 
-  override val emptyUserAnswers = UserAnswers(userAnswersId)
+  override val emptyUserAnswers = UserAnswers(userAnswersId, srnGen.sample.value.toString, "test-uuid")
   private val userAnswersWithDeceasedName = emptyUserAnswers
     .set(IndividualNamePage(JourneyRole.Deceased), nameOfDeceased)
     .success
@@ -119,7 +118,7 @@ class BirthDeathDatesControllerSpec extends SpecBase with MockitoSugar {
       val mockInheritanceTaxOnPensionsConnector = mock[InheritanceTaxOnPensionsConnector]
 
       when(mockInheritanceTaxOnPensionsConnector.setUserAnswers(any(), any(), any(), any(), any())(using any()))
-        .thenReturn(Future.successful(mock[HttpResponse]))
+        .thenReturn(Future.successful(Right(emptyUserAnswers)))
 
       val application =
         applicationBuilder(userAnswers = Some(userAnswersWithDeceasedName), usesSession = true)
@@ -141,7 +140,7 @@ class BirthDeathDatesControllerSpec extends SpecBase with MockitoSugar {
       val mockInheritanceTaxOnPensionsConnector = mock[InheritanceTaxOnPensionsConnector]
 
       when(mockInheritanceTaxOnPensionsConnector.setUserAnswers(any(), any(), any(), any(), any())(using any()))
-        .thenReturn(Future.successful(mock[HttpResponse]))
+        .thenReturn(Future.successful(Right(emptyUserAnswers)))
 
       val application =
         applicationBuilder(userAnswers = Some(userAnswersWithDeceasedName), usesSession = true)
@@ -164,7 +163,7 @@ class BirthDeathDatesControllerSpec extends SpecBase with MockitoSugar {
       val mockInheritanceTaxOnPensionsConnector = mock[InheritanceTaxOnPensionsConnector]
 
       when(mockInheritanceTaxOnPensionsConnector.setUserAnswers(any(), any(), any(), any(), any())(using any()))
-        .thenReturn(Future.successful(mock[HttpResponse]))
+        .thenReturn(Future.successful(Right(emptyUserAnswers)))
 
       val application =
         applicationBuilder(userAnswers = Some(userAnswersWithDeceasedName), usesSession = true)

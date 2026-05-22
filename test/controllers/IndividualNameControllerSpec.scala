@@ -23,12 +23,11 @@ import play.api.inject.bind
 import views.html.IndividualNameView
 import base.SpecBase
 import play.api.libs.json.Json
+import forms.IndividualNameFormProvider
 import models._
 import org.mockito.ArgumentMatchers._
 import play.api.test.Helpers._
 import org.mockito.Mockito.when
-import forms.IndividualNameFormProvider
-import uk.gov.hmrc.http.HttpResponse
 
 import scala.concurrent.Future
 
@@ -86,7 +85,7 @@ class IndividualNameControllerSpec extends SpecBase {
 
       s"must populate the view correctly on a GET when ${journeyRole.key} has previously been answered" in {
 
-        val userAnswers = UserAnswers(userAnswersId)
+        val userAnswers = UserAnswers(userAnswersId, srnGen.sample.value.toString, "test-uuid")
           .set(IndividualNamePage(journeyRole), individualName)
           .success
           .value
@@ -115,7 +114,7 @@ class IndividualNameControllerSpec extends SpecBase {
 
         val mockConnector = mock[InheritanceTaxOnPensionsConnector]
         when(mockConnector.setUserAnswers(any(), any(), any(), any(), any())(using any()))
-          .thenReturn(Future.successful(mock[HttpResponse]))
+          .thenReturn(Future.successful(Right(emptyUserAnswers)))
 
         val application = applicationBuilder(userAnswers = Some(emptyUserAnswers), usesSession = true)
           .overrides(bind[InheritanceTaxOnPensionsConnector].toInstance(mockConnector))
@@ -138,7 +137,7 @@ class IndividualNameControllerSpec extends SpecBase {
 
         val mockConnector = mock[InheritanceTaxOnPensionsConnector]
         when(mockConnector.setUserAnswers(any(), any(), any(), any(), any())(using any()))
-          .thenReturn(Future.successful(mock[HttpResponse]))
+          .thenReturn(Future.successful(Right(emptyUserAnswers)))
 
         val application = applicationBuilder(userAnswers = Some(emptyUserAnswers), usesSession = true)
           .overrides(bind[InheritanceTaxOnPensionsConnector].toInstance(mockConnector))
@@ -222,7 +221,11 @@ class IndividualNameControllerSpec extends SpecBase {
       running(application) {
         val controller = application.injector.instanceOf[IndividualNameController]
 
-        controller.nextPage(srn, NormalMode, JourneyRole.Unknown) mustEqual routes.JourneyRecoveryController
+        controller.nextPage(
+          srn,
+          NormalMode,
+          JourneyRole.Unknown
+        ) mustEqual routes.JourneyRecoveryController
           .onPageLoad()
       }
     }
@@ -231,6 +234,8 @@ class IndividualNameControllerSpec extends SpecBase {
 
       val existingAnswers = UserAnswers(
         userAnswersId,
+        srnGen.sample.value.toString,
+        "test-uuid",
         Json.obj(
           "lprDetails" -> Json.obj(
             "individual" -> Json.obj(

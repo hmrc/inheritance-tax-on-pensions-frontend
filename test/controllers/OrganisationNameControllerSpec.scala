@@ -29,7 +29,6 @@ import play.api.test.Helpers._
 import org.mockito.Mockito.when
 import repositories.SessionMinimalDetailsRepository
 import forms.OrganisationNameFormProvider
-import uk.gov.hmrc.http.HttpResponse
 
 import scala.concurrent.Future
 
@@ -86,7 +85,7 @@ class OrganisationNameControllerSpec extends SpecBase with MockitoSugar {
 
       when(mockSessionRepository.set(any())).thenReturn(Future.successful(true))
       when(mockConnector.setUserAnswers(any(), any(), any(), any(), any())(using any()))
-        .thenReturn(Future.successful(HttpResponse(200)))
+        .thenReturn(Future.successful(Right(emptyUserAnswers)))
 
       val application =
         applicationBuilder(userAnswers = Some(emptyUserAnswers), usesSession = true)

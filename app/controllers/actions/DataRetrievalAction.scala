@@ -39,22 +39,23 @@ class DataRetrievalActionImpl @Inject() (
 
     val headerCarrier: HeaderCarrier = HeaderCarrierConverter.fromRequestAndSession(request, request.session)
 
-    // TODO - when we further establish the service we may wish to think about the following
-    //          - the cache (user answers) key
-    //          - How we handle user answers creation and error handling and logging
+    val uuid = request.getQueryString("uuid").orElse(request.session.get("uuid")).getOrElse("")
+
+    val srn = request.srn.value
+    val cacheKey = s"$srn-$uuid"
+
     userAnswersService
-      .fetch(request.getUserId)(using headerCarrier, request)
+      .fetch(cacheKey)(using headerCarrier, request)
       .map {
         case Right(ua) => OptionalDataRequest(request, Some(ua))
         case Left(ex) if ex.statusCode == NOT_FOUND =>
           logger.info("[DataRetrievalActionImpl][transform] - No user answers found - creating new user answers")
-          OptionalDataRequest(request, Some(UserAnswers(request.getUserId)))
+          OptionalDataRequest(request, Some(UserAnswers(cacheKey, srn, uuid)))
         case Left(ex) =>
           logger.warn("[DataRetrievalActionImpl][transform] - Data retrieval failed with upstream error response: ", ex)
           OptionalDataRequest(request, None)
       }
   }
-
 }
 
 trait DataRetrievalAction extends ActionTransformer[AllowedAccessRequest, OptionalDataRequest]
