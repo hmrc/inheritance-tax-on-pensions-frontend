@@ -18,7 +18,7 @@ package services
 
 import com.google.inject.Inject
 import connectors.InheritanceTaxOnPensionsConnector
-import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse, UpstreamErrorResponse}
+import uk.gov.hmrc.http.{HeaderCarrier, UpstreamErrorResponse}
 import models.UserAnswers
 import models.requests.AllowedAccessRequest
 
@@ -40,7 +40,7 @@ class UserAnswersService @Inject() (inheritanceTaxOnPensionsConnector: Inheritan
 
   def set(
     userAnswers: UserAnswers
-  )(implicit hc: HeaderCarrier, request: AllowedAccessRequest[?]): Future[HttpResponse] =
+  )(implicit hc: HeaderCarrier, request: AllowedAccessRequest[?]): Future[Either[UpstreamErrorResponse, UserAnswers]] =
     inheritanceTaxOnPensionsConnector.setUserAnswers(
       userAnswers,
       schemeAdministratorOrPractitionerName,

@@ -72,11 +72,24 @@ class InheritanceTaxReferenceController @Inject() (
             value =>
               for {
                 updatedAnswers <- Future.fromTry(request.userAnswers.set(InheritanceTaxReferencePage, value))
-                _ <- userAnswersService.set(updatedAnswers)(using hc, request.request)
-              } yield mode match {
-                case CheckMode => Redirect(routes.CheckYourAnswersController.onPageLoad(srn))
-                case NormalMode =>
-                  Redirect(routes.IndividualNameController.onPageLoad(srn, NormalMode, JourneyRole.Deceased))
+                result <- userAnswersService.set(updatedAnswers)(using hc, request.request)
+              } yield result match {
+                case Right(returnedUserAnswers) =>
+                  val newUuid = returnedUserAnswers.uuid
+                  val updatedSession = if (request.session.get("uuid").contains(newUuid)) {
+                    request.session
+                  } else {
+                    request.session + ("uuid" -> newUuid)
+                  }
+                  mode match {
+                    case CheckMode =>
+                      Redirect(routes.CheckYourAnswersController.onPageLoad(srn)).withSession(updatedSession)
+                    case NormalMode =>
+                      Redirect(routes.IndividualNameController.onPageLoad(srn, NormalMode, JourneyRole.Deceased))
+                        .withSession(updatedSession)
+                  }
+                case Left(_) =>
+                  BadRequest(view(form.fill(value), srn, mode))
               }
           )
       }

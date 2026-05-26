@@ -30,7 +30,6 @@ import play.api.test.Helpers._
 import org.mockito.Mockito.{times, verify, when}
 import repositories.SessionMinimalDetailsRepository
 import forms.LprTypeFormProvider
-import uk.gov.hmrc.http.HttpResponse
 
 import scala.concurrent.Future
 
@@ -85,7 +84,7 @@ class LprTypeControllerSpec extends SpecBase {
 
       val mockInheritanceTaxOnPensionsConnector = mock[InheritanceTaxOnPensionsConnector]
       when(mockInheritanceTaxOnPensionsConnector.setUserAnswers(any(), any(), any(), any(), any())(using any()))
-        .thenReturn(Future.successful(mock[HttpResponse]))
+        .thenReturn(Future.successful(Right(emptyUserAnswers)))
 
       val application = applicationBuilder(userAnswers = Some(emptyUserAnswers), usesSession = true)
         .overrides(
@@ -114,7 +113,7 @@ class LprTypeControllerSpec extends SpecBase {
 
       val mockInheritanceTaxOnPensionsConnector = mock[InheritanceTaxOnPensionsConnector]
       when(mockInheritanceTaxOnPensionsConnector.setUserAnswers(any(), any(), any(), any(), any())(using any()))
-        .thenReturn(Future.successful(mock[HttpResponse]))
+        .thenReturn(Future.successful(Right(emptyUserAnswers)))
 
       val application = applicationBuilder(userAnswers = Some(emptyUserAnswers), usesSession = true)
         .overrides(
@@ -143,7 +142,7 @@ class LprTypeControllerSpec extends SpecBase {
 
       val mockInheritanceTaxOnPensionsConnector = mock[InheritanceTaxOnPensionsConnector]
       when(mockInheritanceTaxOnPensionsConnector.setUserAnswers(any(), any(), any(), any(), any())(using any()))
-        .thenReturn(Future.successful(mock[HttpResponse]))
+        .thenReturn(Future.successful(Right(emptyUserAnswers)))
 
       val application = applicationBuilder(userAnswers = Some(userAnswers), usesSession = true)
         .overrides(
@@ -172,7 +171,7 @@ class LprTypeControllerSpec extends SpecBase {
 
       val mockInheritanceTaxOnPensionsConnector = mock[InheritanceTaxOnPensionsConnector]
       when(mockInheritanceTaxOnPensionsConnector.setUserAnswers(any(), any(), any(), any(), any())(using any()))
-        .thenReturn(Future.successful(mock[HttpResponse]))
+        .thenReturn(Future.successful(Right(emptyUserAnswers)))
 
       val userAnswersWithOrgName = emptyUserAnswers
         .set(OrganisationNamePage, "Test Organisation")
@@ -201,7 +200,7 @@ class LprTypeControllerSpec extends SpecBase {
 
       val mockInheritanceTaxOnPensionsConnector = mock[InheritanceTaxOnPensionsConnector]
       when(mockInheritanceTaxOnPensionsConnector.setUserAnswers(any(), any(), any(), any(), any())(using any()))
-        .thenReturn(Future.successful(mock[HttpResponse]))
+        .thenReturn(Future.successful(Right(emptyUserAnswers)))
 
       val application = applicationBuilder(userAnswers = Some(emptyUserAnswers), usesSession = true)
         .overrides(
@@ -229,7 +228,7 @@ class LprTypeControllerSpec extends SpecBase {
 
       when(mockSessionRepository.set(any())).thenReturn(Future.successful(true))
       when(mockConnector.setUserAnswers(any(), any(), any(), any(), any())(using any()))
-        .thenReturn(Future.successful(HttpResponse(200)))
+        .thenReturn(Future.successful(Right(emptyUserAnswers)))
 
       val userAnswersWithOrgName = emptyUserAnswers
         .set(OrganisationNamePage, "Test Organisation")
@@ -278,7 +277,7 @@ class LprTypeControllerSpec extends SpecBase {
 
       val mockInheritanceTaxOnPensionsConnector = mock[InheritanceTaxOnPensionsConnector]
       when(mockInheritanceTaxOnPensionsConnector.setUserAnswers(any(), any(), any(), any(), any())(using any()))
-        .thenReturn(Future.successful(mock[HttpResponse]))
+        .thenReturn(Future.successful(Right(emptyUserAnswers)))
 
       val application = applicationBuilder(userAnswers = Some(userAnswers), usesSession = true)
         .overrides(

@@ -61,7 +61,7 @@ class InheritanceTaxOnPensionsConnector @Inject() (
     schemeName: String,
     srnVal: String,
     role: String
-  )(implicit hc: HeaderCarrier): Future[HttpResponse] =
+  )(implicit hc: HeaderCarrier): Future[Either[UpstreamErrorResponse, UserAnswers]] =
     httpClient
       .put(url"${config.setUserAnswersUrl()}")
       .setHeader("Csrf-Token" -> "nocheck")
@@ -74,7 +74,7 @@ class InheritanceTaxOnPensionsConnector @Inject() (
           ROLE_HEADER -> role
         )
       )
-      .execute[HttpResponse]
+      .execute[Either[UpstreamErrorResponse, UserAnswers]]
 
   def submitReport(
     pstr: String,

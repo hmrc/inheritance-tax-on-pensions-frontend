@@ -50,6 +50,8 @@ class InheritanceTaxOnPensionsConnectorSpec extends BaseConnectorSpec {
 
   val userAnswers: UserAnswers = UserAnswers(
     id = id,
+    srn = srnVal,
+    uuid = "test-uuid",
     data = JsObject(Seq("inheritanceTaxReference" -> Json.toJson("foo"))),
     lastUpdated = Instant.now(clock)
   )
@@ -86,14 +88,15 @@ class InheritanceTaxOnPensionsConnectorSpec extends BaseConnectorSpec {
 
     "set must" - {
       "successfully write user answers" in runningApplication { implicit app =>
+        val jsonResponse: String = Json.toJson(userAnswers).toString()
         wireMockServer.stubFor(
           put(urlMatching(setUrl))
             .withRequestBody(equalToJson(Json.stringify(Json.toJson(userAnswers))))
-            .willReturn(aResponse().withStatus(OK))
+            .willReturn(aResponse().withStatus(OK).withBody(jsonResponse))
         )
 
         whenReady(connector.setUserAnswers(userAnswers, schemeAdministratorOrPractitionerName, schemeName, srnVal, role)) { result =>
-          result.status mustBe OK
+          result mustBe Right(userAnswers)
         }
       }
 
@@ -105,7 +108,8 @@ class InheritanceTaxOnPensionsConnectorSpec extends BaseConnectorSpec {
         )
 
         whenReady(connector.setUserAnswers(userAnswers, schemeAdministratorOrPractitionerName, schemeName, srnVal, role)) { result =>
-          result.status mustBe SERVICE_UNAVAILABLE
+          result.isLeft mustBe true
+          result.swap.toOption.get.statusCode mustBe SERVICE_UNAVAILABLE
         }
       }
     }

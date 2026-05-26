@@ -25,8 +25,8 @@ import config.Constants.PREPOPULATION_FLAG
 import models.UserAnswers
 import models.requests.AllowedAccessRequest
 import org.mockito.ArgumentMatchers.any
-import play.api.http.Status.{INTERNAL_SERVER_ERROR, OK}
-import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse, UpstreamErrorResponse}
+import play.api.http.Status.INTERNAL_SERVER_ERROR
+import uk.gov.hmrc.http.{HeaderCarrier, UpstreamErrorResponse}
 
 import scala.concurrent.Future
 
@@ -64,19 +64,21 @@ class UserAnswersServiceSpec extends SpecBase {
   "set" - {
 
     "must return a success if the operation was successful" in new Setup {
+      val userAnswers: UserAnswers = emptyUserAnswers
       when(mockInheritanceTaxOnPensionsConnector.setUserAnswers(any(), any(), any(), any(), any())(using any()))
-        .thenReturn(Future.successful(HttpResponse(status = OK, body = "success response")))
+        .thenReturn(Future.successful(Right(userAnswers)))
 
-      whenReady(testService.set(emptyUserAnswers)) {
-        _.status mustBe OK
+      whenReady(testService.set(userAnswers)) {
+        _.mustBe(Right(userAnswers))
       }
     }
     "must return an error if the operation was unsuccessful" in new Setup {
+      val errorResponse: UpstreamErrorResponse = UpstreamErrorResponse("Something went wrong", INTERNAL_SERVER_ERROR)
       when(mockInheritanceTaxOnPensionsConnector.setUserAnswers(any(), any(), any(), any(), any())(using any()))
-        .thenReturn(Future.successful(HttpResponse(status = INTERNAL_SERVER_ERROR, body = "error response")))
+        .thenReturn(Future.successful(Left(errorResponse)))
 
       whenReady(testService.set(emptyUserAnswers)) {
-        _.status mustBe INTERNAL_SERVER_ERROR
+        _.mustBe(Left(errorResponse))
       }
     }
   }

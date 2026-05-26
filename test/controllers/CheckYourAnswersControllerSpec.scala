@@ -185,5 +185,48 @@ class CheckYourAnswersControllerSpec extends SpecBase {
         redirectLocation(result).value mustEqual routes.PspDeclarationController.onPageLoad(srn).url
       }
     }
+
+    "must return OK when UUID is not in query parameter" in {
+
+      val userAnswers = emptyUserAnswers
+        .set(InheritanceTaxReferencePage, "A123456/25A")
+        .success
+        .value
+        .set(
+          IndividualNamePage(JourneyRole.Deceased),
+          IndividualName(
+            title = Some("Mr"),
+            firstForename = "John",
+            secondForename = Some("William"),
+            surname = "Doe"
+          )
+        )
+        .get
+        .set(NinoOrReasonPage, NinoOrReasonFormData(NinoOrReason.Yes, Some(validNino), None))
+        .get
+        .set(BirthDeathDatesPage, BirthDeathDates(testDateOfBirth, testDateOfDeath))
+        .get
+        .set(LprTypePage, LprType.Individual)
+        .get
+        .set(
+          IndividualNamePage(JourneyRole.LprIndividual),
+          IndividualName(
+            title = Some("Mr"),
+            firstForename = "John",
+            secondForename = Some("William"),
+            surname = "Doe"
+          )
+        )
+        .get
+      val application = applicationBuilder(userAnswers = Some(userAnswers)).build()
+
+      running(application) {
+        val request = FakeRequest(GET, routes.CheckYourAnswersController.onPageLoad(srn).url)
+
+        val result = route(application, request).value
+
+        status(result) mustEqual OK
+      }
+    }
   }
 }

@@ -93,10 +93,14 @@ class InheritanceTaxOnPensionsConnectorSpec extends SpecBase {
       when(requestBuilder.transform(any()))
         .thenReturn(requestBuilder)
 
-      when(requestBuilder.execute[HttpResponse](using any(), any()))
-        .thenReturn(Future.successful(mockHttpResponse))
+      when(requestBuilder.execute[Either[UpstreamErrorResponse, UserAnswers]](using any(), any()))
+        .thenReturn(Future.successful(Right(expectedUserAnswers)))
 
-      connector.setUserAnswers(expectedUserAnswers, schemeAdministratorOrPractitionerName, schemeName, srnVal, role)
+      whenReady(
+        connector.setUserAnswers(expectedUserAnswers, schemeAdministratorOrPractitionerName, schemeName, srnVal, role)
+      ) {
+        _ mustBe Right(expectedUserAnswers)
+      }
 
       verify(connector.httpClient, atLeastOnce).put(eqTo(url"$putUrl"))(using any())
     }
@@ -163,7 +167,6 @@ class InheritanceTaxOnPensionsConnectorSpec extends SpecBase {
     val id = "some_id"
     val mockConfig: FrontendAppConfig = mock[FrontendAppConfig]
     val httpClient: HttpClientV2 = mock[HttpClientV2]
-    val mockHttpResponse: HttpResponse = mock[HttpResponse]
     val requestBuilder: RequestBuilder = mock[RequestBuilder]
     val schemeAdministratorOrPractitionerName: String = "name"
     val schemeName: String = "schemeName"

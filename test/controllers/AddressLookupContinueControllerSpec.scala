@@ -22,7 +22,6 @@ import play.api.inject.bind
 import models.addresslookup.{AlfAddress, AlfAddressData, AlfCountry}
 import base.SpecBase
 import play.api.libs.json.{JsObject, Json}
-import uk.gov.hmrc.http.HttpResponse
 import models.{LprAddress, NormalMode, UserAnswers}
 import org.mockito.ArgumentCaptor
 import org.mockito.ArgumentMatchers.any
@@ -55,7 +54,7 @@ class AddressLookupContinueControllerSpec extends SpecBase {
       when(mockAddressLookupFrontendService.getAddress(any())(using any()))
         .thenReturn(Future.successful(validAddressData))
       when(mockUserAnswersService.set(any())(using any(), any()))
-        .thenReturn(Future.successful(mock[HttpResponse]))
+        .thenReturn(Future.successful(Right(emptyUserAnswers)))
 
       val application = applicationBuilder(userAnswers = Some(emptyUserAnswers), usesSession = true)
         .overrides(
@@ -123,7 +122,7 @@ class AddressLookupContinueControllerSpec extends SpecBase {
       when(mockAddressLookupFrontendService.getAddress(any())(using any()))
         .thenReturn(Future.successful(newAddressData))
       when(mockUserAnswersService.set(any())(using any(), any()))
-        .thenReturn(Future.successful(mock[HttpResponse]))
+        .thenReturn(Future.successful(Right(emptyUserAnswers)))
 
       val application = applicationBuilder(userAnswers = Some(existingUserAnswers), usesSession = true)
         .overrides(

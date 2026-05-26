@@ -21,13 +21,12 @@ import connectors.InheritanceTaxOnPensionsConnector
 import play.api.inject.bind
 import views.html.InheritanceTaxReferenceView
 import base.SpecBase
+import forms.InheritanceTaxReferenceFormProvider
 import models.{CheckMode, JourneyRole, NormalMode}
 import play.api.data.Form
 import org.mockito.ArgumentMatchers.any
 import play.api.test.Helpers._
 import org.mockito.Mockito._
-import forms.InheritanceTaxReferenceFormProvider
-import uk.gov.hmrc.http.HttpResponse
 
 import scala.concurrent.Future
 
@@ -61,7 +60,7 @@ class InheritanceTaxReferenceControllerSpec extends SpecBase {
 
       val mockInheritanceTaxOnPensionsConnector = mock[InheritanceTaxOnPensionsConnector]
       when(mockInheritanceTaxOnPensionsConnector.setUserAnswers(any(), any(), any(), any(), any())(using any()))
-        .thenReturn(Future.successful(mock[HttpResponse]))
+        .thenReturn(Future.successful(Right(emptyUserAnswers)))
 
       val application = applicationBuilder(userAnswers = Some(emptyUserAnswers), usesSession = true)
         .overrides(
@@ -90,7 +89,7 @@ class InheritanceTaxReferenceControllerSpec extends SpecBase {
 
       val mockInheritanceTaxOnPensionsConnector = mock[InheritanceTaxOnPensionsConnector]
       when(mockInheritanceTaxOnPensionsConnector.setUserAnswers(any(), any(), any(), any(), any())(using any()))
-        .thenReturn(Future.successful(mock[HttpResponse]))
+        .thenReturn(Future.successful(Right(emptyUserAnswers)))
 
       val application = applicationBuilder(userAnswers = Some(emptyUserAnswers), usesSession = true)
         .overrides(
@@ -110,6 +109,27 @@ class InheritanceTaxReferenceControllerSpec extends SpecBase {
 
         verify(mockInheritanceTaxOnPensionsConnector, times(1))
           .setUserAnswers(any(), any(), any(), any(), any())(using any())
+      }
+    }
+
+    "must return BadRequest when userAnswersService.set returns Left" in {
+
+      val mockInheritanceTaxOnPensionsConnector = mock[InheritanceTaxOnPensionsConnector]
+      when(mockInheritanceTaxOnPensionsConnector.setUserAnswers(any(), any(), any(), any(), any())(using any()))
+        .thenReturn(Future.successful(Left(uk.gov.hmrc.http.UpstreamErrorResponse("Error", 500))))
+
+      val application = applicationBuilder(userAnswers = Some(emptyUserAnswers), usesSession = true)
+        .overrides(bind[InheritanceTaxOnPensionsConnector].toInstance(mockInheritanceTaxOnPensionsConnector))
+        .build()
+
+      running(application) {
+        val request =
+          FakeRequest(POST, inheritanceTaxReferenceRoute)
+            .withFormUrlEncodedBody(("value", "A123456/25A"))
+
+        val result = route(application, request).value
+
+        status(result) mustEqual BAD_REQUEST
       }
     }
 
