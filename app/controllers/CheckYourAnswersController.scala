@@ -43,33 +43,27 @@ class CheckYourAnswersController @Inject() (
   def onPageLoad(srn: Srn): Action[AnyContent] =
     identify.andThen(allowAccess(srn)).andThen(getData).andThen(requireData) { implicit request =>
 
+      val userAnswers: UserAnswers = request.userAnswers
+
+      val list = SummaryListViewModel(
+        rows = Seq(
+          InheritanceTaxReferenceSummary.row(srn, userAnswers),
+          NameOfDeceasedSummary.row(srn, userAnswers),
+          NinoOrReasonSummary.row(srn, userAnswers),
+          BirthDeathDatesSummary.row(srn, userAnswers),
+          LprTypeSummary.row(srn, userAnswers),
+          LprIndividualNameSummary.row(srn, userAnswers),
+          LprOrganisationNameSummary.row(srn, userAnswers),
+          LprIndividualAddressSummary.row(srn, userAnswers, countryService.nameForCode)
+        ).flatten
+      )
+
+      val result = Ok(view(srn, list))
       val uuidFromQuery = request.request.getQueryString("uuid")
-      val uuidFromSession = request.session.get("uuid")
 
-      (uuidFromQuery, uuidFromSession) match {
-        case (None, Some(uuid)) =>
-          Redirect(routes.CheckYourAnswersController.onPageLoad(srn).url + s"?uuid=$uuid")
-        case _ =>
-          val userAnswers: UserAnswers = request.userAnswers
-
-          val list = SummaryListViewModel(
-            rows = Seq(
-              InheritanceTaxReferenceSummary.row(srn, userAnswers),
-              NameOfDeceasedSummary.row(srn, userAnswers),
-              NinoOrReasonSummary.row(srn, userAnswers),
-              BirthDeathDatesSummary.row(srn, userAnswers),
-              LprTypeSummary.row(srn, userAnswers),
-              LprIndividualNameSummary.row(srn, userAnswers),
-              LprOrganisationNameSummary.row(srn, userAnswers),
-              LprIndividualAddressSummary.row(srn, userAnswers, countryService.nameForCode)
-            ).flatten
-          )
-
-          val result = Ok(view(srn, list))
-          uuidFromQuery match {
-            case Some(uuid) => result.addingToSession("uuid" -> uuid)
-            case None => result
-          }
+      uuidFromQuery match {
+        case Some(uuidFromQuery) => result.addingToSession("uuid" -> uuidFromQuery)
+        case _ => result
       }
     }
 
