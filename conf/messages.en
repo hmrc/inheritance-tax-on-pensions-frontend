@@ -63,11 +63,10 @@ unauthorised.linkMessage = contact HMRC for pension scheme help
 
 whatYouWillNeed.title = What you will need
 whatYouWillNeed.heading = What you will need
-whatYouWillNeed.text.guidance = To complete a report you will need information supplied by the Legal Personal Representative (LPR) or a beneficiary.
-whatYouWillNeed.text.list = This includes:
+whatYouWillNeed.text.guidance = You must use the information supplied by the personal representative (PR) or beneficiary on the payment notice. This includes:
 whatYouWillNeed.text.guidance.usecase1 = the Inheritance Tax reference number
 whatYouWillNeed.text.guidance.usecase2 = the name, birth and death dates of the deceased
-whatYouWillNeed.text.guidance.usecase3 = the name and address of the LPR
+whatYouWillNeed.text.guidance.usecase3 = the name and address of the PR
 whatYouWillNeed.text.guidance.usecase4 = beneficiary details and amounts of Inheritance Tax payable
 whatYouWillNeed.text.guidance.usecase5 = the National Insurance (NI) number of the deceased and each beneficiary (if applicable)
 
