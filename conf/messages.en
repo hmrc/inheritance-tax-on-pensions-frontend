@@ -32,7 +32,7 @@ error.summary.title = There is a problem
 common.nameInput.title = Title (optional)
 common.nameInput.titleHint = For example, Ms or Dr
 common.nameInput.firstName = First name
-common.nameInput.middleName = Middle names
+common.nameInput.middleName = Middle names (optional)
 common.nameInput.lastName = Last name
 
 section.visuallyHidden = This section is:
@@ -78,8 +78,8 @@ inheritanceTaxReference.error.required = Enter the Inheritance Tax reference num
 inheritanceTaxReference.error.invalid = Enter a valid Inheritance Tax reference number
 inheritanceTaxReference.hint = For example, A123456/25A or F123456/25B
 
-nameOfDeceased.title = Enter the full name of the deceased person
-nameOfDeceased.heading = Enter the full name of the deceased person
+nameOfDeceased.title = Enter the full name of the deceased
+nameOfDeceased.heading = Enter the full name of the deceased
 nameOfDeceased.checkYourAnswersLabel = Name of deceased
 nameOfDeceased.error.title.length = Title must be 4 characters or less
 nameOfDeceased.error.title.pattern = Enter a valid title
