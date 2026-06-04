@@ -20,7 +20,7 @@ import forms.mappings.Mappings
 import play.api.data.Forms.mapping
 import models.BirthDeathDates
 import play.api.i18n.Messages
-import play.api.data.Form
+import play.api.data.{Form, FormError}
 
 import scala.util.Try
 
@@ -36,39 +36,67 @@ class BirthDeathDatesFormProvider @Inject() extends Mappings {
   def apply()(implicit messages: Messages): Form[BirthDeathDates] =
     Form(
       mapping(
-        dateOfBirthKey -> localDate(
-          invalidKey = "birthDeathDates.dateOfBirth.error.invalid",
-          allRequiredKey = "birthDeathDates.dateOfBirth.error.required.all",
-          twoRequiredKey = "birthDeathDates.dateOfBirth.error.required.two",
-          requiredKey = "birthDeathDates.dateOfBirth.error.required"
-        ),
-        dateOfDeathKey -> localDate(
-          invalidKey = "birthDeathDates.dateOfDeath.error.invalid",
-          allRequiredKey = "birthDeathDates.dateOfDeath.error.required.all",
-          twoRequiredKey = "birthDeathDates.dateOfDeath.error.required.two",
-          requiredKey = "birthDeathDates.dateOfDeath.error.required"
-        )
+        dateOfBirthKey -> localDateConfig(dateOfBirthKey),
+        dateOfDeathKey -> localDateConfig(dateOfDeathKey)
       )(BirthDeathDates.apply)(date => Some((date.dateOfBirth, date.dateOfDeath)))
+    )
+
+  private def localDateConfig(key: String)(implicit messages: Messages) =
+    localDate(
+      invalidKey = s"birthDeathDates.$key.error.invalid",
+      allRequiredKey = s"birthDeathDates.$key.error.required.all",
+      twoRequiredKey = s"birthDeathDates.$key.error.required.two",
+      requiredKey = s"birthDeathDates.$key.error.required"
     )
 
   def validate(form: Form[BirthDeathDates]): Form[BirthDeathDates] = {
     val formattedForm = form.copy(data = form.data.view.mapValues(_.replaceAll("\\s+", "")).toMap)
 
-    form.value match {
+    val formWithRangeErrors = List(dateOfBirthKey, dateOfDeathKey).foldLeft(formattedForm) { (form, key) =>
+      List("day", "month", "year").foldLeft(form) { (form, field) =>
+        validateFieldRange(form, key, field, formattedForm.data)
+      }
+    }
+
+    val formWithParentErrors = addParentKeyErrors(formWithRangeErrors)
+
+    formWithParentErrors.value match {
       case None =>
-        formattedForm.withEarliestBirthDateError
+        formWithParentErrors.withEarliestBirthDateError.withFutureYearErrors
       case Some(dates) =>
         val today = LocalDate.now(ZoneOffset.UTC)
 
-        if (!dates.dateOfBirth.isAfter(earliestBirthDate)) {
-          formattedForm.withError(dateOfBirthKey, "birthDeathDates.error.birthAfter1900")
-        } else if (!dates.dateOfBirth.isBefore(today) || !dates.dateOfDeath.isBefore(today)) {
-          formattedForm.withPastDateErrors(dates, today)
-        } else if (!dates.dateOfBirth.isBefore(dates.dateOfDeath)) {
-          formattedForm.withError(dateOfBirthKey, "birthDeathDates.error.birthBeforeDeath")
+        val withBirthAfter1900 = if (!dates.dateOfBirth.isAfter(earliestBirthDate)) {
+          formWithParentErrors.withError(dateOfBirthKey, "birthDeathDates.error.birthAfter1900")
         } else {
-          formattedForm
+          formWithParentErrors
         }
+
+        val withBirthPast = if (!dates.dateOfBirth.isBefore(today)) {
+          withBirthAfter1900.withError(dateOfBirthKey, "birthDeathDates.dateOfBirth.error.past")
+        } else {
+          withBirthAfter1900
+        }
+
+        val withDeathPast = if (!dates.dateOfDeath.isBefore(today)) {
+          withBirthPast.withError(dateOfDeathKey, "birthDeathDates.dateOfDeath.error.past")
+        } else {
+          withBirthPast
+        }
+
+        val withBirthBeforeDeath =
+          if (
+            dates.dateOfBirth.isAfter(earliestBirthDate) &&
+            dates.dateOfBirth.isBefore(today) &&
+            dates.dateOfDeath.isBefore(today) &&
+            !dates.dateOfBirth.isBefore(dates.dateOfDeath)
+          ) {
+            withDeathPast.withError(dateOfBirthKey, "birthDeathDates.error.birthBeforeDeath")
+          } else {
+            withDeathPast
+          }
+
+        withBirthBeforeDeath
     }
   }
 
@@ -84,18 +112,34 @@ class BirthDeathDatesFormProvider @Inject() extends Mappings {
           }
         }
 
-    private def withPastDateErrors(dates: BirthDeathDates, today: LocalDate): Form[BirthDeathDates] = {
-      val formWithBirthDateError =
-        if (!dates.dateOfBirth.isBefore(today)) {
-          form.withError(dateOfBirthKey, "birthDeathDates.dateOfBirth.error.past")
-        } else {
-          form
-        }
+    private def withFutureYearErrors: Form[BirthDeathDates] = {
+      val today = LocalDate.now(ZoneOffset.UTC)
+      val currentYear = today.getYear
 
-      if (!dates.dateOfDeath.isBefore(today)) {
-        formWithBirthDateError.withError(dateOfDeathKey, "birthDeathDates.dateOfDeath.error.past")
-      } else {
-        formWithBirthDateError
+      val hasBirthSubFieldErrors = form.errors.exists(e => e.key.startsWith(s"$dateOfBirthKey."))
+
+      val birthYearError = parsedYear(form.data, dateOfBirthKey).flatMap { year =>
+        if (year > currentYear) {
+          Some((dateOfBirthKey, "birthDeathDates.dateOfBirth.error.past"))
+        } else if (
+          year < earliestBirthDate.getYear && !form.errors.exists(_.key == dateOfBirthKey) && !hasBirthSubFieldErrors
+        ) {
+          Some((dateOfBirthKey, "birthDeathDates.error.birthAfter1900"))
+        } else {
+          None
+        }
+      }
+
+      val deathYearError = parsedYear(form.data, dateOfDeathKey).flatMap { year =>
+        if (year > currentYear) {
+          Some((dateOfDeathKey, "birthDeathDates.dateOfDeath.error.past"))
+        } else {
+          None
+        }
+      }
+
+      List(birthYearError, deathYearError).flatten.foldLeft(form) { (form, error) =>
+        form.withError(error._1, error._2)
       }
     }
 
@@ -106,6 +150,9 @@ class BirthDeathDatesFormProvider @Inject() extends Mappings {
       year <- formattedInt(data, s"$dateOfBirthKey.year")
       date <- Try(LocalDate.of(year, month, day)).toOption
     } yield date
+
+  private def parsedYear(data: Map[String, String], key: String): Option[Int] =
+    formattedInt(data, s"$key.year")
 
   private def formattedInt(data: Map[String, String], key: String): Option[Int] =
     data
@@ -128,4 +175,62 @@ class BirthDeathDatesFormProvider @Inject() extends Mappings {
           )
           .map(_.getValue)
       }
+
+  private def validateFieldRange(
+    form: Form[BirthDeathDates],
+    key: String,
+    field: String,
+    data: Map[String, String]
+  ): Form[BirthDeathDates] = {
+    val fieldKey = s"$key.$field"
+    formattedInt(data, fieldKey).fold(form) { value =>
+      val isValid = field match {
+        case "day" => value >= 1 && value <= 31
+        case "month" => value >= 1 && value <= 12
+        case "year" => value >= 1
+        case _ => true
+      }
+
+      if (isValid) {
+        form
+      } else if (form.errors.exists(_.key == fieldKey)) {
+        form
+      } else {
+        form.withError(fieldKey, s"birthDeathDates.$key.error.invalid.$field")
+      }
+    }
+  }
+
+  private def addParentKeyErrors(form: Form[BirthDeathDates]): Form[BirthDeathDates] = {
+    val originalErrors = form.errors
+    List(dateOfBirthKey, dateOfDeathKey).foldLeft(form) { (form, key) =>
+      processDateFieldErrors(form, key, originalErrors)
+    }
+  }
+
+  private def processDateFieldErrors(
+    form: Form[BirthDeathDates],
+    dateKey: String,
+    originalErrors: Seq[play.api.data.FormError]
+  ): Form[BirthDeathDates] = {
+    val subFieldKeys = Set(s"$dateKey.day", s"$dateKey.month", s"$dateKey.year")
+    val subFieldErrors = originalErrors.filter(e => subFieldKeys.contains(e.key))
+
+    if (subFieldErrors.size >= 2) {
+      form.copy(errors = form.errors.filterNot(e => subFieldKeys.contains(e.key)))
+    } else if (subFieldErrors.nonEmpty) {
+      val subFieldError = subFieldErrors.head
+      form.copy(errors = form.errors.flatMap { error =>
+        if (error.key == dateKey) {
+          Some(FormError(dateKey, subFieldError.message, subFieldError.args))
+        } else if (subFieldKeys.contains(error.key)) {
+          None
+        } else {
+          Some(error)
+        }
+      })
+    } else {
+      form
+    }
+  }
 }

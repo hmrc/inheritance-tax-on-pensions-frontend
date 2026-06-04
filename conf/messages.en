@@ -130,6 +130,12 @@ birthDeathDates.dateOfDeath.error.past = The death date must be in the past
 birthDeathDates.error.birthBeforeDeath = The birth date must be before the death date
 birthDeathDates.error.birthAfter1900 = The birth date must be after 01/01/1900
 birthDeathDates.change.hidden = birth and death dates
+birthDeathDates.dateOfBirth.error.invalid.day = Enter a valid day for the birth date
+birthDeathDates.dateOfBirth.error.invalid.month = Enter a valid month for the birth date
+birthDeathDates.dateOfBirth.error.invalid.year = Enter a valid year for the birth date
+birthDeathDates.dateOfDeath.error.invalid.day = Enter a valid day for the death date
+birthDeathDates.dateOfDeath.error.invalid.month = Enter a valid month for the death date
+birthDeathDates.dateOfDeath.error.invalid.year = Enter a valid year for the death date
 
 lprType.title = Is the legal personal representative (LPR) an individual or a member of an organisation?
 lprType.heading = Is the legal personal representative (LPR) an individual or a member of an organisation?

@@ -166,5 +166,171 @@ class BirthDeathDatesFormProviderSpec extends SpecBase {
       result.errors must contain(FormError("dateOfBirth", "birthDeathDates.error.birthAfter1900"))
       result.errors must contain(FormError("dateOfDeath", "birthDeathDates.dateOfDeath.error.required.all"))
     }
+
+    "must error when birth day is out of range (less than 1)" in {
+      val data = validData ++ Map(
+        "dateOfBirth.day" -> "0"
+      )
+
+      val result = formProvider.validate(form.bind(data))
+
+      result.errors must contain(FormError("dateOfBirth", "birthDeathDates.dateOfBirth.error.invalid.day"))
+      result.errors must not contain FormError("dateOfBirth.day", "birthDeathDates.dateOfBirth.error.invalid.day")
+    }
+
+    "must error when birth day is out of range (greater than 31)" in {
+      val data = validData ++ Map(
+        "dateOfBirth.day" -> "32"
+      )
+
+      val result = formProvider.validate(form.bind(data))
+
+      result.errors must contain(FormError("dateOfBirth", "birthDeathDates.dateOfBirth.error.invalid.day"))
+      result.errors must not contain FormError("dateOfBirth.day", "birthDeathDates.dateOfBirth.error.invalid.day")
+    }
+
+    "must error when birth month is out of range (greater than 12)" in {
+      val data = validData ++ Map(
+        "dateOfBirth.month" -> "13"
+      )
+
+      val result = formProvider.validate(form.bind(data))
+
+      result.errors must contain(FormError("dateOfBirth", "birthDeathDates.dateOfBirth.error.invalid.month"))
+      result.errors must not contain FormError("dateOfBirth.month", "birthDeathDates.dateOfBirth.error.invalid.month")
+    }
+
+    "must error when birth year is out of range (less than 1)" in {
+      val data = validData ++ Map(
+        "dateOfBirth.year" -> "0"
+      )
+
+      val result = formProvider.validate(form.bind(data))
+
+      result.errors must contain(FormError("dateOfBirth", "birthDeathDates.error.birthAfter1900"))
+      result.errors must not contain FormError("dateOfBirth.year", "birthDeathDates.dateOfBirth.error.invalid.year")
+    }
+
+    "must error when death day is out of range" in {
+      val data = validData ++ Map(
+        "dateOfDeath.day" -> "32"
+      )
+
+      val result = formProvider.validate(form.bind(data))
+
+      result.errors must contain(FormError("dateOfDeath", "birthDeathDates.dateOfDeath.error.invalid.day"))
+      result.errors must not contain FormError("dateOfDeath.day", "birthDeathDates.dateOfDeath.error.invalid.day")
+    }
+
+    "must error when death month is out of range" in {
+      val data = validData ++ Map(
+        "dateOfDeath.month" -> "13"
+      )
+
+      val result = formProvider.validate(form.bind(data))
+
+      result.errors must contain(FormError("dateOfDeath", "birthDeathDates.dateOfDeath.error.invalid.month"))
+      result.errors must not contain FormError("dateOfDeath.month", "birthDeathDates.dateOfDeath.error.invalid.month")
+    }
+
+    "must error when birth year is before 1900 when date cannot be parsed" in {
+      val data = Map(
+        "dateOfBirth.day" -> "33",
+        "dateOfBirth.month" -> "13",
+        "dateOfBirth.year" -> "1800",
+        "dateOfDeath.day" -> "1",
+        "dateOfDeath.month" -> "1",
+        "dateOfDeath.year" -> "2020"
+      )
+
+      val result = formProvider.validate(form.bind(data))
+
+      result.errors must contain(FormError("dateOfBirth", "birthDeathDates.dateOfBirth.error.invalid"))
+      result.errors must not contain FormError("dateOfBirth", "birthDeathDates.error.birthAfter1900")
+    }
+
+    "must show multiple errors for different fields" in {
+      val data = Map(
+        "dateOfBirth.day" -> "1",
+        "dateOfBirth.month" -> "1",
+        "dateOfBirth.year" -> "1800",
+        "dateOfDeath.day" -> "1",
+        "dateOfDeath.month" -> "1",
+        "dateOfDeath.year" -> "2999"
+      )
+
+      val result = formProvider.validate(form.bind(data))
+
+      result.errors must contain(FormError("dateOfBirth", "birthDeathDates.error.birthAfter1900"))
+      result.errors must contain(FormError("dateOfDeath", "birthDeathDates.dateOfDeath.error.past"))
+    }
+
+    "must show only parent error when multiple sub-fields are invalid for same date" in {
+      val data = Map(
+        "dateOfBirth.day" -> "33",
+        "dateOfBirth.month" -> "13",
+        "dateOfBirth.year" -> "1950",
+        "dateOfDeath.day" -> "1",
+        "dateOfDeath.month" -> "1",
+        "dateOfDeath.year" -> "2020"
+      )
+
+      val result = formProvider.validate(form.bind(data))
+
+      result.errors must not contain FormError("dateOfBirth.day", "birthDeathDates.dateOfBirth.error.invalid.day")
+      result.errors must not contain FormError("dateOfBirth.month", "birthDeathDates.dateOfBirth.error.invalid.month")
+      result.errors must contain(FormError("dateOfBirth", "birthDeathDates.dateOfBirth.error.invalid"))
+    }
+
+    "must show only sub-field error when only one sub-field is invalid" in {
+      val data = Map(
+        "dateOfBirth.day" -> "33",
+        "dateOfBirth.month" -> "1",
+        "dateOfBirth.year" -> "1950",
+        "dateOfDeath.day" -> "1",
+        "dateOfDeath.month" -> "1",
+        "dateOfDeath.year" -> "2020"
+      )
+
+      val result = formProvider.validate(form.bind(data))
+
+      result.errors must contain(FormError("dateOfBirth", "birthDeathDates.dateOfBirth.error.invalid.day"))
+      result.errors must not contain FormError("dateOfBirth.day", "birthDeathDates.dateOfBirth.error.invalid.day")
+    }
+
+    "must show only parent error when multiple sub-fields are invalid for death date" in {
+      val data = Map(
+        "dateOfBirth.day" -> "1",
+        "dateOfBirth.month" -> "1",
+        "dateOfBirth.year" -> "1950",
+        "dateOfDeath.day" -> "32",
+        "dateOfDeath.month" -> "13",
+        "dateOfDeath.year" -> "2020"
+      )
+
+      val result = formProvider.validate(form.bind(data))
+
+      result.errors must not contain FormError("dateOfDeath.day", "birthDeathDates.dateOfDeath.error.invalid.day")
+      result.errors must not contain FormError("dateOfDeath.month", "birthDeathDates.dateOfDeath.error.invalid.month")
+      result.errors must contain(FormError("dateOfDeath", "birthDeathDates.dateOfDeath.error.invalid"))
+    }
+
+    "must show both birth and death errors when both have issues" in {
+      val data = Map(
+        "dateOfBirth.day" -> "33",
+        "dateOfBirth.month" -> "13",
+        "dateOfBirth.year" -> "1701",
+        "dateOfDeath.day" -> "32",
+        "dateOfDeath.month" -> "13",
+        "dateOfDeath.year" -> "2028"
+      )
+
+      val result = formProvider.validate(form.bind(data))
+
+      result.errors must contain(FormError("dateOfBirth", "birthDeathDates.dateOfBirth.error.invalid"))
+      result.errors must contain(FormError("dateOfDeath", "birthDeathDates.dateOfDeath.error.invalid"))
+      result.errors must contain(FormError("dateOfDeath", "birthDeathDates.dateOfDeath.error.past"))
+      result.errors must not contain FormError("dateOfBirth", "birthDeathDates.error.birthAfter1900")
+    }
   }
 }
