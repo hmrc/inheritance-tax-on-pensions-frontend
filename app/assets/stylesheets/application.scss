@@ -9,3 +9,11 @@
 .js-enabled .js-visible {
   display: inline-block !important;
 }
+
+$ihtp-mobile-breakpoint: 640px;
+
+@media (max-width: $ihtp-mobile-breakpoint) {
+  .ihtp-scrollable-pane {
+    overflow-x: scroll;
+  }
+}

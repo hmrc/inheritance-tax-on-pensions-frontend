@@ -20,7 +20,7 @@ import org.mockito.Mockito._
 import config.FrontendAppConfig
 import base.SpecBase
 import play.api.libs.json.Json
-import models.{IhtpReportSubmissionResponse, UserAnswers}
+import models._
 import uk.gov.hmrc.http.client.{HttpClientV2, RequestBuilder}
 import org.mockito.ArgumentMatchers.{any, eq => eqTo}
 import play.api.http.Status.INTERNAL_SERVER_ERROR
@@ -156,6 +156,78 @@ class InheritanceTaxOnPensionsConnectorSpec extends SpecBase {
 
       whenReady(
         connector.submitReport(pstr, userAnswersId, schemeAdministratorOrPractitionerName, schemeName, srnVal, role)
+      ) {
+        _ mustBe Left(errorResponse)
+      }
+    }
+  }
+
+  "getSubmissionList" - {
+
+    "must successfully get the submission list" in new SetUp {
+      val pstr = "12345678"
+      val dateFrom = "1900-01-01"
+      val dateTo = "9999-12-31"
+      val expectedResponse = IhtpOverviewResponse(IhtpOverviewSuccess(pstr, Seq.empty))
+      val mockUrl =
+        s"http://inheritance-tax-on-pensions/inheritance-tax-on-pensions/$pstr/submission-list?dateFrom=$dateFrom&dateTo=$dateTo"
+
+      when(mockConfig.getSubmissionListUrl(eqTo(pstr), eqTo(dateFrom), eqTo(dateTo))).thenReturn(mockUrl)
+
+      when(requestBuilder.execute[Either[UpstreamErrorResponse, IhtpOverviewResponse]](using any(), any()))
+        .thenReturn(Future.successful(Right(expectedResponse)))
+
+      when(requestBuilder.transform(any()))
+        .thenReturn(requestBuilder)
+
+      when(connector.httpClient.get(any())(using any())).thenReturn(requestBuilder)
+
+      whenReady(
+        connector.getSubmissionList(
+          pstr,
+          dateFrom,
+          dateTo,
+          schemeAdministratorOrPractitionerName,
+          schemeName,
+          srnVal,
+          role
+        )
+      ) {
+        _ mustBe Right(expectedResponse)
+      }
+
+      verify(connector.httpClient).get(eqTo(url"$mockUrl"))(using any())
+      verify(requestBuilder).transform(any())
+    }
+
+    "must return error when getting the submission list fails" in new SetUp {
+      val pstr = "12345678"
+      val dateFrom = "1900-01-01"
+      val dateTo = "9999-12-31"
+      val errorResponse = UpstreamErrorResponse("Retrieval failed", INTERNAL_SERVER_ERROR)
+      val mockUrl =
+        s"http://inheritance-tax-on-pensions/inheritance-tax-on-pensions/$pstr/submission-list?dateFrom=$dateFrom&dateTo=$dateTo"
+
+      when(mockConfig.getSubmissionListUrl(eqTo(pstr), eqTo(dateFrom), eqTo(dateTo))).thenReturn(mockUrl)
+
+      when(requestBuilder.execute[Either[UpstreamErrorResponse, IhtpOverviewResponse]](using any(), any()))
+        .thenReturn(Future.successful(Left(errorResponse)))
+
+      when(requestBuilder.transform(any()))
+        .thenReturn(requestBuilder)
+
+      when(connector.httpClient.get(any())(using any())).thenReturn(requestBuilder)
+
+      whenReady(
+        connector.getSubmissionList(
+          pstr,
+          dateFrom,
+          dateTo,
+          schemeAdministratorOrPractitionerName,
+          schemeName,
+          srnVal,
+          role
+        )
       ) {
         _ mustBe Left(errorResponse)
       }

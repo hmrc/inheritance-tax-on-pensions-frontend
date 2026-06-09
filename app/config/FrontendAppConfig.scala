@@ -21,7 +21,7 @@ import com.google.inject.{Inject, Singleton}
 import controllers.routes
 import models.SchemeId.Srn
 import play.api.Configuration
-import models.Mode
+import models.{Mode, PensionSchemeId}
 
 import scala.concurrent.duration.Duration
 
@@ -53,6 +53,10 @@ class FrontendAppConfig @Inject() (configuration: Configuration) {
       val contactHmrc: String = baseUrl + configuration.get[String]("urls.manage-pension-schemes.contactHmrc")
       val cannotAccessDeregistered: String =
         baseUrl + configuration.get[String]("urls.manage-pension-schemes.cannotAccessDeregistered")
+      val schemeSummaryDashboard: String =
+        configuration.get[String]("urls.manage-pension-schemes.schemeSummaryDashboard")
+      val schemeSummaryPspDashboard: String =
+        configuration.get[String]("urls.manage-pension-schemes.schemeSummaryPSPDashboard")
     }
 
     object pensionAdministrator {
@@ -75,6 +79,9 @@ class FrontendAppConfig @Inject() (configuration: Configuration) {
   val countdown: Int = configuration.get[Int]("timeout-dialog.countdown")
 
   val sessionTtl: Long = configuration.get[Int]("mongodb.sessionTtl")
+  val submissionListPageSize: Int = configuration.get[Int]("submission-list.page-size")
+  val submissionListDateFrom: String = configuration.get[String]("submission-list.date-from")
+  val submissionListDateTo: String = configuration.get[String]("submission-list.date-to")
 
   val pensionsAdministrator: Service = configuration.get[Service]("microservice.services.pensionAdministrator")
   val pensionsScheme: Service = configuration.get[Service]("microservice.services.pensionsScheme")
@@ -87,6 +94,16 @@ class FrontendAppConfig @Inject() (configuration: Configuration) {
 
   def getSubmitReportUrl(pstr: String, userAnswersId: String): String =
     s"$inheritanceTaxOnPensionsHost/inheritance-tax-on-pensions/$pstr/submit-report/$userAnswersId"
+
+  def getSubmissionListUrl(pstr: String, dateFrom: String, dateTo: String): String =
+    s"$inheritanceTaxOnPensionsHost/inheritance-tax-on-pensions/$pstr/submission-list?dateFrom=$dateFrom&dateTo=$dateTo"
+
+  def schemeDashboardUrl(srn: Srn, pensionSchemeId: PensionSchemeId): String =
+    if (pensionSchemeId.isPSP) {
+      urls.managePensionsSchemes.baseUrl + urls.managePensionsSchemes.schemeSummaryPspDashboard.format(srn.value)
+    } else {
+      urls.managePensionsSchemes.baseUrl + urls.managePensionsSchemes.schemeSummaryDashboard.format(srn.value)
+    }
 
   val addressLookupFrontendBaseUrl: String =
     configuration.get[Service]("microservice.services.addressLookupFrontend").baseUrl
