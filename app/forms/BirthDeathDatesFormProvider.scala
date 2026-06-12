@@ -62,23 +62,29 @@ class BirthDeathDatesFormProvider @Inject() extends Mappings {
 
     formWithParentErrors.value match {
       case None =>
-        formWithParentErrors.withEarliestBirthDateError.withFutureYearErrors
+        val hasBirthSubFieldErrors = formWithRangeErrors.errors.exists(_.key.startsWith(s"$dateOfBirthKey."))
+        val hasDeathSubFieldErrors = formWithRangeErrors.errors.exists(_.key.startsWith(s"$dateOfDeathKey."))
+        formWithParentErrors
+          .withEarliestBirthDateError(hasBirthSubFieldErrors)
+          .withFutureYearErrors(hasBirthSubFieldErrors, hasDeathSubFieldErrors)
       case Some(dates) =>
         val today = LocalDate.now(ZoneOffset.UTC)
+        val hasBirthSubFieldErrors = formWithRangeErrors.errors.exists(_.key.startsWith(s"$dateOfBirthKey."))
+        val hasDeathSubFieldErrors = formWithRangeErrors.errors.exists(_.key.startsWith(s"$dateOfDeathKey."))
 
-        val withBirthAfter1900 = if (!dates.dateOfBirth.isAfter(earliestBirthDate)) {
+        val withBirthAfter1900 = if (!dates.dateOfBirth.isAfter(earliestBirthDate) && !hasBirthSubFieldErrors) {
           formWithParentErrors.withError(dateOfBirthKey, "birthDeathDates.error.birthAfter1900")
         } else {
           formWithParentErrors
         }
 
-        val withBirthPast = if (!dates.dateOfBirth.isBefore(today)) {
+        val withBirthPast = if (!dates.dateOfBirth.isBefore(today) && !hasBirthSubFieldErrors) {
           withBirthAfter1900.withError(dateOfBirthKey, "birthDeathDates.dateOfBirth.error.past")
         } else {
           withBirthAfter1900
         }
 
-        val withDeathPast = if (!dates.dateOfDeath.isBefore(today)) {
+        val withDeathPast = if (!dates.dateOfDeath.isBefore(today) && !hasDeathSubFieldErrors) {
           withBirthPast.withError(dateOfDeathKey, "birthDeathDates.dateOfDeath.error.past")
         } else {
           withBirthPast
@@ -89,7 +95,9 @@ class BirthDeathDatesFormProvider @Inject() extends Mappings {
             dates.dateOfBirth.isAfter(earliestBirthDate) &&
             dates.dateOfBirth.isBefore(today) &&
             dates.dateOfDeath.isBefore(today) &&
-            !dates.dateOfBirth.isBefore(dates.dateOfDeath)
+            !dates.dateOfBirth.isBefore(dates.dateOfDeath) &&
+            !hasBirthSubFieldErrors &&
+            !hasDeathSubFieldErrors
           ) {
             withDeathPast.withError(dateOfBirthKey, "birthDeathDates.error.birthBeforeDeath")
           } else {
@@ -101,25 +109,26 @@ class BirthDeathDatesFormProvider @Inject() extends Mappings {
   }
 
   extension (form: Form[BirthDeathDates])
-    private def withEarliestBirthDateError: Form[BirthDeathDates] =
+    private def withEarliestBirthDateError(hasBirthSubFieldErrors: Boolean): Form[BirthDeathDates] =
       parsedDateOfBirth(form.data)
         .filterNot(_.isAfter(earliestBirthDate))
         .fold(form) { _ =>
-          if (form.errors.exists(_.key == dateOfBirthKey)) {
+          if (form.errors.exists(_.key == dateOfBirthKey) || hasBirthSubFieldErrors) {
             form
           } else {
             form.withError(dateOfBirthKey, "birthDeathDates.error.birthAfter1900")
           }
         }
 
-    private def withFutureYearErrors: Form[BirthDeathDates] = {
+    private def withFutureYearErrors(
+      hasBirthSubFieldErrors: Boolean,
+      hasDeathSubFieldErrors: Boolean
+    ): Form[BirthDeathDates] = {
       val today = LocalDate.now(ZoneOffset.UTC)
       val currentYear = today.getYear
 
-      val hasBirthSubFieldErrors = form.errors.exists(e => e.key.startsWith(s"$dateOfBirthKey."))
-
       val birthYearError = parsedYear(form.data, dateOfBirthKey).flatMap { year =>
-        if (year > currentYear) {
+        if (year > currentYear && !hasBirthSubFieldErrors) {
           Some((dateOfBirthKey, "birthDeathDates.dateOfBirth.error.past"))
         } else if (
           year < earliestBirthDate.getYear && !form.errors.exists(_.key == dateOfBirthKey) && !hasBirthSubFieldErrors
@@ -131,7 +140,7 @@ class BirthDeathDatesFormProvider @Inject() extends Mappings {
       }
 
       val deathYearError = parsedYear(form.data, dateOfDeathKey).flatMap { year =>
-        if (year > currentYear) {
+        if (year > currentYear && !hasDeathSubFieldErrors) {
           Some((dateOfDeathKey, "birthDeathDates.dateOfDeath.error.past"))
         } else {
           None

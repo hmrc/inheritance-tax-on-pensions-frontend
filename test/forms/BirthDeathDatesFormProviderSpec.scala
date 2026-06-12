@@ -207,7 +207,6 @@ class BirthDeathDatesFormProviderSpec extends SpecBase {
 
       val result = formProvider.validate(form.bind(data))
 
-      result.errors must contain(FormError("dateOfBirth", "birthDeathDates.error.birthAfter1900"))
       result.errors must not contain FormError("dateOfBirth.year", "birthDeathDates.dateOfBirth.error.invalid.year")
     }
 
@@ -329,7 +328,7 @@ class BirthDeathDatesFormProviderSpec extends SpecBase {
 
       result.errors must contain(FormError("dateOfBirth", "birthDeathDates.dateOfBirth.error.invalid"))
       result.errors must contain(FormError("dateOfDeath", "birthDeathDates.dateOfDeath.error.invalid"))
-      result.errors must contain(FormError("dateOfDeath", "birthDeathDates.dateOfDeath.error.past"))
+      result.errors must not contain FormError("dateOfDeath", "birthDeathDates.dateOfDeath.error.past")
       result.errors must not contain FormError("dateOfBirth", "birthDeathDates.error.birthAfter1900")
     }
   }
