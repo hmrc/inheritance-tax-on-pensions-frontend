@@ -14,18 +14,191 @@
  * limitations under the License.
  *@
 
+@import components.{Caption, Link, LinkWithHiddenText, PageHeading, Paragraph, SubHeading}
+@import config.Constants.Css
+@import models.IhtpOverviewReport
+@import models.SchemeId.Srn
+@import play.twirl.api.{Html, HtmlFormat}
+@import uk.gov.hmrc.govukfrontend.views.Aliases.{HtmlContent, Pagination, PaginationItem, PaginationLink, Text}
+@import uk.gov.hmrc.govukfrontend.views.html.components.{GovukButton, GovukPagination}
+@import utils.DateTimeFormats
+@import viewmodels.SubmissionListPagination
+@import viewmodels.govuk.all._
+
 @this(
-    layout: templates.Layout
+    layout: templates.Layout,
+    caption: Caption,
+    pageHeading: PageHeading,
+    subHeading: SubHeading,
+    paragraph: Paragraph,
+    link: Link,
+    linkWithHiddenText: LinkWithHiddenText,
+    govukButton: GovukButton,
+    govukPagination: GovukPagination
 )
 
-@()(implicit request: Request[?], messages: Messages)
+@(srn: Srn, schemeName: String, reports: Seq[IhtpOverviewReport], pagination: SubmissionListPagination, schemeDashboardUrl: String)(implicit request: Request[?], messages: Messages)
+
+@pageUrl(page: Int) = @{
+    s"${controllers.routes.SubmissionListController.onPageLoad(srn).url}?page=$page"
+}
+
+@submissionLink = @{
+    link(
+        id   = "start-new-submission",
+        text = messages("submissionList.start.link"),
+        href = controllers.routes.WhatYouWillNeedController.onPageLoad(srn).url
+    )
+}
+
+@reportLink(report: IhtpOverviewReport) = @{
+    HtmlContent(linkWithHiddenText(
+        id                    = s"deceased-name-${report.fbNumber}",
+        text                  = report.deceasedName,
+        href                  = "#",
+        visuallyHiddenContent = s" ${messages("submissionList.table.deceasedName.hidden")}"
+    ).toString)
+}
+
+@paymentReferenceContent(report: IhtpOverviewReport) = @{
+    report.paymentReference match {
+        case Some(paymentReference) => HtmlContent(linkWithHiddenText(
+            id                    = s"payment-reference-${report.fbNumber}",
+            text                  = paymentReference,
+            href                  = "#",
+            visuallyHiddenContent = s" ${messages("submissionList.table.paymentReference.hidden")}"
+        ).toString)
+        case None => Text(messages("submissionList.table.paymentReference.unavailable"))
+    }
+}
+
+@paginationItems = @{
+    Some((1 to pagination.totalPages).map { page =>
+        PaginationItem(
+            href               = pageUrl(page),
+            number             = Some(page.toString),
+            visuallyHiddenText = Some(messages("submissionList.pagination.pageNumber", page)),
+            current            = if(page == pagination.currentPage) Some(true) else None
+        )
+    })
+}
+
+@previousPage = @{
+    if(pagination.hasPrevious) {
+        Some(PaginationLink(
+            href = pageUrl(pagination.currentPage - 1),
+            text = Some(messages("submissionList.pagination.previous"))
+        ))
+    } else {
+        None
+    }
+}
+
+@nextPage = @{
+    if(pagination.hasNext) {
+        Some(PaginationLink(
+            href = pageUrl(pagination.currentPage + 1),
+            text = Some(messages("submissionList.pagination.next"))
+        ))
+    } else {
+        None
+    }
+}
+
+@reportsPagination = @{
+    Pagination(
+        items         = paginationItems,
+        previous      = previousPage,
+        next          = nextPage,
+        landmarkLabel = Some(messages("submissionList.pagination.label"))
+    )
+}
 
 @layout(
     pageTitle    = titleNoForm(messages("submissionList.title")),
-    showBackLink = false
+    showBackLink = true,
+    fullWidth    = true
 ) {
 
-    <h1 class="govuk-heading-xl">@messages("submissionList.heading")</h1>
+    <div class="govuk-grid-row">
+        <div class="govuk-grid-column-two-thirds">
+            @caption("scheme-name-caption", schemeName, classes = Css.captionXLCssClass)
 
-    <p class="govuk-body">@messages("submissionList.guidance")</p>
+            @pageHeading(messages("submissionList.heading"), classes = Css.headingXLCssClass)
+
+            @subHeading(messages("submissionList.start.heading"))
+
+            @paragraph(HtmlContent(submissionLink))
+        </div>
+    </div>
+
+    <div class="govuk-grid-row">
+        <div class="govuk-grid-column-full">
+            <fieldset class="govuk-fieldset">
+                @subHeading(
+                    messages("submissionList.find.heading"),
+                    classes = s"${Css.headingMCssClass} govuk-!-margin-bottom-1 govuk-!-margin-top-4"
+                )
+
+                <span class="govuk-hint">@messages("submissionList.find.hint")</span>
+
+                <div class="govuk-form-group govuk-!-margin-top-3 govuk-!-margin-bottom-3">
+                    <label class="@Css.visuallyHiddenCssClass" for="find-report">
+                        @messages("submissionList.find.input.label")
+                    </label>
+                    <input class="govuk-input govuk-!-width-three-quarters" id="find-report" name="findReport" type="text">
+                    @govukButton(
+                        ButtonViewModel(messages("submissionList.find.button"))
+                            .asInput("button")
+                    )
+                </div>
+            </fieldset>
+
+            @if(reports.nonEmpty) {
+                <div class="ihtp-scrollable-pane" role="region" aria-labelledby="active-reports-table-caption">
+                    <table class="govuk-table">
+                        <caption class="govuk-table__caption govuk-table__caption--m" id="active-reports-table-caption">@messages("submissionList.activeReports.caption")</caption>
+                        <thead class="govuk-table__head">
+                            <tr class="govuk-table__row">
+                                <th scope="col" class="govuk-table__header">@messages("submissionList.table.deceasedName")</th>
+                                <th scope="col" class="govuk-table__header">@messages("submissionList.table.status")</th>
+                                <th scope="col" class="govuk-table__header">@messages("submissionList.table.dueDate")</th>
+                                <th scope="col" class="govuk-table__header">@messages("submissionList.table.paymentReference")</th>
+                            </tr>
+                        </thead>
+                        <tbody class="govuk-table__body">
+                            @reports.map { report =>
+                                <tr class="govuk-table__row">
+                                    <th scope="row" class="govuk-table__header govuk-!-font-weight-regular">@reportLink(report).asHtml</th>
+                                    <td class="govuk-table__cell">@report.ihtpStatus</td>
+                                    <td class="govuk-table__cell">@report.paymentDueDate.format(DateTimeFormats.dateTimeFormat()(using messages.lang))</td>
+                                    <td class="govuk-table__cell">@paymentReferenceContent(report).asHtml</td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+
+                @paragraph(messages("submissionList.showing", pagination.firstItem, pagination.lastItem, pagination.totalReports))
+
+                @if(pagination.totalPages > 1) {
+                    @govukPagination(reportsPagination)
+                }
+            } else {
+                @paragraph(messages("submissionList.noReports"))
+            }
+
+            @paragraph(HtmlContent(HtmlFormat.fill(Seq(link(
+                id   = "view-reconciled-reports",
+                text = messages("submissionList.reconciledReports.link"),
+                href = "#"
+            )))))
+
+            @paragraph(HtmlContent(HtmlFormat.fill(Seq(link(
+                id   = "return-to-scheme",
+                text = messages("submissionList.returnToScheme.link", schemeName),
+                href = schemeDashboardUrl
+            )))))
+        </div>
+    </div>
 }

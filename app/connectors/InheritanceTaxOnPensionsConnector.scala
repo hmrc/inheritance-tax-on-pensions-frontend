@@ -19,7 +19,7 @@ package connectors
 import config.FrontendAppConfig
 import config.Constants._
 import uk.gov.hmrc.http._
-import models.{IhtpReportSubmissionResponse, UserAnswers}
+import models.{IhtpOverviewResponse, IhtpReportSubmissionResponse, UserAnswers}
 import uk.gov.hmrc.http.client.HttpClientV2
 import play.api.libs.ws.JsonBodyWritables.writeableOf_JsValue
 import play.api.libs.json.Json
@@ -95,4 +95,25 @@ class InheritanceTaxOnPensionsConnector @Inject() (
         )
       )
       .execute[Either[UpstreamErrorResponse, IhtpReportSubmissionResponse]]
+
+  def getSubmissionList(
+    pstr: String,
+    dateFrom: String,
+    dateTo: String,
+    schemeAdministratorOrPractitionerName: String,
+    schemeName: String,
+    srnVal: String,
+    role: String
+  )(implicit hc: HeaderCarrier): Future[Either[UpstreamErrorResponse, IhtpOverviewResponse]] =
+    httpClient
+      .get(url"${config.getSubmissionListUrl(pstr, dateFrom, dateTo)}")
+      .transform(
+        _.addHttpHeaders(
+          SRN_HEADER -> srnVal,
+          USERNAME_HEADER -> schemeAdministratorOrPractitionerName,
+          SCHEME_NAME_HEADER -> schemeName,
+          ROLE_HEADER -> role
+        )
+      )
+      .execute[Either[UpstreamErrorResponse, IhtpOverviewResponse]]
 }

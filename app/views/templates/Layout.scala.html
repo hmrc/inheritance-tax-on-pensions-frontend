@@ -29,9 +29,10 @@
     hmrcStandardPage: HmrcStandardPage
 )
 
-@(pageTitle: String, showBackLink: Boolean = true, timeout: Boolean = true, showSignOut: Boolean = true, showHmrcBanner: Boolean = false)(contentBlock: Html)(implicit rh: RequestHeader, messages: Messages)
+@(pageTitle: String, showBackLink: Boolean = true, timeout: Boolean = true, showSignOut: Boolean = true, showHmrcBanner: Boolean = false, fullWidth: Boolean = false)(contentBlock: Html)(implicit rh: RequestHeader, messages: Messages)
 
 @head = {
+    <link href="@routes.Assets.versioned("stylesheets/application.css")" media="screen" rel="stylesheet" type="text/css">
 
     @if(timeout) {
         @hmrcTimeoutDialog(TimeoutDialog(
@@ -55,7 +56,8 @@
 @hmrcStandardPage(HmrcStandardPageParams(
     pageTitle = Some(pageTitle),
     templateOverrides = TemplateOverrides(
-        additionalHeadBlock = Some(head)
+        additionalHeadBlock = Some(head),
+        mainContentLayout = if (fullWidth) Some(TemplateOverrides.noMainContentLayout) else None
     ),
     serviceURLs = ServiceURLs(
         serviceUrl = Some(routes.IndexController.onPageLoad().url),

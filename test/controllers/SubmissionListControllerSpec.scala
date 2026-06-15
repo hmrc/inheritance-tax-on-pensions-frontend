@@ -17,19 +17,59 @@
 package controllers
 
 import play.api.test.FakeRequest
-import play.api.test.Helpers._
+import services.SubmissionListService
+import play.api.inject.bind
 import views.html.SubmissionListView
 import base.SpecBase
+import uk.gov.hmrc.http.UpstreamErrorResponse
+import models.{IhtpOverviewReport, IhtpOverviewResponse, IhtpOverviewSuccess}
+import viewmodels.SubmissionListPagination
+import org.mockito.ArgumentMatchers.any
+import play.api.test.Helpers._
+import org.mockito.Mockito.when
+
+import scala.concurrent.Future
+
+import java.time.{Instant, LocalDate}
 
 class SubmissionListControllerSpec extends SpecBase {
 
   lazy val onPageLoadUrl: String = routes.SubmissionListController.onPageLoad(srn).url
 
+  private val overviewReport = IhtpOverviewReport(
+    fbNumber = "119000004320",
+    submissionDate = Instant.parse("2026-04-10T16:12:49Z"),
+    paymentDueDate = LocalDate.of(2026, 2, 2),
+    ihtpVersion = "001",
+    inheritanceTaxReference = "A123456/25A",
+    paymentReference = Some("A123456/25A629671"),
+    title = Some("Dr"),
+    firstForename = "Peter",
+    secondForename = Some("Michael"),
+    surname = "Smith",
+    nino = None,
+    ihtpStatus = "Not reconciled"
+  )
+
+  private val overviewResponse =
+    IhtpOverviewResponse(IhtpOverviewSuccess(defaultSchemeDetails.pstr, Seq(overviewReport)))
+
+  private val firstPagePagination = SubmissionListPagination(currentPage = 1, pageSize = 15, totalReports = 1)
+  private val psaSchemeDashboardUrl =
+    s"http://localhost:8204/manage-pension-schemes/pension-scheme-summary/${srn.value}"
+  private val pspSchemeDashboardUrl =
+    s"http://localhost:8204/manage-pension-schemes/${srn.value}/dashboard/pension-scheme-details"
+
   "Submission list controller" - {
 
     "must return OK and the correct view for a GET" in {
+      val mockSubmissionListService = mock[SubmissionListService]
+      when(mockSubmissionListService.getSubmissionList()(using any(), any()))
+        .thenReturn(Future.successful(Right(overviewResponse)))
 
-      val application = applicationBuilder(userAnswers = None).build()
+      val application = applicationBuilder(userAnswers = None)
+        .overrides(bind[SubmissionListService].toInstance(mockSubmissionListService))
+        .build()
 
       running(application) {
         val request = FakeRequest(GET, onPageLoadUrl)
@@ -40,13 +80,27 @@ class SubmissionListControllerSpec extends SpecBase {
 
         status(result) mustEqual OK
 
-        contentAsString(result) mustEqual view()(using request, messages(application)).toString
+        contentAsString(result) mustEqual view(
+          srn,
+          schemeName,
+          Seq(overviewReport),
+          firstPagePagination,
+          psaSchemeDashboardUrl
+        )(using
+          request,
+          messages(application)
+        ).toString
       }
     }
 
     "must return OK when accessed as PSP" in {
+      val mockSubmissionListService = mock[SubmissionListService]
+      when(mockSubmissionListService.getSubmissionList()(using any(), any()))
+        .thenReturn(Future.successful(Right(overviewResponse)))
 
-      val application = applicationBuilder(userAnswers = None, isPsa = false).build()
+      val application = applicationBuilder(userAnswers = None, isPsa = false)
+        .overrides(bind[SubmissionListService].toInstance(mockSubmissionListService))
+        .build()
 
       running(application) {
         val request = FakeRequest(GET, onPageLoadUrl)
@@ -57,7 +111,107 @@ class SubmissionListControllerSpec extends SpecBase {
 
         status(result) mustEqual OK
 
-        contentAsString(result) mustEqual view()(using request, messages(application)).toString
+        contentAsString(result) mustEqual view(
+          srn,
+          schemeName,
+          Seq(overviewReport),
+          firstPagePagination,
+          pspSchemeDashboardUrl
+        )(using
+          request,
+          messages(application)
+        ).toString
+      }
+    }
+
+    "must redirect to journey recovery when the submission list cannot be retrieved" in {
+      val mockSubmissionListService = mock[SubmissionListService]
+      when(mockSubmissionListService.getSubmissionList()(using any(), any()))
+        .thenReturn(Future.successful(Left(UpstreamErrorResponse("failed", INTERNAL_SERVER_ERROR))))
+
+      val application = applicationBuilder(userAnswers = None)
+        .overrides(bind[SubmissionListService].toInstance(mockSubmissionListService))
+        .build()
+
+      running(application) {
+        val request = FakeRequest(GET, onPageLoadUrl)
+
+        val result = route(application, request).value
+
+        status(result) mustEqual SEE_OTHER
+        redirectLocation(result).value mustEqual routes.JourneyRecoveryController.onPageLoad().url
+      }
+    }
+
+    "must return OK with no reports when no submission list records are returned" in {
+      val mockSubmissionListService = mock[SubmissionListService]
+      when(mockSubmissionListService.getSubmissionList()(using any(), any()))
+        .thenReturn(Future.successful(Left(UpstreamErrorResponse("No records", UNPROCESSABLE_ENTITY))))
+
+      val application = applicationBuilder(userAnswers = None)
+        .overrides(bind[SubmissionListService].toInstance(mockSubmissionListService))
+        .build()
+
+      running(application) {
+        val request = FakeRequest(GET, onPageLoadUrl)
+
+        val result = route(application, request).value
+
+        val view = application.injector.instanceOf[SubmissionListView]
+
+        status(result) mustEqual OK
+
+        contentAsString(result) mustEqual view(
+          srn,
+          schemeName,
+          Seq.empty,
+          SubmissionListPagination(currentPage = 1, pageSize = 15, totalReports = 0),
+          psaSchemeDashboardUrl
+        )(using
+          request,
+          messages(application)
+        ).toString
+      }
+    }
+
+    "must paginate reports and return the requested page" in {
+      val mockSubmissionListService = mock[SubmissionListService]
+      val reports = (1 to 16).map { index =>
+        overviewReport.copy(
+          fbNumber = f"1190000043$index%02d",
+          firstForename = if (index % 2 == 0) "Jane" else "John",
+          secondForename = Some(s"Middle$index"),
+          paymentReference = Some(f"PR$index%09d")
+        )
+      }
+      when(mockSubmissionListService.getSubmissionList()(using any(), any()))
+        .thenReturn(
+          Future.successful(Right(IhtpOverviewResponse(IhtpOverviewSuccess(defaultSchemeDetails.pstr, reports))))
+        )
+
+      val application = applicationBuilder(userAnswers = None)
+        .overrides(bind[SubmissionListService].toInstance(mockSubmissionListService))
+        .build()
+
+      running(application) {
+        val request = FakeRequest(GET, s"$onPageLoadUrl?page=2")
+
+        val result = route(application, request).value
+
+        val view = application.injector.instanceOf[SubmissionListView]
+
+        status(result) mustEqual OK
+
+        contentAsString(result) mustEqual view(
+          srn,
+          schemeName,
+          Seq(reports(15)),
+          SubmissionListPagination(currentPage = 2, pageSize = 15, totalReports = 16),
+          psaSchemeDashboardUrl
+        )(using
+          request,
+          messages(application)
+        ).toString
       }
     }
   }
