@@ -1,4 +1,4 @@
-service.name = Report inheritance tax on a pension
+service.name = Report Inheritance Tax on a pension
 
 site.back = Back
 site.remove = Remove
@@ -46,8 +46,8 @@ submissionList.heading = Report Inheritance Tax on a pension
 submissionList.start.heading = Start a new report
 submissionList.start.link = Report Inheritance Tax on a pension
 submissionList.find.heading = Find a report
-submissionList.find.hint = Search by name, NI number of the deceased, Inheritance Tax or payment reference
-submissionList.find.input.label = Search by name, NI number of the deceased, Inheritance Tax or payment reference
+submissionList.find.hint = Search by NI number, name, Inheritance Tax or payment reference of the deceased
+submissionList.find.input.label = Search by NI number, name, Inheritance Tax or payment reference of the deceased
 submissionList.find.button = Search
 submissionList.activeReports.caption = Active reports
 submissionList.table.deceasedName = Deceased name
