@@ -168,7 +168,7 @@ class InheritanceTaxOnPensionsConnectorSpec extends SpecBase {
       val pstr = "12345678"
       val dateFrom = "1900-01-01"
       val dateTo = "9999-12-31"
-      val expectedResponse = IhtpOverviewResponse(IhtpOverviewSuccess(pstr, Seq.empty))
+      val expectedResponse = IhtpOverviewResponse(IhtpOverviewSuccess(Seq.empty))
       val mockUrl =
         s"http://inheritance-tax-on-pensions/inheritance-tax-on-pensions/$pstr/submission-list?dateFrom=$dateFrom&dateTo=$dateTo"
 

@@ -26,7 +26,7 @@ object IhtpOverviewResponse {
   implicit val formats: OFormat[IhtpOverviewResponse] = Json.format[IhtpOverviewResponse]
 }
 
-case class IhtpOverviewSuccess(pstr: String, ihtpOverview: Seq[IhtpOverviewReport])
+case class IhtpOverviewSuccess(ihtpOverview: Seq[IhtpOverviewReport])
 
 object IhtpOverviewSuccess {
   implicit val formats: OFormat[IhtpOverviewSuccess] = Json.format[IhtpOverviewSuccess]

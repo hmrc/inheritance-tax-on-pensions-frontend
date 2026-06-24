@@ -42,7 +42,6 @@ class IhtpOverviewResponseSpec extends SpecBase {
   )
 
   private val success = IhtpOverviewSuccess(
-    pstr = "24000002IN",
     ihtpOverview = Seq(report)
   )
 
@@ -53,7 +52,6 @@ class IhtpOverviewResponseSpec extends SpecBase {
     "must successfully read from json" in {
       val json = Json.obj(
         "success" -> Json.obj(
-          "pstr" -> "24000002IN",
           "ihtpOverview" -> Json.arr(
             Json.obj(
               "fbNumber" -> "119000004320",
@@ -79,7 +77,6 @@ class IhtpOverviewResponseSpec extends SpecBase {
     "must successfully write to json" in {
       val json = Json.toJson(response)
 
-      (json \ "success" \ "pstr").as[String] mustBe "24000002IN"
       (json \ "success" \ "ihtpOverview" \ 0 \ "fbNumber").as[String] mustBe "119000004320"
       (json \ "success" \ "ihtpOverview" \ 0 \ "submissionDate").as[String] mustBe "2026-04-10T16:12:49Z"
       (json \ "success" \ "ihtpOverview" \ 0 \ "paymentDueDate").as[String] mustBe "2026-02-02"
@@ -112,7 +109,6 @@ class IhtpOverviewResponseSpec extends SpecBase {
 
     "must successfully read from json" in {
       val json = Json.obj(
-        "pstr" -> "24000002IN",
         "ihtpOverview" -> Json.arr(Json.toJson(report))
       )
 
@@ -122,12 +118,11 @@ class IhtpOverviewResponseSpec extends SpecBase {
     "must successfully write to json" in {
       val json = Json.toJson(success)
 
-      (json \ "pstr").as[String] mustBe "24000002IN"
       (json \ "ihtpOverview").as[Seq[IhtpOverviewReport]] mustBe Seq(report)
     }
 
     "must read and write an empty overview list" in {
-      val success = IhtpOverviewSuccess("24000002IN", Seq.empty)
+      val success = IhtpOverviewSuccess(Seq.empty)
       val json = Json.toJson(success)
 
       json.validate[IhtpOverviewSuccess] mustBe JsSuccess(success)
@@ -135,17 +130,14 @@ class IhtpOverviewResponseSpec extends SpecBase {
     }
 
     "must fail to read when required fields are missing" in {
-      Json.obj("pstr" -> "24000002IN").validate[IhtpOverviewSuccess] mustBe a[JsError]
-      Json.obj("ihtpOverview" -> Json.arr()).validate[IhtpOverviewSuccess] mustBe a[JsError]
+      Json.obj().validate[IhtpOverviewSuccess] mustBe a[JsError]
     }
 
     "must expose its case class values" in {
-      success.pstr mustBe "24000002IN"
       success.ihtpOverview mustBe Seq(report)
-      success.copy(pstr = "24000002IN", ihtpOverview = Seq(report)) mustBe success
-      success.productElement(0) mustBe "24000002IN"
-      success.productElement(1) mustBe Seq(report)
-      success.productArity mustBe 2
+      success.copy(ihtpOverview = Seq(report)) mustBe success
+      success.productElement(0) mustBe Seq(report)
+      success.productArity mustBe 1
       success.productPrefix mustBe "IhtpOverviewSuccess"
       success.toString must include("IhtpOverviewSuccess")
     }
