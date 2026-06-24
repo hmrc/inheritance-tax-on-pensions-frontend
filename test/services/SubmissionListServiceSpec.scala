@@ -38,7 +38,7 @@ class SubmissionListServiceSpec extends SpecBase {
   "getSubmissionList" - {
 
     "must return success if connector returns success" in new Setup {
-      val response = IhtpOverviewResponse(IhtpOverviewSuccess(allowedAccessRequest.schemeDetails.pstr, Seq.empty))
+      val response = IhtpOverviewResponse(IhtpOverviewSuccess(Seq.empty))
 
       when(mockConnector.getSubmissionList(any(), any(), any(), any(), any(), any(), any())(using any()))
         .thenReturn(Future.successful(Right(response)))

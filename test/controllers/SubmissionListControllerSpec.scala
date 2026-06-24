@@ -52,7 +52,7 @@ class SubmissionListControllerSpec extends SpecBase {
   )
 
   private val overviewResponse =
-    IhtpOverviewResponse(IhtpOverviewSuccess(defaultSchemeDetails.pstr, Seq(overviewReport)))
+    IhtpOverviewResponse(IhtpOverviewSuccess(Seq(overviewReport)))
 
   private val firstPagePagination = SubmissionListPagination(currentPage = 1, pageSize = 15, totalReports = 1)
   private val psaSchemeDashboardUrl =
@@ -186,7 +186,7 @@ class SubmissionListControllerSpec extends SpecBase {
       }
       when(mockSubmissionListService.getSubmissionList()(using any(), any()))
         .thenReturn(
-          Future.successful(Right(IhtpOverviewResponse(IhtpOverviewSuccess(defaultSchemeDetails.pstr, reports))))
+          Future.successful(Right(IhtpOverviewResponse(IhtpOverviewSuccess(reports))))
         )
 
       val application = applicationBuilder(userAnswers = None)
