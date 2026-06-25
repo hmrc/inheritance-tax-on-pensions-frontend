@@ -43,6 +43,19 @@ class DidPrSubmitControllerSpec extends SpecBase with MockitoSugar {
     .set(IndividualNamePage(JourneyRole.LprIndividual), individualName)
     .get
 
+  private val organisationPrName = IndividualName(
+    title = Some("Mrs"),
+    firstForename = "Sarah",
+    secondForename = Some("Jane"),
+    surname = "Wilson"
+  )
+
+  val userAnswersWithOrganisationPrName: UserAnswers = emptyUserAnswers
+    .set(LprTypePage, LprType.Organisation)
+    .get
+    .set(IndividualNamePage(JourneyRole.LprOrganisation), organisationPrName)
+    .get
+
   "DidPrSubmit Controller" - {
 
     "must return OK and the correct view for a GET" in {
@@ -57,6 +70,25 @@ class DidPrSubmitControllerSpec extends SpecBase with MockitoSugar {
 
         status(result) mustEqual OK
         contentAsString(result) mustEqual view(form, srn, NormalMode, individualNameFormatted)(using
+          request,
+          messages(application)
+        ).toString
+      }
+    }
+
+    "must return OK and the correct view for a GET when the organisation PR name has been answered" in {
+      val application =
+        applicationBuilder(userAnswers = Some(userAnswersWithOrganisationPrName), usesSession = true).build()
+
+      running(application) {
+        val request = FakeRequest(GET, didPrSubmitRoute)
+
+        val result = route(application, request).value
+
+        val view = application.injector.instanceOf[DidPrSubmitView]
+
+        status(result) mustEqual OK
+        contentAsString(result) mustEqual view(form, srn, NormalMode, "Sarah Wilson")(using
           request,
           messages(application)
         ).toString

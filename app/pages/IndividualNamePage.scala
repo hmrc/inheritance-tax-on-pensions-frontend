@@ -25,6 +25,7 @@ case class IndividualNamePage(journeyRole: JourneyRole) extends QuestionPage[Ind
     journeyRole match {
       case JourneyRole.Deceased => JsPath \ "nameOfDeceased"
       case JourneyRole.LprIndividual => JsPath \ "lprDetails" \ "individual"
+      case JourneyRole.LprOrganisation => JsPath \ "lprDetails" \ "organisation"
       case JourneyRole.Unknown => JsPath \ "unknown" \ toString
     }
 

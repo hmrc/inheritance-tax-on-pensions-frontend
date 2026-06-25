@@ -21,7 +21,7 @@ import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import pages.OrganisationNamePage
 import controllers.actions._
 import forms.OrganisationNameFormProvider
-import models.{CheckMode, Mode, NormalMode}
+import models._
 import play.api.data.Form
 import views.html.OrganisationNameView
 import models.SchemeId.Srn
@@ -81,7 +81,7 @@ class OrganisationNameController @Inject() (
 
   private def nextPage(srn: Srn, mode: Mode) =
     mode match {
-      case NormalMode => routes.DidPrSubmitController.onPageLoad(srn, NormalMode)
+      case NormalMode => routes.IndividualNameController.onPageLoad(srn, NormalMode, JourneyRole.LprOrganisation)
       case CheckMode => routes.CheckYourAnswersController.onPageLoad(srn)
     }
 }

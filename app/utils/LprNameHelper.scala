@@ -24,10 +24,7 @@ object LprNameHelper {
   def fromUserAnswers(userAnswers: UserAnswers): Option[String] =
     (userAnswers.get(LprTypePage).getOrElse(LprType.Individual) match {
       case LprType.Individual => userAnswers.get(IndividualNamePage(JourneyRole.LprIndividual))
-      case _ =>
-        Some(
-          IndividualName(Some(""), "", Some(""), "")
-        ) // TODO replace this with get LPR Organisation name page value here, after or with IHTP-376
+      case LprType.Organisation => userAnswers.get(IndividualNamePage(JourneyRole.LprOrganisation))
     }).map(displayName)
 
   def withName[A](userAnswers: UserAnswers)(ifMissing: => A)(f: String => A): A =

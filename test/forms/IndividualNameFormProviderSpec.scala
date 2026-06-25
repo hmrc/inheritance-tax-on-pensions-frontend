@@ -22,6 +22,7 @@ import play.api.data.FormError
 class IndividualNameFormProviderSpec extends forms.behaviours.StringFieldBehaviours {
 
   private val form = new IndividualNameFormProvider()(JourneyRole.LprIndividual)
+  private val organisationForm = new IndividualNameFormProvider()(JourneyRole.LprOrganisation)
 
   "IndividualNameFormProvider" - {
 
@@ -116,6 +117,52 @@ class IndividualNameFormProviderSpec extends forms.behaviours.StringFieldBehavio
           secondForename = Some("William"),
           surname = "Doe"
         )
+      )
+    }
+
+    "must use organisation PR error keys when firstForename and surname are blank" in {
+
+      val result = organisationForm.bind(Map("firstForename" -> "", "surname" -> ""))
+
+      result.errors must contain(FormError("firstForename", "lprOrganisationName.error.firstForename.required"))
+      result.errors must contain(FormError("surname", "lprOrganisationName.error.surname.required"))
+    }
+
+    "must use organisation PR error keys when fields exceed the maximum length" in {
+
+      val result = organisationForm.bind(
+        Map(
+          "title" -> "Title",
+          "firstForename" -> ("A" * 36),
+          "secondForename" -> ("A" * 36),
+          "surname" -> ("A" * 36)
+        )
+      )
+
+      result.errors must contain(FormError("title", "lprOrganisationName.error.title.length", Seq(4)))
+      result.errors must contain(FormError("firstForename", "lprOrganisationName.error.firstForename.length", Seq(35)))
+      result.errors must contain(
+        FormError("secondForename", "lprOrganisationName.error.secondForename.length", Seq(35))
+      )
+      result.errors must contain(FormError("surname", "lprOrganisationName.error.surname.length", Seq(35)))
+    }
+
+    "must use organisation PR error keys when fields contain invalid characters" in {
+
+      val result = organisationForm.bind(
+        Map(
+          "title" -> "M12",
+          "firstForename" -> "John1",
+          "secondForename" -> "William1",
+          "surname" -> "Doe1"
+        )
+      )
+
+      (result.errors.map(_.message) must contain).allOf(
+        "lprOrganisationName.error.title.pattern",
+        "lprOrganisationName.error.firstForename.pattern",
+        "lprOrganisationName.error.secondForename.pattern",
+        "lprOrganisationName.error.surname.pattern"
       )
     }
   }

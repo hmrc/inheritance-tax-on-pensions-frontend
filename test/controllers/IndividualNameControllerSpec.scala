@@ -55,6 +55,10 @@ class IndividualNameControllerSpec extends SpecBase {
     JourneyRoleTestCase(
       JourneyRole.LprIndividual,
       routes.AddressLookupStartController.start(srn, NormalMode).url
+    ),
+    JourneyRoleTestCase(
+      JourneyRole.LprOrganisation,
+      routes.DidPrSubmitController.onPageLoad(srn, NormalMode).url
     )
   )
 
@@ -274,6 +278,48 @@ class IndividualNameControllerSpec extends SpecBase {
         (result.data \ "lprDetails" \ "individual" \ "addressLine2").as[String] mustEqual "FGHIJ Town"
         (result.data \ "lprDetails" \ "individual" \ "ukPostcode").as[String] mustEqual "ZZ99 1AA"
         (result.data \ "lprDetails" \ "individual" \ "country").as[String] mustEqual "GB"
+      }
+    }
+
+    "must preserve the organisation name when updating the organisation PR name" in {
+
+      val existingAnswers = UserAnswers(
+        userAnswersId,
+        srnGen.sample.value.toString,
+        "test-uuid",
+        Json.obj(
+          "lprDetails" -> Json.obj(
+            "organisation" -> Json.obj(
+              "organisationName" -> "Standard Pension",
+              "title" -> "Mr",
+              "firstForename" -> "John",
+              "secondForename" -> "William",
+              "surname" -> "Doe"
+            )
+          )
+        )
+      )
+
+      val updatedName = IndividualName(
+        title = Some("Dr"),
+        firstForename = "Jane",
+        secondForename = None,
+        surname = "Doe"
+      )
+
+      val application = applicationBuilder(userAnswers = Some(existingAnswers), usesSession = true).build()
+
+      running(application) {
+        val controller = application.injector.instanceOf[IndividualNameController]
+
+        val result =
+          controller.addIndividualName(existingAnswers, JourneyRole.LprOrganisation, updatedName).success.value
+
+        (result.data \ "lprDetails" \ "organisation" \ "organisationName").as[String] mustEqual "Standard Pension"
+        (result.data \ "lprDetails" \ "organisation" \ "title").as[String] mustEqual "Dr"
+        (result.data \ "lprDetails" \ "organisation" \ "firstForename").as[String] mustEqual "Jane"
+        (result.data \ "lprDetails" \ "organisation" \ "secondForename").asOpt[String] mustBe None
+        (result.data \ "lprDetails" \ "organisation" \ "surname").as[String] mustEqual "Doe"
       }
     }
 

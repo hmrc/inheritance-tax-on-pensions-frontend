@@ -77,8 +77,26 @@ class LprNameHelperSpec extends AnyFreeSpec with SpecBase {
       }
     }
   }
-//  TODO add test after or with IHTP-376
-//  "when organisation" - {
-//
-//  }
+  "when organisation" - {
+    "fromUserAnswers" - {
+      "must return the PR first name and surname when the organisation PR name has been answered" in {
+        val userAnswers = emptyUserAnswers
+          .set(LprTypePage, LprType.Organisation)
+          .get
+          .set(
+            IndividualNamePage(JourneyRole.LprOrganisation),
+            IndividualName(Some("Mrs"), "Sarah", Some("Jane"), "Wilson")
+          )
+          .get
+
+        fromUserAnswers(userAnswers) mustBe Some("Sarah Wilson")
+      }
+
+      "must return None when the organisation PR name has not been answered" in {
+        val userAnswers = emptyUserAnswers.set(LprTypePage, LprType.Organisation).get
+
+        fromUserAnswers(userAnswers) mustBe None
+      }
+    }
+  }
 }
