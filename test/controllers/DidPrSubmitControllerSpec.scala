@@ -17,40 +17,41 @@
 package controllers
 
 import play.api.test.FakeRequest
+import play.api.mvc.Call
 import connectors.InheritanceTaxOnPensionsConnector
-import pages.OrganisationNamePage
+import pages.DidPrSubmitPage
 import play.api.inject.bind
-import views.html.OrganisationNameView
+import views.html.DidPrSubmitView
 import base.SpecBase
-import models.{CheckMode, NormalMode}
+import forms.DidPrSubmitFormProvider
+import models.NormalMode
 import org.scalatestplus.mockito.MockitoSugar
 import org.mockito.ArgumentMatchers.any
 import play.api.test.Helpers._
 import org.mockito.Mockito.when
-import repositories.SessionMinimalDetailsRepository
-import forms.OrganisationNameFormProvider
 
 import scala.concurrent.Future
 
-class OrganisationNameControllerSpec extends SpecBase with MockitoSugar {
+class DidPrSubmitControllerSpec extends SpecBase with MockitoSugar {
 
-  private val formProvider = new OrganisationNameFormProvider()
-  private val form = formProvider()
+  def onwardRoute = Call("GET", "/foo")
 
-  lazy val organisationNameRoute: String = routes.OrganisationNameController.onPageLoad(srn, NormalMode).url
+  val formProvider = new DidPrSubmitFormProvider()
+  val form = formProvider()
 
-  "OrganisationName Controller" - {
+  lazy val didPrSubmitRoute = routes.DidPrSubmitController.onPageLoad(srn, NormalMode).url
+
+  "DidPrSubmit Controller" - {
 
     "must return OK and the correct view for a GET" in {
-
       val application = applicationBuilder(userAnswers = Some(emptyUserAnswers), usesSession = true).build()
 
       running(application) {
-        val request = FakeRequest(GET, organisationNameRoute)
+        val request = FakeRequest(GET, didPrSubmitRoute)
 
         val result = route(application, request).value
 
-        val view = application.injector.instanceOf[OrganisationNameView]
+        val view = application.injector.instanceOf[DidPrSubmitView]
 
         status(result) mustEqual OK
         contentAsString(result) mustEqual view(form, srn, NormalMode)(using request, messages(application)).toString
@@ -59,56 +60,46 @@ class OrganisationNameControllerSpec extends SpecBase with MockitoSugar {
 
     "must populate the view correctly on a GET when the question has previously been answered" in {
 
-      val userAnswers = emptyUserAnswers.set(OrganisationNamePage, "answer").success.value
+      val userAnswers = emptyUserAnswers.set(DidPrSubmitPage, true).success.value
 
       val application = applicationBuilder(userAnswers = Some(userAnswers), usesSession = true).build()
 
       running(application) {
-        val request = FakeRequest(GET, organisationNameRoute)
+        val request = FakeRequest(GET, didPrSubmitRoute)
 
-        val view = application.injector.instanceOf[OrganisationNameView]
+        val view = application.injector.instanceOf[DidPrSubmitView]
 
         val result = route(application, request).value
 
         status(result) mustEqual OK
-        contentAsString(result) mustEqual view(form.fill("answer"), srn, NormalMode)(using
+        contentAsString(result) mustEqual view(form.fill(true), srn, NormalMode)(using
           request,
           messages(application)
         ).toString
       }
     }
 
-    List(
-      (NormalMode, routes.DidPrSubmitController.onPageLoad(srn, NormalMode).url),
-      (CheckMode, routes.CheckYourAnswersController.onPageLoad(srn).url)
-    ).foreach { (modeTested, expectedRedirectLocation) =>
-      s"must redirect to the next page when valid data is submitted in $modeTested" in {
+    "must redirect to the next page when valid data is submitted" in {
 
-        val mockSessionRepository = mock[SessionMinimalDetailsRepository]
-        val mockConnector = mock[InheritanceTaxOnPensionsConnector]
+      val mockInheritanceTaxOnPensionsConnector = mock[InheritanceTaxOnPensionsConnector]
+      when(mockInheritanceTaxOnPensionsConnector.setUserAnswers(any(), any(), any(), any(), any())(using any()))
+        .thenReturn(Future.successful(Right(emptyUserAnswers)))
 
-        when(mockSessionRepository.set(any())).thenReturn(Future.successful(true))
-        when(mockConnector.setUserAnswers(any(), any(), any(), any(), any())(using any()))
-          .thenReturn(Future.successful(Right(emptyUserAnswers)))
+      val application = applicationBuilder(userAnswers = Some(emptyUserAnswers), usesSession = true)
+        .overrides(
+          bind[InheritanceTaxOnPensionsConnector].toInstance(mockInheritanceTaxOnPensionsConnector)
+        )
+        .build()
 
-        val application =
-          applicationBuilder(userAnswers = Some(emptyUserAnswers), usesSession = true)
-            .overrides(
-              bind[SessionMinimalDetailsRepository].toInstance(mockSessionRepository),
-              bind[InheritanceTaxOnPensionsConnector].toInstance(mockConnector)
-            )
-            .build()
+      running(application) {
+        val request =
+          FakeRequest(POST, didPrSubmitRoute)
+            .withFormUrlEncodedBody(("value", "true"))
 
-        running(application) {
-          val request =
-            FakeRequest(POST, routes.OrganisationNameController.onPageLoad(srn, modeTested).url)
-              .withFormUrlEncodedBody(("value", "answer"))
+        val result = route(application, request).value
 
-          val result = route(application, request).value
-
-          status(result) mustEqual SEE_OTHER
-          redirectLocation(result).value must endWith(expectedRedirectLocation)
-        }
+        status(result) mustEqual SEE_OTHER
+        redirectLocation(result).value mustEqual routes.CheckYourAnswersController.onPageLoad(srn).url
       }
     }
 
@@ -118,12 +109,12 @@ class OrganisationNameControllerSpec extends SpecBase with MockitoSugar {
 
       running(application) {
         val request =
-          FakeRequest(POST, organisationNameRoute)
+          FakeRequest(POST, didPrSubmitRoute)
             .withFormUrlEncodedBody(("value", ""))
 
         val boundForm = form.bind(Map("value" -> ""))
 
-        val view = application.injector.instanceOf[OrganisationNameView]
+        val view = application.injector.instanceOf[DidPrSubmitView]
 
         val result = route(application, request).value
 
@@ -140,7 +131,7 @@ class OrganisationNameControllerSpec extends SpecBase with MockitoSugar {
       val application = applicationBuilder(userAnswers = None, usesSession = true).build()
 
       running(application) {
-        val request = FakeRequest(GET, organisationNameRoute)
+        val request = FakeRequest(GET, didPrSubmitRoute)
 
         val result = route(application, request).value
 
@@ -155,8 +146,8 @@ class OrganisationNameControllerSpec extends SpecBase with MockitoSugar {
 
       running(application) {
         val request =
-          FakeRequest(POST, organisationNameRoute)
-            .withFormUrlEncodedBody(("value", "answer"))
+          FakeRequest(POST, didPrSubmitRoute)
+            .withFormUrlEncodedBody(("value", "true"))
 
         val result = route(application, request).value
 

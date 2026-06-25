@@ -68,7 +68,7 @@ class AddressLookupContinueController @Inject() (
 
   private def nextPage(srn: Srn, mode: Mode) =
     mode match {
-      case NormalMode => routes.CheckYourAnswersController.onPageLoad(srn)
+      case NormalMode => routes.DidPrSubmitController.onPageLoad(srn, NormalMode)
       case CheckMode => routes.CheckYourAnswersController.onPageLoad(srn)
     }
 

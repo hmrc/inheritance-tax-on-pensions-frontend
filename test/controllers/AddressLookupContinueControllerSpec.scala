@@ -22,7 +22,7 @@ import play.api.inject.bind
 import models.addresslookup.{AlfAddress, AlfAddressData, AlfCountry}
 import base.SpecBase
 import play.api.libs.json.{JsObject, Json}
-import models.{LprAddress, NormalMode, UserAnswers}
+import models._
 import org.mockito.ArgumentCaptor
 import org.mockito.ArgumentMatchers.any
 import play.api.test.Helpers._
@@ -46,43 +46,49 @@ class AddressLookupContinueControllerSpec extends SpecBase {
 
   "AddressLookupContinueController" - {
 
-    "must save the selected address and redirect to the next page when ALF returns a valid address" in {
+    List(
+      (NormalMode, routes.DidPrSubmitController.onPageLoad(srn, NormalMode).url),
+      (CheckMode, routes.CheckYourAnswersController.onPageLoad(srn).url)
+    ).foreach { (modeTested, expectedRedirectLocation) =>
+      s"must save the selected address and redirect to the next page when ALF returns a valid address in $modeTested" in {
 
-      val mockAddressLookupFrontendService = mock[AddressLookupFrontendService]
-      val mockUserAnswersService = mock[UserAnswersService]
+        val mockAddressLookupFrontendService = mock[AddressLookupFrontendService]
+        val mockUserAnswersService = mock[UserAnswersService]
 
-      when(mockAddressLookupFrontendService.getAddress(any())(using any()))
-        .thenReturn(Future.successful(validAddressData))
-      when(mockUserAnswersService.set(any())(using any(), any()))
-        .thenReturn(Future.successful(Right(emptyUserAnswers)))
+        when(mockAddressLookupFrontendService.getAddress(any())(using any()))
+          .thenReturn(Future.successful(validAddressData))
+        when(mockUserAnswersService.set(any())(using any(), any()))
+          .thenReturn(Future.successful(Right(emptyUserAnswers)))
 
-      val application = applicationBuilder(userAnswers = Some(emptyUserAnswers), usesSession = true)
-        .overrides(
-          bind[AddressLookupFrontendService].toInstance(mockAddressLookupFrontendService),
-          bind[UserAnswersService].toInstance(mockUserAnswersService)
-        )
-        .build()
-
-      running(application) {
-        val request = FakeRequest(GET, routes.AddressLookupContinueController.continue(srn, NormalMode, addressId).url)
-
-        val result = route(application, request).value
-
-        status(result) mustEqual SEE_OTHER
-        redirectLocation(result).value mustEqual routes.CheckYourAnswersController.onPageLoad(srn).url
-
-        val userAnswersCaptor: ArgumentCaptor[UserAnswers] = ArgumentCaptor.forClass(classOf[UserAnswers])
-        verify(mockUserAnswersService).set(userAnswersCaptor.capture())(using any(), any())
-
-        (userAnswersCaptor.getValue.data \ "lprDetails" \ "individual").as[LprAddress] mustBe
-          LprAddress(
-            addressLine1 = "33 Fake Street",
-            addressLine2 = Some("Fake Area"),
-            addressLine3 = None,
-            addressLine4 = Some("Fakeville"),
-            ukPostcode = Some("ZZ1 1ZZ"),
-            country = "GB"
+        val application = applicationBuilder(userAnswers = Some(emptyUserAnswers), usesSession = true)
+          .overrides(
+            bind[AddressLookupFrontendService].toInstance(mockAddressLookupFrontendService),
+            bind[UserAnswersService].toInstance(mockUserAnswersService)
           )
+          .build()
+
+        running(application) {
+          val request =
+            FakeRequest(GET, routes.AddressLookupContinueController.continue(srn, modeTested, addressId).url)
+
+          val result = route(application, request).value
+
+          status(result) mustEqual SEE_OTHER
+          redirectLocation(result).value must endWith(expectedRedirectLocation)
+
+          val userAnswersCaptor: ArgumentCaptor[UserAnswers] = ArgumentCaptor.forClass(classOf[UserAnswers])
+          verify(mockUserAnswersService).set(userAnswersCaptor.capture())(using any(), any())
+
+          (userAnswersCaptor.getValue.data \ "lprDetails" \ "individual").as[LprAddress] mustBe
+            LprAddress(
+              addressLine1 = "33 Fake Street",
+              addressLine2 = Some("Fake Area"),
+              addressLine3 = None,
+              addressLine4 = Some("Fakeville"),
+              ukPostcode = Some("ZZ1 1ZZ"),
+              country = "GB"
+            )
+        }
       }
     }
 
@@ -137,7 +143,7 @@ class AddressLookupContinueControllerSpec extends SpecBase {
         val result = route(application, request).value
 
         status(result) mustEqual SEE_OTHER
-        redirectLocation(result).value mustEqual routes.CheckYourAnswersController.onPageLoad(srn).url
+        redirectLocation(result).value mustEqual routes.DidPrSubmitController.onPageLoad(srn, NormalMode).url
 
         val userAnswersCaptor: ArgumentCaptor[UserAnswers] = ArgumentCaptor.forClass(classOf[UserAnswers])
         verify(mockUserAnswersService).set(userAnswersCaptor.capture())(using any(), any())

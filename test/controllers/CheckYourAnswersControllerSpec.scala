@@ -63,6 +63,9 @@ class CheckYourAnswersControllerSpec extends SpecBase {
           )
         )
         .get
+        .set(DidPrSubmitPage, true)
+        .get
+
       val application = applicationBuilder(userAnswers = Some(userAnswers)).build()
 
       running(application) {
@@ -79,7 +82,8 @@ class CheckYourAnswersControllerSpec extends SpecBase {
             NinoOrReasonSummary.row(srn, userAnswers)(using messages(application)).get,
             BirthDeathDatesSummary.row(srn, userAnswers)(using messages(application)).get,
             LprTypeSummary.row(srn, userAnswers)(using messages(application)).get,
-            LprIndividualNameSummary.row(srn, userAnswers)(using messages(application)).get
+            LprIndividualNameSummary.row(srn, userAnswers)(using messages(application)).get,
+            DidPrSubmitSummary.row(srn, userAnswers)(using messages(application)).get
           )
         )
 
@@ -119,6 +123,9 @@ class CheckYourAnswersControllerSpec extends SpecBase {
           )
         )
         .get
+        .set(DidPrSubmitPage, true)
+        .get
+
       val application = applicationBuilder(userAnswers = Some(userAnswers)).build()
 
       running(application) {
@@ -135,7 +142,8 @@ class CheckYourAnswersControllerSpec extends SpecBase {
             NinoOrReasonSummary.row(srn, userAnswers)(using messages(application)).get,
             BirthDeathDatesSummary.row(srn, userAnswers)(using messages(application)).get,
             LprTypeSummary.row(srn, userAnswers)(using messages(application)).get,
-            LprIndividualNameSummary.row(srn, userAnswers)(using messages(application)).get
+            LprIndividualNameSummary.row(srn, userAnswers)(using messages(application)).get,
+            DidPrSubmitSummary.row(srn, userAnswers)(using messages(application)).get
           )
         )
 

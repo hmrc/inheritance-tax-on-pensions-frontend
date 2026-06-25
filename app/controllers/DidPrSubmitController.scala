@@ -18,12 +18,11 @@ package controllers
 
 import services.UserAnswersService
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
-import pages.OrganisationNamePage
+import pages.DidPrSubmitPage
 import controllers.actions._
-import forms.OrganisationNameFormProvider
-import models.{CheckMode, Mode, NormalMode}
-import play.api.data.Form
-import views.html.OrganisationNameView
+import forms.DidPrSubmitFormProvider
+import models.Mode
+import views.html.DidPrSubmitView
 import models.SchemeId.Srn
 import play.api.i18n.{I18nSupport, MessagesApi}
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
@@ -32,28 +31,29 @@ import scala.concurrent.{ExecutionContext, Future}
 
 import javax.inject.Inject
 
-class OrganisationNameController @Inject() (
+class DidPrSubmitController @Inject() (
   override val messagesApi: MessagesApi,
-  identify: IdentifierAction,
   allowAccess: AllowAccessActionWithSessionCacheProvider,
+  identify: IdentifierAction,
   getData: DataRetrievalAction,
   requireData: DataRequiredAction,
-  formProvider: OrganisationNameFormProvider,
+  formProvider: DidPrSubmitFormProvider,
   val controllerComponents: MessagesControllerComponents,
   userAnswersService: UserAnswersService,
-  view: OrganisationNameView
+  view: DidPrSubmitView
 )(implicit ec: ExecutionContext)
     extends FrontendBaseController
     with I18nSupport {
 
-  val form: Form[String] = formProvider()
+  val form = formProvider()
 
   def onPageLoad(srn: Srn, mode: Mode): Action[AnyContent] =
     identify
       .andThen(allowAccess(srn))
       .andThen(getData)
       .andThen(requireData) { implicit request =>
-        val preparedForm = request.userAnswers.get(OrganisationNamePage) match {
+
+        val preparedForm = request.userAnswers.get(DidPrSubmitPage) match {
           case None => form
           case Some(value) => form.fill(value)
         }
@@ -73,15 +73,9 @@ class OrganisationNameController @Inject() (
             formWithErrors => Future.successful(BadRequest(view(formWithErrors, srn, mode))),
             value =>
               for {
-                updatedAnswers <- Future.fromTry(request.userAnswers.set(OrganisationNamePage, value))
+                updatedAnswers <- Future.fromTry(request.userAnswers.set(DidPrSubmitPage, value))
                 _ <- userAnswersService.set(updatedAnswers)(using hc, request.request)
-              } yield Redirect(nextPage(srn, mode))
+              } yield Redirect(routes.CheckYourAnswersController.onPageLoad(srn))
           )
       }
-
-  private def nextPage(srn: Srn, mode: Mode) =
-    mode match {
-      case NormalMode => routes.DidPrSubmitController.onPageLoad(srn, NormalMode)
-      case CheckMode => routes.CheckYourAnswersController.onPageLoad(srn)
-    }
 }
