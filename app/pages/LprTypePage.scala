@@ -30,7 +30,7 @@ case object LprTypePage extends QuestionPage[LprType] {
   override def cleanup(value: Option[LprType], userAnswers: UserAnswers): Try[UserAnswers] =
     value match {
       case Some(LprType.Organisation) => userAnswers.remove(IndividualNamePage(JourneyRole.LprIndividual))
-      case Some(LprType.Individual) => userAnswers.remove(OrganisationNamePage)
+      case Some(LprType.Individual) => userAnswers.remove(IndividualNamePage(JourneyRole.LprOrganisation))
       case _ => super.cleanup(value, userAnswers)
     }
 }

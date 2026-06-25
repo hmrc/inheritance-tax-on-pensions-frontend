@@ -184,6 +184,21 @@ lprIndividualName.error.surname.length = Last name must be 35 characters or less
 lprIndividualName.error.surname.pattern = Enter a valid last name
 lprIndividualName.checkYourAnswersLabel.hidden = name of legal personal representative
 
+lprOrganisationName.title = Enter the full name of the PR at {0}
+lprOrganisationName.heading = Enter the full name of the PR at {0}
+lprOrganisationName.checkYourAnswersLabel = Full name of PR at the organisation
+lprOrganisationName.error.title.length = Title must be 4 characters or less
+lprOrganisationName.error.title.pattern = Enter a valid title
+lprOrganisationName.error.firstForename.required = Enter the First Name
+lprOrganisationName.error.firstForename.length = First name must be 35 characters or less
+lprOrganisationName.error.firstForename.pattern = Enter a valid first name
+lprOrganisationName.error.secondForename.length = Middle names must be 35 characters or less
+lprOrganisationName.error.secondForename.pattern = Enter a valid middle name
+lprOrganisationName.error.surname.required = Enter the last name
+lprOrganisationName.error.surname.length = Last name must be 35 characters or less
+lprOrganisationName.error.surname.pattern = Enter a valid last name
+lprOrganisationName.checkYourAnswersLabel.hidden = full name of PR at the organisation
+
 organisationName.title = Enter the name of the organisation
 organisationName.heading = Enter the name of the organisation
 organisationName.checkYourAnswersLabel = Organisation name

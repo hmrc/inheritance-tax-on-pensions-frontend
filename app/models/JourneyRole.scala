@@ -33,11 +33,15 @@ object JourneyRole extends Enumerable.Implicits {
     override val key: String = "lprIndividualName"
   }
 
+  case object LprOrganisation extends WithName("lpr-organisation") with JourneyRole {
+    override val key: String = "lprOrganisationName"
+  }
+
   case object Unknown extends WithName("unknown") with JourneyRole {
     override val key: String = "unknown"
   }
 
-  val values: Seq[JourneyRole] = Seq(Deceased, LprIndividual)
+  val values: Seq[JourneyRole] = Seq(Deceased, LprIndividual, LprOrganisation)
 
   def withNameWithDefault(name: String): JourneyRole =
     values.find(_.toString.equalsIgnoreCase(name)).getOrElse(Unknown)

@@ -18,7 +18,7 @@ package controllers
 
 import services.UserAnswersService
 import play.api.mvc._
-import pages.IndividualNamePage
+import pages.{IndividualNamePage, OrganisationNamePage}
 import controllers.actions._
 import play.api.libs.json._
 import forms.IndividualNameFormProvider
@@ -63,7 +63,7 @@ class IndividualNameController @Inject() (
               case Some(individualName) => form.fill(individualName)
             }
 
-            Ok(view(preparedForm, srn, mode, journeyRole))
+            Ok(view(preparedForm, srn, mode, journeyRole, organisationName(request.userAnswers, journeyRole)))
         }
       }
 
@@ -81,7 +81,12 @@ class IndividualNameController @Inject() (
             formProvider(journeyRole)
               .bindFromRequest()
               .fold(
-                formWithErrors => Future.successful(BadRequest(view(formWithErrors, srn, mode, journeyRole))),
+                formWithErrors =>
+                  Future.successful(
+                    BadRequest(
+                      view(formWithErrors, srn, mode, journeyRole, organisationName(request.userAnswers, journeyRole))
+                    )
+                  ),
                 individualName =>
                   for {
                     updatedAnswers <- Future
@@ -99,25 +104,37 @@ class IndividualNameController @Inject() (
   ): Try[UserAnswers] =
     journeyRole match {
       case JourneyRole.LprIndividual =>
-        Success(
-          userAnswers.copy(
-            data = userAnswers.data.deepMerge(
-              Json.obj(
-                "lprDetails" -> Json.obj(
-                  "individual" -> Json.obj(
-                    "title" -> optionalString(individualName.title),
-                    "firstForename" -> individualName.firstForename,
-                    "secondForename" -> optionalString(individualName.secondForename),
-                    "surname" -> individualName.surname
-                  )
-                )
+        addLprName(userAnswers, "individual", individualName)
+      case JourneyRole.LprOrganisation =>
+        addLprName(userAnswers, "organisation", individualName)
+      case _ =>
+        userAnswers.set(IndividualNamePage(journeyRole), individualName)
+    }
+
+  private def addLprName(
+    userAnswers: UserAnswers,
+    lprTypeKey: String,
+    individualName: IndividualName
+  ): Try[UserAnswers] =
+    Success(
+      userAnswers.copy(
+        data = userAnswers.data.deepMerge(
+          Json.obj(
+            "lprDetails" -> Json.obj(
+              lprTypeKey -> Json.obj(
+                "title" -> optionalString(individualName.title),
+                "firstForename" -> individualName.firstForename,
+                "secondForename" -> optionalString(individualName.secondForename),
+                "surname" -> individualName.surname
               )
             )
           )
         )
-      case _ =>
-        userAnswers.set(IndividualNamePage(journeyRole), individualName)
-    }
+      )
+    )
+
+  private def organisationName(userAnswers: UserAnswers, journeyRole: JourneyRole): Option[String] =
+    Option.when(journeyRole == JourneyRole.LprOrganisation)(userAnswers.get(OrganisationNamePage)).flatten
 
   private def optionalString(value: Option[String]): JsValue =
     value.filter(_.nonEmpty).map(JsString.apply).getOrElse(JsNull)
@@ -129,6 +146,8 @@ class IndividualNameController @Inject() (
         routes.NinoOrReasonController.onPageLoad(srn, NormalMode)
       case NormalMode if journeyRole == JourneyRole.LprIndividual =>
         routes.AddressLookupStartController.start(srn, NormalMode)
+      case NormalMode if journeyRole == JourneyRole.LprOrganisation =>
+        routes.CheckYourAnswersController.onPageLoad(srn)
       case _ => routes.JourneyRecoveryController.onPageLoad()
     }
 }

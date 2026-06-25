@@ -56,6 +56,11 @@ POST        /:srn/enter-organisation-name                controllers.Organisatio
 GET         /:srn/change-organisation-name               controllers.OrganisationNameController.onPageLoad(srn: Srn, mode: Mode = CheckMode)
 POST        /:srn/change-organisation-name               controllers.OrganisationNameController.onSubmit(srn: Srn, mode: Mode = CheckMode)
 
+GET         /:srn/enter-name-pr-organisation             controllers.IndividualNameController.onPageLoad(srn: Srn, mode: Mode = NormalMode, journeyRole: JourneyRole = JourneyRole.LprOrganisation)
+POST        /:srn/enter-name-pr-organisation             controllers.IndividualNameController.onSubmit(srn: Srn, mode: Mode = NormalMode, journeyRole: JourneyRole = JourneyRole.LprOrganisation)
+GET         /:srn/change-name-pr-organisation            controllers.IndividualNameController.onPageLoad(srn: Srn, mode: Mode = CheckMode, journeyRole: JourneyRole = JourneyRole.LprOrganisation)
+POST        /:srn/change-name-pr-organisation            controllers.IndividualNameController.onSubmit(srn: Srn, mode: Mode = CheckMode, journeyRole: JourneyRole = JourneyRole.LprOrganisation)
+
 GET         /:srn/enter-lpr-address                      controllers.AddressLookupStartController.start(srn: Srn, mode: Mode = NormalMode)
 GET         /:srn/change-lpr-address                     controllers.AddressLookupStartController.start(srn: Srn, mode: Mode = CheckMode)
 GET         /:srn/address-lookup-continue/normalmode     controllers.AddressLookupContinueController.continue(srn: Srn, mode: Mode = NormalMode, id: String ?= "")

@@ -22,6 +22,7 @@ import pages._
 import views.html.CheckYourAnswersView
 import base.SpecBase
 import viewmodels.govuk.all.SummaryListViewModel
+import play.api.libs.json.Json
 import forms.NinoOrReasonFormData
 import models._
 import viewmodels.CheckAnswers._
@@ -136,6 +137,47 @@ class CheckYourAnswersControllerSpec extends SpecBase {
             BirthDeathDatesSummary.row(srn, userAnswers)(using messages(application)).get,
             LprTypeSummary.row(srn, userAnswers)(using messages(application)).get,
             LprIndividualNameSummary.row(srn, userAnswers)(using messages(application)).get
+          )
+        )
+
+        status(result) mustEqual OK
+        contentAsString(result) mustEqual view(srn, summaryList)(using request, messages(application)).toString
+      }
+    }
+
+    "must return OK and the correct view for a GET with organisation PR details" in {
+      val userAnswers = emptyUserAnswers
+        .copy(
+          data = Json.obj(
+            "lprDetails" -> Json.obj(
+              "organisation" -> Json.obj(
+                "organisationName" -> "Test Organisation",
+                "title" -> "Ms",
+                "firstForename" -> "Jane",
+                "secondForename" -> "Ann",
+                "surname" -> "Doe"
+              )
+            )
+          )
+        )
+        .set(LprTypePage, LprType.Organisation)
+        .success
+        .value
+
+      val application = applicationBuilder(userAnswers = Some(userAnswers)).build()
+
+      running(application) {
+        val request = FakeRequest(GET, routes.CheckYourAnswersController.onPageLoad(srn).url)
+
+        val result = route(application, request).value
+
+        val view = application.injector.instanceOf[CheckYourAnswersView]
+
+        val summaryList = SummaryListViewModel(
+          rows = Seq(
+            LprTypeSummary.row(srn, userAnswers)(using messages(application)).get,
+            LprOrganisationNameSummary.row(srn, userAnswers)(using messages(application)).get,
+            LprOrganisationPrNameSummary.row(srn, userAnswers)(using messages(application)).get
           )
         )
 

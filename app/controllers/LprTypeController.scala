@@ -94,6 +94,8 @@ class LprTypeController @Inject() (
             routes.IndividualNameController.onPageLoad(srn, NormalMode, JourneyRole.LprIndividual)
           case LprType.Organisation if userAnswers.get(OrganisationNamePage).isEmpty =>
             routes.OrganisationNameController.onPageLoad(srn, NormalMode)
+          case LprType.Organisation if userAnswers.get(IndividualNamePage(JourneyRole.LprOrganisation)).isEmpty =>
+            routes.IndividualNameController.onPageLoad(srn, NormalMode, JourneyRole.LprOrganisation)
           case _ =>
             routes.CheckYourAnswersController.onPageLoad(srn)
         }
