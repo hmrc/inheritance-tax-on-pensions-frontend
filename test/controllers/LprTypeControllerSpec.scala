@@ -22,6 +22,7 @@ import pages.{IndividualNamePage, LprTypePage, OrganisationNamePage}
 import play.api.inject.bind
 import views.html.LprTypeView
 import base.SpecBase
+import play.api.libs.json.Json
 import models._
 import play.api.data.Form
 import org.mockito.ArgumentCaptor
@@ -167,7 +168,7 @@ class LprTypeControllerSpec extends SpecBase {
       }
     }
 
-    "must redirect to Check Your Answers when valid Organisation data is submitted in CheckMode" in {
+    "must redirect to the organisation PR name page when Organisation is submitted in CheckMode and PR name details are missing" in {
 
       val mockInheritanceTaxOnPensionsConnector = mock[InheritanceTaxOnPensionsConnector]
       when(mockInheritanceTaxOnPensionsConnector.setUserAnswers(any(), any(), any(), any(), any())(using any()))
@@ -179,6 +180,47 @@ class LprTypeControllerSpec extends SpecBase {
         .value
 
       val application = applicationBuilder(userAnswers = Some(userAnswersWithOrgName), usesSession = true)
+        .overrides(
+          bind[InheritanceTaxOnPensionsConnector].toInstance(mockInheritanceTaxOnPensionsConnector)
+        )
+        .build()
+
+      running(application) {
+        val request =
+          FakeRequest(POST, routes.LprTypeController.onSubmit(srn, CheckMode).url)
+            .withFormUrlEncodedBody(("value", LprType.Organisation.toString))
+
+        val result = route(application, request).value
+
+        status(result) mustEqual SEE_OTHER
+        redirectLocation(result).value mustEqual routes.IndividualNameController
+          .onPageLoad(srn, NormalMode, JourneyRole.LprOrganisation)
+          .url
+      }
+    }
+
+    "must redirect to Check Your Answers when valid Organisation data is submitted in CheckMode and PR name details are present" in {
+
+      val mockInheritanceTaxOnPensionsConnector = mock[InheritanceTaxOnPensionsConnector]
+      when(mockInheritanceTaxOnPensionsConnector.setUserAnswers(any(), any(), any(), any(), any())(using any()))
+        .thenReturn(Future.successful(Right(emptyUserAnswers)))
+
+      val userAnswersWithOrgDetails = emptyUserAnswers
+        .copy(
+          data = Json.obj(
+            "lprDetails" -> Json.obj(
+              "organisation" -> Json.obj(
+                "organisationName" -> "Test Organisation",
+                "title" -> "Mr",
+                "firstForename" -> "John",
+                "secondForename" -> "William",
+                "surname" -> "Doe"
+              )
+            )
+          )
+        )
+
+      val application = applicationBuilder(userAnswers = Some(userAnswersWithOrgDetails), usesSession = true)
         .overrides(
           bind[InheritanceTaxOnPensionsConnector].toInstance(mockInheritanceTaxOnPensionsConnector)
         )
@@ -222,7 +264,7 @@ class LprTypeControllerSpec extends SpecBase {
       }
     }
 
-    "must clear OrganisationNamePage when switching from Organisation to Individual" in {
+    "must clear Organisation details when switching from Organisation to Individual" in {
       val mockSessionRepository = mock[SessionMinimalDetailsRepository]
       val mockConnector = mock[InheritanceTaxOnPensionsConnector]
 
@@ -231,9 +273,19 @@ class LprTypeControllerSpec extends SpecBase {
         .thenReturn(Future.successful(Right(emptyUserAnswers)))
 
       val userAnswersWithOrgName = emptyUserAnswers
-        .set(OrganisationNamePage, "Test Organisation")
-        .success
-        .value
+        .copy(
+          data = Json.obj(
+            "lprDetails" -> Json.obj(
+              "organisation" -> Json.obj(
+                "organisationName" -> "Test Organisation",
+                "title" -> "Mr",
+                "firstForename" -> "John",
+                "secondForename" -> "William",
+                "surname" -> "Doe"
+              )
+            )
+          )
+        )
         .set(LprTypePage, LprType.Organisation)
         .success
         .value
@@ -258,7 +310,8 @@ class LprTypeControllerSpec extends SpecBase {
 
         verify(mockConnector).setUserAnswers(
           argThat { userAnswers =>
-            userAnswers.get(OrganisationNamePage).isEmpty
+            userAnswers.get(OrganisationNamePage).isEmpty &&
+            userAnswers.get(IndividualNamePage(JourneyRole.LprOrganisation)).isEmpty
           },
           any(),
           any(),

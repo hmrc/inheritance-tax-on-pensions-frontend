@@ -35,6 +35,11 @@ class IndividualNamePageSpec extends AnyFreeSpec with Matchers {
       IndividualNamePage(JourneyRole.LprIndividual).path mustEqual JsPath \ "lprDetails" \ "individual"
     }
 
+    "must use the LPR organisation path for the LPR organisation journey role" in {
+
+      IndividualNamePage(JourneyRole.LprOrganisation).path mustEqual JsPath \ "lprDetails" \ "organisation"
+    }
+
     "must use the unknown path for the unknown journey role" in {
 
       IndividualNamePage(JourneyRole.Unknown).path mustEqual JsPath \ "unknown" \ "unknown"

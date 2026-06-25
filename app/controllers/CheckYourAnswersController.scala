@@ -54,6 +54,7 @@ class CheckYourAnswersController @Inject() (
           LprTypeSummary.row(srn, userAnswers),
           LprIndividualNameSummary.row(srn, userAnswers),
           LprOrganisationNameSummary.row(srn, userAnswers),
+          LprOrganisationPrNameSummary.row(srn, userAnswers),
           LprIndividualAddressSummary.row(srn, userAnswers, countryService.nameForCode)
         ).flatten
       )

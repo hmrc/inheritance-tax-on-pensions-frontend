@@ -22,7 +22,7 @@ import pages.OrganisationNamePage
 import play.api.inject.bind
 import views.html.OrganisationNameView
 import base.SpecBase
-import models.NormalMode
+import models.{CheckMode, JourneyRole, NormalMode}
 import org.scalatestplus.mockito.MockitoSugar
 import org.mockito.ArgumentMatchers.any
 import play.api.test.Helpers._
@@ -98,6 +98,37 @@ class OrganisationNameControllerSpec extends SpecBase with MockitoSugar {
       running(application) {
         val request =
           FakeRequest(POST, organisationNameRoute)
+            .withFormUrlEncodedBody(("value", "answer"))
+
+        val result = route(application, request).value
+
+        status(result) mustEqual SEE_OTHER
+        redirectLocation(result).value mustEqual routes.IndividualNameController
+          .onPageLoad(srn, NormalMode, JourneyRole.LprOrganisation)
+          .url
+      }
+    }
+
+    "must redirect to Check Your Answers when valid data is submitted in CheckMode" in {
+
+      val mockSessionRepository = mock[SessionMinimalDetailsRepository]
+      val mockConnector = mock[InheritanceTaxOnPensionsConnector]
+
+      when(mockSessionRepository.set(any())).thenReturn(Future.successful(true))
+      when(mockConnector.setUserAnswers(any(), any(), any(), any(), any())(using any()))
+        .thenReturn(Future.successful(Right(emptyUserAnswers)))
+
+      val application =
+        applicationBuilder(userAnswers = Some(emptyUserAnswers), usesSession = true)
+          .overrides(
+            bind[SessionMinimalDetailsRepository].toInstance(mockSessionRepository),
+            bind[InheritanceTaxOnPensionsConnector].toInstance(mockConnector)
+          )
+          .build()
+
+      running(application) {
+        val request =
+          FakeRequest(POST, routes.OrganisationNameController.onSubmit(srn, CheckMode).url)
             .withFormUrlEncodedBody(("value", "answer"))
 
         val result = route(application, request).value
