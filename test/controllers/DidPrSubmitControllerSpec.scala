@@ -17,14 +17,13 @@
 package controllers
 
 import play.api.test.FakeRequest
-import play.api.mvc.Call
 import connectors.InheritanceTaxOnPensionsConnector
-import pages.DidPrSubmitPage
+import pages.{DidPrSubmitPage, IndividualNamePage, LprTypePage}
 import play.api.inject.bind
 import views.html.DidPrSubmitView
 import base.SpecBase
 import forms.DidPrSubmitFormProvider
-import models.NormalMode
+import models._
 import org.scalatestplus.mockito.MockitoSugar
 import org.mockito.ArgumentMatchers.any
 import play.api.test.Helpers._
@@ -34,17 +33,20 @@ import scala.concurrent.Future
 
 class DidPrSubmitControllerSpec extends SpecBase with MockitoSugar {
 
-  def onwardRoute = Call("GET", "/foo")
+  private val formProvider = new DidPrSubmitFormProvider()
+  private val form = formProvider()
 
-  val formProvider = new DidPrSubmitFormProvider()
-  val form = formProvider()
-
-  lazy val didPrSubmitRoute = routes.DidPrSubmitController.onPageLoad(srn, NormalMode).url
+  private lazy val didPrSubmitRoute: String = routes.DidPrSubmitController.onPageLoad(srn, NormalMode).url
+  val userAnswersWithLprName: UserAnswers = emptyUserAnswers
+    .set(LprTypePage, LprType.Individual)
+    .get
+    .set(IndividualNamePage(JourneyRole.LprIndividual), individualName)
+    .get
 
   "DidPrSubmit Controller" - {
 
     "must return OK and the correct view for a GET" in {
-      val application = applicationBuilder(userAnswers = Some(emptyUserAnswers), usesSession = true).build()
+      val application = applicationBuilder(userAnswers = Some(userAnswersWithLprName), usesSession = true).build()
 
       running(application) {
         val request = FakeRequest(GET, didPrSubmitRoute)
@@ -54,13 +56,16 @@ class DidPrSubmitControllerSpec extends SpecBase with MockitoSugar {
         val view = application.injector.instanceOf[DidPrSubmitView]
 
         status(result) mustEqual OK
-        contentAsString(result) mustEqual view(form, srn, NormalMode)(using request, messages(application)).toString
+        contentAsString(result) mustEqual view(form, srn, NormalMode, individualNameFormatted)(using
+          request,
+          messages(application)
+        ).toString
       }
     }
 
     "must populate the view correctly on a GET when the question has previously been answered" in {
 
-      val userAnswers = emptyUserAnswers.set(DidPrSubmitPage, true).success.value
+      val userAnswers = userAnswersWithLprName.set(DidPrSubmitPage, true).success.value
 
       val application = applicationBuilder(userAnswers = Some(userAnswers), usesSession = true).build()
 
@@ -72,7 +77,7 @@ class DidPrSubmitControllerSpec extends SpecBase with MockitoSugar {
         val result = route(application, request).value
 
         status(result) mustEqual OK
-        contentAsString(result) mustEqual view(form.fill(true), srn, NormalMode)(using
+        contentAsString(result) mustEqual view(form.fill(true), srn, NormalMode, individualNameFormatted)(using
           request,
           messages(application)
         ).toString
@@ -83,9 +88,9 @@ class DidPrSubmitControllerSpec extends SpecBase with MockitoSugar {
 
       val mockInheritanceTaxOnPensionsConnector = mock[InheritanceTaxOnPensionsConnector]
       when(mockInheritanceTaxOnPensionsConnector.setUserAnswers(any(), any(), any(), any(), any())(using any()))
-        .thenReturn(Future.successful(Right(emptyUserAnswers)))
+        .thenReturn(Future.successful(Right(userAnswersWithLprName)))
 
-      val application = applicationBuilder(userAnswers = Some(emptyUserAnswers), usesSession = true)
+      val application = applicationBuilder(userAnswers = Some(userAnswersWithLprName), usesSession = true)
         .overrides(
           bind[InheritanceTaxOnPensionsConnector].toInstance(mockInheritanceTaxOnPensionsConnector)
         )
@@ -105,7 +110,7 @@ class DidPrSubmitControllerSpec extends SpecBase with MockitoSugar {
 
     "must return a Bad Request and errors when invalid data is submitted" in {
 
-      val application = applicationBuilder(userAnswers = Some(emptyUserAnswers), usesSession = true).build()
+      val application = applicationBuilder(userAnswers = Some(userAnswersWithLprName), usesSession = true).build()
 
       running(application) {
         val request =
@@ -119,7 +124,7 @@ class DidPrSubmitControllerSpec extends SpecBase with MockitoSugar {
         val result = route(application, request).value
 
         status(result) mustEqual BAD_REQUEST
-        contentAsString(result) mustEqual view(boundForm, srn, NormalMode)(using
+        contentAsString(result) mustEqual view(boundForm, srn, NormalMode, individualNameFormatted)(using
           request,
           messages(application)
         ).toString
@@ -155,5 +160,36 @@ class DidPrSubmitControllerSpec extends SpecBase with MockitoSugar {
         redirectLocation(result).value mustEqual routes.JourneyRecoveryController.onPageLoad().url
       }
     }
+
+    "must redirect to Journey Recovery for a GET if name is missing" in {
+
+      val application = applicationBuilder(userAnswers = Some(emptyUserAnswers), usesSession = true).build()
+
+      running(application) {
+        val request = FakeRequest(GET, didPrSubmitRoute)
+
+        val result = route(application, request).value
+
+        status(result) mustEqual SEE_OTHER
+        redirectLocation(result).value mustEqual routes.JourneyRecoveryController.onPageLoad().url
+      }
+    }
+
+    "must redirect to Journey Recovery for a POST if name is missing" in {
+
+      val application = applicationBuilder(userAnswers = Some(emptyUserAnswers), usesSession = true).build()
+
+      running(application) {
+        val request =
+          FakeRequest(POST, didPrSubmitRoute)
+            .withFormUrlEncodedBody(("value", "true"))
+
+        val result = route(application, request).value
+
+        status(result) mustEqual SEE_OTHER
+        redirectLocation(result).value mustEqual routes.JourneyRecoveryController.onPageLoad().url
+      }
+    }
   }
+
 }

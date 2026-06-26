@@ -25,7 +25,7 @@
     govukButton: GovukButton
 )
 
-@(form: Form[?], srn: Srn, mode: Mode)(implicit request: Request[?], messages: Messages)
+@(form: Form[?], srn: Srn, mode: Mode, lprName: String)(implicit request: Request[?], messages: Messages)
 
 @layout(pageTitle = title(form, messages("didPrSubmit.title"))) {
 
@@ -38,12 +38,12 @@
         @govukRadios(
             RadiosViewModel.yesNo(
                 field = form("value"),
-                legend = LegendViewModel(messages("didPrSubmit.heading")).asPageHeading(LegendSize.Large)
+                legend = LegendViewModel(messages("didPrSubmit.heading", lprName)).asPageHeading(LegendSize.Large)
             )
         )
 
         @govukButton(
-            ButtonViewModel(messages("site.continue"))
+            ButtonViewModel(messages("site.saveAndContinue"))
         )
     }
 }

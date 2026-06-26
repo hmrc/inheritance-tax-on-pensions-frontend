@@ -71,7 +71,7 @@ POST        /:srn/pspDeclaration                         controllers.PspDeclarat
 
 GET         /:srn/ihtp-report-submitted                  controllers.ConfirmationController.onPageLoad(srn: Srn)
 
-GET         /:srn/lpr-submit-payment-notice              controllers.DidPrSubmitController.onPageLoad(srn: Srn, mode: Mode = NormalMode)
-POST        /:srn/lpr-submit-payment-notice              controllers.DidPrSubmitController.onSubmit(srn: Srn, mode: Mode = NormalMode)
-GET         /:srn/change-lpr-submit-payment-notice       controllers.DidPrSubmitController.onPageLoad(srn: Srn, mode: Mode = CheckMode)
-POST        /:srn/change-lpr-submit-payment-notice       controllers.DidPrSubmitController.onSubmit(srn: Srn, mode: Mode = CheckMode)
+GET         /:srn/pr-submit-payment-notice               controllers.DidPrSubmitController.onPageLoad(srn: Srn, mode: Mode = NormalMode)
+POST        /:srn/pr-submit-payment-notice               controllers.DidPrSubmitController.onSubmit(srn: Srn, mode: Mode = NormalMode)
+GET         /:srn/change-pr-submit-payment-notice        controllers.DidPrSubmitController.onPageLoad(srn: Srn, mode: Mode = CheckMode)
+POST        /:srn/change-pr-submit-payment-notice        controllers.DidPrSubmitController.onSubmit(srn: Srn, mode: Mode = CheckMode)

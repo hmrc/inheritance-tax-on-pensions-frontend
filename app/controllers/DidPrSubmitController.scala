@@ -17,6 +17,7 @@
 package controllers
 
 import services.UserAnswersService
+import utils.LprNameHelper
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import pages.DidPrSubmitPage
 import controllers.actions._
@@ -52,13 +53,15 @@ class DidPrSubmitController @Inject() (
       .andThen(allowAccess(srn))
       .andThen(getData)
       .andThen(requireData) { implicit request =>
-
-        val preparedForm = request.userAnswers.get(DidPrSubmitPage) match {
-          case None => form
-          case Some(value) => form.fill(value)
+        LprNameHelper.withName(request.userAnswers)(Redirect(routes.JourneyRecoveryController.onPageLoad())) {
+          lprName =>
+            val preparedForm = request.userAnswers.get(DidPrSubmitPage) match {
+              case None => form
+              case Some(value) =>
+                form.fill(value)
+            }
+            Ok(view(preparedForm, srn, mode, lprName))
         }
-
-        Ok(view(preparedForm, srn, mode))
       }
 
   def onSubmit(srn: Srn, mode: Mode): Action[AnyContent] =
@@ -67,15 +70,19 @@ class DidPrSubmitController @Inject() (
       .andThen(getData)
       .andThen(requireData)
       .async { implicit request =>
-        form
-          .bindFromRequest()
-          .fold(
-            formWithErrors => Future.successful(BadRequest(view(formWithErrors, srn, mode))),
-            value =>
-              for {
-                updatedAnswers <- Future.fromTry(request.userAnswers.set(DidPrSubmitPage, value))
-                _ <- userAnswersService.set(updatedAnswers)(using hc, request.request)
-              } yield Redirect(routes.CheckYourAnswersController.onPageLoad(srn))
-          )
+        LprNameHelper.withName(request.userAnswers) {
+          Future.successful(Redirect(routes.JourneyRecoveryController.onPageLoad()))
+        } { lprName =>
+          form
+            .bindFromRequest()
+            .fold(
+              formWithErrors => Future.successful(BadRequest(view(formWithErrors, srn, mode, lprName))),
+              value =>
+                for {
+                  updatedAnswers <- Future.fromTry(request.userAnswers.set(DidPrSubmitPage, value))
+                  _ <- userAnswersService.set(updatedAnswers)(using hc, request.request)
+                } yield Redirect(routes.CheckYourAnswersController.onPageLoad(srn))
+            )
+        }
       }
 }

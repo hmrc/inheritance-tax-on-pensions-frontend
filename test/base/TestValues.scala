@@ -54,4 +54,12 @@ trait TestValues extends Generators {
     rlsFlag = false,
     deceasedFlag = false
   )
+  val individualName: IndividualName = IndividualName(
+    title = Some("Mr"),
+    firstForename = "John",
+    secondForename = Some("William"),
+    surname = "Doe"
+  )
+  val individualNameFormatted: String = s"${individualName.firstForename} ${individualName.surname}"
+
 }

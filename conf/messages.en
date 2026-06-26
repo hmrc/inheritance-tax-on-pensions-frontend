@@ -264,7 +264,7 @@ confirmation.feedback = What did you think of this service?
 confirmation.feedback.append = (takes 30 seconds)
 
 didPrSubmit.title = Did the PR submit the payment notice?
-didPrSubmit.heading = Did the PR submit the payment notice?
+didPrSubmit.heading = Did {0} submit the payment notice?
 didPrSubmit.checkYourAnswersLabel = Did the PR submit the payment notice?
 didPrSubmit.error.required = Select Yes or No
 didPrSubmit.change.hidden = if PR submit the notice
