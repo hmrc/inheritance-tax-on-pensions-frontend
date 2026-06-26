@@ -70,3 +70,8 @@ GET         /:srn/pspDeclaration                         controllers.PspDeclarat
 POST        /:srn/pspDeclaration                         controllers.PspDeclarationController.onSubmit(srn: Srn)
 
 GET         /:srn/ihtp-report-submitted                  controllers.ConfirmationController.onPageLoad(srn: Srn)
+
+GET         /:srn/pr-submit-payment-notice               controllers.DidPrSubmitController.onPageLoad(srn: Srn, mode: Mode = NormalMode)
+POST        /:srn/pr-submit-payment-notice               controllers.DidPrSubmitController.onSubmit(srn: Srn, mode: Mode = NormalMode)
+GET         /:srn/change-pr-submit-payment-notice        controllers.DidPrSubmitController.onPageLoad(srn: Srn, mode: Mode = CheckMode)
+POST        /:srn/change-pr-submit-payment-notice        controllers.DidPrSubmitController.onSubmit(srn: Srn, mode: Mode = CheckMode)

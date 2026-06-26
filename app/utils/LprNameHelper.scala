@@ -1,0 +1,38 @@
+/*
+ * Copyright 2026 HM Revenue & Customs
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+package utils
+
+import pages.{IndividualNamePage, LprTypePage}
+import models._
+
+object LprNameHelper {
+
+  def fromUserAnswers(userAnswers: UserAnswers): Option[String] =
+    (userAnswers.get(LprTypePage).getOrElse(LprType.Individual) match {
+      case LprType.Individual => userAnswers.get(IndividualNamePage(JourneyRole.LprIndividual))
+      case _ =>
+        Some(
+          IndividualName(Some(""), "", Some(""), "")
+        ) // TODO replace this with get LPR Organisation name page value here, after or with IHTP-376
+    }).map(displayName)
+
+  def withName[A](userAnswers: UserAnswers)(ifMissing: => A)(f: String => A): A =
+    fromUserAnswers(userAnswers).fold(ifMissing)(f)
+
+  def displayName(name: IndividualName): String =
+    s"${name.firstForename} ${name.surname}"
+}

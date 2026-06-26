@@ -22,7 +22,7 @@ import pages.OrganisationNamePage
 import play.api.inject.bind
 import views.html.OrganisationNameView
 import base.SpecBase
-import models.NormalMode
+import models.{CheckMode, NormalMode}
 import org.scalatestplus.mockito.MockitoSugar
 import org.mockito.ArgumentMatchers.any
 import play.api.test.Helpers._
@@ -78,32 +78,37 @@ class OrganisationNameControllerSpec extends SpecBase with MockitoSugar {
       }
     }
 
-    "must redirect to the next page when valid data is submitted" in {
+    List(
+      (NormalMode, routes.DidPrSubmitController.onPageLoad(srn, NormalMode).url),
+      (CheckMode, routes.CheckYourAnswersController.onPageLoad(srn).url)
+    ).foreach { (modeTested, expectedRedirectLocation) =>
+      s"must redirect to the next page when valid data is submitted in $modeTested" in {
 
-      val mockSessionRepository = mock[SessionMinimalDetailsRepository]
-      val mockConnector = mock[InheritanceTaxOnPensionsConnector]
+        val mockSessionRepository = mock[SessionMinimalDetailsRepository]
+        val mockConnector = mock[InheritanceTaxOnPensionsConnector]
 
-      when(mockSessionRepository.set(any())).thenReturn(Future.successful(true))
-      when(mockConnector.setUserAnswers(any(), any(), any(), any(), any())(using any()))
-        .thenReturn(Future.successful(Right(emptyUserAnswers)))
+        when(mockSessionRepository.set(any())).thenReturn(Future.successful(true))
+        when(mockConnector.setUserAnswers(any(), any(), any(), any(), any())(using any()))
+          .thenReturn(Future.successful(Right(emptyUserAnswers)))
 
-      val application =
-        applicationBuilder(userAnswers = Some(emptyUserAnswers), usesSession = true)
-          .overrides(
-            bind[SessionMinimalDetailsRepository].toInstance(mockSessionRepository),
-            bind[InheritanceTaxOnPensionsConnector].toInstance(mockConnector)
-          )
-          .build()
+        val application =
+          applicationBuilder(userAnswers = Some(emptyUserAnswers), usesSession = true)
+            .overrides(
+              bind[SessionMinimalDetailsRepository].toInstance(mockSessionRepository),
+              bind[InheritanceTaxOnPensionsConnector].toInstance(mockConnector)
+            )
+            .build()
 
-      running(application) {
-        val request =
-          FakeRequest(POST, organisationNameRoute)
-            .withFormUrlEncodedBody(("value", "answer"))
+        running(application) {
+          val request =
+            FakeRequest(POST, routes.OrganisationNameController.onPageLoad(srn, modeTested).url)
+              .withFormUrlEncodedBody(("value", "answer"))
 
-        val result = route(application, request).value
+          val result = route(application, request).value
 
-        status(result) mustEqual SEE_OTHER
-        redirectLocation(result).value mustEqual routes.CheckYourAnswersController.onPageLoad(srn).url
+          status(result) mustEqual SEE_OTHER
+          redirectLocation(result).value must endWith(expectedRedirectLocation)
+        }
       }
     }
 
