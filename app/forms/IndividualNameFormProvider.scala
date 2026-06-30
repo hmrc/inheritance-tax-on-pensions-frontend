@@ -31,23 +31,39 @@ class IndividualNameFormProvider @Inject() extends Mappings {
         "title" -> optional(
           text()
             .transform[String](input => input.trim, identity)
-            .verifying(maxLength(4, s"${journeyRole.key}.error.title.length"))
-            .verifying(regexp(nameRegex, s"${journeyRole.key}.error.title.pattern"))
+            .verifying(
+              firstError(
+                regexp(nameRegex, s"${journeyRole.key}.error.title.pattern"),
+                maxLength(4, s"${journeyRole.key}.error.title.length")
+              )
+            )
         ),
         "firstForename" -> text(s"${journeyRole.key}.error.firstForename.required")
           .transform[String](input => input.trim, identity)
-          .verifying(maxLength(35, s"${journeyRole.key}.error.firstForename.length"))
-          .verifying(regexp(nameRegex, s"${journeyRole.key}.error.firstForename.pattern")),
+          .verifying(
+            firstError(
+              regexp(nameRegex, s"${journeyRole.key}.error.firstForename.pattern"),
+              maxLength(35, s"${journeyRole.key}.error.firstForename.length")
+            )
+          ),
         "secondForename" -> optional(
           text()
             .transform[String](input => input.trim, identity)
-            .verifying(maxLength(35, s"${journeyRole.key}.error.secondForename.length"))
-            .verifying(regexp(nameRegex, s"${journeyRole.key}.error.secondForename.pattern"))
+            .verifying(
+              firstError(
+                regexp(nameRegex, s"${journeyRole.key}.error.secondForename.pattern"),
+                maxLength(35, s"${journeyRole.key}.error.secondForename.length")
+              )
+            )
         ),
         "surname" -> text(s"${journeyRole.key}.error.surname.required")
           .transform[String](input => input.trim, identity)
-          .verifying(maxLength(35, s"${journeyRole.key}.error.surname.length"))
-          .verifying(regexp(nameRegex, s"${journeyRole.key}.error.surname.pattern"))
+          .verifying(
+            firstError(
+              regexp(nameRegex, s"${journeyRole.key}.error.surname.pattern"),
+              maxLength(35, s"${journeyRole.key}.error.surname.length")
+            )
+          )
       )((title, firstForename, secondForename, surname) =>
         IndividualName(title, firstForename, secondForename, surname)
       )(name => Some((name.title, name.firstForename, name.secondForename, name.surname)))
