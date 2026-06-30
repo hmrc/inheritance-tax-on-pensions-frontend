@@ -36,10 +36,14 @@ case class IndividualNamePageViewModel(
 
 object IndividualNamePageViewModel {
 
-  def apply(form: Form[?], journeyRole: JourneyRole)(implicit messages: Messages): IndividualNamePageViewModel =
+  def apply(
+    form: Form[?],
+    journeyRole: JourneyRole,
+    organisationName: Option[String] = None
+  )(implicit messages: Messages): IndividualNamePageViewModel =
     IndividualNamePageViewModel(
-      title = messages(s"${journeyRole.key}.title"),
-      heading = messages(s"${journeyRole.key}.heading"),
+      title = pageMessage(s"${journeyRole.key}.title", journeyRole, organisationName),
+      heading = pageMessage(s"${journeyRole.key}.heading", journeyRole, organisationName),
       hint = Option.when(messages.isDefinedAt(s"${journeyRole.key}.hint")) {
         Text(messages(s"${journeyRole.key}.hint"))
       },
@@ -72,4 +76,14 @@ object IndividualNamePageViewModel {
       ),
       button = ButtonViewModel(Text(messages("site.saveAndContinue")))
     )
+
+  private def pageMessage(
+    messageKey: String,
+    journeyRole: JourneyRole,
+    organisationName: Option[String]
+  )(implicit messages: Messages): String =
+    journeyRole match {
+      case JourneyRole.LprOrganisation => messages(messageKey, organisationName.getOrElse(""))
+      case _ => messages(messageKey)
+    }
 }

@@ -16,9 +16,9 @@
 
 package pages
 
-import org.scalatest.freespec.AnyFreeSpec
 import base.SpecBase
-import play.api.libs.json.JsPath
+import play.api.libs.json.{JsPath, Json}
+import models.{IndividualName, JourneyRole, LprType}
 
 class LprTypePageSpec extends SpecBase {
 
@@ -38,6 +38,37 @@ class LprTypePageSpec extends SpecBase {
       val result = LprTypePage.cleanup(None, userAnswers)
 
       result.isSuccess mustBe true
+    }
+
+    "must remove individual PR details when Organisation is selected" in {
+      val userAnswers = emptyUserAnswers
+        .set(IndividualNamePage(JourneyRole.LprIndividual), IndividualName(Some("Mr"), "John", None, "Doe"))
+        .success
+        .value
+
+      val result = LprTypePage.cleanup(Some(LprType.Organisation), userAnswers).success.value
+
+      result.get(IndividualNamePage(JourneyRole.LprIndividual)) mustBe None
+    }
+
+    "must remove organisation PR details when Individual is selected" in {
+      val userAnswers = emptyUserAnswers.copy(
+        data = Json.obj(
+          "lprDetails" -> Json.obj(
+            "organisation" -> Json.obj(
+              "organisationName" -> "Test Organisation",
+              "title" -> "Mr",
+              "firstForename" -> "John",
+              "surname" -> "Doe"
+            )
+          )
+        )
+      )
+
+      val result = LprTypePage.cleanup(Some(LprType.Individual), userAnswers).success.value
+
+      result.get(OrganisationNamePage) mustBe None
+      result.get(IndividualNamePage(JourneyRole.LprOrganisation)) mustBe None
     }
   }
 }

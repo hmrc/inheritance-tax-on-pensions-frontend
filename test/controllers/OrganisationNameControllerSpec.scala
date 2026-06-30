@@ -22,7 +22,7 @@ import pages.OrganisationNamePage
 import play.api.inject.bind
 import views.html.OrganisationNameView
 import base.SpecBase
-import models.{CheckMode, NormalMode}
+import models.{CheckMode, JourneyRole, NormalMode}
 import org.scalatestplus.mockito.MockitoSugar
 import org.mockito.ArgumentMatchers.any
 import play.api.test.Helpers._
@@ -79,7 +79,7 @@ class OrganisationNameControllerSpec extends SpecBase with MockitoSugar {
     }
 
     List(
-      (NormalMode, routes.DidPrSubmitController.onPageLoad(srn, NormalMode).url),
+      (NormalMode, routes.IndividualNameController.onPageLoad(srn, NormalMode, JourneyRole.LprOrganisation).url),
       (CheckMode, routes.CheckYourAnswersController.onPageLoad(srn).url)
     ).foreach { (modeTested, expectedRedirectLocation) =>
       s"must redirect to the next page when valid data is submitted in $modeTested" in {
