@@ -23,11 +23,10 @@ import pages.NinoOrReasonPage
 import controllers.actions._
 import forms.{NinoOrReasonFormData, NinoOrReasonFormProvider}
 import models._
+import play.api.i18n.MessagesApi
 import play.api.data.Form
 import views.html.NinoOrReasonView
 import models.SchemeId.Srn
-import play.api.i18n.{I18nSupport, MessagesApi}
-import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
 
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -44,8 +43,7 @@ class NinoOrReasonController @Inject() (
   userAnswersService: UserAnswersService,
   view: NinoOrReasonView
 )(implicit ec: ExecutionContext)
-    extends FrontendBaseController
-    with I18nSupport {
+    extends IhtpBaseController {
 
   val form: Form[NinoOrReasonFormData] = formProvider()
 
@@ -54,13 +52,14 @@ class NinoOrReasonController @Inject() (
       .andThen(allowAccess(srn))
       .andThen(getData)
       .andThen(requireData) { implicit request =>
-        DeceasedNameHelper.withName(request.userAnswers)(Redirect(routes.JourneyRecoveryController.onPageLoad())) {
-          deceasedName =>
-            val preparedForm = request.userAnswers.get(NinoOrReasonPage) match {
-              case None => form
-              case Some(value) => form.fill(value)
-            }
-            Ok(view(preparedForm, srn, mode, deceasedName))
+        DeceasedNameHelper.withName(request.userAnswers)(
+          logAndJourneyRecovery("missing deceased name, cannot load the page")
+        ) { deceasedName =>
+          val preparedForm = request.userAnswers.get(NinoOrReasonPage) match {
+            case None => form
+            case Some(value) => form.fill(value)
+          }
+          Ok(view(preparedForm, srn, mode, deceasedName))
         }
       }
 
@@ -71,7 +70,7 @@ class NinoOrReasonController @Inject() (
       .andThen(requireData)
       .async { implicit request =>
         DeceasedNameHelper.withName(request.userAnswers) {
-          Future.successful(Redirect(routes.JourneyRecoveryController.onPageLoad()))
+          Future.successful(logAndJourneyRecovery("missing deceased name, cannot submit the page"))
         } { deceasedName =>
           val boundForm = formProvider.validate(form.bindFromRequest())
 

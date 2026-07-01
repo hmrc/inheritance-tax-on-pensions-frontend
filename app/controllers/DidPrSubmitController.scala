@@ -23,10 +23,9 @@ import pages.DidPrSubmitPage
 import controllers.actions._
 import forms.DidPrSubmitFormProvider
 import models.Mode
+import play.api.i18n.MessagesApi
 import views.html.DidPrSubmitView
 import models.SchemeId.Srn
-import play.api.i18n.{I18nSupport, MessagesApi}
-import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
 
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -43,8 +42,7 @@ class DidPrSubmitController @Inject() (
   userAnswersService: UserAnswersService,
   view: DidPrSubmitView
 )(implicit ec: ExecutionContext)
-    extends FrontendBaseController
-    with I18nSupport {
+    extends IhtpBaseController {
 
   val form = formProvider()
 
@@ -53,7 +51,7 @@ class DidPrSubmitController @Inject() (
       .andThen(allowAccess(srn))
       .andThen(getData)
       .andThen(requireData) { implicit request =>
-        LprNameHelper.withName(request.userAnswers)(Redirect(routes.JourneyRecoveryController.onPageLoad())) {
+        LprNameHelper.withName(request.userAnswers)(logAndJourneyRecovery("PR name is missing, cannot load the page")) {
           lprName =>
             val preparedForm = request.userAnswers.get(DidPrSubmitPage) match {
               case None => form
@@ -71,7 +69,7 @@ class DidPrSubmitController @Inject() (
       .andThen(requireData)
       .async { implicit request =>
         LprNameHelper.withName(request.userAnswers) {
-          Future.successful(Redirect(routes.JourneyRecoveryController.onPageLoad()))
+          Future.successful(logAndJourneyRecovery("PR name is missing, cannot submit the page"))
         } { lprName =>
           form
             .bindFromRequest()
