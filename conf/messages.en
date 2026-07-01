@@ -159,8 +159,8 @@ birthDeathDates.dateOfDeath.error.invalid.day = Enter a valid day for the death 
 birthDeathDates.dateOfDeath.error.invalid.month = Enter a valid month for the death date
 birthDeathDates.dateOfDeath.error.invalid.year = Enter a valid year for the death date
 
-lprType.title = Is the legal personal representative (LPR) an individual or a member of an organisation?
-lprType.heading = Is the legal personal representative (LPR) an individual or a member of an organisation?
+lprType.title = Is the personal representative (PR) an individual or a member of an organisation?
+lprType.heading = Is the personal representative (PR) an individual or a member of an organisation?
 lprType.individual = Individual
 lprType.organisation = Organisation
 lprType.organisation.hint = For example, a firm of solicitors
