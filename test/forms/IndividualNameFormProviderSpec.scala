@@ -98,6 +98,26 @@ class IndividualNameFormProviderSpec extends forms.behaviours.StringFieldBehavio
       )
     }
 
+    "must only return the highest priority error for each field" in {
+
+      val tooLongAndInvalidName = s"${"A" * 36}1"
+      val result = form.bind(
+        Map(
+          "title" -> "Title1",
+          "firstForename" -> tooLongAndInvalidName,
+          "secondForename" -> tooLongAndInvalidName,
+          "surname" -> tooLongAndInvalidName
+        )
+      )
+
+      result.errors.map(error => error.key -> error.message) mustBe Seq(
+        "title" -> "lprIndividualName.error.title.pattern",
+        "firstForename" -> "lprIndividualName.error.firstForename.pattern",
+        "secondForename" -> "lprIndividualName.error.secondForename.pattern",
+        "surname" -> "lprIndividualName.error.surname.pattern"
+      )
+    }
+
     "must trim whitespace" in {
 
       val result = form.bind(
