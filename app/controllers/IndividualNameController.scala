@@ -23,10 +23,9 @@ import controllers.actions._
 import play.api.libs.json._
 import forms.IndividualNameFormProvider
 import models._
+import play.api.i18n.MessagesApi
 import views.html.IndividualNameView
 import models.SchemeId.Srn
-import play.api.i18n.{I18nSupport, MessagesApi}
-import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
 
 import scala.concurrent.{ExecutionContext, Future}
 import scala.util.{Success, Try}
@@ -44,8 +43,7 @@ class IndividualNameController @Inject() (
   userAnswersService: UserAnswersService,
   view: IndividualNameView
 )(implicit ec: ExecutionContext)
-    extends FrontendBaseController
-    with I18nSupport {
+    extends IhtpBaseController {
 
   def onPageLoad(srn: Srn, mode: Mode, journeyRole: JourneyRole): Action[AnyContent] =
     identify
@@ -54,7 +52,7 @@ class IndividualNameController @Inject() (
       .andThen(requireData) { implicit request =>
         journeyRole match {
           case JourneyRole.Unknown =>
-            Redirect(routes.JourneyRecoveryController.onPageLoad())
+            logAndJourneyRecovery("unknown journeyRole, cannot load the page")
 
           case _ =>
             val form = formProvider(journeyRole)
@@ -75,7 +73,7 @@ class IndividualNameController @Inject() (
       .async { implicit request =>
         journeyRole match {
           case JourneyRole.Unknown =>
-            Future.successful(Redirect(routes.JourneyRecoveryController.onPageLoad()))
+            Future.successful(logAndJourneyRecovery("unknown journeyRole, cannot submit the page"))
 
           case _ =>
             formProvider(journeyRole)
