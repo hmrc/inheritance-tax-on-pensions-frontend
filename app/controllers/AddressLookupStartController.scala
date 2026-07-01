@@ -21,7 +21,6 @@ import pages.IndividualNamePage
 import models.SchemeId.Srn
 import controllers.actions._
 import models.{JourneyRole, Mode}
-import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
 import uk.gov.hmrc.http.HttpVerbs.GET
 import play.api.mvc._
 
@@ -37,7 +36,7 @@ class AddressLookupStartController @Inject() (
   addressLookupFrontendService: AddressLookupFrontendService,
   val controllerComponents: MessagesControllerComponents
 )(implicit ec: ExecutionContext)
-    extends FrontendBaseController {
+    extends IhtpBaseController {
 
   def start(srn: Srn, mode: Mode): Action[AnyContent] =
     identify
@@ -52,7 +51,7 @@ class AddressLookupStartController @Inject() (
               .map(addressLookupUrl => Redirect(Call(GET, addressLookupUrl)))
 
           case None =>
-            Future.successful(Redirect(routes.JourneyRecoveryController.onPageLoad()))
+            Future.successful(logAndJourneyRecovery("individual name is missing, cannot initialise address lookup"))
         }
       }
 }

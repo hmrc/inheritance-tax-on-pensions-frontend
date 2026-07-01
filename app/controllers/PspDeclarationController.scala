@@ -19,13 +19,12 @@ package controllers
 import services.ReportSubmissionService
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import controllers.actions._
+import play.api.i18n.MessagesApi
 import uk.gov.hmrc.play.http.HeaderCarrierConverter
 import views.html.PspDeclarationView
 import models.SchemeId.Srn
 import forms.PspDeclarationFormProvider
 import uk.gov.hmrc.http.HeaderCarrier
-import play.api.i18n.{I18nSupport, MessagesApi}
-import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
 
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -42,8 +41,7 @@ class PspDeclarationController @Inject() (
   val controllerComponents: MessagesControllerComponents,
   view: PspDeclarationView
 )(implicit ec: ExecutionContext)
-    extends FrontendBaseController
-    with I18nSupport {
+    extends IhtpBaseController {
 
   def onPageLoad(srn: Srn): Action[AnyContent] = identify
     .andThen(allowAccess(srn))
@@ -69,7 +67,7 @@ class PspDeclarationController @Inject() (
           _ =>
             reportSubmissionService.submitReport(request.userAnswers)(using hc, request.request).map {
               case Right(_) => Redirect(routes.ConfirmationController.onPageLoad(srn))
-              case Left(_) => Redirect(routes.JourneyRecoveryController.onPageLoad())
+              case Left(_) => logAndJourneyRecovery("unable to submit the IHTP report")
             }
         )
     }

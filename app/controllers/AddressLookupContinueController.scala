@@ -23,7 +23,6 @@ import models.SchemeId.Srn
 import controllers.actions._
 import play.api.libs.json.{JsObject, JsSuccess, Json}
 import models._
-import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
 
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -38,7 +37,7 @@ class AddressLookupContinueController @Inject() (
   userAnswersService: UserAnswersService,
   val controllerComponents: MessagesControllerComponents
 )(implicit ec: ExecutionContext)
-    extends FrontendBaseController {
+    extends IhtpBaseController {
 
   def continue(srn: Srn, mode: Mode, id: String): Action[AnyContent] =
     identify
@@ -47,7 +46,7 @@ class AddressLookupContinueController @Inject() (
       .andThen(requireData)
       .async { implicit request =>
         if (id.trim.isEmpty) {
-          Future.successful(Redirect(routes.JourneyRecoveryController.onPageLoad()))
+          Future.successful(logAndJourneyRecovery("no id from address lookup, unable to continue"))
         } else {
           for {
             addressData <- addressLookupFrontendService.getAddress(id)
@@ -60,7 +59,7 @@ class AddressLookupContinueController @Inject() (
                   .set(updatedAnswers)(using hc, request.request)
                   .map(_ => Redirect(nextPage(srn, mode)))
               } else {
-                Future.successful(Redirect(routes.JourneyRecoveryController.onPageLoad()))
+                Future.successful(logAndJourneyRecovery("no address lines in address, unable to continue"))
               }
           } yield result
         }
