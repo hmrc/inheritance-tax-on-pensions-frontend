@@ -18,15 +18,14 @@ package controllers
 
 import services.UserAnswersService
 import utils.DeceasedNameHelper
-import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
+import play.api.mvc._
 import pages.BirthDeathDatesPage
 import controllers.actions._
 import forms.BirthDeathDatesFormProvider
 import models.{CheckMode, Mode, NormalMode}
+import play.api.i18n.MessagesApi
 import views.html.BirthDeathDatesView
 import models.SchemeId.Srn
-import play.api.i18n.{I18nSupport, MessagesApi}
-import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
 
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -43,24 +42,24 @@ class BirthDeathDatesController @Inject() (
   userAnswersService: UserAnswersService,
   view: BirthDeathDatesView
 )(implicit ec: ExecutionContext)
-    extends FrontendBaseController
-    with I18nSupport {
+    extends IhtpBaseController {
 
   def onPageLoad(srn: Srn, mode: Mode): Action[AnyContent] =
     identify
       .andThen(allowAccess(srn))
       .andThen(getData)
       .andThen(requireData) { implicit request =>
-        DeceasedNameHelper.withName(request.userAnswers)(Redirect(routes.JourneyRecoveryController.onPageLoad())) {
-          deceasedName =>
-            val form = formProvider()
+        DeceasedNameHelper.withName(request.userAnswers)(
+          logAndJourneyRecovery("deceased name is missing, cannot load the page")
+        ) { deceasedName =>
+          val form = formProvider()
 
-            val preparedForm = request.userAnswers.get(BirthDeathDatesPage) match {
-              case None => form
-              case Some(value) => form.fill(value)
-            }
+          val preparedForm = request.userAnswers.get(BirthDeathDatesPage) match {
+            case None => form
+            case Some(value) => form.fill(value)
+          }
 
-            Ok(view(preparedForm, srn, mode, deceasedName))
+          Ok(view(preparedForm, srn, mode, deceasedName))
         }
       }
 
@@ -71,7 +70,7 @@ class BirthDeathDatesController @Inject() (
       .andThen(requireData)
       .async { implicit request =>
         DeceasedNameHelper.withName(request.userAnswers) {
-          Future.successful(Redirect(routes.JourneyRecoveryController.onPageLoad()))
+          Future.successful(logAndJourneyRecovery("deceased name is missing, cannot submit the page"))
         } { deceasedName =>
           val form = formProvider()
 
