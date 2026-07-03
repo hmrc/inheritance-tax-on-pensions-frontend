@@ -66,6 +66,11 @@ GET         /:srn/change-lpr-address                     controllers.AddressLook
 GET         /:srn/address-lookup-continue/normalmode     controllers.AddressLookupContinueController.continue(srn: Srn, mode: Mode = NormalMode, id: String ?= "")
 GET         /:srn/address-lookup-continue/checkmode      controllers.AddressLookupContinueController.continue(srn: Srn, mode: Mode = CheckMode, id: String ?= "")
 
+GET         /:srn/scheme-receive-payment-notice          controllers.PaymentNoticeDateController.onPageLoad(srn: Srn, mode: Mode = NormalMode)
+POST        /:srn/scheme-receive-payment-notice          controllers.PaymentNoticeDateController.onSubmit(srn: Srn, mode: Mode = NormalMode)
+GET         /:srn/change-scheme-receive-payment-notice   controllers.PaymentNoticeDateController.onPageLoad(srn: Srn, mode: Mode = CheckMode)
+POST        /:srn/change-scheme-receive-payment-notice   controllers.PaymentNoticeDateController.onSubmit(srn: Srn, mode: Mode = CheckMode)
+
 GET         /:srn/check-your-answers                     controllers.CheckYourAnswersController.onPageLoad(srn: Srn)
 POST        /:srn/check-your-answers                     controllers.CheckYourAnswersController.onSubmit(srn: Srn)
 

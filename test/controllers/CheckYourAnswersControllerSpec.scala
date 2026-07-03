@@ -27,6 +27,8 @@ import forms.NinoOrReasonFormData
 import models._
 import viewmodels.CheckAnswers._
 
+import java.time.LocalDate
+
 class CheckYourAnswersControllerSpec extends SpecBase {
 
   private val validNino: String = ninoGen.sample.value
@@ -145,6 +147,36 @@ class CheckYourAnswersControllerSpec extends SpecBase {
             LprTypeSummary.row(srn, userAnswers)(using messages(application)).get,
             LprIndividualNameSummary.row(srn, userAnswers)(using messages(application)).get,
             DidPrSubmitSummary.row(srn, userAnswers)(using messages(application)).get
+          )
+        )
+
+        status(result) mustEqual OK
+        contentAsString(result) mustEqual view(srn, summaryList)(using request, messages(application)).toString
+      }
+    }
+
+    "must return OK and include the payment notice date row when present" in {
+      val userAnswers = emptyUserAnswers
+        .set(DidPrSubmitPage, true)
+        .success
+        .value
+        .set(PaymentNoticeDatePage, LocalDate.of(2026, 3, 27))
+        .success
+        .value
+
+      val application = applicationBuilder(userAnswers = Some(userAnswers)).build()
+
+      running(application) {
+        val request = FakeRequest(GET, routes.CheckYourAnswersController.onPageLoad(srn).url)
+
+        val result = route(application, request).value
+
+        val view = application.injector.instanceOf[CheckYourAnswersView]
+
+        val summaryList = SummaryListViewModel(
+          rows = Seq(
+            DidPrSubmitSummary.row(srn, userAnswers)(using messages(application)).get,
+            PaymentNoticeDateSummary.row(srn, userAnswers)(using messages(application)).get
           )
         )
 

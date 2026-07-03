@@ -19,10 +19,10 @@ package controllers
 import services.UserAnswersService
 import utils.LprNameHelper
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
-import pages.DidPrSubmitPage
+import pages.{DidPrSubmitPage, PaymentNoticeDatePage}
 import controllers.actions._
 import forms.DidPrSubmitFormProvider
-import models.Mode
+import models.{CheckMode, Mode, NormalMode, UserAnswers}
 import play.api.i18n.MessagesApi
 import views.html.DidPrSubmitView
 import models.SchemeId.Srn
@@ -79,8 +79,16 @@ class DidPrSubmitController @Inject() (
                 for {
                   updatedAnswers <- Future.fromTry(request.userAnswers.set(DidPrSubmitPage, value))
                   _ <- userAnswersService.set(updatedAnswers)(using hc, request.request)
-                } yield Redirect(routes.CheckYourAnswersController.onPageLoad(srn))
+                } yield Redirect(nextPage(srn, mode, updatedAnswers))
             )
         }
       }
+
+  private def nextPage(srn: Srn, mode: Mode, userAnswers: UserAnswers) =
+    mode match {
+      case NormalMode => routes.PaymentNoticeDateController.onPageLoad(srn, NormalMode)
+      case CheckMode if userAnswers.get(PaymentNoticeDatePage).isEmpty =>
+        routes.PaymentNoticeDateController.onPageLoad(srn, CheckMode)
+      case CheckMode => routes.CheckYourAnswersController.onPageLoad(srn)
+    }
 }

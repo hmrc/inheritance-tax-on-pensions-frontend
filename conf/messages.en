@@ -159,6 +159,19 @@ birthDeathDates.dateOfDeath.error.invalid.day = Enter a valid day for the death 
 birthDeathDates.dateOfDeath.error.invalid.month = Enter a valid month for the death date
 birthDeathDates.dateOfDeath.error.invalid.year = Enter a valid year for the death date
 
+paymentNoticeDate.title = When did the pension scheme receive the payment notice?
+paymentNoticeDate.heading = When did {0} receive the payment notice?
+paymentNoticeDate.paragraph = This is the date you received the complete and valid information required to make this report.
+paymentNoticeDate.hint = For example, 27 3 2026
+paymentNoticeDate.checkYourAnswersLabel = Date the pension scheme received the payment notice
+paymentNoticeDate.change.hidden = the date the pension scheme received the payment notice
+paymentNoticeDate.error.required.all = Enter the payment notice receipt date
+paymentNoticeDate.error.required.two = The valid payment notice receipt date must include {0} and {1}
+paymentNoticeDate.error.required = The valid payment notice receipt date must include {0}
+paymentNoticeDate.error.invalid = Enter a valid payment notice receipt date
+paymentNoticeDate.error.past = The valid payment notice receipt date must be in the past
+paymentNoticeDate.error.afterDateOfDeath = Date must be after {0}
+
 lprType.title = Is the personal representative (PR) an individual or a member of an organisation?
 lprType.heading = Is the personal representative (PR) an individual or a member of an organisation?
 lprType.individual = Individual
