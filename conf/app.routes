@@ -85,3 +85,8 @@ GET         /:srn/pr-submit-payment-notice               controllers.DidPrSubmit
 POST        /:srn/pr-submit-payment-notice               controllers.DidPrSubmitController.onSubmit(srn: Srn, mode: Mode = NormalMode)
 GET         /:srn/change-pr-submit-payment-notice        controllers.DidPrSubmitController.onPageLoad(srn: Srn, mode: Mode = CheckMode)
 POST        /:srn/change-pr-submit-payment-notice        controllers.DidPrSubmitController.onSubmit(srn: Srn, mode: Mode = CheckMode)
+
+GET         /:srn/are-beneficiaries-known              controllers.AreBeneficiariesKnownController.onPageLoad(srn: Srn, mode: Mode = NormalMode)
+POST        /:srn/are-beneficiaries-known              controllers.AreBeneficiariesKnownController.onSubmit(srn: Srn, mode: Mode = NormalMode)
+GET         /:srn/change-are-beneficiaries-known       controllers.AreBeneficiariesKnownController.onPageLoad(srn: Srn, mode: Mode = CheckMode)
+POST        /:srn/change-are-beneficiaries-known       controllers.AreBeneficiariesKnownController.onSubmit(srn: Srn, mode: Mode = CheckMode)

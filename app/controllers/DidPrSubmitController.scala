@@ -22,7 +22,7 @@ import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import pages.{DidPrSubmitPage, PaymentNoticeDatePage}
 import controllers.actions._
 import forms.DidPrSubmitFormProvider
-import models.{CheckMode, Mode, NormalMode, UserAnswers}
+import models._
 import play.api.i18n.MessagesApi
 import views.html.DidPrSubmitView
 import models.SchemeId.Srn

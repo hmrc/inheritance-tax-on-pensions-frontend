@@ -296,3 +296,9 @@ didPrSubmit.heading = Did {0} submit the payment notice?
 didPrSubmit.checkYourAnswersLabel = Did the PR submit the payment notice?
 didPrSubmit.error.required = Select Yes or No
 didPrSubmit.change.hidden = if PR submit the notice
+
+areBeneficiariesKnown.title = Are the beneficiaries known?
+areBeneficiariesKnown.heading = Are the beneficiaries known?
+areBeneficiariesKnown.checkYourAnswersLabel = Are the beneficiaries known?
+areBeneficiariesKnown.change.hidden = whether the beneficiaries are known
+areBeneficiariesKnown.error.required = You must select one option
