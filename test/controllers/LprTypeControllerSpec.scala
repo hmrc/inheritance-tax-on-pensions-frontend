@@ -39,6 +39,8 @@ class LprTypeControllerSpec extends SpecBase {
   val formProvider = new LprTypeFormProvider()
   val form: Form[LprType] = formProvider()
   val lprIndividualName: IndividualName = IndividualName(Some("Mr"), "John", Some("William"), "Doe")
+  val lprIndividualAddress: LprAddress =
+    LprAddress("33 Fake Street", Some("Fake Area"), None, Some("Fakeville"), Some("ZZ1 1ZZ"), "GB")
 
   lazy val lprTypeRoute: String = routes.LprTypeController.onPageLoad(srn, NormalMode).url
 
@@ -194,7 +196,7 @@ class LprTypeControllerSpec extends SpecBase {
 
         status(result) mustEqual SEE_OTHER
         redirectLocation(result).value mustEqual routes.IndividualNameController
-          .onPageLoad(srn, NormalMode, JourneyRole.LprOrganisation)
+          .onPageLoad(srn, CheckMode, JourneyRole.LprOrganisation)
           .url
       }
     }
@@ -259,7 +261,7 @@ class LprTypeControllerSpec extends SpecBase {
 
         status(result) mustEqual SEE_OTHER
         redirectLocation(result).value mustEqual routes.IndividualNameController
-          .onPageLoad(srn, NormalMode, JourneyRole.LprIndividual)
+          .onPageLoad(srn, CheckMode, JourneyRole.LprIndividual)
           .url
       }
     }
@@ -321,12 +323,44 @@ class LprTypeControllerSpec extends SpecBase {
       }
     }
 
-    "must redirect to Check Your Answers when valid Individual data is submitted in CheckMode and name details are present" in {
+    "must redirect to address lookup when Individual is submitted in CheckMode and address details are missing" in {
 
       val userAnswers = emptyUserAnswers
         .set(IndividualNamePage(JourneyRole.LprIndividual), lprIndividualName)
         .success
         .value
+
+      val mockInheritanceTaxOnPensionsConnector = mock[InheritanceTaxOnPensionsConnector]
+      when(mockInheritanceTaxOnPensionsConnector.setUserAnswers(any(), any(), any(), any(), any())(using any()))
+        .thenReturn(Future.successful(Right(emptyUserAnswers)))
+
+      val application = applicationBuilder(userAnswers = Some(userAnswers), usesSession = true)
+        .overrides(
+          bind[InheritanceTaxOnPensionsConnector].toInstance(mockInheritanceTaxOnPensionsConnector)
+        )
+        .build()
+
+      running(application) {
+        val request =
+          FakeRequest(POST, routes.LprTypeController.onSubmit(srn, CheckMode).url)
+            .withFormUrlEncodedBody(("value", LprType.Individual.toString))
+
+        val result = route(application, request).value
+
+        status(result) mustEqual SEE_OTHER
+        redirectLocation(result).value mustEqual routes.AddressLookupStartController.start(srn, CheckMode).url
+      }
+    }
+
+    "must redirect to Check Your Answers when valid Individual data is submitted in CheckMode and name and address details are present" in {
+
+      val userAnswers = emptyUserAnswers.copy(
+        data = Json.obj(
+          "lprDetails" -> Json.obj(
+            "individual" -> (Json.toJsObject(lprIndividualName) ++ Json.toJsObject(lprIndividualAddress))
+          )
+        )
+      )
 
       val mockInheritanceTaxOnPensionsConnector = mock[InheritanceTaxOnPensionsConnector]
       when(mockInheritanceTaxOnPensionsConnector.setUserAnswers(any(), any(), any(), any(), any())(using any()))

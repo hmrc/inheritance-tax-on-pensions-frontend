@@ -18,7 +18,7 @@ package controllers
 
 import services.UserAnswersService
 import play.api.mvc._
-import pages.{IndividualNamePage, OrganisationNamePage}
+import pages.{IndividualNamePage, LprIndividualAddressPage, OrganisationNamePage}
 import controllers.actions._
 import play.api.libs.json._
 import forms.IndividualNameFormProvider
@@ -90,7 +90,7 @@ class IndividualNameController @Inject() (
                     updatedAnswers <- Future
                       .fromTry(addIndividualName(request.userAnswers, journeyRole, individualName))
                     _ <- userAnswersService.set(updatedAnswers)(using hc, request.request)
-                  } yield Redirect(nextPage(srn, mode, journeyRole))
+                  } yield Redirect(nextPage(srn, mode, journeyRole, updatedAnswers))
               )
         }
       }
@@ -137,8 +137,10 @@ class IndividualNameController @Inject() (
   private def optionalString(value: Option[String]): JsValue =
     value.filter(_.nonEmpty).map(JsString.apply).getOrElse(JsNull)
 
-  private[controllers] def nextPage(srn: Srn, mode: Mode, journeyRole: JourneyRole): Call =
+  private[controllers] def nextPage(srn: Srn, mode: Mode, journeyRole: JourneyRole, userAnswers: UserAnswers): Call =
     mode match {
+      case CheckMode if journeyRole == JourneyRole.LprIndividual && userAnswers.get(LprIndividualAddressPage).isEmpty =>
+        routes.AddressLookupStartController.start(srn, CheckMode)
       case CheckMode => routes.CheckYourAnswersController.onPageLoad(srn)
       case NormalMode if journeyRole == JourneyRole.Deceased =>
         routes.NinoOrReasonController.onPageLoad(srn, NormalMode)

@@ -22,6 +22,7 @@ import pages.OrganisationNamePage
 import play.api.inject.bind
 import views.html.OrganisationNameView
 import base.SpecBase
+import play.api.libs.json.Json
 import models.{CheckMode, JourneyRole, NormalMode}
 import org.scalatestplus.mockito.MockitoSugar
 import org.mockito.ArgumentMatchers.any
@@ -80,7 +81,7 @@ class OrganisationNameControllerSpec extends SpecBase with MockitoSugar {
 
     List(
       (NormalMode, routes.IndividualNameController.onPageLoad(srn, NormalMode, JourneyRole.LprOrganisation).url),
-      (CheckMode, routes.CheckYourAnswersController.onPageLoad(srn).url)
+      (CheckMode, routes.IndividualNameController.onPageLoad(srn, CheckMode, JourneyRole.LprOrganisation).url)
     ).foreach { (modeTested, expectedRedirectLocation) =>
       s"must redirect to the next page when valid data is submitted in $modeTested" in {
 
@@ -109,6 +110,49 @@ class OrganisationNameControllerSpec extends SpecBase with MockitoSugar {
           status(result) mustEqual SEE_OTHER
           redirectLocation(result).value must endWith(expectedRedirectLocation)
         }
+      }
+    }
+
+    "must redirect to Check Your Answers when valid data is submitted in CheckMode and organisation PR name is present" in {
+
+      val mockSessionRepository = mock[SessionMinimalDetailsRepository]
+      val mockConnector = mock[InheritanceTaxOnPensionsConnector]
+
+      when(mockSessionRepository.set(any())).thenReturn(Future.successful(true))
+      when(mockConnector.setUserAnswers(any(), any(), any(), any(), any())(using any()))
+        .thenReturn(Future.successful(Right(emptyUserAnswers)))
+
+      val userAnswersWithOrgDetails = emptyUserAnswers.copy(
+        data = Json.obj(
+          "lprDetails" -> Json.obj(
+            "organisation" -> Json.obj(
+              "organisationName" -> "Test Organisation",
+              "title" -> "Mr",
+              "firstForename" -> "John",
+              "secondForename" -> "William",
+              "surname" -> "Doe"
+            )
+          )
+        )
+      )
+
+      val application =
+        applicationBuilder(userAnswers = Some(userAnswersWithOrgDetails), usesSession = true)
+          .overrides(
+            bind[SessionMinimalDetailsRepository].toInstance(mockSessionRepository),
+            bind[InheritanceTaxOnPensionsConnector].toInstance(mockConnector)
+          )
+          .build()
+
+      running(application) {
+        val request =
+          FakeRequest(POST, routes.OrganisationNameController.onPageLoad(srn, CheckMode).url)
+            .withFormUrlEncodedBody(("value", "answer"))
+
+        val result = route(application, request).value
+
+        status(result) mustEqual SEE_OTHER
+        redirectLocation(result).value mustEqual routes.CheckYourAnswersController.onPageLoad(srn).url
       }
     }
 

@@ -17,7 +17,7 @@
 package viewmodels.CheckAnswers
 
 import viewmodels.implicits._
-import pages.BirthDeathDatesPage
+import pages.PaymentNoticeDatePage
 import controllers.routes
 import models.SchemeId.Srn
 import uk.gov.hmrc.govukfrontend.views.viewmodels.summarylist.SummaryListRow
@@ -26,18 +26,15 @@ import play.api.i18n.Messages
 import viewmodels.CheckAnswers.CheckAnswersDateFormatter.format
 import viewmodels.govuk.summarylist._
 
-object BirthDeathDatesSummary {
+object PaymentNoticeDateSummary {
   def row(srn: Srn, answers: UserAnswers)(implicit messages: Messages): Option[SummaryListRow] =
-    answers.get(BirthDeathDatesPage).map { answer =>
-
-      val value = s"${format(answer.dateOfBirth)} to ${format(answer.dateOfDeath)}"
-
+    answers.get(PaymentNoticeDatePage).map { answer =>
       SummaryListRowViewModel(
-        key = "birthDeathDates.checkYourAnswersLabel",
-        value = ValueViewModel(value),
+        key = "paymentNoticeDate.checkYourAnswersLabel",
+        value = ValueViewModel(format(answer)),
         actions = Seq(
-          ActionItemViewModel("site.change", routes.BirthDeathDatesController.onPageLoad(srn, CheckMode).url)
-            .withVisuallyHiddenText(messages("birthDeathDates.change.hidden"))
+          ActionItemViewModel("site.change", routes.PaymentNoticeDateController.onPageLoad(srn, CheckMode).url)
+            .withVisuallyHiddenText(messages("paymentNoticeDate.change.hidden"))
         )
       )
     }

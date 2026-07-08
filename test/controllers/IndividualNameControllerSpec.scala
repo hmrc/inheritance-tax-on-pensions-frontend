@@ -137,7 +137,7 @@ class IndividualNameControllerSpec extends SpecBase {
         }
       }
 
-      s"must redirect to Check Your Answers when valid ${journeyRole.key} data is submitted in CheckMode" in {
+      s"must redirect to the correct next page when valid ${journeyRole.key} data is submitted in CheckMode" in {
 
         val mockConnector = mock[InheritanceTaxOnPensionsConnector]
         when(mockConnector.setUserAnswers(any(), any(), any(), any(), any())(using any()))
@@ -154,8 +154,13 @@ class IndividualNameControllerSpec extends SpecBase {
 
           val result = route(application, request).value
 
+          val expectedNextPage = journeyRole match {
+            case JourneyRole.LprIndividual => routes.AddressLookupStartController.start(srn, CheckMode).url
+            case _ => routes.CheckYourAnswersController.onPageLoad(srn).url
+          }
+
           status(result) mustEqual SEE_OTHER
-          redirectLocation(result).value mustEqual routes.CheckYourAnswersController.onPageLoad(srn).url
+          redirectLocation(result).value mustEqual expectedNextPage
         }
       }
 
@@ -181,6 +186,48 @@ class IndividualNameControllerSpec extends SpecBase {
             messages(application)
           ).toString
         }
+      }
+    }
+
+    "must redirect to Check Your Answers when LPR individual name is submitted in CheckMode and address is present" in {
+
+      val existingAnswers = UserAnswers(
+        userAnswersId,
+        srnGen.sample.value.toString,
+        "test-uuid",
+        Json.obj(
+          "lprDetails" -> Json.obj(
+            "individual" -> Json.obj(
+              "title" -> "Mr",
+              "firstForename" -> "John",
+              "secondForename" -> "William",
+              "surname" -> "Doe",
+              "addressLine1" -> "1 ABCDE Street",
+              "addressLine2" -> "FGHIJ Town",
+              "ukPostcode" -> "ZZ99 1AA",
+              "country" -> "GB"
+            )
+          )
+        )
+      )
+
+      val mockConnector = mock[InheritanceTaxOnPensionsConnector]
+      when(mockConnector.setUserAnswers(any(), any(), any(), any(), any())(using any()))
+        .thenReturn(Future.successful(Right(emptyUserAnswers)))
+
+      val application = applicationBuilder(userAnswers = Some(existingAnswers), usesSession = true)
+        .overrides(bind[InheritanceTaxOnPensionsConnector].toInstance(mockConnector))
+        .build()
+
+      running(application) {
+        val request =
+          FakeRequest(POST, routes.IndividualNameController.onSubmit(srn, CheckMode, JourneyRole.LprIndividual).url)
+            .withFormUrlEncodedBody(validFormData*)
+
+        val result = route(application, request).value
+
+        status(result) mustEqual SEE_OTHER
+        redirectLocation(result).value mustEqual routes.CheckYourAnswersController.onPageLoad(srn).url
       }
     }
 
@@ -228,7 +275,8 @@ class IndividualNameControllerSpec extends SpecBase {
         controller.nextPage(
           srn,
           NormalMode,
-          JourneyRole.Unknown
+          JourneyRole.Unknown,
+          emptyUserAnswers
         ) mustEqual routes.JourneyRecoveryController
           .onPageLoad()
       }

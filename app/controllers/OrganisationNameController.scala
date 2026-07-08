@@ -18,7 +18,7 @@ package controllers
 
 import services.UserAnswersService
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
-import pages.OrganisationNamePage
+import pages.{IndividualNamePage, OrganisationNamePage}
 import controllers.actions._
 import forms.OrganisationNameFormProvider
 import models._
@@ -75,13 +75,15 @@ class OrganisationNameController @Inject() (
               for {
                 updatedAnswers <- Future.fromTry(request.userAnswers.set(OrganisationNamePage, value))
                 _ <- userAnswersService.set(updatedAnswers)(using hc, request.request)
-              } yield Redirect(nextPage(srn, mode))
+              } yield Redirect(nextPage(srn, mode, updatedAnswers))
           )
       }
 
-  private def nextPage(srn: Srn, mode: Mode) =
+  private def nextPage(srn: Srn, mode: Mode, userAnswers: UserAnswers) =
     mode match {
       case NormalMode => routes.IndividualNameController.onPageLoad(srn, NormalMode, JourneyRole.LprOrganisation)
+      case CheckMode if userAnswers.get(IndividualNamePage(JourneyRole.LprOrganisation)).isEmpty =>
+        routes.IndividualNameController.onPageLoad(srn, CheckMode, JourneyRole.LprOrganisation)
       case CheckMode => routes.CheckYourAnswersController.onPageLoad(srn)
     }
 }

@@ -16,8 +16,8 @@
 
 package viewmodels.CheckAnswers
 
-import pages.BirthDeathDatesPage
-import models.{BirthDeathDates, CheckMode}
+import pages.PaymentNoticeDatePage
+import models.CheckMode
 import play.api.i18n.Messages
 import play.api.test.Helpers.stubMessages
 import org.scalatest.freespec.AnyFreeSpec
@@ -26,38 +26,30 @@ import base.SpecBase
 
 import java.time.LocalDate
 
-class BirthDeathDatesSummarySpec extends AnyFreeSpec with SpecBase {
+class PaymentNoticeDateSummarySpec extends AnyFreeSpec with SpecBase {
 
-  "BirthDeathDatesSummary" - {
+  "PaymentNoticeDateSummary" - {
     implicit val messages: Messages = stubMessages()
 
     "must return None when data is not present" in {
-
-      val result = BirthDeathDatesSummary.row(srn, emptyUserAnswers)
+      val result = PaymentNoticeDateSummary.row(srn, emptyUserAnswers)
 
       result mustBe None
     }
 
-    "must return a row with the birth and death dates on one line" in {
-
+    "must return a row with the payment notice receipt date" in {
       val userAnswers = emptyUserAnswers
-        .set(
-          BirthDeathDatesPage,
-          BirthDeathDates(
-            dateOfBirth = LocalDate.of(1956, 1, 16),
-            dateOfDeath = LocalDate.of(2025, 9, 20)
-          )
-        )
+        .set(PaymentNoticeDatePage, LocalDate.of(2026, 3, 27))
         .success
         .value
 
-      val result = BirthDeathDatesSummary.row(srn, userAnswers)
+      val result = PaymentNoticeDateSummary.row(srn, userAnswers)
 
       result mustBe defined
-      result.get.key.content mustBe Text(messages("birthDeathDates.checkYourAnswersLabel"))
-      result.get.value.content mustBe Text("16 Jan 1956 to 20 Sept 2025")
+      result.get.key.content mustBe Text(messages("paymentNoticeDate.checkYourAnswersLabel"))
+      result.get.value.content mustBe Text("27 Mar 2026")
       result.get.actions.get.items.head.href mustBe
-        controllers.routes.BirthDeathDatesController.onPageLoad(srn, CheckMode).url
+        controllers.routes.PaymentNoticeDateController.onPageLoad(srn, CheckMode).url
     }
   }
 }

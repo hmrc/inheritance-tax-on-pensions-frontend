@@ -18,18 +18,21 @@ package controllers
 
 import play.api.test.FakeRequest
 import connectors.InheritanceTaxOnPensionsConnector
-import pages.{DidPrSubmitPage, IndividualNamePage, LprTypePage}
+import pages._
 import play.api.inject.bind
 import views.html.DidPrSubmitView
 import base.SpecBase
 import forms.DidPrSubmitFormProvider
 import models._
-import org.scalatestplus.mockito.MockitoSugar
 import org.mockito.ArgumentMatchers.any
 import play.api.test.Helpers._
-import org.mockito.Mockito.when
+import org.mockito.Mockito.{verify, when}
+import org.mockito.ArgumentCaptor
+import org.scalatestplus.mockito.MockitoSugar
 
 import scala.concurrent.Future
+
+import java.time.LocalDate
 
 class DidPrSubmitControllerSpec extends SpecBase with MockitoSugar {
 
@@ -116,7 +119,7 @@ class DidPrSubmitControllerSpec extends SpecBase with MockitoSugar {
       }
     }
 
-    "must redirect to the next page when valid data is submitted" in {
+    "must redirect to the payment notice date page when Yes is submitted in NormalMode" in {
 
       val mockInheritanceTaxOnPensionsConnector = mock[InheritanceTaxOnPensionsConnector]
       when(mockInheritanceTaxOnPensionsConnector.setUserAnswers(any(), any(), any(), any(), any())(using any()))
@@ -132,6 +135,123 @@ class DidPrSubmitControllerSpec extends SpecBase with MockitoSugar {
         val request =
           FakeRequest(POST, didPrSubmitRoute)
             .withFormUrlEncodedBody(("value", "true"))
+
+        val result = route(application, request).value
+
+        status(result) mustEqual SEE_OTHER
+        redirectLocation(result).value mustEqual routes.PaymentNoticeDateController.onPageLoad(srn, NormalMode).url
+      }
+    }
+
+    "must redirect to the payment notice date page when Yes is submitted in CheckMode" in {
+
+      val mockInheritanceTaxOnPensionsConnector = mock[InheritanceTaxOnPensionsConnector]
+      when(mockInheritanceTaxOnPensionsConnector.setUserAnswers(any(), any(), any(), any(), any())(using any()))
+        .thenReturn(Future.successful(Right(userAnswersWithLprName)))
+
+      val application = applicationBuilder(userAnswers = Some(userAnswersWithLprName), usesSession = true)
+        .overrides(
+          bind[InheritanceTaxOnPensionsConnector].toInstance(mockInheritanceTaxOnPensionsConnector)
+        )
+        .build()
+
+      running(application) {
+        val request =
+          FakeRequest(POST, routes.DidPrSubmitController.onSubmit(srn, CheckMode).url)
+            .withFormUrlEncodedBody(("value", "true"))
+
+        val result = route(application, request).value
+
+        status(result) mustEqual SEE_OTHER
+        redirectLocation(result).value mustEqual routes.PaymentNoticeDateController.onPageLoad(srn, CheckMode).url
+      }
+    }
+
+    "must redirect to the payment notice date page and keep the payment notice date when No is submitted in NormalMode" in {
+
+      val mockInheritanceTaxOnPensionsConnector = mock[InheritanceTaxOnPensionsConnector]
+      when(mockInheritanceTaxOnPensionsConnector.setUserAnswers(any(), any(), any(), any(), any())(using any()))
+        .thenReturn(Future.successful(Right(userAnswersWithLprName)))
+
+      val userAnswers = userAnswersWithLprName
+        .set(PaymentNoticeDatePage, LocalDate.of(2026, 3, 27))
+        .success
+        .value
+
+      val application = applicationBuilder(userAnswers = Some(userAnswers), usesSession = true)
+        .overrides(
+          bind[InheritanceTaxOnPensionsConnector].toInstance(mockInheritanceTaxOnPensionsConnector)
+        )
+        .build()
+
+      running(application) {
+        val request =
+          FakeRequest(POST, didPrSubmitRoute)
+            .withFormUrlEncodedBody(("value", "false"))
+
+        val result = route(application, request).value
+
+        status(result) mustEqual SEE_OTHER
+        redirectLocation(result).value mustEqual routes.PaymentNoticeDateController.onPageLoad(srn, NormalMode).url
+
+        val userAnswersCaptor: ArgumentCaptor[UserAnswers] = ArgumentCaptor.forClass(classOf[UserAnswers])
+        verify(mockInheritanceTaxOnPensionsConnector).setUserAnswers(
+          userAnswersCaptor.capture(),
+          any(),
+          any(),
+          any(),
+          any()
+        )(using any())
+        userAnswersCaptor.getValue.get(DidPrSubmitPage).value mustEqual false
+        userAnswersCaptor.getValue.get(PaymentNoticeDatePage).value mustEqual LocalDate.of(2026, 3, 27)
+      }
+    }
+
+    "must redirect to the payment notice date page when No is submitted in CheckMode and the payment notice date is missing" in {
+
+      val mockInheritanceTaxOnPensionsConnector = mock[InheritanceTaxOnPensionsConnector]
+      when(mockInheritanceTaxOnPensionsConnector.setUserAnswers(any(), any(), any(), any(), any())(using any()))
+        .thenReturn(Future.successful(Right(userAnswersWithLprName)))
+
+      val application = applicationBuilder(userAnswers = Some(userAnswersWithLprName), usesSession = true)
+        .overrides(
+          bind[InheritanceTaxOnPensionsConnector].toInstance(mockInheritanceTaxOnPensionsConnector)
+        )
+        .build()
+
+      running(application) {
+        val request =
+          FakeRequest(POST, routes.DidPrSubmitController.onSubmit(srn, CheckMode).url)
+            .withFormUrlEncodedBody(("value", "false"))
+
+        val result = route(application, request).value
+
+        status(result) mustEqual SEE_OTHER
+        redirectLocation(result).value mustEqual routes.PaymentNoticeDateController.onPageLoad(srn, CheckMode).url
+      }
+    }
+
+    "must redirect to Check Your Answers when No is submitted in CheckMode and the payment notice date is present" in {
+
+      val mockInheritanceTaxOnPensionsConnector = mock[InheritanceTaxOnPensionsConnector]
+      when(mockInheritanceTaxOnPensionsConnector.setUserAnswers(any(), any(), any(), any(), any())(using any()))
+        .thenReturn(Future.successful(Right(userAnswersWithLprName)))
+
+      val userAnswers = userAnswersWithLprName
+        .set(PaymentNoticeDatePage, LocalDate.of(2026, 3, 27))
+        .success
+        .value
+
+      val application = applicationBuilder(userAnswers = Some(userAnswers), usesSession = true)
+        .overrides(
+          bind[InheritanceTaxOnPensionsConnector].toInstance(mockInheritanceTaxOnPensionsConnector)
+        )
+        .build()
+
+      running(application) {
+        val request =
+          FakeRequest(POST, routes.DidPrSubmitController.onSubmit(srn, CheckMode).url)
+            .withFormUrlEncodedBody(("value", "false"))
 
         val result = route(application, request).value
 

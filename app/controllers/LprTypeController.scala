@@ -18,7 +18,7 @@ package controllers
 
 import services.UserAnswersService
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
-import pages.{IndividualNamePage, LprTypePage, OrganisationNamePage}
+import pages._
 import controllers.actions._
 import forms.LprTypeFormProvider
 import models._
@@ -91,11 +91,13 @@ class LprTypeController @Inject() (
       case CheckMode =>
         answer match {
           case LprType.Individual if userAnswers.get(IndividualNamePage(JourneyRole.LprIndividual)).isEmpty =>
-            routes.IndividualNameController.onPageLoad(srn, NormalMode, JourneyRole.LprIndividual)
+            routes.IndividualNameController.onPageLoad(srn, CheckMode, JourneyRole.LprIndividual)
+          case LprType.Individual if userAnswers.get(LprIndividualAddressPage).isEmpty =>
+            routes.AddressLookupStartController.start(srn, CheckMode)
           case LprType.Organisation if userAnswers.get(OrganisationNamePage).isEmpty =>
-            routes.OrganisationNameController.onPageLoad(srn, NormalMode)
+            routes.OrganisationNameController.onPageLoad(srn, CheckMode)
           case LprType.Organisation if userAnswers.get(IndividualNamePage(JourneyRole.LprOrganisation)).isEmpty =>
-            routes.IndividualNameController.onPageLoad(srn, NormalMode, JourneyRole.LprOrganisation)
+            routes.IndividualNameController.onPageLoad(srn, CheckMode, JourneyRole.LprOrganisation)
           case _ =>
             routes.CheckYourAnswersController.onPageLoad(srn)
         }
