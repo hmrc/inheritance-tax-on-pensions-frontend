@@ -19,7 +19,7 @@ package controllers
 import play.api.test.FakeRequest
 import play.api.mvc.{AnyContentAsEmpty, AnyContentAsFormUrlEncoded}
 import connectors.InheritanceTaxOnPensionsConnector
-import pages.{BirthDeathDatesPage, DidPrSubmitPage, PaymentNoticeDatePage}
+import pages._
 import play.api.inject.bind
 import views.html.PaymentNoticeDateView
 import base.SpecBase
@@ -140,7 +140,7 @@ class PaymentNoticeDateControllerSpec extends SpecBase with MockitoSugar {
       }
     }
 
-    "must redirect to Check Your Answers when valid data is submitted and PR submit payment notice has been answered No" in {
+    "must redirect to the beneficiaries known page when valid data is submitted and PR submit payment notice has been answered No" in {
       val mockInheritanceTaxOnPensionsConnector = mock[InheritanceTaxOnPensionsConnector]
 
       when(mockInheritanceTaxOnPensionsConnector.setUserAnswers(any(), any(), any(), any(), any())(using any()))
@@ -156,11 +156,11 @@ class PaymentNoticeDateControllerSpec extends SpecBase with MockitoSugar {
         val result = route(application, postRequest()).value
 
         status(result) mustEqual SEE_OTHER
-        redirectLocation(result).value mustEqual routes.CheckYourAnswersController.onPageLoad(srn).url
+        redirectLocation(result).value mustEqual routes.AreBeneficiariesKnownController.onPageLoad(srn, NormalMode).url
       }
     }
 
-    "must redirect to Check Your Answers when valid data is submitted" in {
+    "must redirect to the beneficiaries known page when valid data is submitted" in {
       val mockInheritanceTaxOnPensionsConnector = mock[InheritanceTaxOnPensionsConnector]
 
       when(mockInheritanceTaxOnPensionsConnector.setUserAnswers(any(), any(), any(), any(), any())(using any()))
@@ -176,17 +176,43 @@ class PaymentNoticeDateControllerSpec extends SpecBase with MockitoSugar {
         val result = route(application, postRequest()).value
 
         status(result) mustEqual SEE_OTHER
-        redirectLocation(result).value mustEqual routes.CheckYourAnswersController.onPageLoad(srn).url
+        redirectLocation(result).value mustEqual routes.AreBeneficiariesKnownController.onPageLoad(srn, NormalMode).url
       }
     }
 
-    "must redirect to Check Your Answers when valid data is submitted in CheckMode" in {
+    "must redirect to the beneficiaries known page when valid data is submitted in CheckMode and beneficiaries known is missing" in {
       val mockInheritanceTaxOnPensionsConnector = mock[InheritanceTaxOnPensionsConnector]
 
       when(mockInheritanceTaxOnPensionsConnector.setUserAnswers(any(), any(), any(), any(), any())(using any()))
         .thenReturn(Future.successful(Right(emptyUserAnswers)))
 
       val application = applicationBuilder(userAnswers = Some(userAnswersWithDidPrSubmit), usesSession = true)
+        .overrides(
+          bind[InheritanceTaxOnPensionsConnector].toInstance(mockInheritanceTaxOnPensionsConnector)
+        )
+        .build()
+
+      running(application) {
+        val result =
+          route(application, postRequest(routes.PaymentNoticeDateController.onSubmit(srn, CheckMode).url)).value
+
+        status(result) mustEqual SEE_OTHER
+        redirectLocation(result).value mustEqual routes.AreBeneficiariesKnownController.onPageLoad(srn, CheckMode).url
+      }
+    }
+
+    "must redirect to Check Your Answers when valid data is submitted in CheckMode and beneficiaries known has already been answered" in {
+      val mockInheritanceTaxOnPensionsConnector = mock[InheritanceTaxOnPensionsConnector]
+
+      when(mockInheritanceTaxOnPensionsConnector.setUserAnswers(any(), any(), any(), any(), any())(using any()))
+        .thenReturn(Future.successful(Right(emptyUserAnswers)))
+
+      val userAnswers = userAnswersWithDidPrSubmit
+        .set(AreBeneficiariesKnownPage, true)
+        .success
+        .value
+
+      val application = applicationBuilder(userAnswers = Some(userAnswers), usesSession = true)
         .overrides(
           bind[InheritanceTaxOnPensionsConnector].toInstance(mockInheritanceTaxOnPensionsConnector)
         )

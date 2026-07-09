@@ -57,7 +57,8 @@ class CheckYourAnswersController @Inject() (
           LprOrganisationPrNameSummary.row(srn, userAnswers),
           LprIndividualAddressSummary.row(srn, userAnswers, countryService.nameForCode),
           DidPrSubmitSummary.row(srn, userAnswers),
-          PaymentNoticeDateSummary.row(srn, userAnswers)
+          PaymentNoticeDateSummary.row(srn, userAnswers),
+          AreBeneficiariesKnownSummary.row(srn, userAnswers)
         ).flatten
       )
 

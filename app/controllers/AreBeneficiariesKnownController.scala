@@ -18,30 +18,32 @@ package controllers
 
 import services.UserAnswersService
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
-import pages._
+import pages.{AreBeneficiariesKnownPage, DidPrSubmitPage}
 import controllers.actions._
-import forms.PaymentNoticeDateFormProvider
-import models._
+import forms.AreBeneficiariesKnownFormProvider
+import models.Mode
 import play.api.i18n.MessagesApi
-import views.html.PaymentNoticeDateView
+import views.html.AreBeneficiariesKnownView
 import models.SchemeId.Srn
 
 import scala.concurrent.{ExecutionContext, Future}
 
 import javax.inject.Inject
 
-class PaymentNoticeDateController @Inject() (
+class AreBeneficiariesKnownController @Inject() (
   override val messagesApi: MessagesApi,
-  identify: IdentifierAction,
   allowAccess: AllowAccessActionWithSessionCacheProvider,
+  identify: IdentifierAction,
   getData: DataRetrievalAction,
   requireData: DataRequiredAction,
-  formProvider: PaymentNoticeDateFormProvider,
+  formProvider: AreBeneficiariesKnownFormProvider,
   val controllerComponents: MessagesControllerComponents,
   userAnswersService: UserAnswersService,
-  view: PaymentNoticeDateView
+  view: AreBeneficiariesKnownView
 )(implicit ec: ExecutionContext)
     extends IhtpBaseController {
+
+  val form = formProvider()
 
   def onPageLoad(srn: Srn, mode: Mode): Action[AnyContent] =
     identify
@@ -50,15 +52,13 @@ class PaymentNoticeDateController @Inject() (
       .andThen(requireData) { implicit request =>
         request.userAnswers.get(DidPrSubmitPage) match {
           case Some(_) =>
-            val form = formProvider()
-            val preparedForm = request.userAnswers.get(PaymentNoticeDatePage) match {
+            val preparedForm = request.userAnswers.get(AreBeneficiariesKnownPage) match {
               case None => form
               case Some(value) => form.fill(value)
             }
-
-            Ok(view(preparedForm, srn, mode, request.request.schemeDetails.schemeName))
-          case _ =>
-            logAndJourneyRecovery("PR payment notice answer is missing, cannot load the page")
+            Ok(view(preparedForm, srn, mode))
+          case None =>
+            logAndJourneyRecovery("PR payment notice answer is missing, cannot load the beneficiaries known page")
         }
       }
 
@@ -70,36 +70,23 @@ class PaymentNoticeDateController @Inject() (
       .async { implicit request =>
         request.userAnswers.get(DidPrSubmitPage) match {
           case Some(_) =>
-            val form = formProvider()
-
-            formProvider
-              .validate(
-                form.bindFromRequest(),
-                request.userAnswers.get(BirthDeathDatesPage).map(_.dateOfDeath)
-              )
+            form
+              .bindFromRequest()
               .fold(
-                formWithErrors =>
-                  Future.successful(
-                    BadRequest(view(formWithErrors, srn, mode, request.request.schemeDetails.schemeName))
-                  ),
+                formWithErrors => Future.successful(BadRequest(view(formWithErrors, srn, mode))),
                 value =>
                   for {
-                    updatedAnswers <- Future.fromTry(request.userAnswers.set(PaymentNoticeDatePage, value))
+                    updatedAnswers <- Future.fromTry(request.userAnswers.set(AreBeneficiariesKnownPage, value))
                     _ <- userAnswersService.set(updatedAnswers)(using hc, request.request)
-                  } yield Redirect(nextPage(srn, mode, updatedAnswers))
+                  } yield Redirect(nextPage(srn))
               )
-          case _ =>
+          case None =>
             Future.successful(
-              logAndJourneyRecovery("PR payment notice answer is missing, cannot submit the page")
+              logAndJourneyRecovery("PR payment notice answer is missing, cannot submit the beneficiaries known page")
             )
         }
       }
 
-  private def nextPage(srn: Srn, mode: Mode, userAnswers: UserAnswers) =
-    mode match {
-      case NormalMode => routes.AreBeneficiariesKnownController.onPageLoad(srn, NormalMode)
-      case CheckMode if userAnswers.get(AreBeneficiariesKnownPage).isEmpty =>
-        routes.AreBeneficiariesKnownController.onPageLoad(srn, CheckMode)
-      case CheckMode => routes.CheckYourAnswersController.onPageLoad(srn)
-    }
+  private def nextPage(srn: Srn) =
+    routes.CheckYourAnswersController.onPageLoad(srn)
 }
