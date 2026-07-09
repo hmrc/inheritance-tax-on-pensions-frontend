@@ -28,12 +28,12 @@ import org.scalatest.freespec.AnyFreeSpec
 class ViewUtilsSpec extends AnyFreeSpec with OptionValues with Matchers with Mappings {
   val validTestForm: Form[String] =
     Form(
-      "value" -> text(),
+      "value" -> text()
     )
 
   val validErrorForm: Form[String] =
     Form(
-      "value" -> text(),
+      "value" -> text()
     ).bind(Map("value" -> ""))
 
   implicit val messages: Messages = stubMessages()
@@ -42,7 +42,7 @@ class ViewUtilsSpec extends AnyFreeSpec with OptionValues with Matchers with Map
 
     "valid form must not start with space" in {
       val result = ViewUtils.title(validTestForm, "testTitle", None)(using messages)
-      result must not startWith " testTitle"
+      (result must not).startWith(" testTitle")
     }
     "form with error should be prefixed and space delimited" in {
       val result = ViewUtils.title(validErrorForm, "testTitle", None)(using messages)
