@@ -153,11 +153,7 @@ class IndividualNameControllerSpec extends SpecBase {
               .withFormUrlEncodedBody(validFormData*)
 
           val result = route(application, request).value
-
-          val expectedNextPage = journeyRole match {
-            case JourneyRole.LprIndividual => routes.AddressLookupStartController.start(srn, CheckMode).url
-            case _ => routes.CheckYourAnswersController.onPageLoad(srn).url
-          }
+          val expectedNextPage = routes.CheckYourAnswersController.onPageLoad(srn).url
 
           status(result) mustEqual SEE_OTHER
           redirectLocation(result).value mustEqual expectedNextPage
@@ -275,8 +271,7 @@ class IndividualNameControllerSpec extends SpecBase {
         controller.nextPage(
           srn,
           NormalMode,
-          JourneyRole.Unknown,
-          emptyUserAnswers
+          JourneyRole.Unknown
         ) mustEqual routes.JourneyRecoveryController
           .onPageLoad()
       }
