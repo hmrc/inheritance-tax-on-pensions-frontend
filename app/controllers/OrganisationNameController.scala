@@ -81,9 +81,9 @@ class OrganisationNameController @Inject() (
 
   private def nextPage(srn: Srn, mode: Mode, userAnswers: UserAnswers) =
     mode match {
-      case NormalMode => routes.IndividualNameController.onPageLoad(srn, NormalMode, JourneyRole.LprOrganisation)
-      case CheckMode if userAnswers.get(IndividualNamePage(JourneyRole.LprOrganisation)).isEmpty =>
-        routes.IndividualNameController.onPageLoad(srn, CheckMode, JourneyRole.LprOrganisation)
+      case NormalMode => routes.IndividualNameController.onPageLoad(srn, NormalMode, JourneyRole.PrOrganisation)
+      case CheckMode if userAnswers.get(IndividualNamePage(JourneyRole.PrOrganisation)).isEmpty =>
+        routes.IndividualNameController.onPageLoad(srn, CheckMode, JourneyRole.PrOrganisation)
       case CheckMode => routes.CheckYourAnswersController.onPageLoad(srn)
     }
 }

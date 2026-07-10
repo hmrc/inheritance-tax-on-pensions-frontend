@@ -19,7 +19,7 @@ package models
 import models.addresslookup.AlfAddressData
 import play.api.libs.json.{Json, OFormat}
 
-final case class LprAddress(
+final case class PrAddress(
   addressLine1: String,
   addressLine2: Option[String],
   addressLine3: Option[String],
@@ -28,18 +28,18 @@ final case class LprAddress(
   country: String
 )
 
-object LprAddress {
-  implicit val format: OFormat[LprAddress] = Json.format[LprAddress]
+object PrAddress {
+  implicit val format: OFormat[PrAddress] = Json.format[PrAddress]
 
   def hasValidFirstAddressLine(addressData: AlfAddressData): Boolean =
     addressLines(addressData).headOption.exists(_.trim.nonEmpty)
 
-  def fromAlfAddressData(addressData: AlfAddressData): LprAddress = {
+  def fromAlfAddressData(addressData: AlfAddressData): PrAddress = {
     val lines = addressLines(addressData)
     val addressLine2 = lines.lift(1).orElse(addressData.address.town)
     val addressLine4 = lines.lift(3).orElse(addressData.address.town.filterNot(addressLine2.contains))
 
-    LprAddress(
+    PrAddress(
       addressLine1 = lines.headOption.map(_.trim).getOrElse(""),
       addressLine2 = addressLine2,
       addressLine3 = lines.lift(2),

@@ -54,10 +54,10 @@ class CheckYourAnswersControllerSpec extends SpecBase {
         .get
         .set(BirthDeathDatesPage, BirthDeathDates(testDateOfBirth, testDateOfDeath))
         .get
-        .set(LprTypePage, LprType.Individual)
+        .set(PrTypePage, PrType.Individual)
         .get
         .set(
-          IndividualNamePage(JourneyRole.LprIndividual),
+          IndividualNamePage(JourneyRole.PrIndividual),
           IndividualName(
             title = Some("Mr"),
             firstForename = "John",
@@ -84,8 +84,8 @@ class CheckYourAnswersControllerSpec extends SpecBase {
             NameOfDeceasedSummary.row(srn, userAnswers)(using messages(application)).get,
             NinoOrReasonSummary.row(srn, userAnswers)(using messages(application)).get,
             BirthDeathDatesSummary.row(srn, userAnswers)(using messages(application)).get,
-            LprTypeSummary.row(srn, userAnswers)(using messages(application)).get,
-            LprIndividualNameSummary.row(srn, userAnswers)(using messages(application)).get,
+            PrTypeSummary.row(srn, userAnswers)(using messages(application)).get,
+            PrIndividualNameSummary.row(srn, userAnswers)(using messages(application)).get,
             DidPrSubmitSummary.row(srn, userAnswers)(using messages(application)).get
           )
         )
@@ -114,10 +114,10 @@ class CheckYourAnswersControllerSpec extends SpecBase {
         .get
         .set(BirthDeathDatesPage, BirthDeathDates(testDateOfBirth, testDateOfDeath))
         .get
-        .set(LprTypePage, LprType.Individual)
+        .set(PrTypePage, PrType.Individual)
         .get
         .set(
-          IndividualNamePage(JourneyRole.LprIndividual),
+          IndividualNamePage(JourneyRole.PrIndividual),
           IndividualName(
             title = Some("Mr"),
             firstForename = "John",
@@ -144,8 +144,8 @@ class CheckYourAnswersControllerSpec extends SpecBase {
             NameOfDeceasedSummary.row(srn, userAnswers)(using messages(application)).get,
             NinoOrReasonSummary.row(srn, userAnswers)(using messages(application)).get,
             BirthDeathDatesSummary.row(srn, userAnswers)(using messages(application)).get,
-            LprTypeSummary.row(srn, userAnswers)(using messages(application)).get,
-            LprIndividualNameSummary.row(srn, userAnswers)(using messages(application)).get,
+            PrTypeSummary.row(srn, userAnswers)(using messages(application)).get,
+            PrIndividualNameSummary.row(srn, userAnswers)(using messages(application)).get,
             DidPrSubmitSummary.row(srn, userAnswers)(using messages(application)).get
           )
         )
@@ -189,7 +189,7 @@ class CheckYourAnswersControllerSpec extends SpecBase {
       val userAnswers = emptyUserAnswers
         .copy(
           data = Json.obj(
-            "lprDetails" -> Json.obj(
+            "prDetails" -> Json.obj(
               "organisation" -> Json.obj(
                 "organisationName" -> "Test Organisation",
                 "title" -> "Ms",
@@ -200,7 +200,7 @@ class CheckYourAnswersControllerSpec extends SpecBase {
             )
           )
         )
-        .set(LprTypePage, LprType.Organisation)
+        .set(PrTypePage, PrType.Organisation)
         .success
         .value
         .set(DidPrSubmitPage, true)
@@ -217,9 +217,9 @@ class CheckYourAnswersControllerSpec extends SpecBase {
 
         val summaryList = SummaryListViewModel(
           rows = Seq(
-            LprTypeSummary.row(srn, userAnswers)(using messages(application)).get,
-            LprOrganisationNameSummary.row(srn, userAnswers)(using messages(application)).get,
-            LprOrganisationPrNameSummary.row(srn, userAnswers)(using messages(application)).get,
+            PrTypeSummary.row(srn, userAnswers)(using messages(application)).get,
+            PrOrganisationNameSummary.row(srn, userAnswers)(using messages(application)).get,
+            PrOrganisationPrNameSummary.row(srn, userAnswers)(using messages(application)).get,
             DidPrSubmitSummary.row(srn, userAnswers)(using messages(application)).get
           )
         )
@@ -291,10 +291,10 @@ class CheckYourAnswersControllerSpec extends SpecBase {
         .get
         .set(BirthDeathDatesPage, BirthDeathDates(testDateOfBirth, testDateOfDeath))
         .get
-        .set(LprTypePage, LprType.Individual)
+        .set(PrTypePage, PrType.Individual)
         .get
         .set(
-          IndividualNamePage(JourneyRole.LprIndividual),
+          IndividualNamePage(JourneyRole.PrIndividual),
           IndividualName(
             title = Some("Mr"),
             firstForename = "John",

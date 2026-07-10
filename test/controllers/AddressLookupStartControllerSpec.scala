@@ -34,9 +34,9 @@ class AddressLookupStartControllerSpec extends SpecBase {
 
     "must start the ALF journey and redirect to the returned ALF URL" in {
 
-      val lprIndividualName = IndividualName(Some("Mr"), "John", Some("William"), "Doe")
+      val prIndividualName = IndividualName(Some("Mr"), "John", Some("William"), "Doe")
       val userAnswers =
-        emptyUserAnswers.set(IndividualNamePage(JourneyRole.LprIndividual), lprIndividualName).success.value
+        emptyUserAnswers.set(IndividualNamePage(JourneyRole.PrIndividual), prIndividualName).success.value
       val mockAddressLookupFrontendService = mock[AddressLookupFrontendService]
 
       when(
@@ -67,9 +67,9 @@ class AddressLookupStartControllerSpec extends SpecBase {
 
     "must start a new ALF journey in CheckMode" in {
 
-      val lprIndividualName = IndividualName(Some("Mr"), "John", Some("William"), "Doe")
+      val prIndividualName = IndividualName(Some("Mr"), "John", Some("William"), "Doe")
       val userAnswers =
-        emptyUserAnswers.set(IndividualNamePage(JourneyRole.LprIndividual), lprIndividualName).success.value
+        emptyUserAnswers.set(IndividualNamePage(JourneyRole.PrIndividual), prIndividualName).success.value
       val mockAddressLookupFrontendService = mock[AddressLookupFrontendService]
 
       when(
@@ -98,7 +98,7 @@ class AddressLookupStartControllerSpec extends SpecBase {
       }
     }
 
-    "must redirect to journey recovery when the LPR individual name is missing" in {
+    "must redirect to journey recovery when the PR individual name is missing" in {
 
       val mockAddressLookupFrontendService = mock[AddressLookupFrontendService]
 

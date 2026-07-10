@@ -14,13 +14,18 @@
  * limitations under the License.
  */
 
-package pages
+package forms
 
-import play.api.libs.json.JsPath
+import forms.mappings.Mappings
+import models.PrType
+import play.api.data.Form
 
-case object OrganisationNamePage extends QuestionPage[String] {
+import javax.inject.Inject
 
-  override def path: JsPath = JsPath \ "prDetails" \ "organisation" \ "organisationName"
+class PrTypeFormProvider @Inject() extends Mappings {
 
-  override def toString: String = "organisationName"
+  def apply(): Form[PrType] =
+    Form(
+      "value" -> enumerable[PrType]("prType.error.required")
+    )
 }

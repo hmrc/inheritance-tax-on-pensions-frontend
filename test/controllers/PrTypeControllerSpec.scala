@@ -18,9 +18,9 @@ package controllers
 
 import play.api.test.FakeRequest
 import connectors.InheritanceTaxOnPensionsConnector
-import pages.{IndividualNamePage, LprTypePage, OrganisationNamePage}
+import pages.{IndividualNamePage, OrganisationNamePage, PrTypePage}
 import play.api.inject.bind
-import views.html.LprTypeView
+import views.html.PrTypeView
 import base.SpecBase
 import play.api.libs.json.Json
 import models._
@@ -30,32 +30,32 @@ import org.mockito.ArgumentMatchers.{any, argThat}
 import play.api.test.Helpers._
 import org.mockito.Mockito.{times, verify, when}
 import repositories.SessionMinimalDetailsRepository
-import forms.LprTypeFormProvider
+import forms.PrTypeFormProvider
 
 import scala.concurrent.Future
 
-class LprTypeControllerSpec extends SpecBase {
+class PrTypeControllerSpec extends SpecBase {
 
-  val formProvider = new LprTypeFormProvider()
-  val form: Form[LprType] = formProvider()
-  val lprIndividualName: IndividualName = IndividualName(Some("Mr"), "John", Some("William"), "Doe")
-  val lprIndividualAddress: LprAddress =
-    LprAddress("33 Fake Street", Some("Fake Area"), None, Some("Fakeville"), Some("ZZ1 1ZZ"), "GB")
+  val formProvider = new PrTypeFormProvider()
+  val form: Form[PrType] = formProvider()
+  val prIndividualName: IndividualName = IndividualName(Some("Mr"), "John", Some("William"), "Doe")
+  val prIndividualAddress: PrAddress =
+    PrAddress("33 Fake Street", Some("Fake Area"), None, Some("Fakeville"), Some("ZZ1 1ZZ"), "GB")
 
-  lazy val lprTypeRoute: String = routes.LprTypeController.onPageLoad(srn, NormalMode).url
+  lazy val prTypeRoute: String = routes.PrTypeController.onPageLoad(srn, NormalMode).url
 
-  "LprTypeController Controller" - {
+  "PrTypeController Controller" - {
 
     "must return OK and the correct view for a GET" in {
 
       val application = applicationBuilder(userAnswers = Some(emptyUserAnswers), usesSession = true).build()
 
       running(application) {
-        val request = FakeRequest(GET, lprTypeRoute)
+        val request = FakeRequest(GET, prTypeRoute)
 
         val result = route(application, request).value
 
-        val view = application.injector.instanceOf[LprTypeView]
+        val view = application.injector.instanceOf[PrTypeView]
 
         status(result) mustEqual OK
         contentAsString(result) mustEqual view(form, srn, NormalMode)(using request, messages(application)).toString
@@ -64,26 +64,26 @@ class LprTypeControllerSpec extends SpecBase {
 
     "must populate the view correctly on a GET when the question has previously been answered" in {
 
-      val userAnswers = emptyUserAnswers.set(LprTypePage, LprType.Individual).success.value
+      val userAnswers = emptyUserAnswers.set(PrTypePage, PrType.Individual).success.value
 
       val application = applicationBuilder(userAnswers = Some(userAnswers), usesSession = true).build()
 
       running(application) {
-        val request = FakeRequest(GET, lprTypeRoute)
+        val request = FakeRequest(GET, prTypeRoute)
 
-        val view = application.injector.instanceOf[LprTypeView]
+        val view = application.injector.instanceOf[PrTypeView]
 
         val result = route(application, request).value
 
         status(result) mustEqual OK
-        contentAsString(result) mustEqual view(form.fill(LprType.Individual), srn, NormalMode)(using
+        contentAsString(result) mustEqual view(form.fill(PrType.Individual), srn, NormalMode)(using
           request,
           messages(application)
         ).toString
       }
     }
 
-    "must redirect to the LPR individual name page when Individual is submitted" in {
+    "must redirect to the PR individual name page when Individual is submitted" in {
 
       val mockInheritanceTaxOnPensionsConnector = mock[InheritanceTaxOnPensionsConnector]
       when(mockInheritanceTaxOnPensionsConnector.setUserAnswers(any(), any(), any(), any(), any())(using any()))
@@ -97,14 +97,14 @@ class LprTypeControllerSpec extends SpecBase {
 
       running(application) {
         val request =
-          FakeRequest(POST, lprTypeRoute)
-            .withFormUrlEncodedBody(("value", LprType.Individual.toString))
+          FakeRequest(POST, prTypeRoute)
+            .withFormUrlEncodedBody(("value", PrType.Individual.toString))
 
         val result = route(application, request).value
 
         status(result) mustEqual SEE_OTHER
         redirectLocation(result).value mustEqual routes.IndividualNameController
-          .onPageLoad(srn, NormalMode, JourneyRole.LprIndividual)
+          .onPageLoad(srn, NormalMode, JourneyRole.PrIndividual)
           .url
 
         verify(mockInheritanceTaxOnPensionsConnector, times(1))
@@ -126,8 +126,8 @@ class LprTypeControllerSpec extends SpecBase {
 
       running(application) {
         val request =
-          FakeRequest(POST, lprTypeRoute)
-            .withFormUrlEncodedBody(("value", LprType.Organisation.toString))
+          FakeRequest(POST, prTypeRoute)
+            .withFormUrlEncodedBody(("value", PrType.Organisation.toString))
 
         val result = route(application, request).value
 
@@ -136,10 +136,10 @@ class LprTypeControllerSpec extends SpecBase {
       }
     }
 
-    "must clear LPR individual details when Organisation is submitted" in {
+    "must clear PR individual details when Organisation is submitted" in {
 
       val userAnswers = emptyUserAnswers
-        .set(IndividualNamePage(JourneyRole.LprIndividual), lprIndividualName)
+        .set(IndividualNamePage(JourneyRole.PrIndividual), prIndividualName)
         .success
         .value
 
@@ -155,8 +155,8 @@ class LprTypeControllerSpec extends SpecBase {
 
       running(application) {
         val request =
-          FakeRequest(POST, lprTypeRoute)
-            .withFormUrlEncodedBody(("value", LprType.Organisation.toString))
+          FakeRequest(POST, prTypeRoute)
+            .withFormUrlEncodedBody(("value", PrType.Organisation.toString))
 
         val result = route(application, request).value
 
@@ -166,7 +166,7 @@ class LprTypeControllerSpec extends SpecBase {
         verify(mockInheritanceTaxOnPensionsConnector, times(1))
           .setUserAnswers(userAnswersCaptor.capture(), any(), any(), any(), any())(using any())
 
-        userAnswersCaptor.getValue.get(IndividualNamePage(JourneyRole.LprIndividual)) mustBe None
+        userAnswersCaptor.getValue.get(IndividualNamePage(JourneyRole.PrIndividual)) mustBe None
       }
     }
 
@@ -189,14 +189,14 @@ class LprTypeControllerSpec extends SpecBase {
 
       running(application) {
         val request =
-          FakeRequest(POST, routes.LprTypeController.onSubmit(srn, CheckMode).url)
-            .withFormUrlEncodedBody(("value", LprType.Organisation.toString))
+          FakeRequest(POST, routes.PrTypeController.onSubmit(srn, CheckMode).url)
+            .withFormUrlEncodedBody(("value", PrType.Organisation.toString))
 
         val result = route(application, request).value
 
         status(result) mustEqual SEE_OTHER
         redirectLocation(result).value mustEqual routes.IndividualNameController
-          .onPageLoad(srn, CheckMode, JourneyRole.LprOrganisation)
+          .onPageLoad(srn, CheckMode, JourneyRole.PrOrganisation)
           .url
       }
     }
@@ -210,7 +210,7 @@ class LprTypeControllerSpec extends SpecBase {
       val userAnswersWithOrgDetails = emptyUserAnswers
         .copy(
           data = Json.obj(
-            "lprDetails" -> Json.obj(
+            "prDetails" -> Json.obj(
               "organisation" -> Json.obj(
                 "organisationName" -> "Test Organisation",
                 "title" -> "Mr",
@@ -230,8 +230,8 @@ class LprTypeControllerSpec extends SpecBase {
 
       running(application) {
         val request =
-          FakeRequest(POST, routes.LprTypeController.onSubmit(srn, CheckMode).url)
-            .withFormUrlEncodedBody(("value", LprType.Organisation.toString))
+          FakeRequest(POST, routes.PrTypeController.onSubmit(srn, CheckMode).url)
+            .withFormUrlEncodedBody(("value", PrType.Organisation.toString))
 
         val result = route(application, request).value
 
@@ -240,7 +240,7 @@ class LprTypeControllerSpec extends SpecBase {
       }
     }
 
-    "must redirect to the LPR individual name page when Individual is submitted in CheckMode and name details are missing" in {
+    "must redirect to the PR individual name page when Individual is submitted in CheckMode and name details are missing" in {
 
       val mockInheritanceTaxOnPensionsConnector = mock[InheritanceTaxOnPensionsConnector]
       when(mockInheritanceTaxOnPensionsConnector.setUserAnswers(any(), any(), any(), any(), any())(using any()))
@@ -254,14 +254,14 @@ class LprTypeControllerSpec extends SpecBase {
 
       running(application) {
         val request =
-          FakeRequest(POST, routes.LprTypeController.onSubmit(srn, CheckMode).url)
-            .withFormUrlEncodedBody(("value", LprType.Individual.toString))
+          FakeRequest(POST, routes.PrTypeController.onSubmit(srn, CheckMode).url)
+            .withFormUrlEncodedBody(("value", PrType.Individual.toString))
 
         val result = route(application, request).value
 
         status(result) mustEqual SEE_OTHER
         redirectLocation(result).value mustEqual routes.IndividualNameController
-          .onPageLoad(srn, CheckMode, JourneyRole.LprIndividual)
+          .onPageLoad(srn, CheckMode, JourneyRole.PrIndividual)
           .url
       }
     }
@@ -277,7 +277,7 @@ class LprTypeControllerSpec extends SpecBase {
       val userAnswersWithOrgName = emptyUserAnswers
         .copy(
           data = Json.obj(
-            "lprDetails" -> Json.obj(
+            "prDetails" -> Json.obj(
               "organisation" -> Json.obj(
                 "organisationName" -> "Test Organisation",
                 "title" -> "Mr",
@@ -288,7 +288,7 @@ class LprTypeControllerSpec extends SpecBase {
             )
           )
         )
-        .set(LprTypePage, LprType.Organisation)
+        .set(PrTypePage, PrType.Organisation)
         .success
         .value
 
@@ -300,20 +300,20 @@ class LprTypeControllerSpec extends SpecBase {
         .build()
 
       running(application) {
-        val request = FakeRequest(POST, routes.LprTypeController.onPageLoad(srn, NormalMode).url)
+        val request = FakeRequest(POST, routes.PrTypeController.onPageLoad(srn, NormalMode).url)
           .withFormUrlEncodedBody(("value", "individual"))
 
         val result = route(application, request).value
 
         status(result) mustEqual SEE_OTHER
         redirectLocation(result).value mustEqual routes.IndividualNameController
-          .onPageLoad(srn, NormalMode, JourneyRole.LprIndividual)
+          .onPageLoad(srn, NormalMode, JourneyRole.PrIndividual)
           .url
 
         verify(mockConnector).setUserAnswers(
           argThat { userAnswers =>
             userAnswers.get(OrganisationNamePage).isEmpty &&
-            userAnswers.get(IndividualNamePage(JourneyRole.LprOrganisation)).isEmpty
+            userAnswers.get(IndividualNamePage(JourneyRole.PrOrganisation)).isEmpty
           },
           any(),
           any(),
@@ -326,7 +326,7 @@ class LprTypeControllerSpec extends SpecBase {
     "must redirect to address lookup when Individual is submitted in CheckMode and address details are missing" in {
 
       val userAnswers = emptyUserAnswers
-        .set(IndividualNamePage(JourneyRole.LprIndividual), lprIndividualName)
+        .set(IndividualNamePage(JourneyRole.PrIndividual), prIndividualName)
         .success
         .value
 
@@ -342,8 +342,8 @@ class LprTypeControllerSpec extends SpecBase {
 
       running(application) {
         val request =
-          FakeRequest(POST, routes.LprTypeController.onSubmit(srn, CheckMode).url)
-            .withFormUrlEncodedBody(("value", LprType.Individual.toString))
+          FakeRequest(POST, routes.PrTypeController.onSubmit(srn, CheckMode).url)
+            .withFormUrlEncodedBody(("value", PrType.Individual.toString))
 
         val result = route(application, request).value
 
@@ -356,8 +356,8 @@ class LprTypeControllerSpec extends SpecBase {
 
       val userAnswers = emptyUserAnswers.copy(
         data = Json.obj(
-          "lprDetails" -> Json.obj(
-            "individual" -> (Json.toJsObject(lprIndividualName) ++ Json.toJsObject(lprIndividualAddress))
+          "prDetails" -> Json.obj(
+            "individual" -> (Json.toJsObject(prIndividualName) ++ Json.toJsObject(prIndividualAddress))
           )
         )
       )
@@ -374,8 +374,8 @@ class LprTypeControllerSpec extends SpecBase {
 
       running(application) {
         val request =
-          FakeRequest(POST, routes.LprTypeController.onSubmit(srn, CheckMode).url)
-            .withFormUrlEncodedBody(("value", LprType.Individual.toString))
+          FakeRequest(POST, routes.PrTypeController.onSubmit(srn, CheckMode).url)
+            .withFormUrlEncodedBody(("value", PrType.Individual.toString))
 
         val result = route(application, request).value
 
@@ -390,12 +390,12 @@ class LprTypeControllerSpec extends SpecBase {
 
       running(application) {
         val request =
-          FakeRequest(POST, lprTypeRoute)
+          FakeRequest(POST, prTypeRoute)
             .withFormUrlEncodedBody(("value", ""))
 
         val boundForm = form.bind(Map("value" -> ""))
 
-        val view = application.injector.instanceOf[LprTypeView]
+        val view = application.injector.instanceOf[PrTypeView]
 
         val result = route(application, request).value
 
@@ -412,7 +412,7 @@ class LprTypeControllerSpec extends SpecBase {
       val application = applicationBuilder(userAnswers = None, usesSession = true).build()
 
       running(application) {
-        val request = FakeRequest(GET, lprTypeRoute)
+        val request = FakeRequest(GET, prTypeRoute)
 
         val result = route(application, request).value
 
@@ -427,8 +427,8 @@ class LprTypeControllerSpec extends SpecBase {
 
       running(application) {
         val request =
-          FakeRequest(POST, lprTypeRoute)
-            .withFormUrlEncodedBody(("value", LprType.Individual.toString))
+          FakeRequest(POST, prTypeRoute)
+            .withFormUrlEncodedBody(("value", PrType.Individual.toString))
 
         val result = route(application, request).value
 

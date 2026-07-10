@@ -79,8 +79,8 @@ class AddressLookupContinueControllerSpec extends SpecBase {
           val userAnswersCaptor: ArgumentCaptor[UserAnswers] = ArgumentCaptor.forClass(classOf[UserAnswers])
           verify(mockUserAnswersService).set(userAnswersCaptor.capture())(using any(), any())
 
-          (userAnswersCaptor.getValue.data \ "lprDetails" \ "individual").as[LprAddress] mustBe
-            LprAddress(
+          (userAnswersCaptor.getValue.data \ "prDetails" \ "individual").as[PrAddress] mustBe
+            PrAddress(
               addressLine1 = "33 Fake Street",
               addressLine2 = Some("Fake Area"),
               addressLine3 = None,
@@ -99,7 +99,7 @@ class AddressLookupContinueControllerSpec extends SpecBase {
 
       val existingUserAnswers = emptyUserAnswers.copy(
         data = Json.obj(
-          "lprDetails" -> Json.obj(
+          "prDetails" -> Json.obj(
             "individual" -> Json.obj(
               "firstForename" -> "John",
               "surname" -> "Doe",
@@ -148,7 +148,7 @@ class AddressLookupContinueControllerSpec extends SpecBase {
         val userAnswersCaptor: ArgumentCaptor[UserAnswers] = ArgumentCaptor.forClass(classOf[UserAnswers])
         verify(mockUserAnswersService).set(userAnswersCaptor.capture())(using any(), any())
 
-        val updatedIndividual = (userAnswersCaptor.getValue.data \ "lprDetails" \ "individual").as[JsObject]
+        val updatedIndividual = (userAnswersCaptor.getValue.data \ "prDetails" \ "individual").as[JsObject]
 
         updatedIndividual mustBe Json.obj(
           "firstForename" -> "John",

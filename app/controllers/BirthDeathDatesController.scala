@@ -89,7 +89,7 @@ class BirthDeathDatesController @Inject() (
 
   private def nextPage(srn: Srn, mode: Mode) =
     mode match {
-      case NormalMode => routes.LprTypeController.onPageLoad(srn, NormalMode)
+      case NormalMode => routes.PrTypeController.onPageLoad(srn, NormalMode)
       case CheckMode => routes.CheckYourAnswersController.onPageLoad(srn)
     }
 }

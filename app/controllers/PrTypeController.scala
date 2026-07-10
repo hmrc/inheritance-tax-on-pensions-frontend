@@ -20,10 +20,10 @@ import services.UserAnswersService
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import pages._
 import controllers.actions._
-import forms.LprTypeFormProvider
+import forms.PrTypeFormProvider
 import models._
 import play.api.data.Form
-import views.html.LprTypeView
+import views.html.PrTypeView
 import models.SchemeId.Srn
 import play.api.i18n.{I18nSupport, MessagesApi}
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
@@ -32,30 +32,30 @@ import scala.concurrent.{ExecutionContext, Future}
 
 import javax.inject.Inject
 
-class LprTypeController @Inject() (
+class PrTypeController @Inject() (
   override val messagesApi: MessagesApi,
   identify: IdentifierAction,
   allowAccess: AllowAccessActionWithSessionCacheProvider,
   getData: DataRetrievalAction,
   requireData: DataRequiredAction,
-  formProvider: LprTypeFormProvider,
+  formProvider: PrTypeFormProvider,
   val controllerComponents: MessagesControllerComponents,
   userAnswersService: UserAnswersService,
-  view: LprTypeView
+  view: PrTypeView
 )(implicit ec: ExecutionContext)
     extends FrontendBaseController
     with I18nSupport {
 
-  val form: Form[LprType] = formProvider()
+  val form: Form[PrType] = formProvider()
 
   def onPageLoad(srn: Srn, mode: Mode): Action[AnyContent] =
     identify
       .andThen(allowAccess(srn))
       .andThen(getData)
       .andThen(requireData) { implicit request =>
-        val preparedForm = request.userAnswers.get(LprTypePage) match {
+        val preparedForm = request.userAnswers.get(PrTypePage) match {
           case None => form
-          case Some(lprType) => form.fill(lprType)
+          case Some(prType) => form.fill(prType)
         }
 
         Ok(view(preparedForm, srn, mode))
@@ -71,33 +71,33 @@ class LprTypeController @Inject() (
           .bindFromRequest()
           .fold(
             formWithErrors => Future.successful(BadRequest(view(formWithErrors, srn, mode))),
-            lprType =>
+            prType =>
               for {
-                updatedAnswers <- Future.fromTry(request.userAnswers.set(LprTypePage, lprType))
+                updatedAnswers <- Future.fromTry(request.userAnswers.set(PrTypePage, prType))
                 _ <- userAnswersService.set(updatedAnswers)(using hc, request.request)
-              } yield Redirect(nextPage(srn, mode, lprType, updatedAnswers))
+              } yield Redirect(nextPage(srn, mode, prType, updatedAnswers))
           )
       }
 
-  private def nextPage(srn: Srn, mode: Mode, answer: LprType, userAnswers: UserAnswers) =
+  private def nextPage(srn: Srn, mode: Mode, answer: PrType, userAnswers: UserAnswers) =
     mode match {
       case NormalMode =>
         answer match {
-          case LprType.Individual =>
-            routes.IndividualNameController.onPageLoad(srn, NormalMode, JourneyRole.LprIndividual)
-          case LprType.Organisation =>
+          case PrType.Individual =>
+            routes.IndividualNameController.onPageLoad(srn, NormalMode, JourneyRole.PrIndividual)
+          case PrType.Organisation =>
             routes.OrganisationNameController.onPageLoad(srn, NormalMode)
         }
       case CheckMode =>
         answer match {
-          case LprType.Individual if userAnswers.get(IndividualNamePage(JourneyRole.LprIndividual)).isEmpty =>
-            routes.IndividualNameController.onPageLoad(srn, CheckMode, JourneyRole.LprIndividual)
-          case LprType.Individual if userAnswers.get(LprIndividualAddressPage).isEmpty =>
+          case PrType.Individual if userAnswers.get(IndividualNamePage(JourneyRole.PrIndividual)).isEmpty =>
+            routes.IndividualNameController.onPageLoad(srn, CheckMode, JourneyRole.PrIndividual)
+          case PrType.Individual if userAnswers.get(PrIndividualAddressPage).isEmpty =>
             routes.AddressLookupStartController.start(srn, CheckMode)
-          case LprType.Organisation if userAnswers.get(OrganisationNamePage).isEmpty =>
+          case PrType.Organisation if userAnswers.get(OrganisationNamePage).isEmpty =>
             routes.OrganisationNameController.onPageLoad(srn, CheckMode)
-          case LprType.Organisation if userAnswers.get(IndividualNamePage(JourneyRole.LprOrganisation)).isEmpty =>
-            routes.IndividualNameController.onPageLoad(srn, CheckMode, JourneyRole.LprOrganisation)
+          case PrType.Organisation if userAnswers.get(IndividualNamePage(JourneyRole.PrOrganisation)).isEmpty =>
+            routes.IndividualNameController.onPageLoad(srn, CheckMode, JourneyRole.PrOrganisation)
           case _ =>
             routes.CheckYourAnswersController.onPageLoad(srn)
         }

@@ -17,7 +17,7 @@
 package controllers
 
 import services.UserAnswersService
-import utils.LprNameHelper
+import utils.PrNameHelper
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import pages.{DidPrSubmitPage, PaymentNoticeDatePage}
 import controllers.actions._
@@ -51,14 +51,14 @@ class DidPrSubmitController @Inject() (
       .andThen(allowAccess(srn))
       .andThen(getData)
       .andThen(requireData) { implicit request =>
-        LprNameHelper.withName(request.userAnswers)(logAndJourneyRecovery("PR name is missing, cannot load the page")) {
-          lprName =>
+        PrNameHelper.withName(request.userAnswers)(logAndJourneyRecovery("PR name is missing, cannot load the page")) {
+          prName =>
             val preparedForm = request.userAnswers.get(DidPrSubmitPage) match {
               case None => form
               case Some(value) =>
                 form.fill(value)
             }
-            Ok(view(preparedForm, srn, mode, lprName))
+            Ok(view(preparedForm, srn, mode, prName))
         }
       }
 
@@ -68,13 +68,13 @@ class DidPrSubmitController @Inject() (
       .andThen(getData)
       .andThen(requireData)
       .async { implicit request =>
-        LprNameHelper.withName(request.userAnswers) {
+        PrNameHelper.withName(request.userAnswers) {
           Future.successful(logAndJourneyRecovery("PR name is missing, cannot submit the page"))
-        } { lprName =>
+        } { prName =>
           form
             .bindFromRequest()
             .fold(
-              formWithErrors => Future.successful(BadRequest(view(formWithErrors, srn, mode, lprName))),
+              formWithErrors => Future.successful(BadRequest(view(formWithErrors, srn, mode, prName))),
               value =>
                 for {
                   updatedAnswers <- Future.fromTry(request.userAnswers.set(DidPrSubmitPage, value))

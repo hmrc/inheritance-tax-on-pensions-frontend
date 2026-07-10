@@ -19,24 +19,24 @@ package viewmodels.CheckAnswers
 import play.api.test.Helpers.stubMessages
 import uk.gov.hmrc.govukfrontend.views.viewmodels.content.HtmlContent
 import play.api.libs.json.Json
-import models.{CheckMode, LprAddress}
+import models.{CheckMode, PrAddress}
 import play.api.i18n.Messages
 import uk.gov.hmrc.govukfrontend.views.Aliases.Text
 import base.SpecBase
 
-class LprIndividualAddressSummarySpec extends SpecBase {
+class PrIndividualAddressSummarySpec extends SpecBase {
 
-  "LprIndividualAddressSummary" - {
+  "PrIndividualAddressSummary" - {
     implicit val messages: Messages = stubMessages()
 
     "must return None when data is not present" in {
 
-      LprIndividualAddressSummary.row(srn, emptyUserAnswers) mustBe None
+      PrIndividualAddressSummary.row(srn, emptyUserAnswers) mustBe None
     }
 
     "must return a row when data is present" in {
 
-      val address = LprAddress(
+      val address = PrAddress(
         addressLine1 = "33 Fake Street",
         addressLine2 = Some("Fake Area"),
         addressLine3 = Some("Fake County"),
@@ -47,20 +47,20 @@ class LprIndividualAddressSummarySpec extends SpecBase {
 
       val userAnswers = emptyUserAnswers.copy(
         data = Json.obj(
-          "lprDetails" -> Json.obj(
+          "prDetails" -> Json.obj(
             "individual" -> Json.toJson(address)
           )
         )
       )
 
-      val result = LprIndividualAddressSummary.row(
+      val result = PrIndividualAddressSummary.row(
         srn,
         userAnswers,
         countryNameForCode = code => if (code == "GB") "United Kingdom" else code
       )
 
       result mustBe defined
-      result.value.key.content mustBe Text(messages("lprIndividualAddress.checkYourAnswersLabel"))
+      result.value.key.content mustBe Text(messages("prIndividualAddress.checkYourAnswersLabel"))
       result.value.value.content mustBe HtmlContent(
         "33 Fake Street<br>Fake Area<br>Fake County<br>Fakeville<br>ZZ1 1ZZ<br>United Kingdom"
       )
@@ -70,7 +70,7 @@ class LprIndividualAddressSummarySpec extends SpecBase {
 
     "must use country code as-is when no lookup function is provided" in {
 
-      val address = LprAddress(
+      val address = PrAddress(
         addressLine1 = "33 Fake Street",
         addressLine2 = None,
         addressLine3 = None,
@@ -81,20 +81,20 @@ class LprIndividualAddressSummarySpec extends SpecBase {
 
       val userAnswers = emptyUserAnswers.copy(
         data = Json.obj(
-          "lprDetails" -> Json.obj(
+          "prDetails" -> Json.obj(
             "individual" -> Json.toJson(address)
           )
         )
       )
 
-      val result = LprIndividualAddressSummary.row(srn, userAnswers)
+      val result = PrIndividualAddressSummary.row(srn, userAnswers)
 
       result mustBe defined
     }
 
     "must fall back to the country code when a country name cannot be found" in {
 
-      val address = LprAddress(
+      val address = PrAddress(
         addressLine1 = "33 Fake Street",
         addressLine2 = None,
         addressLine3 = None,
@@ -105,13 +105,13 @@ class LprIndividualAddressSummarySpec extends SpecBase {
 
       val userAnswers = emptyUserAnswers.copy(
         data = Json.obj(
-          "lprDetails" -> Json.obj(
+          "prDetails" -> Json.obj(
             "individual" -> Json.toJson(address)
           )
         )
       )
 
-      val result = LprIndividualAddressSummary.row(srn, userAnswers, countryNameForCode = identity)
+      val result = PrIndividualAddressSummary.row(srn, userAnswers, countryNameForCode = identity)
 
       result.value.value.content mustBe HtmlContent("33 Fake Street<br>XX")
     }

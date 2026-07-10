@@ -36,16 +36,16 @@ class AddressLookupFrontendService @Inject() (
   countryService: CountryService
 ) {
 
-  def initJourney(srn: Srn, mode: Mode, lprIndividualName: String)(implicit
+  def initJourney(srn: Srn, mode: Mode, prIndividualName: String)(implicit
     hc: HeaderCarrier,
     request: RequestHeader
   ): Future[String] =
-    connector.initJourney(srn, mode, journeyConfig(srn, mode, lprIndividualName))
+    connector.initJourney(srn, mode, journeyConfig(srn, mode, prIndividualName))
 
   def getAddress(addressId: String)(implicit hc: HeaderCarrier): Future[AlfAddressData] =
     connector.getAddress(addressId)
 
-  private def journeyConfig(srn: Srn, mode: Mode, lprIndividualName: String)(implicit
+  private def journeyConfig(srn: Srn, mode: Mode, prIndividualName: String)(implicit
     request: RequestHeader
   ): AlfJourneyConfig =
     AlfJourneyConfig(
@@ -59,45 +59,45 @@ class AddressLookupFrontendService @Inject() (
           mandatoryFields = AlfMandatoryFields()
         )
       ),
-      labels = AlfLabelsConfig(labels(lprIndividualName))
+      labels = AlfLabelsConfig(labels(prIndividualName))
     )
 
   private def message(key: String, args: Any*): String =
     messagesApi.preferred(Seq.empty)(key, args*)
 
-  private def labels(lprIndividualName: String): AlfLabels =
+  private def labels(prIndividualName: String): AlfLabels =
     AlfLabels(
       appLevelLabels = AlfAppLabels(
         navTitle = message("service.name"),
         phaseBannerHtml = message("addressLookup.phaseBannerHtml")
       ),
       countryPickerLabels = AlfCountryPickerLabels(
-        title = message("addressLookup.countryPicker.title", lprIndividualName),
-        heading = message("addressLookup.countryPicker.heading", lprIndividualName),
+        title = message("addressLookup.countryPicker.title", prIndividualName),
+        heading = message("addressLookup.countryPicker.heading", prIndividualName),
         countryLabel = message("addressLookup.countryPicker.countryLabel"),
         submitLabel = message("site.saveAndContinue")
       ),
       selectPageLabels = AlfSelectPageLabels(
-        title = message("addressLookup.select.title", lprIndividualName),
-        heading = message("addressLookup.select.heading", lprIndividualName),
+        title = message("addressLookup.select.title", prIndividualName),
+        heading = message("addressLookup.select.heading", prIndividualName),
         submitLabel = message("site.saveAndContinue"),
         editAddressLinkText = message("addressLookup.select.editAddressLinkText")
       ),
       lookupPageLabels = AlfLookupPageLabels(
-        title = message("addressLookup.lookup.title", lprIndividualName),
-        heading = message("addressLookup.lookup.heading", lprIndividualName),
+        title = message("addressLookup.lookup.title", prIndividualName),
+        heading = message("addressLookup.lookup.heading", prIndividualName),
         filterLabel = message("addressLookup.lookup.filterLabel"),
         postcodeLabel = message("addressLookup.lookup.postcode"),
         submitLabel = message("site.saveAndContinue")
       ),
       confirmPageLabels = AlfConfirmPageLabels(
-        title = message("addressLookup.confirm.title", lprIndividualName),
-        heading = message("addressLookup.confirm.heading", lprIndividualName),
+        title = message("addressLookup.confirm.title", prIndividualName),
+        heading = message("addressLookup.confirm.heading", prIndividualName),
         submitLabel = message("addressLookup.confirm.submitLabel")
       ),
       editPageLabels = AlfEditPageLabels(
-        title = message("addressLookup.edit.title", lprIndividualName),
-        heading = message("addressLookup.edit.heading", lprIndividualName),
+        title = message("addressLookup.edit.title", prIndividualName),
+        heading = message("addressLookup.edit.heading", prIndividualName),
         line1Label = message("addressLookup.edit.line1Label"),
         line2Label = message("addressLookup.edit.line2Label"),
         line3Label = message("addressLookup.edit.line3Label"),
@@ -108,8 +108,8 @@ class AddressLookupFrontendService @Inject() (
       ),
       international = AlfInternationalLabels(
         editPageLabels = AlfEditPageLabels(
-          title = message("addressLookup.international.edit.title", lprIndividualName),
-          heading = message("addressLookup.international.edit.heading", lprIndividualName),
+          title = message("addressLookup.international.edit.title", prIndividualName),
+          heading = message("addressLookup.international.edit.heading", prIndividualName),
           line1Label = message("addressLookup.international.edit.line1Label"),
           line2Label = message("addressLookup.international.edit.line2Label"),
           line3Label = message("addressLookup.international.edit.line3Label"),

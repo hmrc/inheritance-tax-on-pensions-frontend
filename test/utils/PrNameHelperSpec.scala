@@ -17,23 +17,23 @@
 package utils
 
 import org.scalatest.freespec.AnyFreeSpec
-import pages.{IndividualNamePage, LprTypePage}
-import utils.LprNameHelper.fromUserAnswers
+import pages.{IndividualNamePage, PrTypePage}
 import base.SpecBase
-import models.{IndividualName, JourneyRole, LprType}
+import utils.PrNameHelper.fromUserAnswers
+import models.{IndividualName, JourneyRole, PrType}
 
-class LprNameHelperSpec extends AnyFreeSpec with SpecBase {
+class PrNameHelperSpec extends AnyFreeSpec with SpecBase {
 
   "when inidividual" - {
     "fromUserAnswers" - {
 
-      "must return the lpr first name and surname if inividual when the name has been answered" in {
+      "must return the pr first name and surname if inividual when the name has been answered" in {
 
         val userAnswers = emptyUserAnswers
-          .set(LprTypePage, LprType.Individual)
+          .set(PrTypePage, PrType.Individual)
           .get
           .set(
-            IndividualNamePage(JourneyRole.LprIndividual),
+            IndividualNamePage(JourneyRole.PrIndividual),
             IndividualName(
               title = Some("Dr"),
               firstForename = "John",
@@ -45,7 +45,7 @@ class LprNameHelperSpec extends AnyFreeSpec with SpecBase {
 
         fromUserAnswers(userAnswers) mustBe Some("John Doe")
       }
-      "must return None when the LPR name has not been answered" in {
+      "must return None when the PR name has not been answered" in {
 
         fromUserAnswers(emptyUserAnswers) mustBe None
       }
@@ -53,11 +53,11 @@ class LprNameHelperSpec extends AnyFreeSpec with SpecBase {
 
     "withName" - {
 
-      "must run the success block when the LPR name has been answered" in {
+      "must run the success block when the PR name has been answered" in {
 
         val userAnswers = emptyUserAnswers
           .set(
-            IndividualNamePage(JourneyRole.LprIndividual),
+            IndividualNamePage(JourneyRole.PrIndividual),
             IndividualName(
               title = Some("Mr"),
               firstForename = "John",
@@ -68,12 +68,12 @@ class LprNameHelperSpec extends AnyFreeSpec with SpecBase {
           .success
           .value
 
-        LprNameHelper.withName(userAnswers)("missing")(name => s"found $name") mustBe "found John Doe"
+        PrNameHelper.withName(userAnswers)("missing")(name => s"found $name") mustBe "found John Doe"
       }
 
       "must run the fallback block when the individual name has not been answered" in {
 
-        LprNameHelper.withName(emptyUserAnswers)("missing")(name => s"found $name") mustBe "missing"
+        PrNameHelper.withName(emptyUserAnswers)("missing")(name => s"found $name") mustBe "missing"
       }
     }
   }
@@ -81,10 +81,10 @@ class LprNameHelperSpec extends AnyFreeSpec with SpecBase {
     "fromUserAnswers" - {
       "must return the PR first name and surname when the organisation PR name has been answered" in {
         val userAnswers = emptyUserAnswers
-          .set(LprTypePage, LprType.Organisation)
+          .set(PrTypePage, PrType.Organisation)
           .get
           .set(
-            IndividualNamePage(JourneyRole.LprOrganisation),
+            IndividualNamePage(JourneyRole.PrOrganisation),
             IndividualName(Some("Mrs"), "Sarah", Some("Jane"), "Wilson")
           )
           .get
@@ -93,7 +93,7 @@ class LprNameHelperSpec extends AnyFreeSpec with SpecBase {
       }
 
       "must return None when the organisation PR name has not been answered" in {
-        val userAnswers = emptyUserAnswers.set(LprTypePage, LprType.Organisation).get
+        val userAnswers = emptyUserAnswers.set(PrTypePage, PrType.Organisation).get
 
         fromUserAnswers(userAnswers) mustBe None
       }

@@ -18,7 +18,7 @@ package controllers
 
 import services.{AddressLookupFrontendService, UserAnswersService}
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
-import pages.LprIndividualAddressPage
+import pages.PrIndividualAddressPage
 import models.SchemeId.Srn
 import controllers.actions._
 import play.api.libs.json.{JsObject, JsSuccess, Json}
@@ -51,9 +51,9 @@ class AddressLookupContinueController @Inject() (
           for {
             addressData <- addressLookupFrontendService.getAddress(id)
             result <-
-              if (LprAddress.hasValidFirstAddressLine(addressData)) {
+              if (PrAddress.hasValidFirstAddressLine(addressData)) {
                 val updatedAnswers =
-                  addLprIndividualAddress(request.userAnswers, LprAddress.fromAlfAddressData(addressData))
+                  addPrIndividualAddress(request.userAnswers, PrAddress.fromAlfAddressData(addressData))
 
                 userAnswersService
                   .set(updatedAnswers)(using hc, request.request)
@@ -71,10 +71,10 @@ class AddressLookupContinueController @Inject() (
       case CheckMode => routes.CheckYourAnswersController.onPageLoad(srn)
     }
 
-  private[controllers] def addLprIndividualAddress(userAnswers: UserAnswers, address: LprAddress): UserAnswers =
+  private[controllers] def addPrIndividualAddress(userAnswers: UserAnswers, address: PrAddress): UserAnswers =
     userAnswers.data
       .setObject(
-        LprIndividualAddressPage.path,
+        PrIndividualAddressPage.path,
         individualWithoutAddressFields(userAnswers) ++ Json.toJsObject(address)
       ) match {
       case JsSuccess(data, _) => userAnswers.copy(data = data)
@@ -90,7 +90,7 @@ class AddressLookupContinueController @Inject() (
       "ukPostcode",
       "country"
     ).foldLeft(
-      (userAnswers.data \ "lprDetails" \ "individual")
+      (userAnswers.data \ "prDetails" \ "individual")
         .asOpt[JsObject]
         .getOrElse(Json.obj())
     )(_ - _)

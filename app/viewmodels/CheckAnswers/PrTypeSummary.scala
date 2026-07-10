@@ -17,8 +17,7 @@
 package viewmodels.CheckAnswers
 
 import viewmodels.implicits._
-import play.twirl.api.HtmlFormat
-import pages.OrganisationNamePage
+import pages.PrTypePage
 import controllers.routes
 import models.SchemeId.Srn
 import uk.gov.hmrc.govukfrontend.views.viewmodels.summarylist.SummaryListRow
@@ -26,16 +25,16 @@ import models.{CheckMode, UserAnswers}
 import play.api.i18n.Messages
 import viewmodels.govuk.summarylist._
 
-object LprOrganisationNameSummary {
+object PrTypeSummary {
 
   def row(srn: Srn, answers: UserAnswers)(implicit messages: Messages): Option[SummaryListRow] =
-    answers.get(OrganisationNamePage).map { answer =>
+    answers.get(PrTypePage).map { answer =>
       SummaryListRowViewModel(
-        key = "organisationName.checkYourAnswersLabel",
-        value = ValueViewModel(HtmlFormat.escape(answer).toString),
+        key = "prType.checkYourAnswersLabel",
+        value = ValueViewModel(messages(s"prType.${answer.toString}")),
         actions = Seq(
-          ActionItemViewModel("site.change", routes.OrganisationNameController.onPageLoad(srn, CheckMode).url)
-            .withVisuallyHiddenText(messages("organisationName.change.hidden"))
+          ActionItemViewModel("site.change", routes.PrTypeController.onPageLoad(srn, CheckMode).url)
+            .withVisuallyHiddenText(messages("prType.change.hidden"))
         )
       )
     }

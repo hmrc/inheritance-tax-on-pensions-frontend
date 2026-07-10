@@ -14,18 +14,13 @@
  * limitations under the License.
  */
 
-package forms
+package pages
 
-import forms.mappings.Mappings
-import models.LprType
-import play.api.data.Form
+import queries.Gettable
+import play.api.libs.json.JsPath
+import models.PrAddress
 
-import javax.inject.Inject
+case object PrIndividualAddressPage extends Page with Gettable[PrAddress] {
 
-class LprTypeFormProvider @Inject() extends Mappings {
-
-  def apply(): Form[LprType] =
-    Form(
-      "value" -> enumerable[LprType]("lprType.error.required")
-    )
+  override def path: JsPath = JsPath \ "prDetails" \ "individual"
 }

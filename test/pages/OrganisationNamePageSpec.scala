@@ -24,7 +24,7 @@ class OrganisationNamePageSpec extends SpecBase {
   "OrganisationNamePage" - {
 
     "must use the correct path" in {
-      OrganisationNamePage.path mustEqual JsPath \ "lprDetails" \ "organisation" \ "organisationName"
+      OrganisationNamePage.path mustEqual JsPath \ "prDetails" \ "organisation" \ "organisationName"
     }
 
     "must use the correct page name" in {

@@ -15,7 +15,7 @@
  *@
 
 @import models.SchemeId.Srn
-@import models.LprType
+@import models.PrType
 @import viewmodels.LegendSize
 
 @this(
@@ -28,9 +28,9 @@
 
 @(form: Form[?], srn: Srn, mode: Mode)(implicit request: Request[?], messages: Messages)
 
-@layout(pageTitle = title(form, messages("lprType.title"))) {
+@layout(pageTitle = title(form, messages("prType.title"))) {
 
-    @formHelper(action = routes.LprTypeController.onSubmit(srn, mode), Symbol("autoComplete") -> "off") {
+    @formHelper(action = routes.PrTypeController.onSubmit(srn, mode), Symbol("autoComplete") -> "off") {
 
         @if(form.errors.nonEmpty) {
             @govukErrorSummary(ErrorSummaryViewModel(form, errorLinkOverrides = Map("value" -> "value_0")))
@@ -39,9 +39,9 @@
         @govukRadios(
             RadiosViewModel(
                 field  = form("value"),
-                legend = LegendViewModel(messages("lprType.heading"))
+                legend = LegendViewModel(messages("prType.heading"))
                     .asPageHeading(LegendSize.Large),
-                items  = LprType.options
+                items  = PrType.options
             )
         )
 

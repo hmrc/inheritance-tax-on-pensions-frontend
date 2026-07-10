@@ -44,10 +44,10 @@ class AddressLookupStartController @Inject() (
       .andThen(getData)
       .andThen(requireData)
       .async { implicit request =>
-        request.userAnswers.get(IndividualNamePage(JourneyRole.LprIndividual)) match {
-          case Some(lprIndividualName) =>
+        request.userAnswers.get(IndividualNamePage(JourneyRole.PrIndividual)) match {
+          case Some(prIndividualName) =>
             addressLookupFrontendService
-              .initJourney(srn, mode, s"${lprIndividualName.firstForename} ${lprIndividualName.surname}")
+              .initJourney(srn, mode, s"${prIndividualName.firstForename} ${prIndividualName.surname}")
               .map(addressLookupUrl => Redirect(Call(GET, addressLookupUrl)))
 
           case None =>

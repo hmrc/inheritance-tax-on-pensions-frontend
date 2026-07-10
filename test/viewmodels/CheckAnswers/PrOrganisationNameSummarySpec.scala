@@ -17,20 +17,20 @@
 package viewmodels.CheckAnswers
 
 import play.api.test.Helpers.stubMessages
-import pages.IndividualNamePage
-import models.{CheckMode, IndividualName, JourneyRole}
+import pages.OrganisationNamePage
+import models.CheckMode
 import play.api.i18n.Messages
 import uk.gov.hmrc.govukfrontend.views.Aliases.Text
 import base.SpecBase
 
-class LprOrganisationPrNameSummarySpec extends org.scalatest.freespec.AnyFreeSpec with SpecBase {
+class PrOrganisationNameSummarySpec extends org.scalatest.freespec.AnyFreeSpec with SpecBase {
 
-  "LprOrganisationPrNameSummary" - {
+  "PrOrganisationNameSummary" - {
     implicit val messages: Messages = stubMessages()
 
     "must return None when data is not present" in {
 
-      val result = LprOrganisationPrNameSummary.row(srn, emptyUserAnswers)
+      val result = PrOrganisationNameSummary.row(srn, emptyUserAnswers)
 
       result mustBe None
     }
@@ -38,25 +38,17 @@ class LprOrganisationPrNameSummarySpec extends org.scalatest.freespec.AnyFreeSpe
     "must return a row when data is present" in {
 
       val userAnswers = emptyUserAnswers
-        .set(
-          IndividualNamePage(JourneyRole.LprOrganisation),
-          IndividualName(
-            title = Some("Ms"),
-            firstForename = "Jane",
-            secondForename = Some("Ann"),
-            surname = "Doe"
-          )
-        )
+        .set(OrganisationNamePage, "Test Org")
         .success
         .value
 
-      val result = LprOrganisationPrNameSummary.row(srn, userAnswers)
+      val result = PrOrganisationNameSummary.row(srn, userAnswers)
 
       result mustBe defined
-      result.get.key.content mustBe Text(messages("lprOrganisationName.checkYourAnswersLabel"))
-      result.get.value.content mustBe Text("Ms Jane Ann Doe")
+      result.get.key.content mustBe Text(messages("organisationName.checkYourAnswersLabel"))
+      result.get.value.content mustBe Text("Test Org")
       result.get.actions.get.items.head.href mustBe
-        controllers.routes.IndividualNameController.onPageLoad(srn, CheckMode, JourneyRole.LprOrganisation).url
+        controllers.routes.OrganisationNameController.onPageLoad(srn, CheckMode).url
     }
   }
 }

@@ -40,10 +40,10 @@ class DidPrSubmitControllerSpec extends SpecBase with MockitoSugar {
   private val form = formProvider()
 
   private lazy val didPrSubmitRoute: String = routes.DidPrSubmitController.onPageLoad(srn, NormalMode).url
-  val userAnswersWithLprName: UserAnswers = emptyUserAnswers
-    .set(LprTypePage, LprType.Individual)
+  val userAnswersWithPrName: UserAnswers = emptyUserAnswers
+    .set(PrTypePage, PrType.Individual)
     .get
-    .set(IndividualNamePage(JourneyRole.LprIndividual), individualName)
+    .set(IndividualNamePage(JourneyRole.PrIndividual), individualName)
     .get
 
   private val organisationPrName = IndividualName(
@@ -54,15 +54,15 @@ class DidPrSubmitControllerSpec extends SpecBase with MockitoSugar {
   )
 
   val userAnswersWithOrganisationPrName: UserAnswers = emptyUserAnswers
-    .set(LprTypePage, LprType.Organisation)
+    .set(PrTypePage, PrType.Organisation)
     .get
-    .set(IndividualNamePage(JourneyRole.LprOrganisation), organisationPrName)
+    .set(IndividualNamePage(JourneyRole.PrOrganisation), organisationPrName)
     .get
 
   "DidPrSubmit Controller" - {
 
     "must return OK and the correct view for a GET" in {
-      val application = applicationBuilder(userAnswers = Some(userAnswersWithLprName), usesSession = true).build()
+      val application = applicationBuilder(userAnswers = Some(userAnswersWithPrName), usesSession = true).build()
 
       running(application) {
         val request = FakeRequest(GET, didPrSubmitRoute)
@@ -100,7 +100,7 @@ class DidPrSubmitControllerSpec extends SpecBase with MockitoSugar {
 
     "must populate the view correctly on a GET when the question has previously been answered" in {
 
-      val userAnswers = userAnswersWithLprName.set(DidPrSubmitPage, true).success.value
+      val userAnswers = userAnswersWithPrName.set(DidPrSubmitPage, true).success.value
 
       val application = applicationBuilder(userAnswers = Some(userAnswers), usesSession = true).build()
 
@@ -123,9 +123,9 @@ class DidPrSubmitControllerSpec extends SpecBase with MockitoSugar {
 
       val mockInheritanceTaxOnPensionsConnector = mock[InheritanceTaxOnPensionsConnector]
       when(mockInheritanceTaxOnPensionsConnector.setUserAnswers(any(), any(), any(), any(), any())(using any()))
-        .thenReturn(Future.successful(Right(userAnswersWithLprName)))
+        .thenReturn(Future.successful(Right(userAnswersWithPrName)))
 
-      val application = applicationBuilder(userAnswers = Some(userAnswersWithLprName), usesSession = true)
+      val application = applicationBuilder(userAnswers = Some(userAnswersWithPrName), usesSession = true)
         .overrides(
           bind[InheritanceTaxOnPensionsConnector].toInstance(mockInheritanceTaxOnPensionsConnector)
         )
@@ -147,9 +147,9 @@ class DidPrSubmitControllerSpec extends SpecBase with MockitoSugar {
 
       val mockInheritanceTaxOnPensionsConnector = mock[InheritanceTaxOnPensionsConnector]
       when(mockInheritanceTaxOnPensionsConnector.setUserAnswers(any(), any(), any(), any(), any())(using any()))
-        .thenReturn(Future.successful(Right(userAnswersWithLprName)))
+        .thenReturn(Future.successful(Right(userAnswersWithPrName)))
 
-      val application = applicationBuilder(userAnswers = Some(userAnswersWithLprName), usesSession = true)
+      val application = applicationBuilder(userAnswers = Some(userAnswersWithPrName), usesSession = true)
         .overrides(
           bind[InheritanceTaxOnPensionsConnector].toInstance(mockInheritanceTaxOnPensionsConnector)
         )
@@ -171,9 +171,9 @@ class DidPrSubmitControllerSpec extends SpecBase with MockitoSugar {
 
       val mockInheritanceTaxOnPensionsConnector = mock[InheritanceTaxOnPensionsConnector]
       when(mockInheritanceTaxOnPensionsConnector.setUserAnswers(any(), any(), any(), any(), any())(using any()))
-        .thenReturn(Future.successful(Right(userAnswersWithLprName)))
+        .thenReturn(Future.successful(Right(userAnswersWithPrName)))
 
-      val userAnswers = userAnswersWithLprName
+      val userAnswers = userAnswersWithPrName
         .set(PaymentNoticeDatePage, LocalDate.of(2026, 3, 27))
         .success
         .value
@@ -211,9 +211,9 @@ class DidPrSubmitControllerSpec extends SpecBase with MockitoSugar {
 
       val mockInheritanceTaxOnPensionsConnector = mock[InheritanceTaxOnPensionsConnector]
       when(mockInheritanceTaxOnPensionsConnector.setUserAnswers(any(), any(), any(), any(), any())(using any()))
-        .thenReturn(Future.successful(Right(userAnswersWithLprName)))
+        .thenReturn(Future.successful(Right(userAnswersWithPrName)))
 
-      val application = applicationBuilder(userAnswers = Some(userAnswersWithLprName), usesSession = true)
+      val application = applicationBuilder(userAnswers = Some(userAnswersWithPrName), usesSession = true)
         .overrides(
           bind[InheritanceTaxOnPensionsConnector].toInstance(mockInheritanceTaxOnPensionsConnector)
         )
@@ -235,9 +235,9 @@ class DidPrSubmitControllerSpec extends SpecBase with MockitoSugar {
 
       val mockInheritanceTaxOnPensionsConnector = mock[InheritanceTaxOnPensionsConnector]
       when(mockInheritanceTaxOnPensionsConnector.setUserAnswers(any(), any(), any(), any(), any())(using any()))
-        .thenReturn(Future.successful(Right(userAnswersWithLprName)))
+        .thenReturn(Future.successful(Right(userAnswersWithPrName)))
 
-      val userAnswers = userAnswersWithLprName
+      val userAnswers = userAnswersWithPrName
         .set(PaymentNoticeDatePage, LocalDate.of(2026, 3, 27))
         .success
         .value
@@ -262,7 +262,7 @@ class DidPrSubmitControllerSpec extends SpecBase with MockitoSugar {
 
     "must return a Bad Request and errors when invalid data is submitted" in {
 
-      val application = applicationBuilder(userAnswers = Some(userAnswersWithLprName), usesSession = true).build()
+      val application = applicationBuilder(userAnswers = Some(userAnswersWithPrName), usesSession = true).build()
 
       running(application) {
         val request =

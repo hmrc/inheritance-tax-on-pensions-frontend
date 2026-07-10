@@ -19,7 +19,7 @@ package models
 import models.addresslookup.{AlfAddress, AlfAddressData, AlfCountry}
 import base.SpecBase
 
-class LprAddressSpec extends SpecBase {
+class PrAddressSpec extends SpecBase {
 
   "fromAlfAddressData" - {
 
@@ -36,7 +36,7 @@ class LprAddressSpec extends SpecBase {
         )
       )
 
-      LprAddress.fromAlfAddressData(addressData) mustBe LprAddress(
+      PrAddress.fromAlfAddressData(addressData) mustBe PrAddress(
         addressLine1 = "33 Fake Street",
         addressLine2 = Some("Fake Area"),
         addressLine3 = Some("Fake County"),
@@ -59,7 +59,7 @@ class LprAddressSpec extends SpecBase {
         )
       )
 
-      LprAddress.fromAlfAddressData(addressData) mustBe LprAddress(
+      PrAddress.fromAlfAddressData(addressData) mustBe PrAddress(
         addressLine1 = "33 Fake Street",
         addressLine2 = Some("Fakeville"),
         addressLine3 = None,
@@ -83,7 +83,7 @@ class LprAddressSpec extends SpecBase {
         )
       )
 
-      LprAddress.fromAlfAddressData(addressData) mustBe LprAddress(
+      PrAddress.fromAlfAddressData(addressData) mustBe PrAddress(
         addressLine1 = "PO Box 999",
         addressLine2 = Some("33 Fake Street"),
         addressLine3 = Some("Fake Area"),
@@ -107,7 +107,7 @@ class LprAddressSpec extends SpecBase {
         )
       )
 
-      LprAddress.fromAlfAddressData(addressData) mustBe LprAddress(
+      PrAddress.fromAlfAddressData(addressData) mustBe PrAddress(
         addressLine1 = "PO Box 999",
         addressLine2 = Some("Fake Area"),
         addressLine3 = None,
@@ -131,7 +131,7 @@ class LprAddressSpec extends SpecBase {
         )
       )
 
-      LprAddress.fromAlfAddressData(addressData) mustBe LprAddress(
+      PrAddress.fromAlfAddressData(addressData) mustBe PrAddress(
         addressLine1 = "PO Box 999",
         addressLine2 = Some("Fakeville"),
         addressLine3 = None,
@@ -154,7 +154,7 @@ class LprAddressSpec extends SpecBase {
         )
       )
 
-      LprAddress.fromAlfAddressData(addressData) mustBe LprAddress(
+      PrAddress.fromAlfAddressData(addressData) mustBe PrAddress(
         addressLine1 = "PO Box 999",
         addressLine2 = Some("Fakeville"),
         addressLine3 = None,
@@ -177,7 +177,7 @@ class LprAddressSpec extends SpecBase {
         )
       )
 
-      LprAddress.fromAlfAddressData(addressData) mustBe LprAddress(
+      PrAddress.fromAlfAddressData(addressData) mustBe PrAddress(
         addressLine1 = "33 Fake Street",
         addressLine2 = Some("Fakeville"),
         addressLine3 = None,
@@ -203,7 +203,7 @@ class LprAddressSpec extends SpecBase {
         )
       )
 
-      LprAddress.hasValidFirstAddressLine(addressData) mustBe true
+      PrAddress.hasValidFirstAddressLine(addressData) mustBe true
     }
 
     "must return true when ALF address lines are empty but a PO Box is present" in {
@@ -220,7 +220,7 @@ class LprAddressSpec extends SpecBase {
         )
       )
 
-      LprAddress.hasValidFirstAddressLine(addressData) mustBe true
+      PrAddress.hasValidFirstAddressLine(addressData) mustBe true
     }
 
     "must return false when ALF address line 1 is blank" in {
@@ -236,7 +236,7 @@ class LprAddressSpec extends SpecBase {
         )
       )
 
-      LprAddress.hasValidFirstAddressLine(addressData) mustBe false
+      PrAddress.hasValidFirstAddressLine(addressData) mustBe false
     }
   }
 }

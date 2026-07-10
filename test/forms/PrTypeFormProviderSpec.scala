@@ -17,23 +17,23 @@
 package forms
 
 import forms.behaviours.OptionFieldBehaviours
-import models.LprType
+import models.PrType
 import play.api.data.FormError
 
-class LprTypeFormProviderSpec extends OptionFieldBehaviours {
+class PrTypeFormProviderSpec extends OptionFieldBehaviours {
 
-  val form = new LprTypeFormProvider()()
+  val form = new PrTypeFormProvider()()
 
   "the individual/organisation choice field binds correctly" - {
 
     val fieldName = "value"
-    val requiredKey = "lprType.error.required"
+    val requiredKey = "prType.error.required"
 
     behave.like(
-      optionsField[LprType](
+      optionsField[PrType](
         form,
         fieldName,
-        validValues = LprType.values,
+        validValues = PrType.values,
         invalidError = FormError(fieldName, "error.invalid")
       )
     )

@@ -16,21 +16,22 @@
 
 package viewmodels.CheckAnswers
 
-import play.api.test.Helpers.stubMessages
-import pages.IndividualNamePage
-import models.{CheckMode, IndividualName, JourneyRole}
+import pages.PrTypePage
+import models.{CheckMode, PrType}
 import play.api.i18n.Messages
+import play.api.test.Helpers.stubMessages
+import org.scalatest.freespec.AnyFreeSpec
 import uk.gov.hmrc.govukfrontend.views.Aliases.Text
 import base.SpecBase
 
-class LprIndividualNameSummarySpec extends org.scalatest.freespec.AnyFreeSpec with SpecBase {
+class PrTypeSummarySpec extends AnyFreeSpec with SpecBase {
 
-  "LprIndividualNameSummary" - {
+  "PrTypeSummary" - {
     implicit val messages: Messages = stubMessages()
 
     "must return None when data is not present" in {
 
-      val result = LprIndividualNameSummary.row(srn, emptyUserAnswers)
+      val result = PrTypeSummary.row(srn, emptyUserAnswers)
 
       result mustBe None
     }
@@ -38,25 +39,17 @@ class LprIndividualNameSummarySpec extends org.scalatest.freespec.AnyFreeSpec wi
     "must return a row when data is present" in {
 
       val userAnswers = emptyUserAnswers
-        .set(
-          IndividualNamePage(JourneyRole.LprIndividual),
-          IndividualName(
-            title = Some("Mr"),
-            firstForename = "John",
-            secondForename = Some("William"),
-            surname = "Doe"
-          )
-        )
+        .set(PrTypePage, PrType.Individual)
         .success
         .value
 
-      val result = LprIndividualNameSummary.row(srn, userAnswers)
+      val result = PrTypeSummary.row(srn, userAnswers)
 
       result mustBe defined
-      result.get.key.content mustBe Text(messages("lprIndividualName.checkYourAnswersLabel"))
-      result.get.value.content mustBe Text("Mr John William Doe")
+      result.get.key.content mustBe Text(messages("prType.checkYourAnswersLabel"))
+      result.get.value.content mustBe Text(messages("prType.individual"))
       result.get.actions.get.items.head.href mustBe
-        controllers.routes.IndividualNameController.onPageLoad(srn, CheckMode, JourneyRole.LprIndividual).url
+        controllers.routes.PrTypeController.onPageLoad(srn, CheckMode).url
     }
   }
 }

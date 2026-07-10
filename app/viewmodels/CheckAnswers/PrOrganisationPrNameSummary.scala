@@ -18,39 +18,25 @@ package viewmodels.CheckAnswers
 
 import viewmodels.implicits._
 import play.twirl.api.HtmlFormat
-import pages.LprIndividualAddressPage
+import pages.IndividualNamePage
 import controllers.routes
-import uk.gov.hmrc.govukfrontend.views.viewmodels.content.HtmlContent
 import uk.gov.hmrc.govukfrontend.views.viewmodels.summarylist.SummaryListRow
 import models._
 import play.api.i18n.Messages
 import viewmodels.govuk.summarylist._
 
-object LprIndividualAddressSummary {
+object PrOrganisationPrNameSummary {
 
-  def row(
-    srn: SchemeId.Srn,
-    answers: UserAnswers,
-    countryNameForCode: String => String = identity
-  )(implicit messages: Messages): Option[SummaryListRow] =
-    answers.get(LprIndividualAddressPage).map { answer =>
-      val address = Seq(
-        Some(answer.addressLine1),
-        answer.addressLine2,
-        answer.addressLine3,
-        answer.addressLine4,
-        answer.ukPostcode,
-        Some(countryNameForCode(answer.country))
-      ).flatten.map(line => HtmlFormat.escape(line).toString).mkString("<br>")
-
+  def row(srn: SchemeId.Srn, answers: UserAnswers)(implicit messages: Messages): Option[SummaryListRow] =
+    answers.get(IndividualNamePage(JourneyRole.PrOrganisation)).map { answer =>
       SummaryListRowViewModel(
-        key = "lprIndividualAddress.checkYourAnswersLabel",
-        value = ValueViewModel(HtmlContent(HtmlFormat.raw(address))),
+        key = "prOrganisationName.checkYourAnswersLabel",
+        value = ValueViewModel(HtmlFormat.escape(answer.displayFullNameAndTitle).toString),
         actions = Seq(
           ActionItemViewModel(
             "site.change",
-            routes.AddressLookupStartController.start(srn, CheckMode).url
-          ).withVisuallyHiddenText(messages("lprIndividualAddress.checkYourAnswersLabel.hidden"))
+            routes.IndividualNameController.onPageLoad(srn, CheckMode, JourneyRole.PrOrganisation).url
+          ).withVisuallyHiddenText(messages("prOrganisationName.checkYourAnswersLabel.hidden"))
         )
       )
     }
