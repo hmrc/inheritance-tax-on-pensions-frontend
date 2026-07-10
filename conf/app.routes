@@ -41,15 +41,15 @@ POST        /:srn/enter-birth-death-date                 controllers.BirthDeathD
 GET         /:srn/change-birth-death-date                controllers.BirthDeathDatesController.onPageLoad(srn: Srn, mode: Mode = CheckMode)
 POST        /:srn/change-birth-death-date                controllers.BirthDeathDatesController.onSubmit(srn: Srn, mode: Mode = CheckMode)
 
-GET         /:srn/lpr-individual-or-organisation         controllers.LprTypeController.onPageLoad(srn: Srn, mode: Mode = NormalMode)
-POST        /:srn/lpr-individual-or-organisation         controllers.LprTypeController.onSubmit(srn: Srn, mode: Mode = NormalMode)
-GET         /:srn/change-lpr-individual-or-organisation  controllers.LprTypeController.onPageLoad(srn: Srn, mode: Mode = CheckMode)
-POST        /:srn/change-lpr-individual-or-organisation  controllers.LprTypeController.onSubmit(srn: Srn, mode: Mode = CheckMode)
+GET         /:srn/pr-individual-or-organisation         controllers.LprTypeController.onPageLoad(srn: Srn, mode: Mode = NormalMode)
+POST        /:srn/pr-individual-or-organisation         controllers.LprTypeController.onSubmit(srn: Srn, mode: Mode = NormalMode)
+GET         /:srn/change-pr-individual-or-organisation  controllers.LprTypeController.onPageLoad(srn: Srn, mode: Mode = CheckMode)
+POST        /:srn/change-pr-individual-or-organisation  controllers.LprTypeController.onSubmit(srn: Srn, mode: Mode = CheckMode)
 
-GET         /:srn/enter-name-lpr                         controllers.IndividualNameController.onPageLoad(srn: Srn, mode: Mode = NormalMode, journeyRole: JourneyRole = JourneyRole.LprIndividual)
-POST        /:srn/enter-name-lpr                         controllers.IndividualNameController.onSubmit(srn: Srn, mode: Mode = NormalMode, journeyRole: JourneyRole = JourneyRole.LprIndividual)
-GET         /:srn/change-name-lpr                        controllers.IndividualNameController.onPageLoad(srn: Srn, mode: Mode = CheckMode, journeyRole: JourneyRole = JourneyRole.LprIndividual)
-POST        /:srn/change-name-lpr                        controllers.IndividualNameController.onSubmit(srn: Srn, mode: Mode = CheckMode, journeyRole: JourneyRole = JourneyRole.LprIndividual)
+GET         /:srn/enter-name-pr                         controllers.IndividualNameController.onPageLoad(srn: Srn, mode: Mode = NormalMode, journeyRole: JourneyRole = JourneyRole.LprIndividual)
+POST        /:srn/enter-name-pr                         controllers.IndividualNameController.onSubmit(srn: Srn, mode: Mode = NormalMode, journeyRole: JourneyRole = JourneyRole.LprIndividual)
+GET         /:srn/change-name-pr                        controllers.IndividualNameController.onPageLoad(srn: Srn, mode: Mode = CheckMode, journeyRole: JourneyRole = JourneyRole.LprIndividual)
+POST        /:srn/change-name-pr                        controllers.IndividualNameController.onSubmit(srn: Srn, mode: Mode = CheckMode, journeyRole: JourneyRole = JourneyRole.LprIndividual)
 
 GET         /:srn/enter-organisation-name                controllers.OrganisationNameController.onPageLoad(srn: Srn, mode: Mode = NormalMode)
 POST        /:srn/enter-organisation-name                controllers.OrganisationNameController.onSubmit(srn: Srn, mode: Mode = NormalMode)
@@ -61,8 +61,8 @@ POST        /:srn/enter-name-pr-organisation             controllers.IndividualN
 GET         /:srn/change-name-pr-organisation            controllers.IndividualNameController.onPageLoad(srn: Srn, mode: Mode = CheckMode, journeyRole: JourneyRole = JourneyRole.LprOrganisation)
 POST        /:srn/change-name-pr-organisation            controllers.IndividualNameController.onSubmit(srn: Srn, mode: Mode = CheckMode, journeyRole: JourneyRole = JourneyRole.LprOrganisation)
 
-GET         /:srn/enter-lpr-address                      controllers.AddressLookupStartController.start(srn: Srn, mode: Mode = NormalMode)
-GET         /:srn/change-lpr-address                     controllers.AddressLookupStartController.start(srn: Srn, mode: Mode = CheckMode)
+GET         /:srn/enter-pr-address                      controllers.AddressLookupStartController.start(srn: Srn, mode: Mode = NormalMode)
+GET         /:srn/change-pr-address                     controllers.AddressLookupStartController.start(srn: Srn, mode: Mode = CheckMode)
 GET         /:srn/address-lookup-continue/normalmode     controllers.AddressLookupContinueController.continue(srn: Srn, mode: Mode = NormalMode, id: String ?= "")
 GET         /:srn/address-lookup-continue/checkmode      controllers.AddressLookupContinueController.continue(srn: Srn, mode: Mode = CheckMode, id: String ?= "")
 
