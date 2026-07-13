@@ -20,26 +20,26 @@ import uk.gov.hmrc.govukfrontend.views.Aliases.Text
 import play.api.i18n.Messages
 import uk.gov.hmrc.govukfrontend.views.viewmodels.radios.RadioItem
 
-sealed trait LprType
+sealed trait PrType
 
-object LprType extends Enumerable.Implicits {
+object PrType extends Enumerable.Implicits {
 
-  case object Individual extends WithName("individual") with LprType
-  case object Organisation extends WithName("organisation") with LprType
+  case object Individual extends WithName("individual") with PrType
+  case object Organisation extends WithName("organisation") with PrType
 
-  val values: Seq[LprType] = Seq(
+  val values: Seq[PrType] = Seq(
     Individual,
     Organisation
   )
 
   def options(implicit messages: Messages): Seq[RadioItem] = values.zipWithIndex.map { case (value, index) =>
     RadioItem(
-      content = Text(messages(s"lprType.${value.toString}")),
+      content = Text(messages(s"prType.${value.toString}")),
       value = Some(value.toString),
       id = Some(s"value_$index"),
       hint = if (value == Organisation) {
         Some(
-          uk.gov.hmrc.govukfrontend.views.viewmodels.hint.Hint(content = Text(messages("lprType.organisation.hint")))
+          uk.gov.hmrc.govukfrontend.views.viewmodels.hint.Hint(content = Text(messages("prType.organisation.hint")))
         )
       } else {
         None
@@ -47,6 +47,6 @@ object LprType extends Enumerable.Implicits {
     )
   }
 
-  implicit val enumerable: Enumerable[LprType] =
+  implicit val enumerable: Enumerable[PrType] =
     Enumerable(values.map(v => v.toString -> v)*)
 }

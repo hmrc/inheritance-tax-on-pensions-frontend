@@ -101,25 +101,25 @@ class IndividualNameController @Inject() (
     individualName: IndividualName
   ): Try[UserAnswers] =
     journeyRole match {
-      case JourneyRole.LprIndividual =>
-        addLprName(userAnswers, "individual", individualName)
-      case JourneyRole.LprOrganisation =>
-        addLprName(userAnswers, "organisation", individualName)
+      case JourneyRole.PrIndividual =>
+        addPrName(userAnswers, "individual", individualName)
+      case JourneyRole.PrOrganisation =>
+        addPrName(userAnswers, "organisation", individualName)
       case _ =>
         userAnswers.set(IndividualNamePage(journeyRole), individualName)
     }
 
-  private def addLprName(
+  private def addPrName(
     userAnswers: UserAnswers,
-    lprTypeKey: String,
+    prTypeKey: String,
     individualName: IndividualName
   ): Try[UserAnswers] =
     Success(
       userAnswers.copy(
         data = userAnswers.data.deepMerge(
           Json.obj(
-            "lprDetails" -> Json.obj(
-              lprTypeKey -> Json.obj(
+            "prDetails" -> Json.obj(
+              prTypeKey -> Json.obj(
                 "title" -> optionalString(individualName.title),
                 "firstForename" -> individualName.firstForename,
                 "secondForename" -> optionalString(individualName.secondForename),
@@ -132,7 +132,7 @@ class IndividualNameController @Inject() (
     )
 
   private def organisationName(userAnswers: UserAnswers, journeyRole: JourneyRole): Option[String] =
-    Option.when(journeyRole == JourneyRole.LprOrganisation)(userAnswers.get(OrganisationNamePage)).flatten
+    Option.when(journeyRole == JourneyRole.PrOrganisation)(userAnswers.get(OrganisationNamePage)).flatten
 
   private def optionalString(value: Option[String]): JsValue =
     value.filter(_.nonEmpty).map(JsString.apply).getOrElse(JsNull)
@@ -142,9 +142,9 @@ class IndividualNameController @Inject() (
       case CheckMode => routes.CheckYourAnswersController.onPageLoad(srn)
       case NormalMode if journeyRole == JourneyRole.Deceased =>
         routes.NinoOrReasonController.onPageLoad(srn, NormalMode)
-      case NormalMode if journeyRole == JourneyRole.LprIndividual =>
+      case NormalMode if journeyRole == JourneyRole.PrIndividual =>
         routes.AddressLookupStartController.start(srn, NormalMode)
-      case NormalMode if journeyRole == JourneyRole.LprOrganisation =>
+      case NormalMode if journeyRole == JourneyRole.PrOrganisation =>
         routes.DidPrSubmitController.onPageLoad(srn, NormalMode)
       case _ => routes.JourneyRecoveryController.onPageLoad()
     }

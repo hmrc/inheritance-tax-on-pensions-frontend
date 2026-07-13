@@ -80,8 +80,8 @@ class OrganisationNameControllerSpec extends SpecBase with MockitoSugar {
     }
 
     List(
-      (NormalMode, routes.IndividualNameController.onPageLoad(srn, NormalMode, JourneyRole.LprOrganisation).url),
-      (CheckMode, routes.IndividualNameController.onPageLoad(srn, CheckMode, JourneyRole.LprOrganisation).url)
+      (NormalMode, routes.IndividualNameController.onPageLoad(srn, NormalMode, JourneyRole.PrOrganisation).url),
+      (CheckMode, routes.IndividualNameController.onPageLoad(srn, CheckMode, JourneyRole.PrOrganisation).url)
     ).foreach { (modeTested, expectedRedirectLocation) =>
       s"must redirect to the next page when valid data is submitted in $modeTested" in {
 
@@ -124,7 +124,7 @@ class OrganisationNameControllerSpec extends SpecBase with MockitoSugar {
 
       val userAnswersWithOrgDetails = emptyUserAnswers.copy(
         data = Json.obj(
-          "lprDetails" -> Json.obj(
+          "prDetails" -> Json.obj(
             "organisation" -> Json.obj(
               "organisationName" -> "Test Organisation",
               "title" -> "Mr",

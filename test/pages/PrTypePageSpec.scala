@@ -18,43 +18,43 @@ package pages
 
 import base.SpecBase
 import play.api.libs.json.{JsPath, Json}
-import models.{IndividualName, JourneyRole, LprType}
+import models.{IndividualName, JourneyRole, PrType}
 
-class LprTypePageSpec extends SpecBase {
+class PrTypePageSpec extends SpecBase {
 
-  "LprTypePage" - {
+  "PrTypePage" - {
 
     "must use the correct path" in {
-      LprTypePage.path mustEqual JsPath \ "lprType"
+      PrTypePage.path mustEqual JsPath \ "prType"
     }
 
     "must use the correct page name" in {
-      LprTypePage.toString mustEqual "lprType"
+      PrTypePage.toString mustEqual "prType"
     }
 
     "must call super.cleanup when value is None" in {
       val userAnswers = emptyUserAnswers
 
-      val result = LprTypePage.cleanup(None, userAnswers)
+      val result = PrTypePage.cleanup(None, userAnswers)
 
       result.isSuccess mustBe true
     }
 
     "must remove individual PR details when Organisation is selected" in {
       val userAnswers = emptyUserAnswers
-        .set(IndividualNamePage(JourneyRole.LprIndividual), IndividualName(Some("Mr"), "John", None, "Doe"))
+        .set(IndividualNamePage(JourneyRole.PrIndividual), IndividualName(Some("Mr"), "John", None, "Doe"))
         .success
         .value
 
-      val result = LprTypePage.cleanup(Some(LprType.Organisation), userAnswers).success.value
+      val result = PrTypePage.cleanup(Some(PrType.Organisation), userAnswers).success.value
 
-      result.get(IndividualNamePage(JourneyRole.LprIndividual)) mustBe None
+      result.get(IndividualNamePage(JourneyRole.PrIndividual)) mustBe None
     }
 
     "must remove organisation PR details when Individual is selected" in {
       val userAnswers = emptyUserAnswers.copy(
         data = Json.obj(
-          "lprDetails" -> Json.obj(
+          "prDetails" -> Json.obj(
             "organisation" -> Json.obj(
               "organisationName" -> "Test Organisation",
               "title" -> "Mr",
@@ -65,10 +65,10 @@ class LprTypePageSpec extends SpecBase {
         )
       )
 
-      val result = LprTypePage.cleanup(Some(LprType.Individual), userAnswers).success.value
+      val result = PrTypePage.cleanup(Some(PrType.Individual), userAnswers).success.value
 
       result.get(OrganisationNamePage) mustBe None
-      result.get(IndividualNamePage(JourneyRole.LprOrganisation)) mustBe None
+      result.get(IndividualNamePage(JourneyRole.PrOrganisation)) mustBe None
     }
   }
 }

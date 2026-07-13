@@ -25,7 +25,7 @@
     govukButton: GovukButton
 )
 
-@(form: Form[?], srn: Srn, mode: Mode, lprName: String)(implicit request: Request[?], messages: Messages)
+@(form: Form[?], srn: Srn, mode: Mode, prName: String)(implicit request: Request[?], messages: Messages)
 
 @layout(pageTitle = title(form, messages("didPrSubmit.title"))) {
 
@@ -38,7 +38,7 @@
         @govukRadios(
             RadiosViewModel.yesNo(
                 field = form("value"),
-                legend = LegendViewModel(messages("didPrSubmit.heading", lprName)).asPageHeading(LegendSize.Large)
+                legend = LegendViewModel(messages("didPrSubmit.heading", prName)).asPageHeading(LegendSize.Large)
             )
         )
 

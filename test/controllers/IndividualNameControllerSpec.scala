@@ -53,11 +53,11 @@ class IndividualNameControllerSpec extends SpecBase {
       routes.NinoOrReasonController.onPageLoad(srn, NormalMode).url
     ),
     JourneyRoleTestCase(
-      JourneyRole.LprIndividual,
+      JourneyRole.PrIndividual,
       routes.AddressLookupStartController.start(srn, NormalMode).url
     ),
     JourneyRoleTestCase(
-      JourneyRole.LprOrganisation,
+      JourneyRole.PrOrganisation,
       routes.DidPrSubmitController.onPageLoad(srn, NormalMode).url
     )
   )
@@ -185,14 +185,14 @@ class IndividualNameControllerSpec extends SpecBase {
       }
     }
 
-    "must redirect to Check Your Answers when LPR individual name is submitted in CheckMode and address is present" in {
+    "must redirect to Check Your Answers when PR individual name is submitted in CheckMode and address is present" in {
 
       val existingAnswers = UserAnswers(
         userAnswersId,
         srnGen.sample.value.toString,
         "test-uuid",
         Json.obj(
-          "lprDetails" -> Json.obj(
+          "prDetails" -> Json.obj(
             "individual" -> Json.obj(
               "title" -> "Mr",
               "firstForename" -> "John",
@@ -217,7 +217,7 @@ class IndividualNameControllerSpec extends SpecBase {
 
       running(application) {
         val request =
-          FakeRequest(POST, routes.IndividualNameController.onSubmit(srn, CheckMode, JourneyRole.LprIndividual).url)
+          FakeRequest(POST, routes.IndividualNameController.onSubmit(srn, CheckMode, JourneyRole.PrIndividual).url)
             .withFormUrlEncodedBody(validFormData*)
 
         val result = route(application, request).value
@@ -277,14 +277,14 @@ class IndividualNameControllerSpec extends SpecBase {
       }
     }
 
-    "must preserve the LPR individual address when updating the LPR individual name" in {
+    "must preserve the PR individual address when updating the PR individual name" in {
 
       val existingAnswers = UserAnswers(
         userAnswersId,
         srnGen.sample.value.toString,
         "test-uuid",
         Json.obj(
-          "lprDetails" -> Json.obj(
+          "prDetails" -> Json.obj(
             "individual" -> Json.obj(
               "title" -> "Mr",
               "firstForename" -> "John",
@@ -311,16 +311,16 @@ class IndividualNameControllerSpec extends SpecBase {
       running(application) {
         val controller = application.injector.instanceOf[IndividualNameController]
 
-        val result = controller.addIndividualName(existingAnswers, JourneyRole.LprIndividual, updatedName).success.value
+        val result = controller.addIndividualName(existingAnswers, JourneyRole.PrIndividual, updatedName).success.value
 
-        (result.data \ "lprDetails" \ "individual" \ "title").as[String] mustEqual "Dr"
-        (result.data \ "lprDetails" \ "individual" \ "firstForename").as[String] mustEqual "Jane"
-        (result.data \ "lprDetails" \ "individual" \ "secondForename").asOpt[String] mustBe None
-        (result.data \ "lprDetails" \ "individual" \ "surname").as[String] mustEqual "Doe"
-        (result.data \ "lprDetails" \ "individual" \ "addressLine1").as[String] mustEqual "1 ABCDE Street"
-        (result.data \ "lprDetails" \ "individual" \ "addressLine2").as[String] mustEqual "FGHIJ Town"
-        (result.data \ "lprDetails" \ "individual" \ "ukPostcode").as[String] mustEqual "ZZ99 1AA"
-        (result.data \ "lprDetails" \ "individual" \ "country").as[String] mustEqual "GB"
+        (result.data \ "prDetails" \ "individual" \ "title").as[String] mustEqual "Dr"
+        (result.data \ "prDetails" \ "individual" \ "firstForename").as[String] mustEqual "Jane"
+        (result.data \ "prDetails" \ "individual" \ "secondForename").asOpt[String] mustBe None
+        (result.data \ "prDetails" \ "individual" \ "surname").as[String] mustEqual "Doe"
+        (result.data \ "prDetails" \ "individual" \ "addressLine1").as[String] mustEqual "1 ABCDE Street"
+        (result.data \ "prDetails" \ "individual" \ "addressLine2").as[String] mustEqual "FGHIJ Town"
+        (result.data \ "prDetails" \ "individual" \ "ukPostcode").as[String] mustEqual "ZZ99 1AA"
+        (result.data \ "prDetails" \ "individual" \ "country").as[String] mustEqual "GB"
       }
     }
 
@@ -331,7 +331,7 @@ class IndividualNameControllerSpec extends SpecBase {
         srnGen.sample.value.toString,
         "test-uuid",
         Json.obj(
-          "lprDetails" -> Json.obj(
+          "prDetails" -> Json.obj(
             "organisation" -> Json.obj(
               "organisationName" -> "Standard Pension",
               "title" -> "Mr",
@@ -356,13 +356,13 @@ class IndividualNameControllerSpec extends SpecBase {
         val controller = application.injector.instanceOf[IndividualNameController]
 
         val result =
-          controller.addIndividualName(existingAnswers, JourneyRole.LprOrganisation, updatedName).success.value
+          controller.addIndividualName(existingAnswers, JourneyRole.PrOrganisation, updatedName).success.value
 
-        (result.data \ "lprDetails" \ "organisation" \ "organisationName").as[String] mustEqual "Standard Pension"
-        (result.data \ "lprDetails" \ "organisation" \ "title").as[String] mustEqual "Dr"
-        (result.data \ "lprDetails" \ "organisation" \ "firstForename").as[String] mustEqual "Jane"
-        (result.data \ "lprDetails" \ "organisation" \ "secondForename").asOpt[String] mustBe None
-        (result.data \ "lprDetails" \ "organisation" \ "surname").as[String] mustEqual "Doe"
+        (result.data \ "prDetails" \ "organisation" \ "organisationName").as[String] mustEqual "Standard Pension"
+        (result.data \ "prDetails" \ "organisation" \ "title").as[String] mustEqual "Dr"
+        (result.data \ "prDetails" \ "organisation" \ "firstForename").as[String] mustEqual "Jane"
+        (result.data \ "prDetails" \ "organisation" \ "secondForename").asOpt[String] mustBe None
+        (result.data \ "prDetails" \ "organisation" \ "surname").as[String] mustEqual "Doe"
       }
     }
 

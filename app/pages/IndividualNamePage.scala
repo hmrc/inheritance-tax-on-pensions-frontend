@@ -24,8 +24,8 @@ case class IndividualNamePage(journeyRole: JourneyRole) extends QuestionPage[Ind
   override def path: JsPath =
     journeyRole match {
       case JourneyRole.Deceased => JsPath \ "nameOfDeceased"
-      case JourneyRole.LprIndividual => JsPath \ "lprDetails" \ "individual"
-      case JourneyRole.LprOrganisation => JsPath \ "lprDetails" \ "organisation"
+      case JourneyRole.PrIndividual => JsPath \ "prDetails" \ "individual"
+      case JourneyRole.PrOrganisation => JsPath \ "prDetails" \ "organisation"
       case JourneyRole.Unknown => JsPath \ "unknown" \ toString
     }
 

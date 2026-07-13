@@ -83,7 +83,7 @@ object IndividualNamePageViewModel {
     organisationName: Option[String]
   )(implicit messages: Messages): String =
     journeyRole match {
-      case JourneyRole.LprOrganisation => messages(messageKey, organisationName.getOrElse(""))
+      case JourneyRole.PrOrganisation => messages(messageKey, organisationName.getOrElse(""))
       case _ => messages(messageKey)
     }
 }

@@ -16,11 +16,21 @@
 
 package pages
 
-import queries.Gettable
 import play.api.libs.json.JsPath
-import models.LprAddress
+import models.{JourneyRole, PrType, UserAnswers}
 
-case object LprIndividualAddressPage extends Page with Gettable[LprAddress] {
+import scala.util.Try
 
-  override def path: JsPath = JsPath \ "lprDetails" \ "individual"
+case object PrTypePage extends QuestionPage[PrType] {
+
+  override def path: JsPath = JsPath \ toString
+
+  override def toString: String = "prType"
+
+  override def cleanup(value: Option[PrType], userAnswers: UserAnswers): Try[UserAnswers] =
+    value match {
+      case Some(PrType.Organisation) => userAnswers.remove(IndividualNamePage(JourneyRole.PrIndividual))
+      case Some(PrType.Individual) => userAnswers.remove(IndividualNamePage(JourneyRole.PrOrganisation))
+      case _ => super.cleanup(value, userAnswers)
+    }
 }

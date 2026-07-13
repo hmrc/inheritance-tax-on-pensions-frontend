@@ -24,34 +24,34 @@ import org.scalacheck.Gen
 import org.scalatest.OptionValues
 import play.api.libs.json.{JsError, JsString, Json}
 
-class LprTypeSpec extends AnyFreeSpec with Matchers with ScalaCheckPropertyChecks with OptionValues {
+class PrTypeSpec extends AnyFreeSpec with Matchers with ScalaCheckPropertyChecks with OptionValues {
 
-  "LprType" - {
+  "PrType" - {
 
-    "must read individual and organisation from JSON into LprType values" in {
+    "must read individual and organisation from JSON into PrType values" in {
 
-      val gen = Gen.oneOf(LprType.values.toSeq)
+      val gen = Gen.oneOf(PrType.values.toSeq)
 
-      forAll(gen) { lprType =>
-        JsString(lprType.toString).validate[LprType].asOpt.value mustEqual lprType
+      forAll(gen) { prType =>
+        JsString(prType.toString).validate[PrType].asOpt.value mustEqual prType
       }
     }
 
     "must reject JSON strings other than individual and organisation" in {
 
-      val gen = arbitrary[String].suchThat(!LprType.values.map(_.toString).contains(_))
+      val gen = arbitrary[String].suchThat(!PrType.values.map(_.toString).contains(_))
 
       forAll(gen) { invalidValue =>
-        JsString(invalidValue).validate[LprType] mustEqual JsError("error.invalid")
+        JsString(invalidValue).validate[PrType] mustEqual JsError("error.invalid")
       }
     }
 
-    "must write LprType values to JSON strings individual and organisation" in {
+    "must write PrType values to JSON strings individual and organisation" in {
 
-      val gen = Gen.oneOf(LprType.values.toSeq)
+      val gen = Gen.oneOf(PrType.values.toSeq)
 
-      forAll(gen) { lprType =>
-        Json.toJson(lprType) mustEqual JsString(lprType.toString)
+      forAll(gen) { prType =>
+        Json.toJson(prType) mustEqual JsString(prType.toString)
       }
     }
   }

@@ -16,15 +16,15 @@
 
 package utils
 
-import pages.{IndividualNamePage, LprTypePage}
+import pages.{IndividualNamePage, PrTypePage}
 import models._
 
-object LprNameHelper {
+object PrNameHelper {
 
   def fromUserAnswers(userAnswers: UserAnswers): Option[String] =
-    (userAnswers.get(LprTypePage).getOrElse(LprType.Individual) match {
-      case LprType.Individual => userAnswers.get(IndividualNamePage(JourneyRole.LprIndividual))
-      case LprType.Organisation => userAnswers.get(IndividualNamePage(JourneyRole.LprOrganisation))
+    (userAnswers.get(PrTypePage).getOrElse(PrType.Individual) match {
+      case PrType.Individual => userAnswers.get(IndividualNamePage(JourneyRole.PrIndividual))
+      case PrType.Organisation => userAnswers.get(IndividualNamePage(JourneyRole.PrOrganisation))
     }).map(displayName)
 
   def withName[A](userAnswers: UserAnswers)(ifMissing: => A)(f: String => A): A =

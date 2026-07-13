@@ -25,18 +25,18 @@ import models._
 import play.api.i18n.Messages
 import viewmodels.govuk.summarylist._
 
-object LprIndividualNameSummary {
+object PrIndividualNameSummary {
 
   def row(srn: SchemeId.Srn, answers: UserAnswers)(implicit messages: Messages): Option[SummaryListRow] =
-    answers.get(IndividualNamePage(JourneyRole.LprIndividual)).map { answer =>
+    answers.get(IndividualNamePage(JourneyRole.PrIndividual)).map { answer =>
       SummaryListRowViewModel(
-        key = "lprIndividualName.checkYourAnswersLabel",
+        key = "prIndividualName.checkYourAnswersLabel",
         value = ValueViewModel(HtmlFormat.escape(answer.displayFullNameAndTitle).toString),
         actions = Seq(
           ActionItemViewModel(
             "site.change",
-            routes.IndividualNameController.onPageLoad(srn, CheckMode, JourneyRole.LprIndividual).url
-          ).withVisuallyHiddenText(messages("lprIndividualName.checkYourAnswersLabel.hidden"))
+            routes.IndividualNameController.onPageLoad(srn, CheckMode, JourneyRole.PrIndividual).url
+          ).withVisuallyHiddenText(messages("prIndividualName.checkYourAnswersLabel.hidden"))
         )
       )
     }
