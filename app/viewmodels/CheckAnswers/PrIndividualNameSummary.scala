@@ -20,6 +20,7 @@ import viewmodels.implicits._
 import play.twirl.api.HtmlFormat
 import pages.IndividualNamePage
 import controllers.routes
+import uk.gov.hmrc.govukfrontend.views.viewmodels.content.HtmlContent
 import uk.gov.hmrc.govukfrontend.views.viewmodels.summarylist.SummaryListRow
 import models._
 import play.api.i18n.Messages
@@ -31,7 +32,7 @@ object PrIndividualNameSummary {
     answers.get(IndividualNamePage(JourneyRole.PrIndividual)).map { answer =>
       SummaryListRowViewModel(
         key = "prIndividualName.checkYourAnswersLabel",
-        value = ValueViewModel(HtmlFormat.escape(answer.displayFullNameAndTitle).toString),
+        value = ValueViewModel(HtmlContent(HtmlFormat.escape(answer.displayFullNameAndTitle).toString)),
         actions = Seq(
           ActionItemViewModel(
             "site.change",
