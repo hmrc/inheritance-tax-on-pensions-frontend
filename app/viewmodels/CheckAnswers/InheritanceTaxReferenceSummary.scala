@@ -20,6 +20,7 @@ import viewmodels.implicits._
 import play.twirl.api.HtmlFormat
 import pages.InheritanceTaxReferencePage
 import controllers.routes
+import uk.gov.hmrc.govukfrontend.views.viewmodels.content.HtmlContent
 import models.SchemeId.Srn
 import uk.gov.hmrc.govukfrontend.views.viewmodels.summarylist.SummaryListRow
 import models.{CheckMode, UserAnswers}
@@ -32,7 +33,7 @@ object InheritanceTaxReferenceSummary {
     answers.get(InheritanceTaxReferencePage).map { answer =>
       SummaryListRowViewModel(
         key = "inheritanceTaxReference.checkYourAnswersLabel",
-        value = ValueViewModel(HtmlFormat.escape(answer).toString),
+        value = ValueViewModel(HtmlContent(HtmlFormat.escape(answer).toString)),
         actions = Seq(
           ActionItemViewModel("site.change", routes.InheritanceTaxReferenceController.onPageLoad(srn, CheckMode).url)
             .withVisuallyHiddenText(messages("inheritanceTaxReference.change.hidden"))

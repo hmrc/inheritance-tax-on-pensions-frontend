@@ -20,6 +20,7 @@ import viewmodels.implicits._
 import play.twirl.api.HtmlFormat
 import pages.OrganisationNamePage
 import controllers.routes
+import uk.gov.hmrc.govukfrontend.views.viewmodels.content.HtmlContent
 import models.SchemeId.Srn
 import uk.gov.hmrc.govukfrontend.views.viewmodels.summarylist.SummaryListRow
 import models.{CheckMode, UserAnswers}
@@ -32,7 +33,7 @@ object PrOrganisationNameSummary {
     answers.get(OrganisationNamePage).map { answer =>
       SummaryListRowViewModel(
         key = "organisationName.checkYourAnswersLabel",
-        value = ValueViewModel(HtmlFormat.escape(answer).toString),
+        value = ValueViewModel(HtmlContent(HtmlFormat.escape(answer).toString)),
         actions = Seq(
           ActionItemViewModel("site.change", routes.OrganisationNameController.onPageLoad(srn, CheckMode).url)
             .withVisuallyHiddenText(messages("organisationName.change.hidden"))

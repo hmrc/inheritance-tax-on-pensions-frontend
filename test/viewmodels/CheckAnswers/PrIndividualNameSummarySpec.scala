@@ -18,6 +18,7 @@ package viewmodels.CheckAnswers
 
 import play.api.test.Helpers.stubMessages
 import pages.IndividualNamePage
+import uk.gov.hmrc.govukfrontend.views.viewmodels.content.HtmlContent
 import models.{CheckMode, IndividualName, JourneyRole}
 import play.api.i18n.Messages
 import uk.gov.hmrc.govukfrontend.views.Aliases.Text
@@ -54,7 +55,7 @@ class PrIndividualNameSummarySpec extends org.scalatest.freespec.AnyFreeSpec wit
 
       result mustBe defined
       result.get.key.content mustBe Text(messages("prIndividualName.checkYourAnswersLabel"))
-      result.get.value.content mustBe Text("Mr John William Doe")
+      result.get.value.content mustBe HtmlContent("Mr John William Doe")
       result.get.actions.get.items.head.href mustBe
         controllers.routes.IndividualNameController.onPageLoad(srn, CheckMode, JourneyRole.PrIndividual).url
     }
