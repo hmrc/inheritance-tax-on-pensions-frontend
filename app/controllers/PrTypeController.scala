@@ -92,12 +92,8 @@ class PrTypeController @Inject() (
         answer match {
           case PrType.Individual if userAnswers.get(IndividualNamePage(JourneyRole.PrIndividual)).isEmpty =>
             routes.IndividualNameController.onPageLoad(srn, CheckMode, JourneyRole.PrIndividual)
-          case PrType.Individual if userAnswers.get(PrIndividualAddressPage).isEmpty =>
-            routes.AddressLookupStartController.start(srn, CheckMode)
           case PrType.Organisation if userAnswers.get(OrganisationNamePage).isEmpty =>
             routes.OrganisationNameController.onPageLoad(srn, CheckMode)
-          case PrType.Organisation if userAnswers.get(IndividualNamePage(JourneyRole.PrOrganisation)).isEmpty =>
-            routes.IndividualNameController.onPageLoad(srn, CheckMode, JourneyRole.PrOrganisation)
           case _ =>
             routes.CheckYourAnswersController.onPageLoad(srn)
         }

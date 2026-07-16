@@ -20,7 +20,7 @@ import config.FrontendAppConfig
 import models.SchemeId.Srn
 import models.addresslookup.{AlfAddressData, AlfJourneyConfig}
 import uk.gov.hmrc.http._
-import models.Mode
+import models.{JourneyRole, Mode}
 import uk.gov.hmrc.http.client.HttpClientV2
 import play.api.libs.ws.JsonBodyWritables.writeableOf_JsValue
 import play.api.libs.json.Json
@@ -35,12 +35,14 @@ class AddressLookupFrontendConnector @Inject() (
 )(implicit ec: ExecutionContext)
     extends HttpReadsInstances {
 
-  def initJourney(srn: Srn, mode: Mode, journeyConfig: AlfJourneyConfig)(implicit hc: HeaderCarrier): Future[String] =
+  def initJourney(srn: Srn, mode: Mode, journeyConfig: AlfJourneyConfig, journeyRole: JourneyRole)(implicit
+    hc: HeaderCarrier
+  ): Future[String] =
     httpClient
       .post(url"${config.addressLookupFrontendBaseUrl}/api/init")
       .withBody(Json.toJson(journeyConfig))
       .execute[HttpResponse]
-      .map(_.header("Location").getOrElse(config.addressLookupContinueUrl(srn, mode)))
+      .map(_.header("Location").getOrElse(config.addressLookupContinueUrl(srn, mode, journeyRole)))
 
   def getAddress(addressId: String)(implicit hc: HeaderCarrier): Future[AlfAddressData] =
     httpClient

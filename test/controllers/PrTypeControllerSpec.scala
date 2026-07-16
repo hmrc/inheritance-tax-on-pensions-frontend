@@ -170,18 +170,13 @@ class PrTypeControllerSpec extends SpecBase {
       }
     }
 
-    "must redirect to the organisation PR name page when Organisation is submitted in CheckMode and PR name details are missing" in {
+    "must redirect to the organisation name page when Organisation is submitted in CheckMode and organisation name details are missing" in {
 
       val mockInheritanceTaxOnPensionsConnector = mock[InheritanceTaxOnPensionsConnector]
       when(mockInheritanceTaxOnPensionsConnector.setUserAnswers(any(), any(), any(), any(), any())(using any()))
         .thenReturn(Future.successful(Right(emptyUserAnswers)))
 
-      val userAnswersWithOrgName = emptyUserAnswers
-        .set(OrganisationNamePage, "Test Organisation")
-        .success
-        .value
-
-      val application = applicationBuilder(userAnswers = Some(userAnswersWithOrgName), usesSession = true)
+      val application = applicationBuilder(userAnswers = Some(emptyUserAnswers), usesSession = true)
         .overrides(
           bind[InheritanceTaxOnPensionsConnector].toInstance(mockInheritanceTaxOnPensionsConnector)
         )
@@ -195,8 +190,8 @@ class PrTypeControllerSpec extends SpecBase {
         val result = route(application, request).value
 
         status(result) mustEqual SEE_OTHER
-        redirectLocation(result).value mustEqual routes.IndividualNameController
-          .onPageLoad(srn, CheckMode, JourneyRole.PrOrganisation)
+        redirectLocation(result).value mustEqual routes.OrganisationNameController
+          .onPageLoad(srn, CheckMode)
           .url
       }
     }
@@ -320,35 +315,6 @@ class PrTypeControllerSpec extends SpecBase {
           any(),
           any()
         )(using any())
-      }
-    }
-
-    "must redirect to address lookup when Individual is submitted in CheckMode and address details are missing" in {
-
-      val userAnswers = emptyUserAnswers
-        .set(IndividualNamePage(JourneyRole.PrIndividual), prIndividualName)
-        .success
-        .value
-
-      val mockInheritanceTaxOnPensionsConnector = mock[InheritanceTaxOnPensionsConnector]
-      when(mockInheritanceTaxOnPensionsConnector.setUserAnswers(any(), any(), any(), any(), any())(using any()))
-        .thenReturn(Future.successful(Right(emptyUserAnswers)))
-
-      val application = applicationBuilder(userAnswers = Some(userAnswers), usesSession = true)
-        .overrides(
-          bind[InheritanceTaxOnPensionsConnector].toInstance(mockInheritanceTaxOnPensionsConnector)
-        )
-        .build()
-
-      running(application) {
-        val request =
-          FakeRequest(POST, routes.PrTypeController.onSubmit(srn, CheckMode).url)
-            .withFormUrlEncodedBody(("value", PrType.Individual.toString))
-
-        val result = route(application, request).value
-
-        status(result) mustEqual SEE_OTHER
-        redirectLocation(result).value mustEqual routes.AddressLookupStartController.start(srn, CheckMode).url
       }
     }
 

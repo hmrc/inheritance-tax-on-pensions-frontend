@@ -18,7 +18,7 @@ package controllers
 
 import services.{AddressLookupFrontendService, UserAnswersService}
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
-import pages.PrIndividualAddressPage
+import pages.{PrIndividualAddressPage, PrOrganisationAddressPage}
 import models.SchemeId.Srn
 import controllers.actions._
 import play.api.libs.json.{JsObject, JsSuccess, Json}
@@ -39,7 +39,7 @@ class AddressLookupContinueController @Inject() (
 )(implicit ec: ExecutionContext)
     extends IhtpBaseController {
 
-  def continue(srn: Srn, mode: Mode, id: String): Action[AnyContent] =
+  def continue(srn: Srn, mode: Mode, journeyRole: JourneyRole, id: String): Action[AnyContent] =
     identify
       .andThen(allowAccess(srn))
       .andThen(getData)
@@ -53,7 +53,7 @@ class AddressLookupContinueController @Inject() (
             result <-
               if (PrAddress.hasValidFirstAddressLine(addressData)) {
                 val updatedAnswers =
-                  addPrIndividualAddress(request.userAnswers, PrAddress.fromAlfAddressData(addressData))
+                  addPrAddress(request.userAnswers, journeyRole, PrAddress.fromAlfAddressData(addressData))
 
                 userAnswersService
                   .set(updatedAnswers)(using hc, request.request)
@@ -71,17 +71,33 @@ class AddressLookupContinueController @Inject() (
       case CheckMode => routes.CheckYourAnswersController.onPageLoad(srn)
     }
 
-  private[controllers] def addPrIndividualAddress(userAnswers: UserAnswers, address: PrAddress): UserAnswers =
-    userAnswers.data
-      .setObject(
-        PrIndividualAddressPage.path,
-        individualWithoutAddressFields(userAnswers) ++ Json.toJsObject(address)
-      ) match {
-      case JsSuccess(data, _) => userAnswers.copy(data = data)
-      case _ => userAnswers
+  private[controllers] def addPrAddress(
+    userAnswers: UserAnswers,
+    journeyRole: JourneyRole,
+    address: PrAddress
+  ): UserAnswers =
+    journeyRole match {
+      case JourneyRole.PrIndividual =>
+        userAnswers.data
+          .setObject(
+            PrIndividualAddressPage.path,
+            prWithoutAddressFields(userAnswers, "individual") ++ Json.toJsObject(address)
+          ) match {
+          case JsSuccess(data, _) => userAnswers.copy(data = data)
+          case _ => userAnswers
+        }
+      case JourneyRole.PrOrganisation =>
+        userAnswers.data
+          .setObject(
+            PrOrganisationAddressPage.path,
+            prWithoutAddressFields(userAnswers, "organisation") ++ Json.toJsObject(address)
+          ) match {
+          case JsSuccess(data, _) => userAnswers.copy(data = data)
+          case _ => userAnswers
+        }
     }
 
-  private def individualWithoutAddressFields(userAnswers: UserAnswers): JsObject =
+  private def prWithoutAddressFields(userAnswers: UserAnswers, prTypeKey: String): JsObject =
     Seq(
       "addressLine1",
       "addressLine2",
@@ -90,7 +106,7 @@ class AddressLookupContinueController @Inject() (
       "ukPostcode",
       "country"
     ).foldLeft(
-      (userAnswers.data \ "prDetails" \ "individual")
+      (userAnswers.data \ "prDetails" \ prTypeKey)
         .asOpt[JsObject]
         .getOrElse(Json.obj())
     )(_ - _)

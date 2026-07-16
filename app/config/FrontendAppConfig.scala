@@ -21,7 +21,7 @@ import com.google.inject.{Inject, Singleton}
 import controllers.routes
 import models.SchemeId.Srn
 import play.api.Configuration
-import models.{Mode, PensionSchemeId}
+import models.{JourneyRole, Mode, PensionSchemeId}
 
 import scala.concurrent.duration.Duration
 
@@ -108,8 +108,8 @@ class FrontendAppConfig @Inject() (configuration: Configuration) {
   val addressLookupFrontendBaseUrl: String =
     configuration.get[Service]("microservice.services.addressLookupFrontend").baseUrl
 
-  def addressLookupContinueUrl(srn: Srn, mode: Mode): String =
-    s"$host${routes.AddressLookupContinueController.continue(srn, mode).url}"
+  def addressLookupContinueUrl(srn: Srn, mode: Mode, journeyRole: JourneyRole): String =
+    s"$host${routes.AddressLookupContinueController.continue(srn, mode, journeyRole).url}"
 
   val signOutSurveyUrl: String =
     s"$host$servicePath${controllers.auth.routes.AuthController.signOut().url}"
