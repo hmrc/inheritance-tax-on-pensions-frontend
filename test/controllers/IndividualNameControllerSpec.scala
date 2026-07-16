@@ -16,7 +16,6 @@
 
 package controllers
 
-import play.api.test.FakeRequest
 import connectors.InheritanceTaxOnPensionsConnector
 import pages.IndividualNamePage
 import play.api.inject.bind
@@ -26,6 +25,7 @@ import play.api.libs.json.Json
 import forms.IndividualNameFormProvider
 import models._
 import org.mockito.ArgumentMatchers._
+import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import org.mockito.Mockito.when
 
@@ -54,11 +54,11 @@ class IndividualNameControllerSpec extends SpecBase {
     ),
     JourneyRoleTestCase(
       JourneyRole.PrIndividual,
-      routes.AddressLookupStartController.start(srn, NormalMode).url
+      routes.AddressLookupStartController.start(srn, NormalMode, JourneyRole.PrIndividual).url
     ),
     JourneyRoleTestCase(
       JourneyRole.PrOrganisation,
-      routes.DidPrSubmitController.onPageLoad(srn, NormalMode).url
+      routes.AddressLookupStartController.start(srn, NormalMode, JourneyRole.PrOrganisation).url
     )
   )
 
@@ -67,7 +67,7 @@ class IndividualNameControllerSpec extends SpecBase {
     journeyRoleTestCases.foreach { testCase =>
       val journeyRole = testCase.journeyRole
 
-      s"must return OK and the correct view for a GET for ${journeyRole.key}" in {
+      s"must return OK and the correct view for a GET for ${journeyRole.name}" in {
 
         val application = applicationBuilder(userAnswers = Some(emptyUserAnswers), usesSession = true).build()
 
@@ -87,7 +87,7 @@ class IndividualNameControllerSpec extends SpecBase {
         }
       }
 
-      s"must populate the view correctly on a GET when ${journeyRole.key} has previously been answered" in {
+      s"must populate the view correctly on a GET when ${journeyRole.name} has previously been answered" in {
 
         val userAnswers = UserAnswers(userAnswersId, srnGen.sample.value.toString, "test-uuid")
           .set(IndividualNamePage(journeyRole), individualName)
@@ -114,7 +114,7 @@ class IndividualNameControllerSpec extends SpecBase {
         }
       }
 
-      s"must redirect to the correct next page when valid ${journeyRole.key} data is submitted" in {
+      s"must redirect to the correct next page when valid ${journeyRole.name} data is submitted" in {
 
         val mockConnector = mock[InheritanceTaxOnPensionsConnector]
         when(mockConnector.setUserAnswers(any(), any(), any(), any(), any())(using any()))
@@ -137,7 +137,7 @@ class IndividualNameControllerSpec extends SpecBase {
         }
       }
 
-      s"must redirect to the correct next page when valid ${journeyRole.key} data is submitted in CheckMode" in {
+      s"must redirect to the correct next page when valid ${journeyRole.name} data is submitted in CheckMode and address is not present" in {
 
         val mockConnector = mock[InheritanceTaxOnPensionsConnector]
         when(mockConnector.setUserAnswers(any(), any(), any(), any(), any())(using any()))
@@ -153,14 +153,20 @@ class IndividualNameControllerSpec extends SpecBase {
               .withFormUrlEncodedBody(validFormData*)
 
           val result = route(application, request).value
-          val expectedNextPage = routes.CheckYourAnswersController.onPageLoad(srn).url
 
           status(result) mustEqual SEE_OTHER
-          redirectLocation(result).value mustEqual expectedNextPage
+          journeyRole match {
+            case JourneyRole.Deceased =>
+              redirectLocation(result).value mustEqual routes.CheckYourAnswersController.onPageLoad(srn).url
+            case JourneyRole.PrIndividual | JourneyRole.PrOrganisation =>
+              redirectLocation(result).value mustEqual routes.AddressLookupStartController
+                .start(srn, CheckMode, journeyRole)
+                .url
+          }
         }
       }
 
-      s"must return a Bad Request and errors when invalid ${journeyRole.key} data is submitted" in {
+      s"must return a Bad Request and errors when invalid ${journeyRole.name} data is submitted" in {
 
         val application = applicationBuilder(userAnswers = Some(emptyUserAnswers), usesSession = true).build()
 
@@ -271,7 +277,8 @@ class IndividualNameControllerSpec extends SpecBase {
         controller.nextPage(
           srn,
           NormalMode,
-          JourneyRole.Unknown
+          JourneyRole.Unknown,
+          emptyUserAnswers
         ) mustEqual routes.JourneyRecoveryController
           .onPageLoad()
       }

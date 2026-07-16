@@ -18,7 +18,7 @@ package viewmodels.CheckAnswers
 
 import viewmodels.implicits._
 import play.twirl.api.HtmlFormat
-import pages.PrIndividualAddressPage
+import pages.PrOrganisationAddressPage
 import controllers.routes
 import uk.gov.hmrc.govukfrontend.views.viewmodels.content.HtmlContent
 import uk.gov.hmrc.govukfrontend.views.viewmodels.summarylist.SummaryListRow
@@ -26,14 +26,14 @@ import models._
 import play.api.i18n.Messages
 import viewmodels.govuk.summarylist._
 
-object PrIndividualAddressSummary {
+object PrOrganisationAddressSummary {
 
   def row(
     srn: SchemeId.Srn,
     answers: UserAnswers,
     countryNameForCode: String => String = identity
   )(implicit messages: Messages): Option[SummaryListRow] =
-    answers.get(PrIndividualAddressPage).map { answer =>
+    answers.get(PrOrganisationAddressPage).map { answer =>
       val address = Seq(
         Some(answer.addressLine1),
         answer.addressLine2,
@@ -44,13 +44,13 @@ object PrIndividualAddressSummary {
       ).flatten.map(line => HtmlFormat.escape(line).toString).mkString("<br>")
 
       SummaryListRowViewModel(
-        key = "prIndividualAddress.checkYourAnswersLabel",
+        key = "prOrganisationAddress.checkYourAnswersLabel",
         value = ValueViewModel(HtmlContent(HtmlFormat.raw(address))),
         actions = Seq(
           ActionItemViewModel(
             "site.change",
-            routes.AddressLookupStartController.start(srn, CheckMode, JourneyRole.PrIndividual).url
-          ).withVisuallyHiddenText(messages("prIndividualAddress.checkYourAnswersLabel.hidden"))
+            routes.AddressLookupStartController.start(srn, CheckMode, JourneyRole.PrOrganisation).url
+          ).withVisuallyHiddenText(messages("prOrganisationAddress.checkYourAnswersLabel.hidden"))
         )
       )
     }

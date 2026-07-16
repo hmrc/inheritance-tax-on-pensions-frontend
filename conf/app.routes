@@ -61,10 +61,15 @@ POST        /:srn/enter-name-pr-organisation             controllers.IndividualN
 GET         /:srn/change-name-pr-organisation            controllers.IndividualNameController.onPageLoad(srn: Srn, mode: Mode = CheckMode, journeyRole: JourneyRole = JourneyRole.PrOrganisation)
 POST        /:srn/change-name-pr-organisation            controllers.IndividualNameController.onSubmit(srn: Srn, mode: Mode = CheckMode, journeyRole: JourneyRole = JourneyRole.PrOrganisation)
 
-GET         /:srn/enter-pr-address                      controllers.AddressLookupStartController.start(srn: Srn, mode: Mode = NormalMode)
-GET         /:srn/change-pr-address                     controllers.AddressLookupStartController.start(srn: Srn, mode: Mode = CheckMode)
-GET         /:srn/address-lookup-continue/normalmode     controllers.AddressLookupContinueController.continue(srn: Srn, mode: Mode = NormalMode, id: String ?= "")
-GET         /:srn/address-lookup-continue/checkmode      controllers.AddressLookupContinueController.continue(srn: Srn, mode: Mode = CheckMode, id: String ?= "")
+GET         /:srn/enter-pr-address                       controllers.AddressLookupStartController.start(srn: Srn, mode: Mode = NormalMode, journeyRole: JourneyRole = JourneyRole.PrIndividual)
+GET         /:srn/change-pr-address                      controllers.AddressLookupStartController.start(srn: Srn, mode: Mode = CheckMode, journeyRole: JourneyRole = JourneyRole.PrIndividual)
+GET         /:srn/address-lookup-continue/normalmode     controllers.AddressLookupContinueController.continue(srn: Srn, mode: Mode = NormalMode, journeyRole: JourneyRole = JourneyRole.PrIndividual, id: String ?= "")
+GET         /:srn/address-lookup-continue/checkmode      controllers.AddressLookupContinueController.continue(srn: Srn, mode: Mode = CheckMode, journeyRole: JourneyRole = JourneyRole.PrIndividual, id: String ?= "")
+
+GET         /:srn/enter-pr-organisation-address           controllers.AddressLookupStartController.start(srn: Srn, mode: Mode = NormalMode, journeyRole: JourneyRole = JourneyRole.PrOrganisation)
+GET         /:srn/change-pr-organisation-address          controllers.AddressLookupStartController.start(srn: Srn, mode: Mode = CheckMode, journeyRole: JourneyRole = JourneyRole.PrOrganisation)
+GET         /:srn/address-lookup-continue-org/normalmode  controllers.AddressLookupContinueController.continue(srn: Srn, mode: Mode = NormalMode, journeyRole: JourneyRole = JourneyRole.PrOrganisation, id: String ?= "")
+GET         /:srn/address-lookup-continue-org/checkmode   controllers.AddressLookupContinueController.continue(srn: Srn, mode: Mode = CheckMode, journeyRole: JourneyRole = JourneyRole.PrOrganisation, id: String ?= "")
 
 GET         /:srn/scheme-receive-payment-notice          controllers.PaymentNoticeDateController.onPageLoad(srn: Srn, mode: Mode = NormalMode)
 POST        /:srn/scheme-receive-payment-notice          controllers.PaymentNoticeDateController.onSubmit(srn: Srn, mode: Mode = NormalMode)

@@ -17,7 +17,7 @@
 package controllers
 
 import services.AddressLookupFrontendService
-import pages.IndividualNamePage
+import pages.{IndividualNamePage, OrganisationNamePage}
 import models.SchemeId.Srn
 import controllers.actions._
 import models.{JourneyRole, Mode}
@@ -38,20 +38,50 @@ class AddressLookupStartController @Inject() (
 )(implicit ec: ExecutionContext)
     extends IhtpBaseController {
 
-  def start(srn: Srn, mode: Mode): Action[AnyContent] =
+  def start(srn: Srn, mode: Mode, journeyRole: JourneyRole): Action[AnyContent] =
     identify
       .andThen(allowAccess(srn))
       .andThen(getData)
       .andThen(requireData)
       .async { implicit request =>
-        request.userAnswers.get(IndividualNamePage(JourneyRole.PrIndividual)) match {
-          case Some(prIndividualName) =>
-            addressLookupFrontendService
-              .initJourney(srn, mode, s"${prIndividualName.firstForename} ${prIndividualName.surname}")
-              .map(addressLookupUrl => Redirect(Call(GET, addressLookupUrl)))
+        journeyRole match {
+          case JourneyRole.PrOrganisation =>
+            request.userAnswers.get(OrganisationNamePage) match {
+              case Some(organisationName) =>
+                addressLookupFrontendService
+                  .initJourney(
+                    srn,
+                    mode,
+                    organisationName,
+                    journeyRole
+                  )
+                  .map(addressLookupUrl => Redirect(Call(GET, addressLookupUrl)))
+              case None =>
+                Future.successful(
+                  logAndJourneyRecovery("organisation name is missing, cannot initialise address lookup")
+                )
+            }
 
-          case None =>
-            Future.successful(logAndJourneyRecovery("individual name is missing, cannot initialise address lookup"))
+          case JourneyRole.PrIndividual =>
+            request.userAnswers.get(IndividualNamePage(JourneyRole.PrIndividual)) match {
+              case Some(prIndividualName) =>
+                addressLookupFrontendService
+                  .initJourney(
+                    srn,
+                    mode,
+                    s"${prIndividualName.firstForename} ${prIndividualName.surname}",
+                    journeyRole
+                  )
+                  .map(addressLookupUrl => Redirect(Call(GET, addressLookupUrl)))
+              case None =>
+                Future.successful(
+                  logAndJourneyRecovery("individual name is missing, cannot initialise address lookup")
+                )
+            }
+          case _ =>
+            Future.successful(
+              logAndJourneyRecovery("unknown journeyRole, cannot load the page")
+            )
         }
       }
 }

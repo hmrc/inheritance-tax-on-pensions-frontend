@@ -18,7 +18,7 @@ package controllers
 
 import services.UserAnswersService
 import play.api.mvc._
-import pages.{IndividualNamePage, OrganisationNamePage}
+import pages._
 import controllers.actions._
 import play.api.libs.json._
 import forms.IndividualNameFormProvider
@@ -90,7 +90,7 @@ class IndividualNameController @Inject() (
                     updatedAnswers <- Future
                       .fromTry(addIndividualName(request.userAnswers, journeyRole, individualName))
                     _ <- userAnswersService.set(updatedAnswers)(using hc, request.request)
-                  } yield Redirect(nextPage(srn, mode, journeyRole))
+                  } yield Redirect(nextPage(srn, mode, journeyRole, request.userAnswers))
               )
         }
       }
@@ -137,15 +137,26 @@ class IndividualNameController @Inject() (
   private def optionalString(value: Option[String]): JsValue =
     value.filter(_.nonEmpty).map(JsString.apply).getOrElse(JsNull)
 
-  private[controllers] def nextPage(srn: Srn, mode: Mode, journeyRole: JourneyRole): Call =
+  private[controllers] def nextPage(srn: Srn, mode: Mode, journeyRole: JourneyRole, userAnswers: UserAnswers): Call =
     mode match {
-      case CheckMode => routes.CheckYourAnswersController.onPageLoad(srn)
-      case NormalMode if journeyRole == JourneyRole.Deceased =>
-        routes.NinoOrReasonController.onPageLoad(srn, NormalMode)
-      case NormalMode if journeyRole == JourneyRole.PrIndividual =>
-        routes.AddressLookupStartController.start(srn, NormalMode)
-      case NormalMode if journeyRole == JourneyRole.PrOrganisation =>
-        routes.DidPrSubmitController.onPageLoad(srn, NormalMode)
-      case _ => routes.JourneyRecoveryController.onPageLoad()
+      case NormalMode =>
+        journeyRole match {
+          case JourneyRole.PrIndividual =>
+            routes.AddressLookupStartController.start(srn, NormalMode, journeyRole)
+          case JourneyRole.PrOrganisation =>
+            routes.AddressLookupStartController.start(srn, NormalMode, journeyRole)
+          case JourneyRole.Deceased =>
+            routes.NinoOrReasonController.onPageLoad(srn, NormalMode)
+          case _ => routes.JourneyRecoveryController.onPageLoad()
+        }
+      case CheckMode =>
+        journeyRole match {
+          case JourneyRole.PrIndividual if userAnswers.get(PrIndividualAddressPage).isEmpty =>
+            routes.AddressLookupStartController.start(srn, CheckMode, journeyRole)
+          case JourneyRole.PrOrganisation if userAnswers.get(PrOrganisationAddressPage).isEmpty =>
+            routes.AddressLookupStartController.start(srn, CheckMode, journeyRole)
+          case _ =>
+            routes.CheckYourAnswersController.onPageLoad(srn)
+        }
     }
 }

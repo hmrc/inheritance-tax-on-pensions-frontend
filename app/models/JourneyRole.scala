@@ -29,11 +29,11 @@ object JourneyRole extends Enumerable.Implicits {
     override val key: String = "nameOfDeceased"
   }
 
-  case object PrIndividual extends WithName("pr-individual") with JourneyRole {
+  case object PrIndividual extends WithName("individual") with JourneyRole {
     override val key: String = "prIndividualName"
   }
 
-  case object PrOrganisation extends WithName("pr-organisation") with JourneyRole {
+  case object PrOrganisation extends WithName("organisation") with JourneyRole {
     override val key: String = "prOrganisationName"
   }
 
