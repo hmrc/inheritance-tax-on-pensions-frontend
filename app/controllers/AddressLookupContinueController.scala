@@ -52,12 +52,22 @@ class AddressLookupContinueController @Inject() (
             addressData <- addressLookupFrontendService.getAddress(id)
             result <-
               if (PrAddress.hasValidFirstAddressLine(addressData)) {
-                val updatedAnswers =
-                  addPrAddress(request.userAnswers, journeyRole, PrAddress.fromAlfAddressData(addressData))
-
-                userAnswersService
-                  .set(updatedAnswers)(using hc, request.request)
-                  .map(_ => Redirect(nextPage(srn, mode)))
+                journeyRole match {
+                  case JourneyRole.PrIndividual =>
+                    val updatedAnswers =
+                      addPrAddressIndividual(request.userAnswers, PrAddress.fromAlfAddressData(addressData))
+                    userAnswersService
+                      .set(updatedAnswers)(using hc, request.request)
+                      .map(_ => Redirect(nextPage(srn, mode)))
+                  case JourneyRole.PrOrganisation =>
+                    val updatedAnswers =
+                      addPrAddressOrganisation(request.userAnswers, PrAddress.fromAlfAddressData(addressData))
+                    userAnswersService
+                      .set(updatedAnswers)(using hc, request.request)
+                      .map(_ => Redirect(nextPage(srn, mode)))
+                  case _ =>
+                    Future.successful(logAndJourneyRecovery("unknown journeyRole, cannot load the page"))
+                }
               } else {
                 Future.successful(logAndJourneyRecovery("no address lines in address, unable to continue"))
               }
@@ -71,30 +81,30 @@ class AddressLookupContinueController @Inject() (
       case CheckMode => routes.CheckYourAnswersController.onPageLoad(srn)
     }
 
-  private[controllers] def addPrAddress(
+  private[controllers] def addPrAddressIndividual(
     userAnswers: UserAnswers,
-    journeyRole: JourneyRole,
     address: PrAddress
   ): UserAnswers =
-    journeyRole match {
-      case JourneyRole.PrIndividual =>
-        userAnswers.data
-          .setObject(
-            PrIndividualAddressPage.path,
-            prWithoutAddressFields(userAnswers, "individual") ++ Json.toJsObject(address)
-          ) match {
-          case JsSuccess(data, _) => userAnswers.copy(data = data)
-          case _ => userAnswers
-        }
-      case JourneyRole.PrOrganisation =>
-        userAnswers.data
-          .setObject(
-            PrOrganisationAddressPage.path,
-            prWithoutAddressFields(userAnswers, "organisation") ++ Json.toJsObject(address)
-          ) match {
-          case JsSuccess(data, _) => userAnswers.copy(data = data)
-          case _ => userAnswers
-        }
+    userAnswers.data
+      .setObject(
+        PrIndividualAddressPage.path,
+        prWithoutAddressFields(userAnswers, "individual") ++ Json.toJsObject(address)
+      ) match {
+      case JsSuccess(data, _) => userAnswers.copy(data = data)
+      case _ => userAnswers
+    }
+
+  private[controllers] def addPrAddressOrganisation(
+    userAnswers: UserAnswers,
+    address: PrAddress
+  ): UserAnswers =
+    userAnswers.data
+      .setObject(
+        PrOrganisationAddressPage.path,
+        prWithoutAddressFields(userAnswers, "organisation") ++ Json.toJsObject(address)
+      ) match {
+      case JsSuccess(data, _) => userAnswers.copy(data = data)
+      case _ => userAnswers
     }
 
   private def prWithoutAddressFields(userAnswers: UserAnswers, prTypeKey: String): JsObject =
