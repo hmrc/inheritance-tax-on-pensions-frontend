@@ -151,7 +151,7 @@ class AddressLookupStartControllerSpec extends SpecBase {
         }
       }
 
-      s"must redirect to journey recovery when the PR individual name is missing for ${journeyRole.name} journey" in {
+      s"must redirect to journey recovery when the ${journeyRole.name} name is missing for ${journeyRole.name} journey" in {
 
         val mockAddressLookupFrontendService = mock[AddressLookupFrontendService]
 

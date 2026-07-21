@@ -16,6 +16,7 @@
 
 package controllers
 
+import play.api.test.FakeRequest
 import connectors.InheritanceTaxOnPensionsConnector
 import pages.IndividualNamePage
 import play.api.inject.bind
@@ -25,7 +26,6 @@ import play.api.libs.json.Json
 import forms.IndividualNameFormProvider
 import models._
 import org.mockito.ArgumentMatchers._
-import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import org.mockito.Mockito.when
 
@@ -137,7 +137,7 @@ class IndividualNameControllerSpec extends SpecBase {
         }
       }
 
-      s"must redirect to the correct next page when valid ${journeyRole.name} data is submitted in CheckMode and address is not present" in {
+      s"must redirect to the correct next page when valid ${journeyRole.name} data is submitted in CheckMode" in {
 
         val mockConnector = mock[InheritanceTaxOnPensionsConnector]
         when(mockConnector.setUserAnswers(any(), any(), any(), any(), any())(using any()))
@@ -155,14 +155,7 @@ class IndividualNameControllerSpec extends SpecBase {
           val result = route(application, request).value
 
           status(result) mustEqual SEE_OTHER
-          journeyRole match {
-            case JourneyRole.Deceased =>
-              redirectLocation(result).value mustEqual routes.CheckYourAnswersController.onPageLoad(srn).url
-            case JourneyRole.PrIndividual | JourneyRole.PrOrganisation =>
-              redirectLocation(result).value mustEqual routes.AddressLookupStartController
-                .start(srn, CheckMode, journeyRole)
-                .url
-          }
+          redirectLocation(result).value mustEqual routes.CheckYourAnswersController.onPageLoad(srn).url
         }
       }
 
@@ -277,8 +270,7 @@ class IndividualNameControllerSpec extends SpecBase {
         controller.nextPage(
           srn,
           NormalMode,
-          JourneyRole.Unknown,
-          emptyUserAnswers
+          JourneyRole.Unknown
         ) mustEqual routes.JourneyRecoveryController
           .onPageLoad()
       }
