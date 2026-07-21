@@ -333,5 +333,34 @@ class AddressLookupContinueControllerSpec extends SpecBase {
         )
       }
     }
+
+    "must redirect to journey recovery when the journey is not individual or organisation" in {
+
+      val mockAddressLookupFrontendService = mock[AddressLookupFrontendService]
+      val mockUserAnswersService = mock[UserAnswersService]
+
+      when(mockAddressLookupFrontendService.getAddress(any())(using any()))
+        .thenReturn(Future.successful(validAddressData))
+      when(mockUserAnswersService.set(any())(using any(), any()))
+        .thenReturn(Future.successful(Right(emptyUserAnswers)))
+
+      val application = applicationBuilder(userAnswers = Some(emptyUserAnswers), usesSession = true)
+        .overrides(
+          bind[AddressLookupFrontendService].toInstance(mockAddressLookupFrontendService),
+          bind[UserAnswersService].toInstance(mockUserAnswersService)
+        )
+        .build()
+
+      running(application) {
+        val request = FakeRequest(GET, "/test-only/unknown-address-lookup-continue")
+
+        val controller = application.injector.instanceOf[AddressLookupContinueController]
+
+        val result = controller.continue(srn, NormalMode, JourneyRole.Unknown, addressId)(request)
+
+        status(result) mustEqual SEE_OTHER
+        redirectLocation(result).value mustEqual routes.JourneyRecoveryController.onPageLoad().url
+      }
+    }
   }
 }
