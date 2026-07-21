@@ -90,7 +90,7 @@ class IndividualNameController @Inject() (
                     updatedAnswers <- Future
                       .fromTry(addIndividualName(request.userAnswers, journeyRole, individualName))
                     _ <- userAnswersService.set(updatedAnswers)(using hc, request.request)
-                  } yield Redirect(nextPage(srn, mode, journeyRole, request.userAnswers))
+                  } yield Redirect(nextPage(srn, mode, journeyRole))
               )
         }
       }
@@ -137,7 +137,7 @@ class IndividualNameController @Inject() (
   private def optionalString(value: Option[String]): JsValue =
     value.filter(_.nonEmpty).map(JsString.apply).getOrElse(JsNull)
 
-  private[controllers] def nextPage(srn: Srn, mode: Mode, journeyRole: JourneyRole, userAnswers: UserAnswers): Call =
+  private[controllers] def nextPage(srn: Srn, mode: Mode, journeyRole: JourneyRole): Call =
     mode match {
       case NormalMode =>
         journeyRole match {
@@ -149,14 +149,6 @@ class IndividualNameController @Inject() (
             routes.NinoOrReasonController.onPageLoad(srn, NormalMode)
           case _ => routes.JourneyRecoveryController.onPageLoad()
         }
-      case CheckMode =>
-        journeyRole match {
-          case JourneyRole.PrIndividual if userAnswers.get(PrIndividualAddressPage).isEmpty =>
-            routes.AddressLookupStartController.start(srn, CheckMode, journeyRole)
-          case JourneyRole.PrOrganisation if userAnswers.get(PrOrganisationAddressPage).isEmpty =>
-            routes.AddressLookupStartController.start(srn, CheckMode, journeyRole)
-          case _ =>
-            routes.CheckYourAnswersController.onPageLoad(srn)
-        }
+      case CheckMode => routes.CheckYourAnswersController.onPageLoad(srn)
     }
 }

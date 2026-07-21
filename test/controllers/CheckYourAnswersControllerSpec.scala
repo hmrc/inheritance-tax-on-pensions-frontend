@@ -185,7 +185,58 @@ class CheckYourAnswersControllerSpec extends SpecBase {
       }
     }
 
-    "must return OK and the correct view for a GET with organisation PR details" in {
+    "must return OK and the correct view for a GET with individual PR details and address" in {
+      val userAnswers = emptyUserAnswers
+        .copy(
+          data = Json.obj(
+            "prDetails" -> Json.obj(
+              "individual" -> Json.obj(
+                "title" -> "Ms",
+                "firstForename" -> "Jane",
+                "secondForename" -> "Ann",
+                "surname" -> "Doe",
+                "addressLine1" -> "33 Fake Street",
+                "addressLine2" -> "Fake Area",
+                "addressLine3" -> "Some District",
+                "addressLine4" -> "Anytown",
+                "ukPostcode" -> "ZZ1 1ZZ",
+                "country" -> "GB"
+              )
+            )
+          )
+        )
+        .set(PrTypePage, PrType.Individual)
+        .success
+        .value
+        .set(DidPrSubmitPage, true)
+        .get
+
+      val application = applicationBuilder(userAnswers = Some(userAnswers)).build()
+
+      running(application) {
+        val request = FakeRequest(GET, routes.CheckYourAnswersController.onPageLoad(srn).url)
+
+        val result = route(application, request).value
+
+        val view = application.injector.instanceOf[CheckYourAnswersView]
+
+        val summaryList = SummaryListViewModel(
+          rows = Seq(
+            PrTypeSummary.row(srn, userAnswers)(using messages(application)).get,
+            PrIndividualNameSummary.row(srn, userAnswers)(using messages(application)).get,
+            PrIndividualAddressSummary
+              .row(srn, userAnswers, (_: String) => "United Kingdom")(using messages(application))
+              .get,
+            DidPrSubmitSummary.row(srn, userAnswers)(using messages(application)).get
+          )
+        )
+
+        status(result) mustEqual OK
+        contentAsString(result) mustEqual view(srn, summaryList)(using request, messages(application)).toString
+      }
+    }
+
+    "must return OK and the correct view for a GET with organisation PR details and address" in {
       val userAnswers = emptyUserAnswers
         .copy(
           data = Json.obj(
@@ -195,7 +246,13 @@ class CheckYourAnswersControllerSpec extends SpecBase {
                 "title" -> "Ms",
                 "firstForename" -> "Jane",
                 "secondForename" -> "Ann",
-                "surname" -> "Doe"
+                "surname" -> "Doe",
+                "addressLine1" -> "33 Fake Street",
+                "addressLine2" -> "Fake Area",
+                "addressLine3" -> "Some District",
+                "addressLine4" -> "Anytown",
+                "ukPostcode" -> "ZZ1 1ZZ",
+                "country" -> "GB"
               )
             )
           )
@@ -220,6 +277,9 @@ class CheckYourAnswersControllerSpec extends SpecBase {
             PrTypeSummary.row(srn, userAnswers)(using messages(application)).get,
             PrOrganisationNameSummary.row(srn, userAnswers)(using messages(application)).get,
             PrOrganisationPrNameSummary.row(srn, userAnswers)(using messages(application)).get,
+            PrOrganisationAddressSummary
+              .row(srn, userAnswers, (_: String) => "United Kingdom")(using messages(application))
+              .get,
             DidPrSubmitSummary.row(srn, userAnswers)(using messages(application)).get
           )
         )
