@@ -262,6 +262,8 @@ addressLookup.international.edit.countryLabel = <b>Country</b>
 
 checkYourAnswers.title = Check and submit the report
 checkYourAnswers.heading = Check and submit the report
+checkYourAnswers.beneficiary.details.heading = Beneficiary details
+checkYourAnswers.beneficiary.details.card.title = Beneficiary {0}
 
 psaDeclaration.title = Declaration
 psaDeclaration.heading = Declaration
@@ -309,3 +311,12 @@ areBeneficiariesKnown.heading = Are the beneficiaries known?
 areBeneficiariesKnown.checkYourAnswersLabel = Are the beneficiaries known?
 areBeneficiariesKnown.change.hidden = whether the beneficiaries are known
 areBeneficiariesKnown.error.required = You must select one option
+
+beneficiaryType.title = Select the type of beneficiary to add
+beneficiaryType.heading = Select the type of beneficiary to add
+beneficiaryType.hint = Beneficiaries are added one at a time
+beneficiaryType.individual = An individual
+beneficiaryType.organisation = An organisation or trust
+beneficiaryType.error.required = You must select individual or organisation
+beneficiaryType.checkYourAnswersLabel = Type of beneficiary
+beneficiaryType.change.hidden = the type of beneficiary

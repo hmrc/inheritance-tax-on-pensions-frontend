@@ -19,7 +19,10 @@ package controllers
 import services.CountryService
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import com.google.inject.Inject
+import viewmodels.CheckAnswers.beneficiary.BeneficiaryTypeSummary
+import play.i18n.Lang
 import controllers.actions._
+import models.beneficiary.BeneficiaryType
 import models.UserAnswers
 import views.html.CheckYourAnswersView
 import models.SchemeId.Srn
@@ -63,7 +66,28 @@ class CheckYourAnswersController @Inject() (
         ).flatten
       )
 
-      val result = Ok(view(srn, list))
+      val beneficiaryList =
+        (userAnswers.data \ "beneficiaries" \\ "beneficiaryType")
+          .map(_.as[BeneficiaryType])
+          .toList
+          .zipWithIndex
+          .map { case (_, index) =>
+            SummaryListViewModel(
+              rows = Seq(
+                BeneficiaryTypeSummary.row(srn, index, userAnswers)
+              ).flatten
+            ).withCard(
+              CardViewModel(
+                messagesApi("checkYourAnswers.beneficiary.details.card.title", index + 1)(using
+                  Lang.defaultLang
+                ),
+                2,
+                None
+              )
+            )
+          }
+
+      val result = Ok(view(srn, list, beneficiaryList))
       val uuidFromQuery = request.request.getQueryString("uuid")
 
       uuidFromQuery match {

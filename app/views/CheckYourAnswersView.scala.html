@@ -15,17 +15,19 @@
  *@
 
 @import components.PageHeading
+@import components.SubHeading
 @import models.SchemeId.Srn
 
 @this(
     layout: templates.Layout,
     formHelper: FormWithCSRF,
     pageHeading: PageHeading,
+    subHeading: SubHeading,
     govukSummaryList: GovukSummaryList,
     govukButton: GovukButton
 )
 
-@(srn: Srn, list: SummaryList)(implicit request: Request[?], messages: Messages)
+@(srn: Srn, list: SummaryList, beneficiaryList: List[SummaryList])(implicit request: Request[?], messages: Messages)
 
 @layout(pageTitle = titleNoForm(messages("checkYourAnswers.title"))) {
 
@@ -34,6 +36,14 @@
         @pageHeading(messages("checkYourAnswers.heading"))
 
         @govukSummaryList(list)
+
+        @if(beneficiaryList.nonEmpty) {
+            @subHeading(text = messages("checkYourAnswers.beneficiary.details.heading"))
+
+            @beneficiaryList.map { beneficiarySummaryList =>
+                @govukSummaryList(beneficiarySummaryList)
+            }
+        }
 
         @govukButton(
             ButtonViewModel(messages("site.saveAndContinue"))

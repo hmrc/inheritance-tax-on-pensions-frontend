@@ -21,7 +21,7 @@ import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import pages.{AreBeneficiariesKnownPage, DidPrSubmitPage}
 import controllers.actions._
 import forms.AreBeneficiariesKnownFormProvider
-import models.Mode
+import models.{CheckMode, Mode, NormalMode}
 import play.api.i18n.MessagesApi
 import views.html.AreBeneficiariesKnownView
 import models.SchemeId.Srn
@@ -43,7 +43,7 @@ class AreBeneficiariesKnownController @Inject() (
 )(implicit ec: ExecutionContext)
     extends IhtpBaseController {
 
-  val form = formProvider()
+  private val form = formProvider()
 
   def onPageLoad(srn: Srn, mode: Mode): Action[AnyContent] =
     identify
@@ -78,7 +78,7 @@ class AreBeneficiariesKnownController @Inject() (
                   for {
                     updatedAnswers <- Future.fromTry(request.userAnswers.set(AreBeneficiariesKnownPage, value))
                     _ <- userAnswersService.set(updatedAnswers)(using hc, request.request)
-                  } yield Redirect(nextPage(srn))
+                  } yield Redirect(nextPage(srn, mode, value))
               )
           case None =>
             Future.successful(
@@ -87,6 +87,11 @@ class AreBeneficiariesKnownController @Inject() (
         }
       }
 
-  private def nextPage(srn: Srn) =
-    routes.CheckYourAnswersController.onPageLoad(srn)
+  private def nextPage(srn: Srn, mode: Mode, value: Boolean) =
+    mode match {
+      case NormalMode if value =>
+        controllers.beneficiary.routes.BeneficiaryTypeController.onPageLoad(srn, 0, NormalMode)
+      case NormalMode => routes.CheckYourAnswersController.onPageLoad(srn)
+      case CheckMode => routes.CheckYourAnswersController.onPageLoad(srn)
+    }
 }

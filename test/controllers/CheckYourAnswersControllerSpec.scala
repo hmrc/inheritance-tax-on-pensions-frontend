@@ -19,9 +19,11 @@ package controllers
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import pages._
+import viewmodels.CheckAnswers.beneficiary.BeneficiaryTypeSummary
 import views.html.CheckYourAnswersView
 import base.SpecBase
-import viewmodels.govuk.all.SummaryListViewModel
+import uk.gov.hmrc.govukfrontend.views.viewmodels.summarylist.SummaryList
+import viewmodels.govuk.all.{CardViewModel, SummaryListViewModel}
 import play.api.libs.json.Json
 import forms.NinoOrReasonFormData
 import models._
@@ -32,6 +34,8 @@ import java.time.LocalDate
 class CheckYourAnswersControllerSpec extends SpecBase {
 
   private val validNino: String = ninoGen.sample.value
+  private val emptySummaryList = SummaryListViewModel(rows = Seq())
+  private val emptyBeneficiarySummaryListViewModel = List[SummaryList]()
 
   "CheckYourAnswers Controller" - {
 
@@ -91,7 +95,10 @@ class CheckYourAnswersControllerSpec extends SpecBase {
         )
 
         status(result) mustEqual OK
-        contentAsString(result) mustEqual view(srn, summaryList)(using request, messages(application)).toString
+        contentAsString(result) mustEqual view(srn, summaryList, emptyBeneficiarySummaryListViewModel)(using
+          request,
+          messages(application)
+        ).toString
       }
     }
 
@@ -151,7 +158,10 @@ class CheckYourAnswersControllerSpec extends SpecBase {
         )
 
         status(result) mustEqual OK
-        contentAsString(result) mustEqual view(srn, summaryList)(using request, messages(application)).toString
+        contentAsString(result) mustEqual view(srn, summaryList, emptyBeneficiarySummaryListViewModel)(using
+          request,
+          messages(application)
+        ).toString
       }
     }
 
@@ -181,7 +191,10 @@ class CheckYourAnswersControllerSpec extends SpecBase {
         )
 
         status(result) mustEqual OK
-        contentAsString(result) mustEqual view(srn, summaryList)(using request, messages(application)).toString
+        contentAsString(result) mustEqual view(srn, summaryList, emptyBeneficiarySummaryListViewModel)(using
+          request,
+          messages(application)
+        ).toString
       }
     }
 
@@ -232,7 +245,10 @@ class CheckYourAnswersControllerSpec extends SpecBase {
         )
 
         status(result) mustEqual OK
-        contentAsString(result) mustEqual view(srn, summaryList)(using request, messages(application)).toString
+        contentAsString(result) mustEqual view(srn, summaryList, emptyBeneficiarySummaryListViewModel)(using
+          request,
+          messages(application)
+        ).toString
       }
     }
 
@@ -285,7 +301,57 @@ class CheckYourAnswersControllerSpec extends SpecBase {
         )
 
         status(result) mustEqual OK
-        contentAsString(result) mustEqual view(srn, summaryList)(using request, messages(application)).toString
+        contentAsString(result) mustEqual view(srn, summaryList, emptyBeneficiarySummaryListViewModel)(using
+          request,
+          messages(application)
+        ).toString
+      }
+    }
+
+    "must return OK and view with beneficiaries for a GET" in {
+      val userAnswers = emptyUserAnswers
+        .copy(
+          data = Json.obj(
+            "beneficiaries" -> Json.arr(
+              Json.obj(
+                "beneficiaryType" -> "individual"
+              ),
+              Json.obj(
+                "beneficiaryType" -> "individual"
+              )
+            )
+          )
+        )
+
+      val application = applicationBuilder(userAnswers = Some(userAnswers)).build()
+
+      running(application) {
+        val request = FakeRequest(GET, routes.CheckYourAnswersController.onPageLoad(srn).url)
+
+        val result = route(application, request).value
+
+        val view = application.injector.instanceOf[CheckYourAnswersView]
+
+        val beneficiarySummaryList = List(
+          SummaryListViewModel(
+            rows = Seq(
+              BeneficiaryTypeSummary.row(srn, 0, userAnswers)(using messages(application)).get
+            ),
+            card = CardViewModel("Beneficiary 1", 2, None)
+          ),
+          SummaryListViewModel(
+            rows = Seq(
+              BeneficiaryTypeSummary.row(srn, 1, userAnswers)(using messages(application)).get
+            ),
+            card = CardViewModel("Beneficiary 2", 2, None)
+          )
+        )
+
+        status(result) mustEqual OK
+        contentAsString(result) mustEqual view(srn, emptySummaryList, beneficiarySummaryList)(using
+          request,
+          messages(application)
+        ).toString
       }
     }
 
