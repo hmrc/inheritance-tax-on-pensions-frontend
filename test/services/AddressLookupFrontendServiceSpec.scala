@@ -23,7 +23,7 @@ import config.FrontendAppConfig
 import models.addresslookup._
 import base.SpecBase
 import uk.gov.hmrc.http.HeaderCarrier
-import models.NormalMode
+import models.{JourneyRole, NormalMode}
 import play.api.i18n.MessagesApi
 import org.mockito.ArgumentCaptor
 import org.mockito.ArgumentMatchers.{any, eq => eqTo}
@@ -38,45 +38,52 @@ class AddressLookupFrontendServiceSpec extends SpecBase {
   private implicit val request: FakeRequest[?] =
     FakeRequest(GET, "/inheritance-tax-on-pensions/S2400000001/check-your-answers")
 
+  private lazy val journeyRoleTestCases = Seq(
+    JourneyRole.PrIndividual,
+    JourneyRole.PrOrganisation
+  )
+
   "initJourney" - {
 
-    "must build the ALF journey config and return the connector URL" in {
+    journeyRoleTestCases.foreach { journeyRole =>
+      s"must build the ALF journey config and return the connector URL for ${journeyRole.name} journey" in {
 
-      val mockConnector = mock[AddressLookupFrontendConnector]
+        val mockConnector = mock[AddressLookupFrontendConnector]
 
-      val application = applicationBuilder().build()
+        val application = applicationBuilder().build()
 
-      running(application) {
-        val config = application.injector.instanceOf[FrontendAppConfig]
-        val messagesApi = application.injector.instanceOf[MessagesApi]
-        val countryService = application.injector.instanceOf[CountryService]
-        val service = new AddressLookupFrontendService(config, mockConnector, messagesApi, countryService)
+        running(application) {
+          val config = application.injector.instanceOf[FrontendAppConfig]
+          val messagesApi = application.injector.instanceOf[MessagesApi]
+          val countryService = application.injector.instanceOf[CountryService]
+          val service = new AddressLookupFrontendService(config, mockConnector, messagesApi, countryService)
 
-        when(mockConnector.initJourney(eqTo(srn), eqTo(NormalMode), any())(using any()))
-          .thenReturn(Future.successful("/lookup-address"))
+          when(mockConnector.initJourney(eqTo(srn), eqTo(NormalMode), any(), any())(using any()))
+            .thenReturn(Future.successful("/lookup-address"))
 
-        val result = service.initJourney(srn, NormalMode, "John Doe").futureValue
+          val result = service.initJourney(srn, NormalMode, "John Doe", journeyRole).futureValue
 
-        result mustBe "/lookup-address"
+          result mustBe "/lookup-address"
 
-        val configCaptor: ArgumentCaptor[AlfJourneyConfig] = ArgumentCaptor.forClass(classOf[AlfJourneyConfig])
-        verify(mockConnector).initJourney(eqTo(srn), eqTo(NormalMode), configCaptor.capture())(using any())
+          val configCaptor: ArgumentCaptor[AlfJourneyConfig] = ArgumentCaptor.forClass(classOf[AlfJourneyConfig])
+          verify(mockConnector).initJourney(eqTo(srn), eqTo(NormalMode), configCaptor.capture(), any())(using any())
 
-        val journeyConfig = configCaptor.getValue
-        journeyConfig.options.continueUrl must include(
-          routes.AddressLookupContinueController.continue(srn, NormalMode).url
-        )
-        journeyConfig.options.signOutHref mustBe config.signOutSurveyUrl
-        journeyConfig.options.phaseFeedbackLink mustBe config.feedbackUrl
-        journeyConfig.options.allowedCountryCodes mustBe Some(countryService.countries.map(_.code))
-        journeyConfig.options.manualAddressEntryConfig.mandatoryFields.addressLine1 mustBe true
-        journeyConfig.options.manualAddressEntryConfig.mandatoryFields.addressLine2 mustBe true
-        journeyConfig.options.manualAddressEntryConfig.showOrganisationName mustBe false
-        journeyConfig.labels.en.countryPickerLabels.heading must include("John Doe")
-        journeyConfig.labels.en.appLevelLabels.phaseBannerHtml mustBe
-          messagesApi.preferred(Seq.empty)("addressLookup.phaseBannerHtml")
-        journeyConfig.labels.en.lookupPageLabels.heading must include("John Doe")
-        journeyConfig.labels.en.international.editPageLabels.heading must include("John Doe")
+          val journeyConfig = configCaptor.getValue
+          journeyConfig.options.continueUrl must include(
+            routes.AddressLookupContinueController.continue(srn, NormalMode, journeyRole).url
+          )
+          journeyConfig.options.signOutHref mustBe config.signOutSurveyUrl
+          journeyConfig.options.phaseFeedbackLink mustBe config.feedbackUrl
+          journeyConfig.options.allowedCountryCodes mustBe Some(countryService.countries.map(_.code))
+          journeyConfig.options.manualAddressEntryConfig.mandatoryFields.addressLine1 mustBe true
+          journeyConfig.options.manualAddressEntryConfig.mandatoryFields.addressLine2 mustBe true
+          journeyConfig.options.manualAddressEntryConfig.showOrganisationName mustBe false
+          journeyConfig.labels.en.countryPickerLabels.heading must include("John Doe")
+          journeyConfig.labels.en.appLevelLabels.phaseBannerHtml mustBe
+            messagesApi.preferred(Seq.empty)("addressLookup.phaseBannerHtml")
+          journeyConfig.labels.en.lookupPageLabels.heading must include("John Doe")
+          journeyConfig.labels.en.international.editPageLabels.heading must include("John Doe")
+        }
       }
     }
   }

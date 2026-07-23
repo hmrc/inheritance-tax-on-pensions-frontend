@@ -22,7 +22,7 @@ import models.addresslookup._
 import base.SpecBase
 import play.api.libs.json.Json
 import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse, StringContextOps}
-import models.NormalMode
+import models.{JourneyRole, NormalMode}
 import uk.gov.hmrc.http.client.{HttpClientV2, RequestBuilder}
 import org.mockito.ArgumentMatchers.{any, eq => eqTo}
 
@@ -65,36 +65,49 @@ class AddressLookupFrontendConnectorSpec extends SpecBase {
     )
   )
 
+  private lazy val journeyRoleTestCases = Seq(
+    JourneyRole.PrIndividual,
+    JourneyRole.PrOrganisation
+  )
+
   "initJourney" - {
 
-    "must return the Location header from ALF" in new SetUp {
+    journeyRoleTestCases.foreach { journeyRole =>
 
-      val responseWithLocation = mock[HttpResponse]
-      when(responseWithLocation.header("Location")).thenReturn(Some("/lookup-address"))
+      s"must return the Location header from ALF for ${journeyRole.name} journey" in new SetUp {
 
-      when(mockConfig.addressLookupFrontendBaseUrl).thenReturn("http://address-lookup-frontend")
-      when(mockHttpClient.post(any())(using any())).thenReturn(mockRequestBuilder)
-      when(mockRequestBuilder.withBody(eqTo(Json.toJson(journeyConfig)))(using any(), any(), any()))
-        .thenReturn(mockRequestBuilder)
-      when(mockRequestBuilder.execute[HttpResponse](using any(), any()))
-        .thenReturn(Future.successful(responseWithLocation))
+        val responseWithLocation = mock[HttpResponse]
+        when(responseWithLocation.header("Location")).thenReturn(Some("/lookup-address"))
 
-      connector.initJourney(srn, NormalMode, journeyConfig).futureValue mustBe "/lookup-address"
+        when(mockConfig.addressLookupFrontendBaseUrl).thenReturn("http://address-lookup-frontend")
+        when(mockHttpClient.post(any())(using any())).thenReturn(mockRequestBuilder)
+        when(mockRequestBuilder.withBody(eqTo(Json.toJson(journeyConfig)))(using any(), any(), any()))
+          .thenReturn(mockRequestBuilder)
+        when(mockRequestBuilder.execute[HttpResponse](using any(), any()))
+          .thenReturn(Future.successful(responseWithLocation))
 
-      verify(mockHttpClient).post(eqTo(url"http://address-lookup-frontend/api/init"))(using any())
-    }
+        connector
+          .initJourney(srn, NormalMode, journeyConfig, journeyRole)
+          .futureValue mustBe "/lookup-address"
 
-    "must return the local continue URL when ALF does not return a Location header" in new SetUp {
+        verify(mockHttpClient).post(eqTo(url"http://address-lookup-frontend/api/init"))(using any())
+      }
 
-      when(mockConfig.addressLookupFrontendBaseUrl).thenReturn("http://address-lookup-frontend")
-      when(mockConfig.addressLookupContinueUrl(eqTo(srn), eqTo(NormalMode))).thenReturn("/local-continue")
-      when(mockHttpClient.post(any())(using any())).thenReturn(mockRequestBuilder)
-      when(mockRequestBuilder.withBody(eqTo(Json.toJson(journeyConfig)))(using any(), any(), any()))
-        .thenReturn(mockRequestBuilder)
-      when(mockRequestBuilder.execute[HttpResponse](using any(), any()))
-        .thenReturn(Future.successful(HttpResponse(202, "")))
+      s"must return the local continue URL when ALF does not return a Location header for ${journeyRole.name} journey" in new SetUp {
 
-      connector.initJourney(srn, NormalMode, journeyConfig).futureValue mustBe "/local-continue"
+        when(mockConfig.addressLookupFrontendBaseUrl).thenReturn("http://address-lookup-frontend")
+        when(mockConfig.addressLookupContinueUrl(eqTo(srn), eqTo(NormalMode), eqTo(journeyRole)))
+          .thenReturn("/local-continue")
+        when(mockHttpClient.post(any())(using any())).thenReturn(mockRequestBuilder)
+        when(mockRequestBuilder.withBody(eqTo(Json.toJson(journeyConfig)))(using any(), any(), any()))
+          .thenReturn(mockRequestBuilder)
+        when(mockRequestBuilder.execute[HttpResponse](using any(), any()))
+          .thenReturn(Future.successful(HttpResponse(202, "")))
+
+        connector
+          .initJourney(srn, NormalMode, journeyConfig, journeyRole)
+          .futureValue mustBe "/local-continue"
+      }
     }
   }
 

@@ -44,21 +44,68 @@ class AddressLookupContinueControllerSpec extends SpecBase {
     )
   )
 
+  private lazy val journeyRoleTestCases = Seq(
+    JourneyRole.PrIndividual,
+    JourneyRole.PrOrganisation
+  )
+
   "AddressLookupContinueController" - {
 
-    List(
-      (NormalMode, routes.DidPrSubmitController.onPageLoad(srn, NormalMode).url),
-      (CheckMode, routes.CheckYourAnswersController.onPageLoad(srn).url)
-    ).foreach { (modeTested, expectedRedirectLocation) =>
-      s"must save the selected address and redirect to the next page when ALF returns a valid address in $modeTested" in {
+    journeyRoleTestCases.foreach { journeyRole =>
+
+      List(
+        (NormalMode, routes.DidPrSubmitController.onPageLoad(srn, NormalMode).url),
+        (CheckMode, routes.CheckYourAnswersController.onPageLoad(srn).url)
+      ).foreach { (modeTested, expectedRedirectLocation) =>
+        s"must save the selected address and redirect to the next page when ALF returns a valid address in $modeTested for ${journeyRole.name} journey" in {
+
+          val mockAddressLookupFrontendService = mock[AddressLookupFrontendService]
+          val mockUserAnswersService = mock[UserAnswersService]
+
+          when(mockAddressLookupFrontendService.getAddress(any())(using any()))
+            .thenReturn(Future.successful(validAddressData))
+          when(mockUserAnswersService.set(any())(using any(), any()))
+            .thenReturn(Future.successful(Right(emptyUserAnswers)))
+
+          val application = applicationBuilder(userAnswers = Some(emptyUserAnswers), usesSession = true)
+            .overrides(
+              bind[AddressLookupFrontendService].toInstance(mockAddressLookupFrontendService),
+              bind[UserAnswersService].toInstance(mockUserAnswersService)
+            )
+            .build()
+
+          running(application) {
+            val request =
+              FakeRequest(
+                GET,
+                routes.AddressLookupContinueController.continue(srn, modeTested, journeyRole, addressId).url
+              )
+
+            val result = route(application, request).value
+
+            status(result) mustEqual SEE_OTHER
+            redirectLocation(result).value must endWith(expectedRedirectLocation)
+
+            val userAnswersCaptor: ArgumentCaptor[UserAnswers] = ArgumentCaptor.forClass(classOf[UserAnswers])
+            verify(mockUserAnswersService).set(userAnswersCaptor.capture())(using any(), any())
+
+            (userAnswersCaptor.getValue.data \ "prDetails" \ journeyRole.name).as[PrAddress] mustBe
+              PrAddress(
+                addressLine1 = "33 Fake Street",
+                addressLine2 = Some("Fake Area"),
+                addressLine3 = None,
+                addressLine4 = Some("Fakeville"),
+                ukPostcode = Some("ZZ1 1ZZ"),
+                country = "GB"
+              )
+          }
+        }
+      }
+
+      s"must redirect to journey recovery when no address id is returned from ALF for ${journeyRole.name} journey" in {
 
         val mockAddressLookupFrontendService = mock[AddressLookupFrontendService]
         val mockUserAnswersService = mock[UserAnswersService]
-
-        when(mockAddressLookupFrontendService.getAddress(any())(using any()))
-          .thenReturn(Future.successful(validAddressData))
-        when(mockUserAnswersService.set(any())(using any(), any()))
-          .thenReturn(Future.successful(Right(emptyUserAnswers)))
 
         val application = applicationBuilder(userAnswers = Some(emptyUserAnswers), usesSession = true)
           .overrides(
@@ -68,31 +115,84 @@ class AddressLookupContinueControllerSpec extends SpecBase {
           .build()
 
         running(application) {
-          val request =
-            FakeRequest(GET, routes.AddressLookupContinueController.continue(srn, modeTested, addressId).url)
+          val request = FakeRequest(
+            GET,
+            routes.AddressLookupContinueController.continue(srn, NormalMode, journeyRole, " ").url
+          )
 
           val result = route(application, request).value
 
           status(result) mustEqual SEE_OTHER
-          redirectLocation(result).value must endWith(expectedRedirectLocation)
+          redirectLocation(result).value mustEqual routes.JourneyRecoveryController.onPageLoad().url
+          verify(mockAddressLookupFrontendService, never).getAddress(any())(using any())
+          verify(mockUserAnswersService, never).set(any())(using any(), any())
+        }
+      }
 
-          val userAnswersCaptor: ArgumentCaptor[UserAnswers] = ArgumentCaptor.forClass(classOf[UserAnswers])
-          verify(mockUserAnswersService).set(userAnswersCaptor.capture())(using any(), any())
+      s"must redirect to journey recovery and not save when ALF returns no address lines for ${journeyRole.name} journey" in {
 
-          (userAnswersCaptor.getValue.data \ "prDetails" \ "individual").as[PrAddress] mustBe
-            PrAddress(
-              addressLine1 = "33 Fake Street",
-              addressLine2 = Some("Fake Area"),
-              addressLine3 = None,
-              addressLine4 = Some("Fakeville"),
-              ukPostcode = Some("ZZ1 1ZZ"),
-              country = "GB"
-            )
+        val mockAddressLookupFrontendService = mock[AddressLookupFrontendService]
+        val mockUserAnswersService = mock[UserAnswersService]
+
+        when(mockAddressLookupFrontendService.getAddress(any())(using any()))
+          .thenReturn(
+            Future.successful(validAddressData.copy(address = validAddressData.address.copy(lines = Seq.empty)))
+          )
+
+        val application = applicationBuilder(userAnswers = Some(emptyUserAnswers), usesSession = true)
+          .overrides(
+            bind[AddressLookupFrontendService].toInstance(mockAddressLookupFrontendService),
+            bind[UserAnswersService].toInstance(mockUserAnswersService)
+          )
+          .build()
+
+        running(application) {
+          val request = FakeRequest(
+            GET,
+            routes.AddressLookupContinueController.continue(srn, NormalMode, journeyRole, addressId).url
+          )
+
+          val result = route(application, request).value
+
+          status(result) mustEqual SEE_OTHER
+          redirectLocation(result).value mustEqual routes.JourneyRecoveryController.onPageLoad().url
+          verify(mockUserAnswersService, never).set(any())(using any(), any())
+        }
+      }
+
+      s"must redirect to journey recovery and not save when ALF returns a blank first address line for ${journeyRole.name} journey" in {
+
+        val mockAddressLookupFrontendService = mock[AddressLookupFrontendService]
+        val mockUserAnswersService = mock[UserAnswersService]
+
+        when(mockAddressLookupFrontendService.getAddress(any())(using any()))
+          .thenReturn(
+            Future.successful(validAddressData.copy(address = validAddressData.address.copy(lines = Seq(" "))))
+          )
+
+        val application = applicationBuilder(userAnswers = Some(emptyUserAnswers), usesSession = true)
+          .overrides(
+            bind[AddressLookupFrontendService].toInstance(mockAddressLookupFrontendService),
+            bind[UserAnswersService].toInstance(mockUserAnswersService)
+          )
+          .build()
+
+        running(application) {
+          val request = FakeRequest(
+            GET,
+            routes.AddressLookupContinueController.continue(srn, NormalMode, journeyRole, addressId).url
+          )
+
+          val result = route(application, request).value
+
+          status(result) mustEqual SEE_OTHER
+          redirectLocation(result).value mustEqual routes.JourneyRecoveryController.onPageLoad().url
+          verify(mockUserAnswersService, never).set(any())(using any(), any())
         }
       }
     }
 
-    "must replace stale address fields when changing to an address with fewer lines" in {
+    "must replace stale address fields when changing to an address with fewer lines for pr-individual journey" in {
 
       val mockAddressLookupFrontendService = mock[AddressLookupFrontendService]
       val mockUserAnswersService = mock[UserAnswersService]
@@ -138,7 +238,10 @@ class AddressLookupContinueControllerSpec extends SpecBase {
         .build()
 
       running(application) {
-        val request = FakeRequest(GET, routes.AddressLookupContinueController.continue(srn, NormalMode, addressId).url)
+        val request = FakeRequest(
+          GET,
+          routes.AddressLookupContinueController.continue(srn, NormalMode, JourneyRole.PrIndividual, addressId).url
+        )
 
         val result = route(application, request).value
 
@@ -161,12 +264,44 @@ class AddressLookupContinueControllerSpec extends SpecBase {
       }
     }
 
-    "must redirect to journey recovery when no address id is returned from ALF" in {
+    "must replace stale address fields when changing to an address with fewer lines for pr-organisation journey" in {
 
       val mockAddressLookupFrontendService = mock[AddressLookupFrontendService]
       val mockUserAnswersService = mock[UserAnswersService]
 
-      val application = applicationBuilder(userAnswers = Some(emptyUserAnswers), usesSession = true)
+      val existingUserAnswers = emptyUserAnswers.copy(
+        data = Json.obj(
+          "prDetails" -> Json.obj(
+            "organisation" -> Json.obj(
+              "organisationName" -> "Fake Org",
+              "addressLine1" -> "33 Fake Street",
+              "addressLine2" -> "Fake Area",
+              "addressLine3" -> "Some District",
+              "addressLine4" -> "Anytown",
+              "ukPostcode" -> "ZZ1 1ZZ",
+              "country" -> "GB"
+            )
+          )
+        )
+      )
+
+      val newAddressData = AlfAddressData(
+        id = Some(addressId),
+        address = AlfAddress(
+          organisation = None,
+          lines = Seq("11 A Boulevard", "Fakeville"),
+          town = Some("Fakeville"),
+          postcode = Some("ZZ1 1ZZ"),
+          country = AlfCountry("GB", "United Kingdom")
+        )
+      )
+
+      when(mockAddressLookupFrontendService.getAddress(any())(using any()))
+        .thenReturn(Future.successful(newAddressData))
+      when(mockUserAnswersService.set(any())(using any(), any()))
+        .thenReturn(Future.successful(Right(emptyUserAnswers)))
+
+      val application = applicationBuilder(userAnswers = Some(existingUserAnswers), usesSession = true)
         .overrides(
           bind[AddressLookupFrontendService].toInstance(mockAddressLookupFrontendService),
           bind[UserAnswersService].toInstance(mockUserAnswersService)
@@ -174,26 +309,40 @@ class AddressLookupContinueControllerSpec extends SpecBase {
         .build()
 
       running(application) {
-        val request = FakeRequest(GET, routes.AddressLookupContinueController.continue(srn, NormalMode, " ").url)
+        val request = FakeRequest(
+          GET,
+          routes.AddressLookupContinueController.continue(srn, NormalMode, JourneyRole.PrOrganisation, addressId).url
+        )
 
         val result = route(application, request).value
 
         status(result) mustEqual SEE_OTHER
-        redirectLocation(result).value mustEqual routes.JourneyRecoveryController.onPageLoad().url
-        verify(mockAddressLookupFrontendService, never).getAddress(any())(using any())
-        verify(mockUserAnswersService, never).set(any())(using any(), any())
+        redirectLocation(result).value mustEqual routes.DidPrSubmitController.onPageLoad(srn, NormalMode).url
+
+        val userAnswersCaptor: ArgumentCaptor[UserAnswers] = ArgumentCaptor.forClass(classOf[UserAnswers])
+        verify(mockUserAnswersService).set(userAnswersCaptor.capture())(using any(), any())
+
+        val updatedOrganisation = (userAnswersCaptor.getValue.data \ "prDetails" \ "organisation").as[JsObject]
+
+        updatedOrganisation mustBe Json.obj(
+          "organisationName" -> "Fake Org",
+          "addressLine1" -> "11 A Boulevard",
+          "addressLine2" -> "Fakeville",
+          "ukPostcode" -> "ZZ1 1ZZ",
+          "country" -> "GB"
+        )
       }
     }
 
-    "must redirect to journey recovery and not save when ALF returns no address lines" in {
+    "must redirect to journey recovery when the journey is not individual or organisation" in {
 
       val mockAddressLookupFrontendService = mock[AddressLookupFrontendService]
       val mockUserAnswersService = mock[UserAnswersService]
 
       when(mockAddressLookupFrontendService.getAddress(any())(using any()))
-        .thenReturn(
-          Future.successful(validAddressData.copy(address = validAddressData.address.copy(lines = Seq.empty)))
-        )
+        .thenReturn(Future.successful(validAddressData))
+      when(mockUserAnswersService.set(any())(using any(), any()))
+        .thenReturn(Future.successful(Right(emptyUserAnswers)))
 
       val application = applicationBuilder(userAnswers = Some(emptyUserAnswers), usesSession = true)
         .overrides(
@@ -203,39 +352,14 @@ class AddressLookupContinueControllerSpec extends SpecBase {
         .build()
 
       running(application) {
-        val request = FakeRequest(GET, routes.AddressLookupContinueController.continue(srn, NormalMode, addressId).url)
+        val request = FakeRequest(GET, "/test-only/unknown-address-lookup-continue")
 
-        val result = route(application, request).value
+        val controller = application.injector.instanceOf[AddressLookupContinueController]
 
-        status(result) mustEqual SEE_OTHER
-        redirectLocation(result).value mustEqual routes.JourneyRecoveryController.onPageLoad().url
-        verify(mockUserAnswersService, never).set(any())(using any(), any())
-      }
-    }
-
-    "must redirect to journey recovery and not save when ALF returns a blank first address line" in {
-
-      val mockAddressLookupFrontendService = mock[AddressLookupFrontendService]
-      val mockUserAnswersService = mock[UserAnswersService]
-
-      when(mockAddressLookupFrontendService.getAddress(any())(using any()))
-        .thenReturn(Future.successful(validAddressData.copy(address = validAddressData.address.copy(lines = Seq(" ")))))
-
-      val application = applicationBuilder(userAnswers = Some(emptyUserAnswers), usesSession = true)
-        .overrides(
-          bind[AddressLookupFrontendService].toInstance(mockAddressLookupFrontendService),
-          bind[UserAnswersService].toInstance(mockUserAnswersService)
-        )
-        .build()
-
-      running(application) {
-        val request = FakeRequest(GET, routes.AddressLookupContinueController.continue(srn, NormalMode, addressId).url)
-
-        val result = route(application, request).value
+        val result = controller.continue(srn, NormalMode, JourneyRole.Unknown, addressId)(request)
 
         status(result) mustEqual SEE_OTHER
         redirectLocation(result).value mustEqual routes.JourneyRecoveryController.onPageLoad().url
-        verify(mockUserAnswersService, never).set(any())(using any(), any())
       }
     }
   }

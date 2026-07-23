@@ -16,13 +16,14 @@
 
 package controllers
 
-import play.api.test.FakeRequest
 import services.AddressLookupFrontendService
-import pages.IndividualNamePage
+import pages.{IndividualNamePage, OrganisationNamePage}
 import play.api.inject.bind
 import base.SpecBase
 import models._
 import org.mockito.ArgumentMatchers.{any, eq => eqTo}
+import models.JourneyRole.PrIndividual
+import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import org.mockito.Mockito.{never, verify, when}
 
@@ -30,75 +31,148 @@ import scala.concurrent.Future
 
 class AddressLookupStartControllerSpec extends SpecBase {
 
+  private case class JourneyRoleTestCase(
+    journeyRole: JourneyRole,
+    userAnswers: UserAnswers,
+    name: String
+  )
+
+  private lazy val journeyRoleTestCases = Seq(
+    JourneyRoleTestCase(
+      JourneyRole.PrIndividual,
+      emptyUserAnswers
+        .set(
+          IndividualNamePage(PrIndividual),
+          IndividualName(Some("Mr"), "John", Some("William"), "Doe")
+        )
+        .success
+        .value,
+      "John Doe"
+    ),
+    JourneyRoleTestCase(
+      JourneyRole.PrOrganisation,
+      emptyUserAnswers
+        .set(
+          OrganisationNamePage,
+          "Test Org"
+        )
+        .success
+        .value,
+      "Test Org"
+    )
+  )
+
   "AddressLookupStartController" - {
 
-    "must start the ALF journey and redirect to the returned ALF URL" in {
+    journeyRoleTestCases.foreach { testCase =>
+      val journeyRole = testCase.journeyRole
 
-      val prIndividualName = IndividualName(Some("Mr"), "John", Some("William"), "Doe")
-      val userAnswers =
-        emptyUserAnswers.set(IndividualNamePage(JourneyRole.PrIndividual), prIndividualName).success.value
-      val mockAddressLookupFrontendService = mock[AddressLookupFrontendService]
+      s"must start the ALF journey and redirect to the returned ALF URL for ${journeyRole.name} journey" in {
 
-      when(
-        mockAddressLookupFrontendService.initJourney(eqTo(srn), eqTo(NormalMode), eqTo("John Doe"))(using
-          any(),
-          any()
+        val userAnswers = testCase.userAnswers
+        val mockAddressLookupFrontendService = mock[AddressLookupFrontendService]
+
+        when(
+          mockAddressLookupFrontendService.initJourney(
+            eqTo(srn),
+            eqTo(NormalMode),
+            eqTo(testCase.name),
+            eqTo(journeyRole)
+          )(using
+            any(),
+            any()
+          )
         )
-      )
-        .thenReturn(Future.successful("/lookup-address"))
+          .thenReturn(Future.successful("/lookup-address"))
 
-      val application = applicationBuilder(userAnswers = Some(userAnswers), usesSession = true)
-        .overrides(bind[AddressLookupFrontendService].toInstance(mockAddressLookupFrontendService))
-        .build()
+        val application = applicationBuilder(userAnswers = Some(userAnswers), usesSession = true)
+          .overrides(bind[AddressLookupFrontendService].toInstance(mockAddressLookupFrontendService))
+          .build()
 
-      running(application) {
-        val request = FakeRequest(GET, routes.AddressLookupStartController.start(srn, NormalMode).url)
+        running(application) {
+          val request =
+            FakeRequest(GET, routes.AddressLookupStartController.start(srn, NormalMode, journeyRole).url)
 
-        val result = route(application, request).value
+          val result = route(application, request).value
 
-        status(result) mustEqual SEE_OTHER
-        redirectLocation(result).value mustEqual "/lookup-address"
-        verify(mockAddressLookupFrontendService).initJourney(eqTo(srn), eqTo(NormalMode), eqTo("John Doe"))(using
-          any(),
-          any()
+          status(result) mustEqual SEE_OTHER
+          redirectLocation(result).value mustEqual "/lookup-address"
+          verify(mockAddressLookupFrontendService).initJourney(
+            eqTo(srn),
+            eqTo(NormalMode),
+            eqTo(testCase.name),
+            eqTo(journeyRole)
+          )(using
+            any(),
+            any()
+          )
+        }
+      }
+
+      s"must start a new ALF journey in CheckMode for ${journeyRole.name} journey" in {
+
+        val userAnswers = testCase.userAnswers
+        val mockAddressLookupFrontendService = mock[AddressLookupFrontendService]
+
+        when(
+          mockAddressLookupFrontendService.initJourney(
+            eqTo(srn),
+            eqTo(CheckMode),
+            eqTo(testCase.name),
+            eqTo(journeyRole)
+          )(using
+            any(),
+            any()
+          )
         )
+          .thenReturn(Future.successful("/lookup-address"))
+
+        val application = applicationBuilder(userAnswers = Some(userAnswers), usesSession = true)
+          .overrides(bind[AddressLookupFrontendService].toInstance(mockAddressLookupFrontendService))
+          .build()
+
+        running(application) {
+          val request =
+            FakeRequest(GET, routes.AddressLookupStartController.start(srn, CheckMode, journeyRole).url)
+
+          val result = route(application, request).value
+
+          status(result) mustEqual SEE_OTHER
+          redirectLocation(result).value mustEqual "/lookup-address"
+          verify(mockAddressLookupFrontendService).initJourney(
+            eqTo(srn),
+            eqTo(CheckMode),
+            eqTo(testCase.name),
+            eqTo(journeyRole)
+          )(using
+            any(),
+            any()
+          )
+        }
+      }
+
+      s"must redirect to journey recovery when the ${journeyRole.name} name is missing for ${journeyRole.name} journey" in {
+
+        val mockAddressLookupFrontendService = mock[AddressLookupFrontendService]
+
+        val application = applicationBuilder(userAnswers = Some(emptyUserAnswers), usesSession = true)
+          .overrides(bind[AddressLookupFrontendService].toInstance(mockAddressLookupFrontendService))
+          .build()
+
+        running(application) {
+          val request =
+            FakeRequest(GET, routes.AddressLookupStartController.start(srn, NormalMode, journeyRole).url)
+
+          val result = route(application, request).value
+
+          status(result) mustEqual SEE_OTHER
+          redirectLocation(result).value mustEqual routes.JourneyRecoveryController.onPageLoad().url
+          verify(mockAddressLookupFrontendService, never).initJourney(any(), any(), any(), any())(using any(), any())
+        }
       }
     }
 
-    "must start a new ALF journey in CheckMode" in {
-
-      val prIndividualName = IndividualName(Some("Mr"), "John", Some("William"), "Doe")
-      val userAnswers =
-        emptyUserAnswers.set(IndividualNamePage(JourneyRole.PrIndividual), prIndividualName).success.value
-      val mockAddressLookupFrontendService = mock[AddressLookupFrontendService]
-
-      when(
-        mockAddressLookupFrontendService.initJourney(eqTo(srn), eqTo(CheckMode), eqTo("John Doe"))(using
-          any(),
-          any()
-        )
-      )
-        .thenReturn(Future.successful("/lookup-address"))
-
-      val application = applicationBuilder(userAnswers = Some(userAnswers), usesSession = true)
-        .overrides(bind[AddressLookupFrontendService].toInstance(mockAddressLookupFrontendService))
-        .build()
-
-      running(application) {
-        val request = FakeRequest(GET, routes.AddressLookupStartController.start(srn, CheckMode).url)
-
-        val result = route(application, request).value
-
-        status(result) mustEqual SEE_OTHER
-        redirectLocation(result).value mustEqual "/lookup-address"
-        verify(mockAddressLookupFrontendService).initJourney(eqTo(srn), eqTo(CheckMode), eqTo("John Doe"))(using
-          any(),
-          any()
-        )
-      }
-    }
-
-    "must redirect to journey recovery when the PR individual name is missing" in {
+    "must redirect to journey recovery when the journey is not individual or organisation" in {
 
       val mockAddressLookupFrontendService = mock[AddressLookupFrontendService]
 
@@ -107,13 +181,14 @@ class AddressLookupStartControllerSpec extends SpecBase {
         .build()
 
       running(application) {
-        val request = FakeRequest(GET, routes.AddressLookupStartController.start(srn, NormalMode).url)
+        val request = FakeRequest(GET, "/test-only/unknown-address-lookup-start")
 
-        val result = route(application, request).value
+        val controller = application.injector.instanceOf[AddressLookupStartController]
+
+        val result = controller.start(srn, NormalMode, JourneyRole.Unknown)(request)
 
         status(result) mustEqual SEE_OTHER
         redirectLocation(result).value mustEqual routes.JourneyRecoveryController.onPageLoad().url
-        verify(mockAddressLookupFrontendService, never).initJourney(any(), any(), any())(using any(), any())
       }
     }
   }

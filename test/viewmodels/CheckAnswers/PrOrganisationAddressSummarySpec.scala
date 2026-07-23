@@ -24,14 +24,14 @@ import play.api.i18n.Messages
 import uk.gov.hmrc.govukfrontend.views.Aliases.Text
 import base.SpecBase
 
-class PrIndividualAddressSummarySpec extends SpecBase {
+class PrOrganisationAddressSummarySpec extends SpecBase {
 
-  "PrIndividualAddressSummary" - {
+  "PrOrganisationAddressSummary" - {
     implicit val messages: Messages = stubMessages()
 
     "must return None when data is not present" in {
 
-      PrIndividualAddressSummary.row(srn, emptyUserAnswers) mustBe None
+      PrOrganisationAddressSummary.row(srn, emptyUserAnswers) mustBe None
     }
 
     "must return a row when data is present" in {
@@ -48,24 +48,24 @@ class PrIndividualAddressSummarySpec extends SpecBase {
       val userAnswers = emptyUserAnswers.copy(
         data = Json.obj(
           "prDetails" -> Json.obj(
-            "individual" -> Json.toJson(address)
+            "organisation" -> Json.toJson(address)
           )
         )
       )
 
-      val result = PrIndividualAddressSummary.row(
+      val result = PrOrganisationAddressSummary.row(
         srn,
         userAnswers,
         countryNameForCode = code => if (code == "GB") "United Kingdom" else code
       )
 
       result mustBe defined
-      result.value.key.content mustBe Text(messages("prIndividualAddress.checkYourAnswersLabel"))
+      result.value.key.content mustBe Text(messages("prOrganisationAddress.checkYourAnswersLabel"))
       result.value.value.content mustBe HtmlContent(
         "33 Fake Street<br>Fake Area<br>Fake County<br>Fakeville<br>ZZ1 1ZZ<br>United Kingdom"
       )
       result.value.actions.value.items.head.href mustBe
-        controllers.routes.AddressLookupStartController.start(srn, CheckMode, JourneyRole.PrIndividual).url
+        controllers.routes.AddressLookupStartController.start(srn, CheckMode, JourneyRole.PrOrganisation).url
     }
 
     "must use country code as-is when no lookup function is provided" in {
@@ -82,12 +82,12 @@ class PrIndividualAddressSummarySpec extends SpecBase {
       val userAnswers = emptyUserAnswers.copy(
         data = Json.obj(
           "prDetails" -> Json.obj(
-            "individual" -> Json.toJson(address)
+            "organisation" -> Json.toJson(address)
           )
         )
       )
 
-      val result = PrIndividualAddressSummary.row(srn, userAnswers)
+      val result = PrOrganisationAddressSummary.row(srn, userAnswers)
 
       result mustBe defined
     }
@@ -106,12 +106,12 @@ class PrIndividualAddressSummarySpec extends SpecBase {
       val userAnswers = emptyUserAnswers.copy(
         data = Json.obj(
           "prDetails" -> Json.obj(
-            "individual" -> Json.toJson(address)
+            "organisation" -> Json.toJson(address)
           )
         )
       )
 
-      val result = PrIndividualAddressSummary.row(srn, userAnswers, countryNameForCode = identity)
+      val result = PrOrganisationAddressSummary.row(srn, userAnswers, countryNameForCode = identity)
 
       result.value.value.content mustBe HtmlContent("33 Fake Street<br>XX")
     }
