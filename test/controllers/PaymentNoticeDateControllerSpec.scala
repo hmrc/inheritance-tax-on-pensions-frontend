@@ -140,7 +140,27 @@ class PaymentNoticeDateControllerSpec extends SpecBase with MockitoSugar {
       }
     }
 
-    "must redirect to the beneficiaries known page when valid data is submitted and PR submit payment notice has been answered No" in {
+    "must redirect to the beneficiaries known page when valid data is submitted and PR submit payment notice has been answered Yes" in {
+      val mockInheritanceTaxOnPensionsConnector = mock[InheritanceTaxOnPensionsConnector]
+
+      when(mockInheritanceTaxOnPensionsConnector.setUserAnswers(any(), any(), any(), any(), any())(using any()))
+        .thenReturn(Future.successful(Right(emptyUserAnswers)))
+
+      val application = applicationBuilder(userAnswers = Some(userAnswersWithDidPrSubmit), usesSession = true)
+        .overrides(
+          bind[InheritanceTaxOnPensionsConnector].toInstance(mockInheritanceTaxOnPensionsConnector)
+        )
+        .build()
+
+      running(application) {
+        val result = route(application, postRequest()).value
+
+        status(result) mustEqual SEE_OTHER
+        redirectLocation(result).value mustEqual routes.AreBeneficiariesKnownController.onPageLoad(srn, NormalMode).url
+      }
+    }
+
+    "must redirect to the beneficiary individual or org page when valid data is submitted and PR submit payment notice has been answered Yes" in {
       val mockInheritanceTaxOnPensionsConnector = mock[InheritanceTaxOnPensionsConnector]
 
       when(mockInheritanceTaxOnPensionsConnector.setUserAnswers(any(), any(), any(), any(), any())(using any()))
@@ -156,7 +176,9 @@ class PaymentNoticeDateControllerSpec extends SpecBase with MockitoSugar {
         val result = route(application, postRequest()).value
 
         status(result) mustEqual SEE_OTHER
-        redirectLocation(result).value mustEqual routes.AreBeneficiariesKnownController.onPageLoad(srn, NormalMode).url
+        redirectLocation(result).value mustEqual controllers.beneficiary.routes.BeneficiaryTypeController
+          .onPageLoad(srn, 0, NormalMode)
+          .url
       }
     }
 

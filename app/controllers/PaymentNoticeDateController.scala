@@ -97,7 +97,10 @@ class PaymentNoticeDateController @Inject() (
 
   private def nextPage(srn: Srn, mode: Mode, userAnswers: UserAnswers) =
     mode match {
-      case NormalMode => routes.AreBeneficiariesKnownController.onPageLoad(srn, NormalMode)
+      case NormalMode if userAnswers.get(DidPrSubmitPage).contains(true) =>
+        routes.AreBeneficiariesKnownController.onPageLoad(srn, NormalMode)
+      case NormalMode =>
+        controllers.beneficiary.routes.BeneficiaryTypeController.onPageLoad(srn, 0, NormalMode)
       case CheckMode if userAnswers.get(AreBeneficiariesKnownPage).isEmpty =>
         routes.AreBeneficiariesKnownController.onPageLoad(srn, CheckMode)
       case CheckMode => routes.CheckYourAnswersController.onPageLoad(srn)

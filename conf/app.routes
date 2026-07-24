@@ -95,3 +95,9 @@ GET         /:srn/are-beneficiaries-known              controllers.AreBeneficiar
 POST        /:srn/are-beneficiaries-known              controllers.AreBeneficiariesKnownController.onSubmit(srn: Srn, mode: Mode = NormalMode)
 GET         /:srn/change-are-beneficiaries-known       controllers.AreBeneficiariesKnownController.onPageLoad(srn: Srn, mode: Mode = CheckMode)
 POST        /:srn/change-are-beneficiaries-known       controllers.AreBeneficiariesKnownController.onSubmit(srn: Srn, mode: Mode = CheckMode)
+
+GET         /:srn/select-beneficiary-type/$index<[1-2]?[0-9]>  controllers.beneficiary.BeneficiaryTypeController.onPageLoad(srn: Srn, index: Int, mode: Mode = NormalMode)
+POST        /:srn/select-beneficiary-type/$index<[1-2]?[0-9]>  controllers.beneficiary.BeneficiaryTypeController.onSubmit(srn: Srn, index: Int, mode: Mode = NormalMode)
+GET         /:srn/change-beneficiary-type/$index<[1-2]?[0-9]>  controllers.beneficiary.BeneficiaryTypeController.onPageLoad(srn: Srn, index: Int, mode: Mode = CheckMode)
+POST        /:srn/change-beneficiary-type/$index<[1-2]?[0-9]>  controllers.beneficiary.BeneficiaryTypeController.onSubmit(srn: Srn, index: Int, mode: Mode = CheckMode)
+

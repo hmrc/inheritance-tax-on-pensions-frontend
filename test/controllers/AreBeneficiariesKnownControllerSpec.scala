@@ -104,7 +104,7 @@ class AreBeneficiariesKnownControllerSpec extends SpecBase with MockitoSugar {
       }
     }
 
-    "must redirect to Check Your Answers when Yes is submitted" in {
+    "must redirect to beneficiary individual or org when Yes is submitted" in {
       val mockInheritanceTaxOnPensionsConnector = mock[InheritanceTaxOnPensionsConnector]
       when(mockInheritanceTaxOnPensionsConnector.setUserAnswers(any(), any(), any(), any(), any())(using any()))
         .thenReturn(Future.successful(Right(userAnswersWithDidPrSubmit)))
@@ -119,7 +119,9 @@ class AreBeneficiariesKnownControllerSpec extends SpecBase with MockitoSugar {
         val result = route(application, postRequest("true")).value
 
         status(result) mustEqual SEE_OTHER
-        redirectLocation(result).value mustEqual routes.CheckYourAnswersController.onPageLoad(srn).url
+        redirectLocation(result).value mustEqual controllers.beneficiary.routes.BeneficiaryTypeController
+          .onPageLoad(srn, 0, NormalMode)
+          .url
       }
     }
 
@@ -136,25 +138,6 @@ class AreBeneficiariesKnownControllerSpec extends SpecBase with MockitoSugar {
 
       running(application) {
         val result = route(application, postRequest("false")).value
-
-        status(result) mustEqual SEE_OTHER
-        redirectLocation(result).value mustEqual routes.CheckYourAnswersController.onPageLoad(srn).url
-      }
-    }
-
-    "must redirect to Check Your Answers when an answer is submitted and PR did not submit the payment notice" in {
-      val mockInheritanceTaxOnPensionsConnector = mock[InheritanceTaxOnPensionsConnector]
-      when(mockInheritanceTaxOnPensionsConnector.setUserAnswers(any(), any(), any(), any(), any())(using any()))
-        .thenReturn(Future.successful(Right(userAnswersWithDidPrNotSubmit)))
-
-      val application = applicationBuilder(userAnswers = Some(userAnswersWithDidPrNotSubmit), usesSession = true)
-        .overrides(
-          bind[InheritanceTaxOnPensionsConnector].toInstance(mockInheritanceTaxOnPensionsConnector)
-        )
-        .build()
-
-      running(application) {
-        val result = route(application, postRequest("true")).value
 
         status(result) mustEqual SEE_OTHER
         redirectLocation(result).value mustEqual routes.CheckYourAnswersController.onPageLoad(srn).url
