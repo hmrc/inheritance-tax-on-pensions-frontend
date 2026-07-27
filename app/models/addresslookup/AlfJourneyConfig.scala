@@ -35,6 +35,7 @@ final case class AlfOptions(
   disableTranslations: Boolean = true,
   includeHMRCBranding: Boolean = false,
   allowedCountryCodes: Option[Seq[String]] = None,
+  selectPageConfig: AlfSelectPageConfig = AlfSelectPageConfig(),
   ukMode: Boolean = false,
   manualAddressEntryConfig: AlfManualAddressEntryConfig,
   pageHeadingStyle: String = "govuk-heading-l"
@@ -42,6 +43,12 @@ final case class AlfOptions(
 
 object AlfOptions {
   implicit val format: OFormat[AlfOptions] = Json.format[AlfOptions]
+}
+
+final case class AlfSelectPageConfig(showNoneOfTheseOption: Boolean = false)
+
+object AlfSelectPageConfig {
+  implicit val format: OFormat[AlfSelectPageConfig] = Json.format[AlfSelectPageConfig]
 }
 
 final case class AlfManualAddressEntryConfig(

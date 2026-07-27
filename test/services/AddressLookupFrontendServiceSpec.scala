@@ -75,6 +75,7 @@ class AddressLookupFrontendServiceSpec extends SpecBase {
           journeyConfig.options.signOutHref mustBe config.signOutSurveyUrl
           journeyConfig.options.phaseFeedbackLink mustBe config.feedbackUrl
           journeyConfig.options.allowedCountryCodes mustBe Some(countryService.countries.map(_.code))
+          journeyConfig.options.selectPageConfig.showNoneOfTheseOption mustBe false
           journeyConfig.options.manualAddressEntryConfig.mandatoryFields.addressLine1 mustBe true
           journeyConfig.options.manualAddressEntryConfig.mandatoryFields.addressLine2 mustBe true
           journeyConfig.options.manualAddressEntryConfig.showOrganisationName mustBe false
