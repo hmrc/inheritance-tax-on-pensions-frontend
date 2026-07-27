@@ -55,6 +55,7 @@ class AddressLookupFrontendService @Inject() (
         deskProServiceName = config.appName,
         phaseFeedbackLink = config.feedbackUrl,
         allowedCountryCodes = Some(countryService.countries.map(_.code)),
+        selectPageConfig = AlfSelectPageConfig(showNoneOfTheseOption = false),
         manualAddressEntryConfig = AlfManualAddressEntryConfig(
           mandatoryFields = AlfMandatoryFields()
         )
