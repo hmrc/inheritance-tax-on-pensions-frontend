@@ -24,9 +24,9 @@ import models.SchemeId.Srn
 import views.html.beneficiary.BeneficiaryTypeView
 import controllers.actions._
 import forms.beneficiary.BeneficiaryTypeFormProvider
-import models.beneficiary.BeneficiaryType
+import models.beneficiary.{BeneficiaryJourneyRole, BeneficiaryType}
 import models._
-import pages.beneficiary.BeneficiaryTypePage
+import pages.beneficiary.{BeneficiaryNamePage, BeneficiaryTypePage}
 import play.api.i18n.MessagesApi
 import play.api.data.Form
 
@@ -85,8 +85,32 @@ class BeneficiaryTypeController @Inject() (
           )
       }
 
-  private def nextPage(srn: Srn, index: Int, mode: Mode, answer: BeneficiaryType, userAnswers: UserAnswers) = {
-    logger.warn(s"TODO implement navigation with parameters: $index, $mode, $answer and ${userAnswers.id}") // TODO
-    controllers.routes.CheckYourAnswersController.onPageLoad(srn)
-  }
+  private def nextPage(srn: Srn, index: Int, mode: Mode, answer: BeneficiaryType, userAnswers: UserAnswers) =
+    mode match {
+      case NormalMode =>
+        answer match {
+          case BeneficiaryType.Individual =>
+            routes.BeneficiaryNameController.onPageLoad(
+              srn,
+              NormalMode,
+              index,
+              BeneficiaryJourneyRole.BeneficiaryIndividual
+            )
+          case _ =>
+            controllers.routes.CheckYourAnswersController.onPageLoad(srn)
+        }
+      case CheckMode =>
+        answer match {
+          case BeneficiaryType.Individual
+              if userAnswers.get(BeneficiaryNamePage(index, BeneficiaryJourneyRole.BeneficiaryIndividual)).isEmpty =>
+            routes.BeneficiaryNameController.onPageLoad(
+              srn,
+              CheckMode,
+              index,
+              BeneficiaryJourneyRole.BeneficiaryIndividual
+            )
+          case _ =>
+            controllers.routes.CheckYourAnswersController.onPageLoad(srn)
+        }
+    }
 }

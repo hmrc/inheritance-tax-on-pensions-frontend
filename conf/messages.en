@@ -320,3 +320,19 @@ beneficiaryType.organisation = An organisation or trust
 beneficiaryType.error.required = You must select individual or organisation
 beneficiaryType.checkYourAnswersLabel = Type of beneficiary
 beneficiaryType.change.hidden = the type of beneficiary
+
+beneficiaryIndividualName.title = Enter the full name of the beneficiary
+beneficiaryIndividualName.heading = Enter the full name of the beneficiary
+beneficiaryIndividualName.error.title.length = Title must be 4 characters or less
+beneficiaryIndividualName.error.title.pattern = Enter a valid title
+beneficiaryIndividualName.error.firstForename.required = Enter the beneficiary's first name
+beneficiaryIndividualName.error.firstForename.length = First name must be 35 characters or less
+beneficiaryIndividualName.error.firstForename.pattern = Enter a valid first name
+beneficiaryIndividualName.error.secondForename.length = Middle names must be 35 characters or less
+beneficiaryIndividualName.error.secondForename.pattern = Enter a valid middle name
+beneficiaryIndividualName.error.surname.required = Enter the beneficiary's last name
+beneficiaryIndividualName.error.surname.length = Last name must be 35 characters or less
+beneficiaryIndividualName.error.surname.pattern = Enter a valid last name
+
+beneficiaryIndividualName.checkYourAnswersLabel = Name of beneficiary
+beneficiaryIndividualName.checkYourAnswersLabel.hidden = name of beneficiary

@@ -18,6 +18,7 @@ package config
 
 import play.api.mvc.PathBindable
 import models.SchemeId.Srn
+import models.beneficiary.BeneficiaryJourneyRole
 import models.JourneyRole
 
 object Binders {
@@ -37,4 +38,13 @@ object Binders {
 
     override def unbind(key: String, value: JourneyRole): String = value.name
   }
+
+  implicit val beneficiaryJourneyRoleBinder: PathBindable[BeneficiaryJourneyRole] =
+    new PathBindable[BeneficiaryJourneyRole] {
+
+      override def bind(key: String, value: String): Either[String, BeneficiaryJourneyRole] =
+        Right(BeneficiaryJourneyRole.withNameWithDefault(value))
+
+      override def unbind(key: String, value: BeneficiaryJourneyRole): String = value.name
+    }
 }

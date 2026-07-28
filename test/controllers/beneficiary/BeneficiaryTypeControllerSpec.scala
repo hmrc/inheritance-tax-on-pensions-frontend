@@ -22,7 +22,7 @@ import play.api.inject.bind
 import views.html.beneficiary.BeneficiaryTypeView
 import base.SpecBase
 import forms.beneficiary.BeneficiaryTypeFormProvider
-import models.beneficiary.BeneficiaryType
+import models.beneficiary.{BeneficiaryJourneyRole, BeneficiaryType}
 import models._
 import pages.beneficiary.BeneficiaryTypePage
 import play.api.data.Form
@@ -106,7 +106,7 @@ class BeneficiaryTypeControllerSpec extends SpecBase {
       }
     }
 
-    "must redirect to the CYA page when submitted" in {
+    "must redirect to the beneficiary name page when individual submitted" in {
 
       val mockInheritanceTaxOnPensionsConnector = mock[InheritanceTaxOnPensionsConnector]
       when(mockInheritanceTaxOnPensionsConnector.setUserAnswers(any(), any(), any(), any(), any())(using any()))
@@ -122,6 +122,93 @@ class BeneficiaryTypeControllerSpec extends SpecBase {
         val request =
           FakeRequest(POST, beneficiaryTypeRoute)
             .withFormUrlEncodedBody(("value", BeneficiaryType.Individual.toString))
+
+        val result = route(application, request).value
+
+        status(result) mustEqual SEE_OTHER
+        redirectLocation(result).value mustEqual controllers.beneficiary.routes.BeneficiaryNameController
+          .onPageLoad(srn, NormalMode, testIndex, BeneficiaryJourneyRole.BeneficiaryIndividual)
+          .url
+
+        verify(mockInheritanceTaxOnPensionsConnector, times(1))
+          .setUserAnswers(any(), any(), any(), any(), any())(using any())
+      }
+    }
+
+    "must redirect to the CYA page when organisation submitted" in {
+
+      val mockInheritanceTaxOnPensionsConnector = mock[InheritanceTaxOnPensionsConnector]
+      when(mockInheritanceTaxOnPensionsConnector.setUserAnswers(any(), any(), any(), any(), any())(using any()))
+        .thenReturn(Future.successful(Right(emptyUserAnswers)))
+
+      val application = applicationBuilder(userAnswers = Some(emptyUserAnswers), usesSession = true)
+        .overrides(
+          bind[InheritanceTaxOnPensionsConnector].toInstance(mockInheritanceTaxOnPensionsConnector)
+        )
+        .build()
+
+      running(application) {
+        val request =
+          FakeRequest(POST, beneficiaryTypeRoute)
+            .withFormUrlEncodedBody(("value", BeneficiaryType.Organisation.toString))
+
+        val result = route(application, request).value
+
+        status(result) mustEqual SEE_OTHER
+        redirectLocation(result).value mustEqual controllers.routes.CheckYourAnswersController
+          .onPageLoad(srn)
+          .url
+
+        verify(mockInheritanceTaxOnPensionsConnector, times(1))
+          .setUserAnswers(any(), any(), any(), any(), any())(using any())
+      }
+    }
+
+    "must redirect to the beneficiary name page when individual submitted in CheckMode and name details are missing" in {
+
+      val mockInheritanceTaxOnPensionsConnector = mock[InheritanceTaxOnPensionsConnector]
+      when(mockInheritanceTaxOnPensionsConnector.setUserAnswers(any(), any(), any(), any(), any())(using any()))
+        .thenReturn(Future.successful(Right(emptyUserAnswers)))
+
+      val application = applicationBuilder(userAnswers = Some(emptyUserAnswers), usesSession = true)
+        .overrides(
+          bind[InheritanceTaxOnPensionsConnector].toInstance(mockInheritanceTaxOnPensionsConnector)
+        )
+        .build()
+
+      running(application) {
+        val request =
+          FakeRequest(POST, routes.BeneficiaryTypeController.onSubmit(srn, testIndex, CheckMode).url)
+            .withFormUrlEncodedBody(("value", BeneficiaryType.Individual.toString))
+
+        val result = route(application, request).value
+
+        status(result) mustEqual SEE_OTHER
+        redirectLocation(result).value mustEqual controllers.beneficiary.routes.BeneficiaryNameController
+          .onPageLoad(srn, CheckMode, testIndex, BeneficiaryJourneyRole.BeneficiaryIndividual)
+          .url
+
+        verify(mockInheritanceTaxOnPensionsConnector, times(1))
+          .setUserAnswers(any(), any(), any(), any(), any())(using any())
+      }
+    }
+
+    "must redirect to the CYA page when organisation submitted in CheckMode" in {
+
+      val mockInheritanceTaxOnPensionsConnector = mock[InheritanceTaxOnPensionsConnector]
+      when(mockInheritanceTaxOnPensionsConnector.setUserAnswers(any(), any(), any(), any(), any())(using any()))
+        .thenReturn(Future.successful(Right(emptyUserAnswers)))
+
+      val application = applicationBuilder(userAnswers = Some(emptyUserAnswers), usesSession = true)
+        .overrides(
+          bind[InheritanceTaxOnPensionsConnector].toInstance(mockInheritanceTaxOnPensionsConnector)
+        )
+        .build()
+
+      running(application) {
+        val request =
+          FakeRequest(POST, routes.BeneficiaryTypeController.onSubmit(srn, testIndex, CheckMode).url)
+            .withFormUrlEncodedBody(("value", BeneficiaryType.Organisation.toString))
 
         val result = route(application, request).value
 
