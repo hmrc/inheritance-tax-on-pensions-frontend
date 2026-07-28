@@ -334,5 +334,5 @@ beneficiaryIndividualName.error.surname.required = Enter the beneficiary's last 
 beneficiaryIndividualName.error.surname.length = Last name must be 35 characters or less
 beneficiaryIndividualName.error.surname.pattern = Enter a valid last name
 
-beneficiaryIndividualName.checkYourAnswersLabel = Name of beneficiary
-beneficiaryIndividualName.checkYourAnswersLabel.hidden = name of beneficiary
+beneficiaryIndividualName.checkYourAnswersLabel = Full name of beneficiary
+beneficiaryIndividualName.checkYourAnswersLabel.hidden = full name of beneficiary
