@@ -18,16 +18,15 @@ package pages.beneficiary
 
 import pages.QuestionPage
 import play.api.libs.json.JsPath
-import models.beneficiary.BeneficiaryJourneyRole
-import models.IndividualName
+import models.{IndividualName, JourneyRole}
 
-case class BeneficiaryNamePage(index: Int, journeyRole: BeneficiaryJourneyRole) extends QuestionPage[IndividualName] {
+case class BeneficiaryNamePage(index: Int, journeyRole: JourneyRole) extends QuestionPage[IndividualName] {
 
   override def path: JsPath =
     journeyRole match {
-      case BeneficiaryJourneyRole.BeneficiaryIndividual =>
+      case JourneyRole.BeneficiaryIndividual =>
         (JsPath \ "beneficiaries")(index) \ "beneficiaryDetails" \ "individual"
-      case BeneficiaryJourneyRole.BeneficiaryOrganisation =>
+      case JourneyRole.BeneficiaryOrganisation =>
         (JsPath \ "beneficiaries")(index) \ "beneficiaryDetails" \ "organisation"
       case _ => JsPath \ "unknown" \ toString
     }

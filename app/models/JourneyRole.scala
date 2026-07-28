@@ -41,6 +41,14 @@ object JourneyRole extends Enumerable.Implicits {
     override val key: String = "unknown"
   }
 
+  case object BeneficiaryIndividual extends WithName("individual") with JourneyRole {
+    override val key: String = "beneficiaryIndividualName"
+  }
+
+  case object BeneficiaryOrganisation extends WithName("organisation") with JourneyRole {
+    override val key: String = "beneficiaryOrganisationName"
+  }
+
   val values: Seq[JourneyRole] = Seq(Deceased, PrIndividual, PrOrganisation)
 
   def withNameWithDefault(name: String): JourneyRole =

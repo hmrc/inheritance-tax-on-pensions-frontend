@@ -24,7 +24,7 @@ import models.SchemeId.Srn
 import views.html.beneficiary.BeneficiaryTypeView
 import controllers.actions._
 import forms.beneficiary.BeneficiaryTypeFormProvider
-import models.beneficiary.{BeneficiaryJourneyRole, BeneficiaryType}
+import models.beneficiary.BeneficiaryType
 import models._
 import pages.beneficiary.{BeneficiaryNamePage, BeneficiaryTypePage}
 import play.api.i18n.MessagesApi
@@ -94,7 +94,7 @@ class BeneficiaryTypeController @Inject() (
               srn,
               NormalMode,
               index,
-              BeneficiaryJourneyRole.BeneficiaryIndividual
+              JourneyRole.BeneficiaryIndividual
             )
           case _ =>
             controllers.routes.CheckYourAnswersController.onPageLoad(srn)
@@ -102,12 +102,12 @@ class BeneficiaryTypeController @Inject() (
       case CheckMode =>
         answer match {
           case BeneficiaryType.Individual
-              if userAnswers.get(BeneficiaryNamePage(index, BeneficiaryJourneyRole.BeneficiaryIndividual)).isEmpty =>
+              if userAnswers.get(BeneficiaryNamePage(index, JourneyRole.BeneficiaryIndividual)).isEmpty =>
             routes.BeneficiaryNameController.onPageLoad(
               srn,
               CheckMode,
               index,
-              BeneficiaryJourneyRole.BeneficiaryIndividual
+              JourneyRole.BeneficiaryIndividual
             )
           case _ =>
             controllers.routes.CheckYourAnswersController.onPageLoad(srn)

@@ -18,15 +18,14 @@ package forms.beneficiary
 
 import forms.mappings.Mappings
 import play.api.data.Forms.{mapping, optional}
-import models.beneficiary.BeneficiaryJourneyRole
-import models.IndividualName
+import models.{IndividualName, JourneyRole}
 import play.api.data.Form
 
 import javax.inject.Inject
 
 class BeneficiaryNameFormProvider @Inject() extends Mappings {
 
-  def apply(journeyRole: BeneficiaryJourneyRole): Form[IndividualName] =
+  def apply(journeyRole: JourneyRole): Form[IndividualName] =
     Form(
       mapping(
         "title" -> optional(

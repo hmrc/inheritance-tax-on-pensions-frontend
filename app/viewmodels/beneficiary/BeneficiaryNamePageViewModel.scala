@@ -20,7 +20,7 @@ import uk.gov.hmrc.govukfrontend.views.viewmodels.button.Button
 import uk.gov.hmrc.govukfrontend.views.Aliases.Text
 import uk.gov.hmrc.govukfrontend.views.viewmodels.input.Input
 import viewmodels.govuk.all._
-import models.beneficiary.BeneficiaryJourneyRole
+import models.JourneyRole
 import play.api.i18n.Messages
 import play.api.data.Form
 import viewmodels.InputWidth._
@@ -38,7 +38,7 @@ object BeneficiaryNamePageViewModel {
 
   def apply(
     form: Form[?],
-    journeyRole: BeneficiaryJourneyRole,
+    journeyRole: JourneyRole,
     organisationName: Option[String] = None
   )(implicit messages: Messages): BeneficiaryNamePageViewModel =
     BeneficiaryNamePageViewModel(
@@ -79,11 +79,11 @@ object BeneficiaryNamePageViewModel {
 
   private def pageMessage(
     messageKey: String,
-    journeyRole: BeneficiaryJourneyRole,
+    journeyRole: JourneyRole,
     organisationName: Option[String]
   )(implicit messages: Messages): String =
     journeyRole match {
-      case BeneficiaryJourneyRole.BeneficiaryOrganisation => messages(messageKey, organisationName.getOrElse(""))
+      case JourneyRole.BeneficiaryOrganisation => messages(messageKey, organisationName.getOrElse(""))
       case _ => messages(messageKey)
     }
 }

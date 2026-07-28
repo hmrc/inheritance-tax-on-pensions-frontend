@@ -21,7 +21,6 @@ import play.twirl.api.HtmlFormat
 import uk.gov.hmrc.govukfrontend.views.viewmodels.content.HtmlContent
 import models.SchemeId.Srn
 import uk.gov.hmrc.govukfrontend.views.viewmodels.summarylist.SummaryListRow
-import models.beneficiary.BeneficiaryJourneyRole
 import controllers.beneficiary.routes
 import models._
 import pages.beneficiary.BeneficiaryNamePage
@@ -31,7 +30,7 @@ import viewmodels.govuk.summarylist._
 object BeneficiaryIndividualNameSummary {
 
   def row(srn: Srn, index: Int, answers: UserAnswers)(implicit messages: Messages): Option[SummaryListRow] =
-    answers.get(BeneficiaryNamePage(index, BeneficiaryJourneyRole.BeneficiaryIndividual)).map { answer =>
+    answers.get(BeneficiaryNamePage(index, JourneyRole.BeneficiaryIndividual)).map { answer =>
       SummaryListRowViewModel(
         key = "beneficiaryIndividualName.checkYourAnswersLabel",
         value = ValueViewModel(HtmlContent(HtmlFormat.escape(answer.displayFullNameAndTitle).toString)),
@@ -39,7 +38,7 @@ object BeneficiaryIndividualNameSummary {
           ActionItemViewModel(
             "site.change",
             routes.BeneficiaryNameController
-              .onPageLoad(srn, CheckMode, index, BeneficiaryJourneyRole.BeneficiaryIndividual)
+              .onPageLoad(srn, CheckMode, index, JourneyRole.BeneficiaryIndividual)
               .url
           ).withVisuallyHiddenText(messages("beneficiaryIndividualName.checkYourAnswersLabel.hidden"))
         )
