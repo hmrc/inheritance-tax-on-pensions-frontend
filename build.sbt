@@ -18,6 +18,7 @@ lazy val microservice = (project in file("."))
     semanticdbVersion := scalafixSemanticdb.revision,
     RoutesKeys.routesImport ++= Seq(
       "models._",
+      "models.beneficiary._",
       "models.SchemeId.*",
       "uk.gov.hmrc.play.bootstrap.binders.RedirectUrl",
       "config.Binders.*",

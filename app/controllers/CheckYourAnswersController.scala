@@ -19,7 +19,7 @@ package controllers
 import services.CountryService
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import com.google.inject.Inject
-import viewmodels.CheckAnswers.beneficiary.BeneficiaryTypeSummary
+import viewmodels.CheckAnswers.beneficiary.{BeneficiaryIndividualNameSummary, BeneficiaryTypeSummary}
 import play.i18n.Lang
 import controllers.actions._
 import models.beneficiary.BeneficiaryType
@@ -74,7 +74,8 @@ class CheckYourAnswersController @Inject() (
           .map { case (_, index) =>
             SummaryListViewModel(
               rows = Seq(
-                BeneficiaryTypeSummary.row(srn, index, userAnswers)
+                BeneficiaryTypeSummary.row(srn, index, userAnswers),
+                BeneficiaryIndividualNameSummary.row(srn, index, userAnswers)
               ).flatten
             ).withCard(
               CardViewModel(
