@@ -57,6 +57,7 @@ class CheckYourAnswersController @Inject() (
           InheritanceTaxReferenceSummary.row(srn, userAnswers),
           NameOfDeceasedSummary.row(srn, userAnswers),
           NinoOrReasonSummary.row(srn, userAnswers),
+          NinoSummary.row(srn, userAnswers),
           BirthDeathDatesSummary.row(srn, userAnswers),
           PrTypeSummary.row(srn, userAnswers),
           PrIndividualNameSummary.row(srn, userAnswers),

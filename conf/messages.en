@@ -341,3 +341,11 @@ beneficiaryHasNino.heading = Does {0} have a National Insurance number?
 beneficiaryHasNino.checkYourAnswersLabel = Does the beneficiary have a National Insurance number?
 beneficiaryHasNino.change.hidden = if the beneficiary has a National Insurance number
 beneficiaryHasNino.error.required = Select if the beneficiary has a National Insurance number
+
+ninoPage.title = Enter the National Insurance number of the deceased
+ninoPage.heading = Enter the National Insurance number of {0}
+ninoPage.hint = For example, QQ 12 34 56 C
+ninoPage.error.required = Enter the National Insurance number
+ninoPage.error.invalid = Enter the National Insurance number in the correct format
+ninoPage.change.hidden = National Insurance number of the deceased
+ninoPage.checkYourAnswersLabel = National Insurance number
