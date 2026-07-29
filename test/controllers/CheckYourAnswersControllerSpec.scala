@@ -19,7 +19,7 @@ package controllers
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import pages._
-import viewmodels.CheckAnswers.beneficiary.BeneficiaryTypeSummary
+import viewmodels.CheckAnswers.beneficiary.{BeneficiaryHasNinoSummary, BeneficiaryTypeSummary}
 import views.html.CheckYourAnswersView
 import base.SpecBase
 import uk.gov.hmrc.govukfrontend.views.viewmodels.summarylist.SummaryList
@@ -314,7 +314,8 @@ class CheckYourAnswersControllerSpec extends SpecBase {
           data = Json.obj(
             "beneficiaries" -> Json.arr(
               Json.obj(
-                "beneficiaryType" -> "individual"
+                "beneficiaryType" -> "individual",
+                "hasNino" -> true
               ),
               Json.obj(
                 "beneficiaryType" -> "individual"
@@ -335,7 +336,8 @@ class CheckYourAnswersControllerSpec extends SpecBase {
         val beneficiarySummaryList = List(
           SummaryListViewModel(
             rows = Seq(
-              BeneficiaryTypeSummary.row(srn, 0, userAnswers)(using messages(application)).get
+              BeneficiaryTypeSummary.row(srn, 0, userAnswers)(using messages(application)).get,
+              BeneficiaryHasNinoSummary.row(srn, 0, userAnswers)(using messages(application)).get
             ),
             card = CardViewModel("Beneficiary 1", 2, None)
           ),

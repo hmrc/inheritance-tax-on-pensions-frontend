@@ -24,7 +24,7 @@ import views.html.beneficiary.BeneficiaryNameView
 import controllers.actions._
 import forms.beneficiary.BeneficiaryNameFormProvider
 import models._
-import pages.beneficiary.BeneficiaryNamePage
+import pages.beneficiary.{BeneficiaryHasNinoPage, BeneficiaryNamePage}
 import play.api.i18n.MessagesApi
 
 import scala.concurrent.{ExecutionContext, Future}
@@ -90,7 +90,7 @@ class BeneficiaryNameController @Inject() (
                     updatedAnswers <- Future
                       .fromTry(addIndividualName(index, request.userAnswers, journeyRole, individualName))
                     _ <- userAnswersService.set(updatedAnswers)(using hc, request.request)
-                  } yield Redirect(nextPage(srn, mode, journeyRole))
+                  } yield Redirect(nextPage(srn, index, mode, journeyRole, updatedAnswers))
               )
         }
       }
@@ -103,14 +103,22 @@ class BeneficiaryNameController @Inject() (
   ): Try[UserAnswers] =
     userAnswers.set(BeneficiaryNamePage(index, journeyRole), individualName)
 
-  private[controllers] def nextPage(srn: Srn, mode: Mode, journeyRole: JourneyRole): Call =
-    mode match {
-      case NormalMode =>
-        journeyRole match {
-          case JourneyRole.BeneficiaryIndividual =>
-            routes.CheckYourAnswersController.onPageLoad(srn)
-          case _ => routes.JourneyRecoveryController.onPageLoad()
+  private[controllers] def nextPage(
+    srn: Srn,
+    index: Int,
+    mode: Mode,
+    journeyRole: JourneyRole,
+    userAnswers: UserAnswers
+  ): Call =
+    journeyRole match {
+      case JourneyRole.BeneficiaryIndividual =>
+        mode match {
+          case NormalMode =>
+            controllers.beneficiary.routes.BeneficiaryHasNinoController.onPageLoad(srn, index, NormalMode)
+          case CheckMode if userAnswers.get(BeneficiaryHasNinoPage(index)).isEmpty =>
+            controllers.beneficiary.routes.BeneficiaryHasNinoController.onPageLoad(srn, index, CheckMode)
+          case CheckMode => routes.CheckYourAnswersController.onPageLoad(srn)
         }
-      case CheckMode => routes.CheckYourAnswersController.onPageLoad(srn)
+      case _ => routes.JourneyRecoveryController.onPageLoad()
     }
 }
