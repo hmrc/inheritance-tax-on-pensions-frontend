@@ -18,7 +18,7 @@ package pages.beneficiary
 
 import base.SpecBase
 import play.api.libs.json.JsPath
-import models.beneficiary.BeneficiaryJourneyRole
+import models.JourneyRole
 
 class BeneficiaryNamePageSpec extends SpecBase {
 
@@ -28,7 +28,7 @@ class BeneficiaryNamePageSpec extends SpecBase {
 
       BeneficiaryNamePage(
         testIndex,
-        BeneficiaryJourneyRole.BeneficiaryIndividual
+        JourneyRole.BeneficiaryIndividual
       ).path mustEqual (JsPath \ "beneficiaries")(testIndex) \ "beneficiaryDetails" \ "individual"
     }
 
@@ -36,21 +36,21 @@ class BeneficiaryNamePageSpec extends SpecBase {
 
       BeneficiaryNamePage(
         testIndex,
-        BeneficiaryJourneyRole.BeneficiaryOrganisation
+        JourneyRole.BeneficiaryOrganisation
       ).path mustEqual (JsPath \ "beneficiaries")(testIndex) \ "beneficiaryDetails" \ "organisation"
     }
 
     "must use the unknown path for the unknown journey role" in {
 
-      BeneficiaryNamePage(testIndex, BeneficiaryJourneyRole.Unknown).path mustEqual JsPath \ "unknown" \ "unknown"
+      BeneficiaryNamePage(testIndex, JourneyRole.Unknown).path mustEqual JsPath \ "unknown" \ "unknown"
     }
 
     "must use the journey role key as the page name" in {
 
       BeneficiaryNamePage(
         testIndex,
-        BeneficiaryJourneyRole.Unknown
-      ).toString mustEqual BeneficiaryJourneyRole.Unknown.key
+        JourneyRole.Unknown
+      ).toString mustEqual JourneyRole.Unknown.key
     }
   }
 }

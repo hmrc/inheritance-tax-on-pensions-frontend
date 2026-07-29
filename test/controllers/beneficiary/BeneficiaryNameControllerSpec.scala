@@ -23,7 +23,6 @@ import play.api.inject.bind
 import views.html.beneficiary.BeneficiaryNameView
 import base.SpecBase
 import forms.beneficiary.BeneficiaryNameFormProvider
-import models.beneficiary.BeneficiaryJourneyRole
 import controllers.beneficiary.BeneficiaryNameController
 import models._
 import pages.beneficiary.BeneficiaryNamePage
@@ -45,13 +44,13 @@ class BeneficiaryNameControllerSpec extends SpecBase {
   )
 
   private case class JourneyRoleTestCase(
-    journeyRole: BeneficiaryJourneyRole,
+    journeyRole: JourneyRole,
     nextPageUrl: String
   )
 
   private lazy val journeyRoleTestCases = Seq(
     JourneyRoleTestCase(
-      BeneficiaryJourneyRole.BeneficiaryIndividual,
+      JourneyRole.BeneficiaryIndividual,
       routes.CheckYourAnswersController.onPageLoad(srn).url
     )
   )
@@ -191,7 +190,7 @@ class BeneficiaryNameControllerSpec extends SpecBase {
 
         val controller = application.injector.instanceOf[BeneficiaryNameController]
 
-        val result = controller.onPageLoad(srn, NormalMode, 0, BeneficiaryJourneyRole.Unknown)(request)
+        val result = controller.onPageLoad(srn, NormalMode, 0, JourneyRole.Unknown)(request)
 
         status(result) mustEqual SEE_OTHER
         redirectLocation(result).value mustEqual routes.JourneyRecoveryController.onPageLoad().url
@@ -209,7 +208,7 @@ class BeneficiaryNameControllerSpec extends SpecBase {
 
         val controller = application.injector.instanceOf[BeneficiaryNameController]
 
-        val result = controller.onSubmit(srn, NormalMode, 0, BeneficiaryJourneyRole.Unknown)(request)
+        val result = controller.onSubmit(srn, NormalMode, 0, JourneyRole.Unknown)(request)
 
         status(result) mustEqual SEE_OTHER
         redirectLocation(result).value mustEqual routes.JourneyRecoveryController.onPageLoad().url
@@ -226,7 +225,7 @@ class BeneficiaryNameControllerSpec extends SpecBase {
         controller.nextPage(
           srn,
           NormalMode,
-          BeneficiaryJourneyRole.Unknown
+          JourneyRole.Unknown
         ) mustEqual routes.JourneyRecoveryController
           .onPageLoad()
       }

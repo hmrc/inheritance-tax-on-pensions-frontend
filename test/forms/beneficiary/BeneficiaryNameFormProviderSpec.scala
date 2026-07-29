@@ -17,14 +17,13 @@
 package forms.beneficiary
 
 import forms.beneficiary.BeneficiaryNameFormProvider
-import models.beneficiary.BeneficiaryJourneyRole
-import models.IndividualName
+import models.{IndividualName, JourneyRole}
 import play.api.data.FormError
 
 class BeneficiaryNameFormProviderSpec extends forms.behaviours.StringFieldBehaviours {
 
-  private val form = new BeneficiaryNameFormProvider()(BeneficiaryJourneyRole.BeneficiaryIndividual)
-  private val organisationForm = new BeneficiaryNameFormProvider()(BeneficiaryJourneyRole.BeneficiaryOrganisation)
+  private val form = new BeneficiaryNameFormProvider()(JourneyRole.BeneficiaryIndividual)
+  private val organisationForm = new BeneficiaryNameFormProvider()(JourneyRole.BeneficiaryOrganisation)
 
   "BeneficiaryNameFormProvider" - {
 

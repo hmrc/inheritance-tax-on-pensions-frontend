@@ -21,7 +21,6 @@
 @import views.ViewUtils.title
 @import models.{JourneyRole, SchemeId}
 @import models.SchemeId.Srn
-@import models.beneficiary.BeneficiaryJourneyRole
 @import viewmodels.beneficiary.BeneficiaryNamePageViewModel
 
 @this(
@@ -34,7 +33,7 @@
     govukButton: GovukButton
 )
 
-@(form: Form[?], srn: Srn, index: Int, mode: Mode, journeyRole: BeneficiaryJourneyRole, organisationName: Option[String] = None)(implicit request: Request[?], messages: Messages)
+@(form: Form[?], srn: Srn, index: Int, mode: Mode, journeyRole: JourneyRole, organisationName: Option[String] = None)(implicit request: Request[?], messages: Messages)
 
 @viewModel = @{ BeneficiaryNamePageViewModel(form, journeyRole, organisationName) }
 

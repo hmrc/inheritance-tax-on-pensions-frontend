@@ -18,8 +18,7 @@ package viewmodels.CheckAnswers.beneficiary
 
 import play.api.test.Helpers.stubMessages
 import uk.gov.hmrc.govukfrontend.views.viewmodels.content.HtmlContent
-import models.beneficiary.BeneficiaryJourneyRole
-import models.{CheckMode, IndividualName}
+import models.{CheckMode, IndividualName, JourneyRole}
 import pages.beneficiary.BeneficiaryNamePage
 import play.api.i18n.Messages
 import uk.gov.hmrc.govukfrontend.views.Aliases.Text
@@ -41,7 +40,7 @@ class BeneficiaryIndividualNameSummarySpec extends org.scalatest.freespec.AnyFre
 
       val userAnswers = emptyUserAnswers
         .set(
-          BeneficiaryNamePage(testIndex, BeneficiaryJourneyRole.BeneficiaryIndividual),
+          BeneficiaryNamePage(testIndex, JourneyRole.BeneficiaryIndividual),
           IndividualName(
             title = Some("Mr"),
             firstForename = "John",
@@ -59,7 +58,7 @@ class BeneficiaryIndividualNameSummarySpec extends org.scalatest.freespec.AnyFre
       result.get.value.content mustBe HtmlContent("Mr John William Doe")
       result.get.actions.get.items.head.href mustBe
         controllers.beneficiary.routes.BeneficiaryNameController
-          .onPageLoad(srn, CheckMode, testIndex, BeneficiaryJourneyRole.BeneficiaryIndividual)
+          .onPageLoad(srn, CheckMode, testIndex, JourneyRole.BeneficiaryIndividual)
           .url
     }
   }

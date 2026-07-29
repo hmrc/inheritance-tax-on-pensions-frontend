@@ -26,7 +26,7 @@ case class IndividualNamePage(journeyRole: JourneyRole) extends QuestionPage[Ind
       case JourneyRole.Deceased => JsPath \ "nameOfDeceased"
       case JourneyRole.PrIndividual => JsPath \ "prDetails" \ "individual"
       case JourneyRole.PrOrganisation => JsPath \ "prDetails" \ "organisation"
-      case JourneyRole.Unknown => JsPath \ "unknown" \ toString
+      case _ => JsPath \ "unknown" \ toString
     }
 
   override def toString: String = journeyRole.key

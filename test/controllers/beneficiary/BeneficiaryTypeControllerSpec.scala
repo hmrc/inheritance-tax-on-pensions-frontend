@@ -22,7 +22,7 @@ import play.api.inject.bind
 import views.html.beneficiary.BeneficiaryTypeView
 import base.SpecBase
 import forms.beneficiary.BeneficiaryTypeFormProvider
-import models.beneficiary.{BeneficiaryJourneyRole, BeneficiaryType}
+import models.beneficiary.BeneficiaryType
 import models._
 import pages.beneficiary.BeneficiaryTypePage
 import play.api.data.Form
@@ -127,7 +127,7 @@ class BeneficiaryTypeControllerSpec extends SpecBase {
 
         status(result) mustEqual SEE_OTHER
         redirectLocation(result).value mustEqual controllers.beneficiary.routes.BeneficiaryNameController
-          .onPageLoad(srn, NormalMode, testIndex, BeneficiaryJourneyRole.BeneficiaryIndividual)
+          .onPageLoad(srn, NormalMode, testIndex, JourneyRole.BeneficiaryIndividual)
           .url
 
         verify(mockInheritanceTaxOnPensionsConnector, times(1))
@@ -185,7 +185,7 @@ class BeneficiaryTypeControllerSpec extends SpecBase {
 
         status(result) mustEqual SEE_OTHER
         redirectLocation(result).value mustEqual controllers.beneficiary.routes.BeneficiaryNameController
-          .onPageLoad(srn, CheckMode, testIndex, BeneficiaryJourneyRole.BeneficiaryIndividual)
+          .onPageLoad(srn, CheckMode, testIndex, JourneyRole.BeneficiaryIndividual)
           .url
 
         verify(mockInheritanceTaxOnPensionsConnector, times(1))

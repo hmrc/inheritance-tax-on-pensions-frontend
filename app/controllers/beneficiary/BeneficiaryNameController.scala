@@ -23,7 +23,6 @@ import models.SchemeId.Srn
 import views.html.beneficiary.BeneficiaryNameView
 import controllers.actions._
 import forms.beneficiary.BeneficiaryNameFormProvider
-import models.beneficiary.BeneficiaryJourneyRole
 import models._
 import pages.beneficiary.BeneficiaryNamePage
 import play.api.i18n.MessagesApi
@@ -46,13 +45,13 @@ class BeneficiaryNameController @Inject() (
 )(implicit ec: ExecutionContext)
     extends IhtpBaseController {
 
-  def onPageLoad(srn: Srn, mode: Mode, index: Int, journeyRole: BeneficiaryJourneyRole): Action[AnyContent] =
+  def onPageLoad(srn: Srn, mode: Mode, index: Int, journeyRole: JourneyRole): Action[AnyContent] =
     identify
       .andThen(allowAccess(srn))
       .andThen(getData)
       .andThen(requireData) { implicit request =>
         journeyRole match {
-          case BeneficiaryJourneyRole.Unknown =>
+          case JourneyRole.Unknown =>
             logAndJourneyRecovery("unknown journeyRole, cannot load the page")
 
           case _ =>
@@ -66,14 +65,14 @@ class BeneficiaryNameController @Inject() (
         }
       }
 
-  def onSubmit(srn: Srn, mode: Mode, index: Int, journeyRole: BeneficiaryJourneyRole): Action[AnyContent] =
+  def onSubmit(srn: Srn, mode: Mode, index: Int, journeyRole: JourneyRole): Action[AnyContent] =
     identify
       .andThen(allowAccess(srn))
       .andThen(getData)
       .andThen(requireData)
       .async { implicit request =>
         journeyRole match {
-          case BeneficiaryJourneyRole.Unknown =>
+          case JourneyRole.Unknown =>
             Future.successful(logAndJourneyRecovery("unknown journeyRole, cannot submit the page"))
 
           case _ =>
@@ -99,16 +98,16 @@ class BeneficiaryNameController @Inject() (
   private[controllers] def addIndividualName(
     index: Int,
     userAnswers: UserAnswers,
-    journeyRole: BeneficiaryJourneyRole,
+    journeyRole: JourneyRole,
     individualName: IndividualName
   ): Try[UserAnswers] =
     userAnswers.set(BeneficiaryNamePage(index, journeyRole), individualName)
 
-  private[controllers] def nextPage(srn: Srn, mode: Mode, journeyRole: BeneficiaryJourneyRole): Call =
+  private[controllers] def nextPage(srn: Srn, mode: Mode, journeyRole: JourneyRole): Call =
     mode match {
       case NormalMode =>
         journeyRole match {
-          case BeneficiaryJourneyRole.BeneficiaryIndividual =>
+          case JourneyRole.BeneficiaryIndividual =>
             routes.CheckYourAnswersController.onPageLoad(srn)
           case _ => routes.JourneyRecoveryController.onPageLoad()
         }
