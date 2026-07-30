@@ -21,9 +21,9 @@ import play.api.data.FormError
 
 class NinoFormProviderSpec extends StringFieldBehaviours {
 
-  val requiredKey = "ninoPage.error.required"
+  val requiredKey = "nino.error.required"
   val validCharacterRegex = "^(?!BG|GB|KN|NK|NT|TN|ZZ)[ABCEGHJKLMNOPRSTWXYZ][ABCEGHJKLMNPRSTWXYZ][0-9]{6}[ABCD]$"
-  val invalidCharactersKey = "ninoPage.error.invalid"
+  val invalidCharactersKey = "nino.error.invalid"
 
   val form = new NinoFormProvider()()
 

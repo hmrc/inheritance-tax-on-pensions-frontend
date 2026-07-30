@@ -28,7 +28,7 @@
 
 @(form: Form[?], srn: Srn, mode: Mode, deceasedName: String)(implicit request: Request[?], messages: Messages)
 
-@layout(pageTitle = title(form, messages("ninoPage.title"))) {
+@layout(pageTitle = title(form, messages("nino.title"))) {
 
     @formHelper(action = routes.NinoController.onSubmit(srn, mode)) {
 
@@ -39,12 +39,12 @@
         @govukInput(
             InputViewModel(
                 field = form("value"),
-                label = LabelViewModel(messages("ninoPage.heading", deceasedName))
+                label = LabelViewModel(messages("nino.heading", deceasedName))
                     .withCssClass(Css.labelCssLargeClass)
                     .asPageHeading()
             )
             .withWidth(Fixed10)
-            .withHint(Hint(content = messages("ninoPage.hint")))
+            .withHint(Hint(content = messages("nino.hint")))
         )
 
         @govukButton(

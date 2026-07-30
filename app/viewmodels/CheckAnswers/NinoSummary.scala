@@ -32,11 +32,11 @@ object NinoSummary {
   def row(srn: Srn, answers: UserAnswers)(implicit messages: Messages): Option[SummaryListRow] =
     answers.get(NinoPage).map { answer =>
       SummaryListRowViewModel(
-        key = "ninoPage.checkYourAnswersLabel",
+        key = "nino.checkYourAnswersLabel",
         value = ValueViewModel(HtmlContent(HtmlFormat.escape(answer).toString)),
         actions = Seq(
           ActionItemViewModel("site.change", routes.NinoController.onPageLoad(srn, CheckMode).url)
-            .withVisuallyHiddenText(messages("ninoPage.change.hidden"))
+            .withVisuallyHiddenText(messages("nino.change.hidden"))
         )
       )
     }

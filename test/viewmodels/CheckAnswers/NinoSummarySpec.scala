@@ -16,13 +16,13 @@
 
 package viewmodels.CheckAnswers
 
-import base.SpecBase
-import models.CheckMode
-import pages.NinoPage
-import play.api.i18n.Messages
 import play.api.test.Helpers.stubMessages
-import uk.gov.hmrc.govukfrontend.views.Aliases.Text
+import pages.NinoPage
 import uk.gov.hmrc.govukfrontend.views.viewmodels.content.HtmlContent
+import models.CheckMode
+import play.api.i18n.Messages
+import uk.gov.hmrc.govukfrontend.views.Aliases.Text
+import base.SpecBase
 
 class NinoSummarySpec extends org.scalatest.freespec.AnyFreeSpec with SpecBase {
 
@@ -46,7 +46,7 @@ class NinoSummarySpec extends org.scalatest.freespec.AnyFreeSpec with SpecBase {
       val result = NinoSummary.row(srn, userAnswers)
 
       result mustBe defined
-      result.get.key.content mustBe Text(messages("ninoPage.checkYourAnswersLabel"))
+      result.get.key.content mustBe Text(messages("nino.checkYourAnswersLabel"))
       result.get.value.content mustBe HtmlContent("AA123456A")
       result.get.actions.get.items.head.href mustBe
         controllers.routes.NinoController.onPageLoad(srn, CheckMode).url

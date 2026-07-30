@@ -23,12 +23,11 @@ import javax.inject.Inject
 
 class NinoFormProvider @Inject() extends Mappings {
 
-  private val ninoRegex = """^(?!BG|GB|KN|NK|NT|TN|ZZ)[ABCEGHJKLMNOPRSTWXYZ][ABCEGHJKLMNPRSTWXYZ][0-9]{6}[ABCD]$"""
-
   def apply(): Form[String] =
     Form(
-      "value" -> text("ninoPage.error.required")
-        .transform[String](_.replaceAll("\\s+", "").toUpperCase, identity)
-        .verifying(regexp(ninoRegex, "ninoPage.error.invalid"))
+      "value" -> nino(
+        requiredKey = "nino.error.required",
+        invalidKey = "nino.error.invalid"
+      )
     )
 }

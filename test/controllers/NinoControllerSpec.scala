@@ -46,7 +46,7 @@ class NinoControllerSpec extends SpecBase with MockitoSugar {
     .set(IndividualNamePage(JourneyRole.Deceased), nameOfDeceased)
     .success
     .value
-  private lazy val ninoPageRoute = routes.NinoController.onPageLoad(srn, NormalMode).url
+  private lazy val ninoRoute = routes.NinoController.onPageLoad(srn, NormalMode).url
 
   "NinoPage Controller" - {
 
@@ -55,7 +55,7 @@ class NinoControllerSpec extends SpecBase with MockitoSugar {
       val application = applicationBuilder(userAnswers = Some(userAnswersWithDeceasedName), usesSession = true).build()
 
       running(application) {
-        val request = FakeRequest(GET, ninoPageRoute)
+        val request = FakeRequest(GET, ninoRoute)
 
         val result = route(application, request).value
 
@@ -79,7 +79,7 @@ class NinoControllerSpec extends SpecBase with MockitoSugar {
       val application = applicationBuilder(userAnswers = Some(userAnswers), usesSession = true).build()
 
       running(application) {
-        val request = FakeRequest(GET, ninoPageRoute)
+        val request = FakeRequest(GET, ninoRoute)
 
         val view = application.injector.instanceOf[NinoView]
 
@@ -107,7 +107,7 @@ class NinoControllerSpec extends SpecBase with MockitoSugar {
 
       running(application) {
         val request =
-          FakeRequest(POST, ninoPageRoute)
+          FakeRequest(POST, ninoRoute)
             .withFormUrlEncodedBody(("value", "AA123456A"))
 
         val result = route(application, request).value
@@ -123,7 +123,7 @@ class NinoControllerSpec extends SpecBase with MockitoSugar {
 
       running(application) {
         val request =
-          FakeRequest(POST, ninoPageRoute)
+          FakeRequest(POST, ninoRoute)
             .withFormUrlEncodedBody(("value", ""))
 
         val boundForm = form.bind(Map("value" -> ""))
@@ -145,7 +145,7 @@ class NinoControllerSpec extends SpecBase with MockitoSugar {
       val application = applicationBuilder(userAnswers = None, usesSession = true).build()
 
       running(application) {
-        val request = FakeRequest(GET, ninoPageRoute)
+        val request = FakeRequest(GET, ninoRoute)
 
         val result = route(application, request).value
 
@@ -160,8 +160,38 @@ class NinoControllerSpec extends SpecBase with MockitoSugar {
 
       running(application) {
         val request =
-          FakeRequest(POST, ninoPageRoute)
+          FakeRequest(POST, ninoRoute)
             .withFormUrlEncodedBody(("value", "answer"))
+
+        val result = route(application, request).value
+
+        status(result) mustEqual SEE_OTHER
+        redirectLocation(result).value mustEqual routes.JourneyRecoveryController.onPageLoad().url
+      }
+    }
+
+    "must redirect to Journey Recovery for a GET if the deceased name has not been answered" in {
+
+      val application = applicationBuilder(userAnswers = Some(emptyUserAnswers), usesSession = true).build()
+
+      running(application) {
+        val request = FakeRequest(GET, ninoRoute)
+
+        val result = route(application, request).value
+
+        status(result) mustEqual SEE_OTHER
+        redirectLocation(result).value mustEqual routes.JourneyRecoveryController.onPageLoad().url
+      }
+    }
+
+    "must redirect to Journey Recovery for a POST if the deceased name has not been answered" in {
+
+      val application = applicationBuilder(userAnswers = Some(emptyUserAnswers), usesSession = true).build()
+
+      running(application) {
+        val request =
+          FakeRequest(POST, ninoRoute)
+            .withFormUrlEncodedBody(("value", NinoOrReason.values.head.toString))
 
         val result = route(application, request).value
 
