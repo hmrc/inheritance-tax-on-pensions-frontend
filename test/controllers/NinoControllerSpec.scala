@@ -21,13 +21,14 @@ import connectors.InheritanceTaxOnPensionsConnector
 import pages.{IndividualNamePage, NinoPage}
 import views.html.NinoView
 import base.SpecBase
-import play.api.inject
 import forms.NinoFormProvider
 import models._
 import org.scalatestplus.mockito.MockitoSugar
 import org.mockito.ArgumentMatchers.any
 import play.api.test.Helpers._
 import org.mockito.Mockito.when
+import play.api.inject
+import uk.gov.hmrc.domain.Nino
 
 import scala.concurrent.Future
 
@@ -72,7 +73,7 @@ class NinoControllerSpec extends SpecBase with MockitoSugar {
     "must populate the view correctly on a GET" in {
 
       val userAnswers = userAnswersWithDeceasedName
-        .set(NinoPage, "answer")
+        .set(NinoPage, "AA123456A")
         .success
         .value
 
@@ -86,7 +87,7 @@ class NinoControllerSpec extends SpecBase with MockitoSugar {
         val result = route(application, request).value
 
         status(result) mustEqual OK
-        contentAsString(result) mustEqual view(form.fill("answer"), srn, NormalMode, deceasedName)(using
+        contentAsString(result) mustEqual view(form.fill(Nino("AA123456A")), srn, NormalMode, deceasedName)(using
           request,
           messages(application)
         ).toString

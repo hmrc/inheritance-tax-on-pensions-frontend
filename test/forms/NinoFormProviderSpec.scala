@@ -17,12 +17,12 @@
 package forms
 
 import forms.behaviours.StringFieldBehaviours
+import uk.gov.hmrc.domain.Nino
 import play.api.data.FormError
 
 class NinoFormProviderSpec extends StringFieldBehaviours {
 
   val requiredKey = "nino.error.required"
-  val validCharacterRegex = "^(?!BG|GB|KN|NK|NT|TN|ZZ)[ABCEGHJKLMNOPRSTWXYZ][ABCEGHJKLMNPRSTWXYZ][0-9]{6}[ABCD]$"
   val invalidCharactersKey = "nino.error.invalid"
 
   val form = new NinoFormProvider()()
@@ -42,7 +42,7 @@ class NinoFormProviderSpec extends StringFieldBehaviours {
     "must bind valid national insurance number and ignore whitespace and lowercase" in {
       val result = form.bind(Map("value" -> "aa12  3456  A  "))
       result.errors mustBe empty
-      result.value mustBe Some("AA123456A")
+      result.value mustBe Some(Nino("AA123456A"))
     }
 
     behave.like(
@@ -58,7 +58,7 @@ class NinoFormProviderSpec extends StringFieldBehaviours {
         form,
         fieldName,
         "random",
-        error = FormError(fieldName, invalidCharactersKey, Seq(validCharacterRegex))
+        error = FormError(fieldName, invalidCharactersKey, Seq())
       )
     )
   }

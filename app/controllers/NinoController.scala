@@ -21,6 +21,7 @@ import utils.DeceasedNameHelper
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import pages.NinoPage
 import controllers.actions._
+import uk.gov.hmrc.domain.Nino
 import forms.NinoFormProvider
 import models.{CheckMode, Mode, NormalMode}
 import play.api.i18n.{I18nSupport, MessagesApi}
@@ -57,7 +58,7 @@ class NinoController @Inject() (
         ) { deceasedName =>
           val preparedForm = request.userAnswers.get(NinoPage) match {
             case None => form
-            case Some(value) => form.fill(value)
+            case Some(value) => form.fill(Nino(value))
           }
           Ok(view(preparedForm, srn, mode, deceasedName))
         }
@@ -78,7 +79,7 @@ class NinoController @Inject() (
               formWithErrors => Future.successful(BadRequest(view(formWithErrors, srn, mode, deceasedName))),
               value =>
                 for {
-                  updatedAnswers <- Future.fromTry(request.userAnswers.set(NinoPage, value))
+                  updatedAnswers <- Future.fromTry(request.userAnswers.set(NinoPage, value.value))
                   _ <- userAnswersService.set(updatedAnswers)(using hc, request.request)
                 } yield Redirect(nextPage(srn, mode))
             )

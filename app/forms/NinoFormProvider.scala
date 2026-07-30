@@ -17,15 +17,16 @@
 package forms
 
 import forms.mappings.Mappings
+import uk.gov.hmrc.domain.Nino
 import play.api.data.Form
 
 import javax.inject.Inject
 
 class NinoFormProvider @Inject() extends Mappings {
 
-  def apply(): Form[String] =
+  def apply(): Form[Nino] =
     Form(
-      "value" -> nino(
+      "value" -> ninoV2(
         requiredKey = "nino.error.required",
         invalidKey = "nino.error.invalid"
       )
