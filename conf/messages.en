@@ -333,6 +333,11 @@ beneficiaryIndividualName.error.secondForename.pattern = Enter a valid middle na
 beneficiaryIndividualName.error.surname.required = Enter the beneficiary's last name
 beneficiaryIndividualName.error.surname.length = Last name must be 35 characters or less
 beneficiaryIndividualName.error.surname.pattern = Enter a valid last name
-
 beneficiaryIndividualName.checkYourAnswersLabel = Full name of beneficiary
 beneficiaryIndividualName.checkYourAnswersLabel.hidden = full name of beneficiary
+
+beneficiaryHasNino.title = Does the beneficiary have a National Insurance number?
+beneficiaryHasNino.heading = Does {0} have a National Insurance number?
+beneficiaryHasNino.checkYourAnswersLabel = Does the beneficiary have a National Insurance number?
+beneficiaryHasNino.change.hidden = if the beneficiary has a National Insurance number
+beneficiaryHasNino.error.required = Select if the beneficiary has a National Insurance number

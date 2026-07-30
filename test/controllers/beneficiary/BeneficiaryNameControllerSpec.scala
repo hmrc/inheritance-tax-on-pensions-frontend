@@ -25,7 +25,7 @@ import base.SpecBase
 import forms.beneficiary.BeneficiaryNameFormProvider
 import controllers.beneficiary.BeneficiaryNameController
 import models._
-import pages.beneficiary.BeneficiaryNamePage
+import pages.beneficiary.{BeneficiaryHasNinoPage, BeneficiaryNamePage}
 import org.mockito.ArgumentMatchers._
 import play.api.test.Helpers._
 import org.mockito.Mockito.when
@@ -51,7 +51,7 @@ class BeneficiaryNameControllerSpec extends SpecBase {
   private lazy val journeyRoleTestCases = Seq(
     JourneyRoleTestCase(
       JourneyRole.BeneficiaryIndividual,
-      routes.CheckYourAnswersController.onPageLoad(srn).url
+      controllers.beneficiary.routes.BeneficiaryHasNinoController.onPageLoad(srn, testIndex, NormalMode).url
     )
   )
 
@@ -131,7 +131,7 @@ class BeneficiaryNameControllerSpec extends SpecBase {
         }
       }
 
-      s"must redirect to the correct next page when valid ${journeyRole.name} data is submitted in CheckMode" in {
+      s"must redirect to the beneficiary NINO page when valid ${journeyRole.name} data is submitted in CheckMode and the NINO question is unanswered" in {
 
         val mockConnector = mock[InheritanceTaxOnPensionsConnector]
         when(mockConnector.setUserAnswers(any(), any(), any(), any(), any())(using any()))
@@ -146,6 +146,36 @@ class BeneficiaryNameControllerSpec extends SpecBase {
             FakeRequest(
               POST,
               controllers.beneficiary.routes.BeneficiaryNameController.onSubmit(srn, CheckMode, 0, journeyRole).url
+            )
+              .withFormUrlEncodedBody(validFormData*)
+
+          val result = route(application, request).value
+
+          status(result) mustEqual SEE_OTHER
+          redirectLocation(result).value mustEqual controllers.beneficiary.routes.BeneficiaryHasNinoController
+            .onPageLoad(srn, testIndex, CheckMode)
+            .url
+        }
+      }
+
+      s"must redirect to the CYA page when valid ${journeyRole.name} data is submitted in CheckMode and the NINO question is answered" in {
+
+        val userAnswers = emptyUserAnswers.set(BeneficiaryHasNinoPage(testIndex), true).success.value
+        val mockConnector = mock[InheritanceTaxOnPensionsConnector]
+        when(mockConnector.setUserAnswers(any(), any(), any(), any(), any())(using any()))
+          .thenReturn(Future.successful(Right(userAnswers)))
+
+        val application = applicationBuilder(userAnswers = Some(userAnswers), usesSession = true)
+          .overrides(bind[InheritanceTaxOnPensionsConnector].toInstance(mockConnector))
+          .build()
+
+        running(application) {
+          val request =
+            FakeRequest(
+              POST,
+              controllers.beneficiary.routes.BeneficiaryNameController
+                .onSubmit(srn, CheckMode, testIndex, journeyRole)
+                .url
             )
               .withFormUrlEncodedBody(validFormData*)
 
@@ -224,8 +254,10 @@ class BeneficiaryNameControllerSpec extends SpecBase {
 
         controller.nextPage(
           srn,
+          testIndex,
           NormalMode,
-          JourneyRole.Unknown
+          JourneyRole.Unknown,
+          emptyUserAnswers
         ) mustEqual routes.JourneyRecoveryController
           .onPageLoad()
       }

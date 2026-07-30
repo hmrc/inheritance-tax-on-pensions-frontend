@@ -110,3 +110,8 @@ GET         /:srn/enter-name-of-beneficiary-organisation/$index<[1-2]?[0-9]>    
 POST        /:srn/enter-name-of-beneficiary-organisation/$index<[1-2]?[0-9]>     controllers.beneficiary.BeneficiaryNameController.onSubmit(srn: Srn, mode: Mode = NormalMode, index: Int, journeyRole: JourneyRole = JourneyRole.BeneficiaryOrganisation)
 GET         /:srn/change-name-of-beneficiary-organisation/$index<[1-2]?[0-9]>    controllers.beneficiary.BeneficiaryNameController.onPageLoad(srn: Srn, mode: Mode = CheckMode, index: Int, journeyRole: JourneyRole = JourneyRole.BeneficiaryOrganisation)
 POST        /:srn/change-name-of-beneficiary-organisation/$index<[1-2]?[0-9]>    controllers.beneficiary.BeneficiaryNameController.onSubmit(srn: Srn, mode: Mode = CheckMode, index: Int, journeyRole: JourneyRole = JourneyRole.BeneficiaryOrganisation)
+
+GET         /:srn/beneficiary-national-insurance-number/$index<[1-2]?[0-9]>        controllers.beneficiary.BeneficiaryHasNinoController.onPageLoad(srn: Srn, index: Int, mode: Mode = NormalMode)
+POST        /:srn/beneficiary-national-insurance-number/$index<[1-2]?[0-9]>        controllers.beneficiary.BeneficiaryHasNinoController.onSubmit(srn: Srn, index: Int, mode: Mode = NormalMode)
+GET         /:srn/change-beneficiary-national-insurance-number/$index<[1-2]?[0-9]> controllers.beneficiary.BeneficiaryHasNinoController.onPageLoad(srn: Srn, index: Int, mode: Mode = CheckMode)
+POST        /:srn/change-beneficiary-national-insurance-number/$index<[1-2]?[0-9]> controllers.beneficiary.BeneficiaryHasNinoController.onSubmit(srn: Srn, index: Int, mode: Mode = CheckMode)
