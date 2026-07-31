@@ -26,8 +26,9 @@ import viewmodels.CheckAnswers.beneficiary.{
 }
 import play.i18n.Lang
 import controllers.actions._
-import models.beneficiary.BeneficiaryType
+import models.beneficiary.Beneficiaries
 import models.UserAnswers
+import pages.beneficiary.BeneficiariesPage
 import views.html.CheckYourAnswersView
 import models.SchemeId.Srn
 import play.api.i18n.{I18nSupport, MessagesApi}
@@ -71,28 +72,29 @@ class CheckYourAnswersController @Inject() (
         ).flatten
       )
 
-      val beneficiaryList =
-        (userAnswers.data \ "beneficiaries" \\ "beneficiaryType")
-          .map(_.as[BeneficiaryType])
-          .toList
-          .zipWithIndex
-          .map { case (_, index) =>
-            SummaryListViewModel(
-              rows = Seq(
-                BeneficiaryTypeSummary.row(srn, index, userAnswers),
-                BeneficiaryIndividualNameSummary.row(srn, index, userAnswers),
-                BeneficiaryHasNinoSummary.row(srn, index, userAnswers)
-              ).flatten
-            ).withCard(
-              CardViewModel(
-                messagesApi("checkYourAnswers.beneficiary.details.card.title", index + 1)(using
-                  Lang.defaultLang
-                ),
-                2,
-                None
+      val beneficiaryList = userAnswers
+        .get[Beneficiaries](BeneficiariesPage())
+        .map(
+          _.beneficiaries.zipWithIndex
+            .map { case (_, index) =>
+              SummaryListViewModel(
+                rows = Seq(
+                  BeneficiaryTypeSummary.row(srn, index, userAnswers),
+                  BeneficiaryIndividualNameSummary.row(srn, index, userAnswers),
+                  BeneficiaryHasNinoSummary.row(srn, index, userAnswers)
+                ).flatten
+              ).withCard(
+                CardViewModel(
+                  messagesApi("checkYourAnswers.beneficiary.details.card.title", index + 1)(using
+                    Lang.defaultLang
+                  ),
+                  2,
+                  None
+                )
               )
-            )
-          }
+            }
+        )
+        .getOrElse(List())
 
       val result = Ok(view(srn, list, beneficiaryList))
       val uuidFromQuery = request.request.getQueryString("uuid")
