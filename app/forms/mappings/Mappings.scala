@@ -17,6 +17,7 @@
 package forms.mappings
 
 import play.api.data.Forms.of
+import uk.gov.hmrc.domain.Nino
 import models.Enumerable
 import play.api.i18n.Messages
 import play.api.data.{FieldMapping, Mapping}
@@ -33,6 +34,15 @@ trait Mappings extends Formatters with Constraints {
 
   protected def text(errorKey: String = "error.required", args: Seq[String] = Seq.empty): FieldMapping[String] =
     of(using stringFormatter(errorKey, args))
+
+  protected def ninoV2(
+    requiredKey: String,
+    invalidKey: String,
+    args: Seq[String] = Seq.empty
+  ): Mapping[Nino] =
+    text(requiredKey, args)
+      .verifying(invalidKey, s => Nino.isValid(s.filterNot(_.isWhitespace).toUpperCase))
+      .transform[Nino](s => Nino(s.filterNot(_.isWhitespace).toUpperCase), _.nino.filterNot(_.isWhitespace).toUpperCase)
 
   protected def nino(
     requiredKey: String,
