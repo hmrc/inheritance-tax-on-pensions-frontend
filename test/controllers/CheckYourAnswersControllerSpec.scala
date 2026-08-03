@@ -237,9 +237,10 @@ class CheckYourAnswersControllerSpec extends SpecBase {
           rows = Seq(
             PrTypeSummary.row(srn, userAnswers)(using messages(application)).get,
             PrIndividualNameSummary.row(srn, userAnswers)(using messages(application)).get,
-            PrIndividualAddressSummary
+            PrIndividualCountrySummary
               .row(srn, userAnswers, (_: String) => "United Kingdom")(using messages(application))
               .get,
+            PrIndividualAddressSummary.row(srn, userAnswers)(using messages(application)).get,
             DidPrSubmitSummary.row(srn, userAnswers)(using messages(application)).get
           )
         )
@@ -293,9 +294,10 @@ class CheckYourAnswersControllerSpec extends SpecBase {
             PrTypeSummary.row(srn, userAnswers)(using messages(application)).get,
             PrOrganisationNameSummary.row(srn, userAnswers)(using messages(application)).get,
             PrOrganisationPrNameSummary.row(srn, userAnswers)(using messages(application)).get,
-            PrOrganisationAddressSummary
+            PrOrganisationCountrySummary
               .row(srn, userAnswers, (_: String) => "United Kingdom")(using messages(application))
               .get,
+            PrOrganisationAddressSummary.row(srn, userAnswers)(using messages(application)).get,
             DidPrSubmitSummary.row(srn, userAnswers)(using messages(application)).get
           )
         )

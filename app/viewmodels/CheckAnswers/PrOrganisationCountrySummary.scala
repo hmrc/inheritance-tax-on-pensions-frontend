@@ -17,38 +17,29 @@
 package viewmodels.CheckAnswers
 
 import viewmodels.implicits._
-import play.twirl.api.HtmlFormat
-import pages.PrIndividualAddressPage
+import pages.PrOrganisationAddressPage
 import controllers.routes
-import uk.gov.hmrc.govukfrontend.views.viewmodels.content.HtmlContent
 import uk.gov.hmrc.govukfrontend.views.viewmodels.summarylist.SummaryListRow
-import models.{JourneyRole, SchemeId, UserAnswers}
+import models._
 import play.api.i18n.Messages
 import viewmodels.govuk.summarylist._
 
-object PrIndividualAddressSummary {
+object PrOrganisationCountrySummary {
 
   def row(
     srn: SchemeId.Srn,
-    answers: UserAnswers
+    answers: UserAnswers,
+    countryNameForCode: String => String = identity
   )(implicit messages: Messages): Option[SummaryListRow] =
-    answers.get(PrIndividualAddressPage).map { answer =>
-      val address = Seq(
-        Some(answer.addressLine1),
-        answer.addressLine2,
-        answer.addressLine3,
-        answer.addressLine4,
-        answer.ukPostcode
-      ).flatten.map(line => HtmlFormat.escape(line).toString).mkString("<br>")
-
+    answers.get(PrOrganisationAddressPage).map { address =>
       SummaryListRowViewModel(
-        key = "prIndividualAddress.checkYourAnswersLabel",
-        value = ValueViewModel(HtmlContent(HtmlFormat.raw(address))),
+        key = "prOrganisationCountry.checkYourAnswersLabel",
+        value = ValueViewModel(countryNameForCode(address.country)),
         actions = Seq(
           ActionItemViewModel(
             "site.change",
-            routes.ChangePrAddressController.onPageLoad(srn, JourneyRole.PrIndividual).url
-          ).withVisuallyHiddenText(messages("prIndividualAddress.checkYourAnswersLabel.hidden"))
+            routes.AddressLookupStartController.start(srn, CheckMode, JourneyRole.PrOrganisation).url
+          ).withVisuallyHiddenText(messages("prOrganisationCountry.checkYourAnswersLabel.hidden"))
         )
       )
     }
