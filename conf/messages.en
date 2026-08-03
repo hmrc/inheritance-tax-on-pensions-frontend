@@ -382,3 +382,9 @@ noNinoReason.error.length = The reason must be 160 characters or less
 noNinoReason.error.invalid = The reason must not include special characters
 noNinoReason.change.hidden = Reason for missing National Insurance number
 noNinoReason.checkYourAnswersLabel = Reason for no National Insurance number
+
+hasNino.title = Does the deceased have a National Insurance number?
+hasNino.heading = Does {0} have a National Insurance number?
+hasNino.checkYourAnswersLabel = Does the deceased have a National Insurance number?
+hasNino.error.required = Select if there is a National Insurance number
+hasNino.change.hidden = if the deceased has a National Insurance number
