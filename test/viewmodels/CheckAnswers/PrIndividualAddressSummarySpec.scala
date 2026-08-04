@@ -19,7 +19,7 @@ package viewmodels.CheckAnswers
 import play.api.test.Helpers.stubMessages
 import uk.gov.hmrc.govukfrontend.views.viewmodels.content.HtmlContent
 import play.api.libs.json.Json
-import models.{CheckMode, JourneyRole, PrAddress}
+import models.{JourneyRole, PrAddress}
 import play.api.i18n.Messages
 import uk.gov.hmrc.govukfrontend.views.Aliases.Text
 import base.SpecBase
@@ -53,22 +53,18 @@ class PrIndividualAddressSummarySpec extends SpecBase {
         )
       )
 
-      val result = PrIndividualAddressSummary.row(
-        srn,
-        userAnswers,
-        countryNameForCode = code => if (code == "GB") "United Kingdom" else code
-      )
+      val result = PrIndividualAddressSummary.row(srn, userAnswers)
 
       result mustBe defined
       result.value.key.content mustBe Text(messages("prIndividualAddress.checkYourAnswersLabel"))
       result.value.value.content mustBe HtmlContent(
-        "33 Fake Street<br>Fake Area<br>Fake County<br>Fakeville<br>ZZ1 1ZZ<br>United Kingdom"
+        "33 Fake Street<br>Fake Area<br>Fake County<br>Fakeville<br>ZZ1 1ZZ"
       )
       result.value.actions.value.items.head.href mustBe
-        controllers.routes.AddressLookupStartController.start(srn, CheckMode, JourneyRole.PrIndividual).url
+        controllers.routes.ChangePrAddressController.onPageLoad(srn, JourneyRole.PrIndividual).url
     }
 
-    "must use country code as-is when no lookup function is provided" in {
+    "must show only address line 1 when the optional address fields are absent" in {
 
       val address = PrAddress(
         addressLine1 = "33 Fake Street",
@@ -90,30 +86,8 @@ class PrIndividualAddressSummarySpec extends SpecBase {
       val result = PrIndividualAddressSummary.row(srn, userAnswers)
 
       result mustBe defined
+      result.value.value.content mustBe HtmlContent("33 Fake Street")
     }
 
-    "must fall back to the country code when a country name cannot be found" in {
-
-      val address = PrAddress(
-        addressLine1 = "33 Fake Street",
-        addressLine2 = None,
-        addressLine3 = None,
-        addressLine4 = None,
-        ukPostcode = None,
-        country = "XX"
-      )
-
-      val userAnswers = emptyUserAnswers.copy(
-        data = Json.obj(
-          "prDetails" -> Json.obj(
-            "individual" -> Json.toJson(address)
-          )
-        )
-      )
-
-      val result = PrIndividualAddressSummary.row(srn, userAnswers, countryNameForCode = identity)
-
-      result.value.value.content mustBe HtmlContent("33 Fake Street<br>XX")
-    }
   }
 }

@@ -221,9 +221,33 @@ organisationName.change.hidden = Organisation name
 
 prIndividualAddress.checkYourAnswersLabel = Address of PR
 prIndividualAddress.checkYourAnswersLabel.hidden = address of personal representative
+prIndividualCountry.checkYourAnswersLabel = Country of PR
+prIndividualCountry.checkYourAnswersLabel.hidden = country of personal representative
 
 prOrganisationAddress.checkYourAnswersLabel = Address of Organisation
 prOrganisationAddress.checkYourAnswersLabel.hidden = address of organisation
+prOrganisationCountry.checkYourAnswersLabel = Country of Organisation
+prOrganisationCountry.checkYourAnswersLabel.hidden = country of organisation
+
+changePrAddress.title = Enter the address of the PR
+changePrAddress.heading = Enter the address of {0}
+changePrAddress.addressLine1 = Address line 1
+changePrAddress.addressLine2 = Address line 2
+changePrAddress.addressLine3 = Address line 3 (optional)
+changePrAddress.addressLine4 = Address line 4 (optional)
+changePrAddress.postcode = Postcode (optional)
+changePrAddress.postalCode = Postal code (optional)
+changePrAddress.error.addressLine1.required = Enter the address
+changePrAddress.error.addressLine1.invalid = Enter a valid Address Line 1
+changePrAddress.error.addressLine1.length = Address Line 1 should be 35 characters or less
+changePrAddress.error.addressLine2.invalid = Enter a valid Address Line 2
+changePrAddress.error.addressLine2.length = Address Line 2 should be 35 characters or less
+changePrAddress.error.addressLine3.invalid = Enter a valid Address Line 3
+changePrAddress.error.addressLine3.length = Address Line 3 should be 35 characters or less
+changePrAddress.error.addressLine4.invalid = Enter a valid Address Line 4
+changePrAddress.error.addressLine4.length = Address Line 4 should be 35 characters or less
+changePrAddress.error.ukPostcode.invalid = Enter a valid Post Code
+changePrAddress.error.ukPostcode.length = Post Code should be 35 characters or less
 
 addressLookup.countryPicker.title = Select the country or territory
 addressLookup.countryPicker.prIndividualName.heading = Select the country or territory where {0} resides

@@ -65,8 +65,10 @@ class CheckYourAnswersController @Inject() (
           PrIndividualNameSummary.row(srn, userAnswers),
           PrOrganisationNameSummary.row(srn, userAnswers),
           PrOrganisationPrNameSummary.row(srn, userAnswers),
-          PrIndividualAddressSummary.row(srn, userAnswers, countryService.nameForCode),
-          PrOrganisationAddressSummary.row(srn, userAnswers, countryService.nameForCode),
+          PrIndividualCountrySummary.row(srn, userAnswers, countryService.nameForCode),
+          PrIndividualAddressSummary.row(srn, userAnswers),
+          PrOrganisationCountrySummary.row(srn, userAnswers, countryService.nameForCode),
+          PrOrganisationAddressSummary.row(srn, userAnswers),
           DidPrSubmitSummary.row(srn, userAnswers),
           PaymentNoticeDateSummary.row(srn, userAnswers),
           AreBeneficiariesKnownSummary.row(srn, userAnswers)
