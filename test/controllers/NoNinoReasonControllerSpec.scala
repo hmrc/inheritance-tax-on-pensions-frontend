@@ -18,24 +18,24 @@ package controllers
 
 import play.api.test.FakeRequest
 import connectors.InheritanceTaxOnPensionsConnector
-import pages.{IndividualNamePage, NinoPage}
-import views.html.NinoView
+import pages.{IndividualNamePage, NoNinoReasonPage}
+import views.html.NoNinoReasonView
 import base.SpecBase
-import forms.NinoFormProvider
+import play.api.inject
+import forms.NoNinoReasonFormProvider
 import models._
 import org.scalatestplus.mockito.MockitoSugar
 import org.mockito.ArgumentMatchers.any
 import play.api.test.Helpers._
 import org.mockito.Mockito.when
-import play.api.inject
-import uk.gov.hmrc.domain.Nino
 
 import scala.concurrent.Future
 
-class NinoControllerSpec extends SpecBase with MockitoSugar {
+class NoNinoReasonControllerSpec extends SpecBase with MockitoSugar {
 
-  private val formProvider = new NinoFormProvider()
+  private val formProvider = new NoNinoReasonFormProvider()
   private val form = formProvider()
+
   private val nameOfDeceased: IndividualName = IndividualName(
     title = Some("Mr"),
     firstForename = "John",
@@ -47,20 +47,20 @@ class NinoControllerSpec extends SpecBase with MockitoSugar {
     .set(IndividualNamePage(JourneyRole.Deceased), nameOfDeceased)
     .success
     .value
-  private lazy val ninoRoute = routes.NinoController.onPageLoad(srn, NormalMode).url
+  private lazy val noNinoReasonRoute = routes.NoNinoReasonController.onPageLoad(srn, NormalMode).url
 
-  "NinoPage Controller" - {
+  "NoNinoReason Controller" - {
 
     "must return OK and the correct view for a GET" in {
 
-      val application = applicationBuilder(userAnswers = Some(userAnswersWithDeceasedName), usesSession = true).build()
+      val application = applicationBuilder(Some(userAnswersWithDeceasedName), usesSession = true).build()
 
       running(application) {
-        val request = FakeRequest(GET, ninoRoute)
+        val request = FakeRequest(GET, noNinoReasonRoute)
 
         val result = route(application, request).value
 
-        val view = application.injector.instanceOf[NinoView]
+        val view = application.injector.instanceOf[NoNinoReasonView]
 
         status(result) mustEqual OK
         contentAsString(result) mustEqual view(form, srn, NormalMode, deceasedName)(using
@@ -70,24 +70,24 @@ class NinoControllerSpec extends SpecBase with MockitoSugar {
       }
     }
 
-    "must populate the view correctly on a GET" in {
+    "must populate the view correctly on a GET when the question has previously been answered" in {
 
       val userAnswers = userAnswersWithDeceasedName
-        .set(NinoPage, "AA123456A")
+        .set(NoNinoReasonPage, "answer")
         .success
         .value
 
-      val application = applicationBuilder(userAnswers = Some(userAnswers), usesSession = true).build()
+      val application = applicationBuilder(Some(userAnswers), usesSession = true).build()
 
       running(application) {
-        val request = FakeRequest(GET, ninoRoute)
+        val request = FakeRequest(GET, noNinoReasonRoute)
 
-        val view = application.injector.instanceOf[NinoView]
+        val view = application.injector.instanceOf[NoNinoReasonView]
 
         val result = route(application, request).value
 
         status(result) mustEqual OK
-        contentAsString(result) mustEqual view(form.fill(Nino("AA123456A")), srn, NormalMode, deceasedName)(using
+        contentAsString(result) mustEqual view(form.fill("answer"), srn, NormalMode, deceasedName)(using
           request,
           messages(application)
         ).toString
@@ -100,7 +100,7 @@ class NinoControllerSpec extends SpecBase with MockitoSugar {
       when(mockInheritanceTaxOnPensionsConnector.setUserAnswers(any(), any(), any(), any(), any())(using any()))
         .thenReturn(Future.successful(Right(userAnswersWithDeceasedName)))
 
-      val application = applicationBuilder(userAnswers = Some(userAnswersWithDeceasedName), usesSession = true)
+      val application = applicationBuilder(Some(userAnswersWithDeceasedName), usesSession = true)
         .overrides(
           inject.bind[InheritanceTaxOnPensionsConnector].toInstance(mockInheritanceTaxOnPensionsConnector)
         )
@@ -108,8 +108,8 @@ class NinoControllerSpec extends SpecBase with MockitoSugar {
 
       running(application) {
         val request =
-          FakeRequest(POST, ninoRoute)
-            .withFormUrlEncodedBody(("value", "AA123456A"))
+          FakeRequest(POST, noNinoReasonRoute)
+            .withFormUrlEncodedBody(("noNinoReason", "answer"))
 
         val result = route(application, request).value
 
@@ -120,16 +120,16 @@ class NinoControllerSpec extends SpecBase with MockitoSugar {
 
     "must return a Bad Request and errors when invalid data is submitted" in {
 
-      val application = applicationBuilder(userAnswers = Some(userAnswersWithDeceasedName), usesSession = true).build()
+      val application = applicationBuilder(Some(userAnswersWithDeceasedName), usesSession = true).build()
 
       running(application) {
         val request =
-          FakeRequest(POST, ninoRoute)
-            .withFormUrlEncodedBody(("value", ""))
+          FakeRequest(POST, noNinoReasonRoute)
+            .withFormUrlEncodedBody(("noNinoReason", ""))
 
         val boundForm = form.bind(Map("value" -> ""))
 
-        val view = application.injector.instanceOf[NinoView]
+        val view = application.injector.instanceOf[NoNinoReasonView]
 
         val result = route(application, request).value
 
@@ -146,7 +146,7 @@ class NinoControllerSpec extends SpecBase with MockitoSugar {
       val application = applicationBuilder(userAnswers = None, usesSession = true).build()
 
       running(application) {
-        val request = FakeRequest(GET, ninoRoute)
+        val request = FakeRequest(GET, noNinoReasonRoute)
 
         val result = route(application, request).value
 
@@ -161,8 +161,8 @@ class NinoControllerSpec extends SpecBase with MockitoSugar {
 
       running(application) {
         val request =
-          FakeRequest(POST, ninoRoute)
-            .withFormUrlEncodedBody(("value", "answer"))
+          FakeRequest(POST, noNinoReasonRoute)
+            .withFormUrlEncodedBody(("noNinoReason", "answer"))
 
         val result = route(application, request).value
 
@@ -176,7 +176,7 @@ class NinoControllerSpec extends SpecBase with MockitoSugar {
       val application = applicationBuilder(userAnswers = Some(emptyUserAnswers), usesSession = true).build()
 
       running(application) {
-        val request = FakeRequest(GET, ninoRoute)
+        val request = FakeRequest(GET, noNinoReasonRoute)
 
         val result = route(application, request).value
 
@@ -191,8 +191,8 @@ class NinoControllerSpec extends SpecBase with MockitoSugar {
 
       running(application) {
         val request =
-          FakeRequest(POST, ninoRoute)
-            .withFormUrlEncodedBody(("value", "answer"))
+          FakeRequest(POST, noNinoReasonRoute)
+            .withFormUrlEncodedBody(("noNinoReason", "answer"))
 
         val result = route(application, request).value
 

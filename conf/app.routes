@@ -120,3 +120,8 @@ GET         /:srn/enter-ni-number                        controllers.NinoControl
 POST        /:srn/enter-ni-number                        controllers.NinoController.onSubmit(srn: Srn, mode: Mode = NormalMode)
 GET         /:srn/change-ni-number                       controllers.NinoController.onPageLoad(srn: Srn, mode: Mode = CheckMode)
 POST        /:srn/change-ni-number                       controllers.NinoController.onSubmit(srn: Srn, mode: Mode = CheckMode)
+
+GET        /:srn/reason-no-ni-number                       controllers.NoNinoReasonController.onPageLoad(srn: Srn, mode: Mode = NormalMode)
+POST       /:srn/reason-no-ni-number                       controllers.NoNinoReasonController.onSubmit(srn: Srn, mode: Mode = NormalMode)
+GET        /:srn/change-reason-no-ni-number                controllers.NoNinoReasonController.onPageLoad(srn: Srn, mode: Mode = CheckMode)
+POST       /:srn/change-reason-no-ni-number                controllers.NoNinoReasonController.onSubmit(srn: Srn, mode: Mode = CheckMode)

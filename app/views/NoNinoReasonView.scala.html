@@ -22,29 +22,35 @@
     layout: templates.Layout,
     formHelper: FormWithCSRF,
     govukErrorSummary: GovukErrorSummary,
-    govukInput: GovukInput,
+    govukCharacterCount: GovukCharacterCount,
     govukButton: GovukButton
 )
 
 @(form: Form[?], srn: Srn, mode: Mode, deceasedName: String)(implicit request: Request[?], messages: Messages)
 
-@layout(pageTitle = title(form, messages("nino.title"))) {
+@layout(pageTitle = title(form, messages("noNinoReason.title"))) {
 
-    @formHelper(action = routes.NinoController.onSubmit(srn, mode)) {
+    @formHelper(action = routes.NoNinoReasonController.onSubmit(srn, mode)) {
 
         @if(form.errors.nonEmpty) {
             @govukErrorSummary(ErrorSummaryViewModel(form))
         }
 
-        @govukInput(
-            InputViewModel(
-                field = form("value"),
-                label = LabelViewModel(messages("nino.heading", deceasedName))
+        @govukCharacterCount(
+            uk.gov.hmrc.govukfrontend.views.viewmodels.charactercount.CharacterCount(
+                id = "noNinoReason",
+                name = "noNinoReason",
+                value = form("noNinoReason").value,
+                rows = 3,
+                maxLength = Some(160),
+                hint = Some(Hint(content = messages("noNinoReason.hint"))),
+                label = LabelViewModel(messages("noNinoReason.heading", deceasedName))
                     .withCssClass(Css.labelCssLargeClass)
-                    .asPageHeading()
+                    .asPageHeading(),
+                errorMessage = form("noNinoReason").error.map { error =>
+                    ErrorMessage(content = Text(messages(error.message, error.args*)))
+                }
             )
-            .withWidth(Fixed10)
-            .withHint(Hint(content = messages("nino.hint")))
         )
 
         @govukButton(

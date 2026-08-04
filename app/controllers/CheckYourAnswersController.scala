@@ -59,6 +59,7 @@ class CheckYourAnswersController @Inject() (
           NameOfDeceasedSummary.row(srn, userAnswers),
           NinoOrReasonSummary.row(srn, userAnswers),
           NinoSummary.row(srn, userAnswers),
+          NoNinoReasonSummary.row(srn, userAnswers),
           BirthDeathDatesSummary.row(srn, userAnswers),
           PrTypeSummary.row(srn, userAnswers),
           PrIndividualNameSummary.row(srn, userAnswers),
