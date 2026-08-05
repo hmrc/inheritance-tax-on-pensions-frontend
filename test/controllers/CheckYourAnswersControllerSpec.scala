@@ -25,7 +25,6 @@ import base.SpecBase
 import uk.gov.hmrc.govukfrontend.views.viewmodels.summarylist.SummaryList
 import viewmodels.govuk.all.{CardViewModel, SummaryListViewModel}
 import play.api.libs.json.Json
-import forms.NinoOrReasonFormData
 import models._
 import viewmodels.CheckAnswers._
 
@@ -54,7 +53,9 @@ class CheckYourAnswersControllerSpec extends SpecBase {
           )
         )
         .get
-        .set(NinoOrReasonPage, NinoOrReasonFormData(NinoOrReason.Yes, Some(validNino), None))
+        .set(HasNinoPage, true)
+        .get
+        .set(NinoPage, validNino)
         .get
         .set(BirthDeathDatesPage, BirthDeathDates(testDateOfBirth, testDateOfDeath))
         .get
@@ -86,7 +87,8 @@ class CheckYourAnswersControllerSpec extends SpecBase {
           rows = Seq(
             InheritanceTaxReferenceSummary.row(srn, userAnswers)(using messages(application)).get,
             NameOfDeceasedSummary.row(srn, userAnswers)(using messages(application)).get,
-            NinoOrReasonSummary.row(srn, userAnswers)(using messages(application)).get,
+            HasNinoSummary.row(srn, userAnswers)(using messages(application)).get,
+            NinoSummary.row(srn, userAnswers)(using messages(application)).get,
             BirthDeathDatesSummary.row(srn, userAnswers)(using messages(application)).get,
             PrTypeSummary.row(srn, userAnswers)(using messages(application)).get,
             PrIndividualNameSummary.row(srn, userAnswers)(using messages(application)).get,
@@ -117,7 +119,9 @@ class CheckYourAnswersControllerSpec extends SpecBase {
           )
         )
         .get
-        .set(NinoOrReasonPage, NinoOrReasonFormData(NinoOrReason.No, None, Some("John Doe reason")))
+        .set(HasNinoPage, false)
+        .get
+        .set(NoNinoReasonPage, "John Doe reason")
         .get
         .set(BirthDeathDatesPage, BirthDeathDates(testDateOfBirth, testDateOfDeath))
         .get
@@ -149,7 +153,8 @@ class CheckYourAnswersControllerSpec extends SpecBase {
           rows = Seq(
             InheritanceTaxReferenceSummary.row(srn, userAnswers)(using messages(application)).get,
             NameOfDeceasedSummary.row(srn, userAnswers)(using messages(application)).get,
-            NinoOrReasonSummary.row(srn, userAnswers)(using messages(application)).get,
+            HasNinoSummary.row(srn, userAnswers)(using messages(application)).get,
+            NoNinoReasonSummary.row(srn, userAnswers)(using messages(application)).get,
             BirthDeathDatesSummary.row(srn, userAnswers)(using messages(application)).get,
             PrTypeSummary.row(srn, userAnswers)(using messages(application)).get,
             PrIndividualNameSummary.row(srn, userAnswers)(using messages(application)).get,
@@ -417,7 +422,9 @@ class CheckYourAnswersControllerSpec extends SpecBase {
           )
         )
         .get
-        .set(NinoOrReasonPage, NinoOrReasonFormData(NinoOrReason.Yes, Some(validNino), None))
+        .set(HasNinoPage, true)
+        .get
+        .set(NinoPage, validNino)
         .get
         .set(BirthDeathDatesPage, BirthDeathDates(testDateOfBirth, testDateOfDeath))
         .get

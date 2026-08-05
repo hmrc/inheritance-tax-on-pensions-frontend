@@ -16,12 +16,19 @@
 
 package pages
 
+import base.SpecBase
 import play.api.libs.json.JsPath
-import forms.NinoOrReasonFormData
 
-case object NinoOrReasonPage extends QuestionPage[NinoOrReasonFormData] {
+class NoNinoReasonPageSpec extends SpecBase {
 
-  override def path: JsPath = JsPath \ toString
+  "NoNinoReasonPage" - {
 
-  override def toString: String = "ninoOrReason"
+    "must use the API-aligned path" in {
+      NoNinoReasonPage.path mustEqual JsPath \ "reasonForNoNino"
+    }
+
+    "must use the API-aligned page name" in {
+      NoNinoReasonPage.toString mustEqual "reasonForNoNino"
+    }
+  }
 }

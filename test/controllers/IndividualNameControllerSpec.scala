@@ -50,7 +50,7 @@ class IndividualNameControllerSpec extends SpecBase {
   private lazy val journeyRoleTestCases = Seq(
     JourneyRoleTestCase(
       JourneyRole.Deceased,
-      routes.NinoOrReasonController.onPageLoad(srn, NormalMode).url
+      routes.HasNinoController.onPageLoad(srn, NormalMode).url
     ),
     JourneyRoleTestCase(
       JourneyRole.PrIndividual,

@@ -67,6 +67,7 @@ class NoNinoReasonControllerSpec extends SpecBase with MockitoSugar {
           request,
           messages(application)
         ).toString
+        contentAsString(result) must include(messages(application)("site.saveAndContinue"))
       }
     }
 
