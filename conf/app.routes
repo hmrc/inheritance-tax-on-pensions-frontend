@@ -129,3 +129,8 @@ GET        /:srn/reason-no-ni-number                       controllers.NoNinoRea
 POST       /:srn/reason-no-ni-number                       controllers.NoNinoReasonController.onSubmit(srn: Srn, mode: Mode = NormalMode)
 GET        /:srn/change-reason-no-ni-number                controllers.NoNinoReasonController.onPageLoad(srn: Srn, mode: Mode = CheckMode)
 POST       /:srn/change-reason-no-ni-number                controllers.NoNinoReasonController.onSubmit(srn: Srn, mode: Mode = CheckMode)
+
+GET         /:srn/deceased-has-ni-number                    controllers.HasNinoController.onPageLoad(srn: Srn, mode: Mode = NormalMode)
+POST        /:srn/deceased-has-ni-number                    controllers.HasNinoController.onSubmit(srn: Srn, mode: Mode = NormalMode)
+GET         /:srn/change-deceased-has-ni-number             controllers.HasNinoController.onPageLoad(srn: Srn, mode: Mode = CheckMode)
+POST        /:srn/change-deceased-has-ni-number             controllers.HasNinoController.onSubmit(srn: Srn, mode: Mode = CheckMode)
