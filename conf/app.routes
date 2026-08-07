@@ -31,11 +31,6 @@ POST        /:srn/name-of-deceased                       controllers.IndividualN
 GET         /:srn/change-name-of-deceased                controllers.IndividualNameController.onPageLoad(srn: Srn, mode: Mode = CheckMode, journeyRole: JourneyRole = JourneyRole.Deceased)
 POST        /:srn/change-name-of-deceased                controllers.IndividualNameController.onSubmit(srn: Srn, mode: Mode = CheckMode, journeyRole: JourneyRole = JourneyRole.Deceased)
 
-GET         /:srn/enter-national-insurance-number        controllers.NinoOrReasonController.onPageLoad(srn: Srn, mode: Mode = NormalMode)
-POST        /:srn/enter-national-insurance-number        controllers.NinoOrReasonController.onSubmit(srn: Srn, mode: Mode = NormalMode)
-GET         /:srn/change-national-insurance-number       controllers.NinoOrReasonController.onPageLoad(srn: Srn, mode: Mode = CheckMode)
-POST        /:srn/change-national-insurance-number       controllers.NinoOrReasonController.onSubmit(srn: Srn, mode: Mode = CheckMode)
-
 GET         /:srn/enter-birth-death-date                 controllers.BirthDeathDatesController.onPageLoad(srn: Srn, mode: Mode = NormalMode)
 POST        /:srn/enter-birth-death-date                 controllers.BirthDeathDatesController.onSubmit(srn: Srn, mode: Mode = NormalMode)
 GET         /:srn/change-birth-death-date                controllers.BirthDeathDatesController.onPageLoad(srn: Srn, mode: Mode = CheckMode)

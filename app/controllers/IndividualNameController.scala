@@ -146,7 +146,7 @@ class IndividualNameController @Inject() (
           case JourneyRole.PrOrganisation =>
             routes.AddressLookupStartController.start(srn, NormalMode, journeyRole)
           case JourneyRole.Deceased =>
-            routes.NinoOrReasonController.onPageLoad(srn, NormalMode)
+            routes.HasNinoController.onPageLoad(srn, NormalMode)
           case _ => routes.JourneyRecoveryController.onPageLoad()
         }
       case CheckMode => routes.CheckYourAnswersController.onPageLoad(srn)
