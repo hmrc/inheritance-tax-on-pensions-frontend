@@ -17,13 +17,16 @@
 package controllers
 
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
-import pages.PaymentReferencePage
+import pages.{PaymentNoticeDatePage, PaymentReferencePage}
+import config.FrontendAppConfig
 import controllers.actions._
 import views.html.ConfirmationView
 import models.SchemeId.Srn
 import play.api.i18n.{I18nSupport, MessagesApi}
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
 
+import java.time.LocalDate
+import java.time.format.DateTimeFormatter
 import javax.inject.Inject
 
 class ConfirmationController @Inject() (
@@ -32,6 +35,7 @@ class ConfirmationController @Inject() (
   allowAccess: AllowAccessActionWithSessionCacheProvider,
   getData: DataRetrievalAction,
   val controllerComponents: MessagesControllerComponents,
+  appConfig: FrontendAppConfig,
   view: ConfirmationView
 ) extends FrontendBaseController
     with I18nSupport {
@@ -39,12 +43,21 @@ class ConfirmationController @Inject() (
   def onPageLoad(srn: Srn): Action[AnyContent] = identify
     .andThen(allowAccess(srn))
     .andThen(getData) { implicit request =>
-      val paymentReference = request.userAnswers.flatMap(_.get(PaymentReferencePage)).getOrElse("A123456/25A629671")
+      val paymentReference = request.userAnswers
+        .flatMap(_.get(PaymentReferencePage))
+        .getOrElse("A123456/25A629671") // TODO:Remove hard coded value when we have a payment reference
+      val dueDateFormatted = request.userAnswers
+        .flatMap(_.get(PaymentNoticeDatePage))
+        .getOrElse(LocalDate.now)
+        .plusDays(35)
+        .format(DateTimeFormatter.ofPattern("d MMM yyyy"))
       Ok(
         view(
           paymentReference,
           request.request.minimalDetails.email.decryptedValue,
-          srn
+          srn,
+          appConfig.schemeDashboardUrl(srn, request.request.pensionSchemeId),
+          dueDateFormatted
         )
       )
     }
