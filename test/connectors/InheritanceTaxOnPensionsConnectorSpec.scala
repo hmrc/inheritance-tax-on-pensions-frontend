@@ -112,7 +112,7 @@ class InheritanceTaxOnPensionsConnectorSpec extends SpecBase {
       val pstr = "12345678"
       val userAnswersId = "user-answers-id"
       val expectedResponse = IhtpReportSubmissionResponse(
-        processingDateTime = java.time.Instant.now(),
+        processingDate = java.time.Instant.now(),
         formBundleNumber = "bundle-1",
         paymentReference = "payment-1"
       )

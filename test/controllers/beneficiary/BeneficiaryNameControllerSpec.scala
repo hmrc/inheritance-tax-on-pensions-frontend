@@ -82,7 +82,7 @@ class BeneficiaryNameControllerSpec extends SpecBase {
 
       s"must populate the view correctly on a GET when ${journeyRole.name} has previously been answered" in {
 
-        val userAnswers = UserAnswers(userAnswersId, srnGen.sample.value.toString, "test-uuid")
+        val userAnswers = UserAnswers(userAnswersId, srnGen.sample.value.toString, testUuid)
           .set(BeneficiaryNamePage(0, journeyRole), individualName)
           .success
           .value

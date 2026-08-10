@@ -18,20 +18,16 @@ package services
 
 import com.google.inject.Inject
 import connectors.InheritanceTaxOnPensionsConnector
-import pages.PaymentReferencePage
 import play.api.Logging
 import uk.gov.hmrc.http.{HeaderCarrier, UpstreamErrorResponse}
 import models.{IhtpReportSubmissionResponse, UserAnswers}
 import models.requests.AllowedAccessRequest
 
 import scala.concurrent.Future
-import scala.util.Success
 
 class ReportSubmissionService @Inject() (
-  inheritanceTaxOnPensionsConnector: InheritanceTaxOnPensionsConnector,
-  userAnswersService: UserAnswersService
-)(implicit ec: scala.concurrent.ExecutionContext)
-    extends BaseService
+  inheritanceTaxOnPensionsConnector: InheritanceTaxOnPensionsConnector
+) extends BaseService
     with Logging {
 
   def submitReport(
@@ -49,9 +45,4 @@ class ReportSubmissionService @Inject() (
         srnVal,
         role
       )
-      .andThen { case Success(Right(response)) =>
-        userAnswers.set(PaymentReferencePage, response.paymentReference).foreach { updatedAnswers =>
-          userAnswersService.set(updatedAnswers).map { _ => }
-        }
-      }
 }

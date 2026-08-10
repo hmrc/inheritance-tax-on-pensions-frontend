@@ -14,14 +14,13 @@
  * limitations under the License.
  */
 
-package models
+package pages
 
-import play.api.libs.json.{Json, OFormat}
+import play.api.libs.json.JsPath
 
-import java.time.Instant
+case object FormBundleNoPage extends QuestionPage[String] {
 
-case class IhtpReportSubmissionResponse(processingDate: Instant, formBundleNumber: String, paymentReference: String)
+  override def path: JsPath = JsPath \ toString
 
-object IhtpReportSubmissionResponse {
-  implicit val formats: OFormat[IhtpReportSubmissionResponse] = Json.format[IhtpReportSubmissionResponse]
+  override def toString: String = "formBundleNo"
 }

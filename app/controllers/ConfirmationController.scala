@@ -17,7 +17,7 @@
 package controllers
 
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
-import pages.{PaymentNoticeDatePage, PaymentReferencePage}
+import pages.{IHTPaymentReferencePage, PaymentNoticeDatePage}
 import config.FrontendAppConfig
 import controllers.actions._
 import views.html.ConfirmationView
@@ -44,8 +44,8 @@ class ConfirmationController @Inject() (
     .andThen(allowAccess(srn))
     .andThen(getData) { implicit request =>
       val paymentReference = request.userAnswers
-        .flatMap(_.get(PaymentReferencePage))
-        .getOrElse("A123456/25A629671") // TODO:Remove hard coded value when we have a payment reference
+        .flatMap(_.get(IHTPaymentReferencePage))
+        .getOrElse("")
       val dueDateFormatted = request.userAnswers
         .flatMap(_.get(PaymentNoticeDatePage))
         .getOrElse(LocalDate.now)

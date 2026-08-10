@@ -51,7 +51,7 @@ class InheritanceTaxOnPensionsConnectorSpec extends BaseConnectorSpec {
   val userAnswers: UserAnswers = UserAnswers(
     id = id,
     srn = srnVal,
-    uuid = "test-uuid",
+    uuid = testUuid,
     data = JsObject(Seq("inheritanceTaxReference" -> Json.toJson("foo"))),
     lastUpdated = Instant.now(clock)
   )
@@ -117,7 +117,7 @@ class InheritanceTaxOnPensionsConnectorSpec extends BaseConnectorSpec {
     "submitReport must" - {
       "successfully submit report" in runningApplication { implicit app =>
         val response = IhtpReportSubmissionResponse(
-          processingDateTime = Instant.now(clock),
+          processingDate = Instant.now(clock),
           formBundleNumber = "bundle-1",
           paymentReference = "payment-1"
         )
