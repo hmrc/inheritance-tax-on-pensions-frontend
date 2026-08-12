@@ -14,7 +14,7 @@
  * limitations under the License.
  *@
 
-@import components.{Link, PageHeading, Paragraph, StrongPanelText, SubHeading}
+@import components._
 @import models.SchemeId.Srn
 
 @this(
@@ -24,9 +24,10 @@
         strongPanelText: StrongPanelText,
         subHeading: SubHeading,
         link: Link,
+        bulletList: BulletList,
 )
 
-@(paymentReference: String, email: String, srn: Srn)(implicit request: Request[?], messages: Messages)
+@(paymentReference: String, email: String, srn: Srn, schemeDashboardUrl: String, dueDateFormatted: String, schemeName: String)(implicit request: Request[?], messages: Messages)
 
 @panelContent = {
     @paragraph(
@@ -49,37 +50,43 @@
 
     @subHeading(messages("confirmation.what.happens.next"))
 
-    @paragraph(messages("confirmation.what.happens.next.p1"))
-
-    @paragraph(messages("confirmation.what.happens.next.p2"))
-
     @paragraph(
         content = HtmlContent(HtmlFormat.fill(Seq(
-            Html(messages("confirmation.information.pretext")),
+            Html(messages("confirmation.what.happens.next.p1.pretext")),
                 link(
-                    id = "find-information-link",
-                    text = messages("confirmation.information.link.text"),
-                    href = messages("confirmation.information.link.url"),
+                    id = "find-payment-link",
+                    text = messages("confirmation.what.happens.next.p1.link.text"),
+                    href = messages("confirmation.what.happens.next.p1.link.url"),
                     newTab = true
             ),
             Html(messages("site.stop"))
             )),
         ))
 
-    @paragraph(
-        content = HtmlContent(HtmlFormat.fill(Seq(
-            Html(messages("confirmation.progress.pretext")),
+    @paragraph(messages("confirmation.what.happens.next.p2", dueDateFormatted))
+
+    @paragraph(messages("confirmation.what.happens.next.p3"))
+
+    @paragraph(messages("confirmation.information.pretext"))
+
+    @bulletList(Seq(
+         HtmlContent(HtmlFormat.fill(Seq(
+            Html(messages("confirmation.progress.guidance.usecase1")),
                 link(
                     id = "progress-link",
-                    text = messages("confirmation.progress.link.text"),
+                    text = messages("confirmation.progress.guidance.usecase1.link.text"),
                     href = controllers.routes.SubmissionListController.onPageLoad(srn).url
             ),
-            Html(messages("site.stop"))
-            )),
-        )
-    )
-
-    @paragraph(messages("confirmation.corrections"))
+    ))),
+        HtmlContent(HtmlFormat.fill(Seq(
+            Html(messages("confirmation.progress.guidance.usecase2")),
+                link(
+                    id = "progress-link-2",
+                    text = messages("confirmation.progress.guidance.usecase2.link.text", schemeName),
+                    href = schemeDashboardUrl
+            ),
+    ))),
+))
 
     @paragraph(
         content = HtmlContent(HtmlFormat.fill(Seq(

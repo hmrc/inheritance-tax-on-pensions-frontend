@@ -28,6 +28,7 @@ trait TestValues extends Generators {
   val paymentReference = "A123456/25A629671"
   val testDateOfBirth: LocalDate = LocalDate.of(1950, 1, 1)
   val testDateOfDeath: LocalDate = LocalDate.of(2020, 1, 1)
+  val testPaymentNoticeDate: LocalDate = LocalDate.of(2026, 2, 2)
   val testIndex: Int = 0
   val testInvalidBeneficiaryIndexes: List[Int] = List(-1, 30)
 

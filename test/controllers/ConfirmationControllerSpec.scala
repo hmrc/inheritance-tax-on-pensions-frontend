@@ -17,28 +17,37 @@
 package controllers
 
 import play.api.test.FakeRequest
-import play.api.test.Helpers._
-import pages.PaymentReferencePage
+import play.api.test.Helpers.*
+import pages.{PaymentNoticeDatePage, PaymentReferencePage}
 import views.html.ConfirmationView
 import base.SpecBase
+import models.{SchemeId, UserAnswers}
+
+import java.time.format.DateTimeFormatter
 
 class ConfirmationControllerSpec extends SpecBase {
+
+  val testSrn: SchemeId.Srn = srn
+  val url: String = "http://localhost:8204/manage-pension-schemes/pension-scheme-summary/" + testSrn.value
+  val userAnswersWithDueDate: UserAnswers =
+    emptyUserAnswers.set(PaymentNoticeDatePage, testPaymentNoticeDate).success.value
+  val formattedDate: String = testPaymentNoticeDate.plusDays(35).format(DateTimeFormatter.ofPattern("d MMM yyyy"))
 
   "Confirmation Controller" - {
 
     "must return OK and the correct view for a GET" in {
 
-      val application = applicationBuilder(userAnswers = Some(emptyUserAnswers), usesSession = true).build()
+      val application = applicationBuilder(userAnswers = Some(userAnswersWithDueDate), usesSession = true).build()
 
       running(application) {
-        val request = FakeRequest(GET, routes.ConfirmationController.onPageLoad(srn).url)
+        val request = FakeRequest(GET, routes.ConfirmationController.onPageLoad(testSrn).url)
 
         val result = route(application, request).value
 
         val view = application.injector.instanceOf[ConfirmationView]
 
         status(result) mustEqual OK
-        contentAsString(result) mustEqual view(paymentReference, email, srn)(using
+        contentAsString(result) mustEqual view(paymentReference, email, testSrn, url, formattedDate, schemeName)(using
           request,
           messages(application)
         ).toString
@@ -46,19 +55,19 @@ class ConfirmationControllerSpec extends SpecBase {
     }
 
     "must return OK and the correct view for a GET when payment reference is present in user answers" in {
-      val userAnswersWithPaymentRef = emptyUserAnswers.set(PaymentReferencePage, "000012345321").success.value
+      val userAnswersWithPaymentRef = userAnswersWithDueDate.set(PaymentReferencePage, "000012345321").success.value
 
       val application = applicationBuilder(userAnswers = Some(userAnswersWithPaymentRef), usesSession = true).build()
 
       running(application) {
-        val request = FakeRequest(GET, routes.ConfirmationController.onPageLoad(srn).url)
+        val request = FakeRequest(GET, routes.ConfirmationController.onPageLoad(testSrn).url)
 
         val result = route(application, request).value
 
         val view = application.injector.instanceOf[ConfirmationView]
 
         status(result) mustEqual OK
-        contentAsString(result) mustEqual view("000012345321", email, srn)(using
+        contentAsString(result) mustEqual view("000012345321", email, testSrn, url, formattedDate, schemeName)(using
           request,
           messages(application)
         ).toString
@@ -66,17 +75,18 @@ class ConfirmationControllerSpec extends SpecBase {
     }
 
     "must return OK and the correct view for a GET when payment reference is not present in user answers (fallback)" in {
-      val application = applicationBuilder(userAnswers = Some(emptyUserAnswers), usesSession = true).build()
+      val application = applicationBuilder(userAnswers = Some(userAnswersWithDueDate), usesSession = true).build()
 
       running(application) {
-        val request = FakeRequest(GET, routes.ConfirmationController.onPageLoad(srn).url)
+        val request = FakeRequest(GET, routes.ConfirmationController.onPageLoad(testSrn).url)
 
         val result = route(application, request).value
 
         val view = application.injector.instanceOf[ConfirmationView]
 
         status(result) mustEqual OK
-        contentAsString(result) mustEqual view("A123456/25A629671", email, srn)(using
+        contentAsString(result) mustEqual view("A123456/25A629671", email, testSrn, url, formattedDate, schemeName)(
+          using
           request,
           messages(application)
         ).toString
