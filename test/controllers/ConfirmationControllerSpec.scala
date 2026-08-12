@@ -29,7 +29,8 @@ class ConfirmationControllerSpec extends SpecBase {
 
   val testSrn: SchemeId.Srn = srn
   val url: String = "http://localhost:8204/manage-pension-schemes/pension-scheme-summary/" + testSrn.value
-  val userAnswersWithDueDate: UserAnswers = emptyUserAnswers.set(PaymentNoticeDatePage, testPaymentNoticeDate).success.value
+  val userAnswersWithDueDate: UserAnswers =
+    emptyUserAnswers.set(PaymentNoticeDatePage, testPaymentNoticeDate).success.value
   val formattedDate: String = testPaymentNoticeDate.plusDays(35).format(DateTimeFormatter.ofPattern("d MMM yyyy"))
 
   "Confirmation Controller" - {
@@ -46,7 +47,7 @@ class ConfirmationControllerSpec extends SpecBase {
         val view = application.injector.instanceOf[ConfirmationView]
 
         status(result) mustEqual OK
-        contentAsString(result) mustEqual view(paymentReference, email, testSrn, url, formattedDate)(using
+        contentAsString(result) mustEqual view(paymentReference, email, testSrn, url, formattedDate, schemeName)(using
           request,
           messages(application)
         ).toString
@@ -66,7 +67,7 @@ class ConfirmationControllerSpec extends SpecBase {
         val view = application.injector.instanceOf[ConfirmationView]
 
         status(result) mustEqual OK
-        contentAsString(result) mustEqual view("000012345321", email, testSrn, url, formattedDate)(using
+        contentAsString(result) mustEqual view("000012345321", email, testSrn, url, formattedDate, schemeName)(using
           request,
           messages(application)
         ).toString
@@ -84,7 +85,8 @@ class ConfirmationControllerSpec extends SpecBase {
         val view = application.injector.instanceOf[ConfirmationView]
 
         status(result) mustEqual OK
-        contentAsString(result) mustEqual view("A123456/25A629671", email, testSrn, url, formattedDate)(using
+        contentAsString(result) mustEqual view("A123456/25A629671", email, testSrn, url, formattedDate, schemeName)(
+          using
           request,
           messages(application)
         ).toString

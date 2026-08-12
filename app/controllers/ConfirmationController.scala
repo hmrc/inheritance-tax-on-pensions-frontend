@@ -51,13 +51,15 @@ class ConfirmationController @Inject() (
         .getOrElse(LocalDate.now)
         .plusDays(35)
         .format(DateTimeFormatter.ofPattern("d MMM yyyy"))
+      val schemeName = request.request.schemeDetails.schemeName
       Ok(
         view(
           paymentReference,
           request.request.minimalDetails.email.decryptedValue,
           srn,
           appConfig.schemeDashboardUrl(srn, request.request.pensionSchemeId),
-          dueDateFormatted
+          dueDateFormatted,
+          schemeName
         )
       )
     }

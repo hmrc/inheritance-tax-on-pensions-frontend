@@ -314,7 +314,7 @@ confirmation.panel.body.reference = Your payment reference
 confirmation.email = We have sent a confirmation email to {0}.
 confirmation.what.happens.next = How to pay
 confirmation.what.happens.next.p1.pretext = You need to
-confirmation.what.happens.next.p1.link.text = pay HMRC $1,000,000,000 (opens new in tab)
+confirmation.what.happens.next.p1.link.text = pay HMRC £1,000,000,000 (opens new in tab)
 confirmation.what.happens.next.p1.link.url = https://www.gov.uk/paying-inheritance-tax
 confirmation.what.happens.next.p2 = The payment is due by {0}.
 confirmation.what.happens.next.p3 = You must use your payment reference when making the payment. It will be used to match your payment to this report.
@@ -322,7 +322,7 @@ confirmation.information.pretext = You can:
 confirmation.progress.guidance.usecase1 = check the progress of this report on the
 confirmation.progress.guidance.usecase1.link.text = overview page
 confirmation.progress.guidance.usecase2 = return to the
-confirmation.progress.guidance.usecase2.link.text = Scheme Dashboard for Smith Harper Pension Scheme
+confirmation.progress.guidance.usecase2.link.text = Scheme Dashboard for {0}
 confirmation.feedback = What did you think of this service?
 confirmation.feedback.append = (takes 30 seconds)
 

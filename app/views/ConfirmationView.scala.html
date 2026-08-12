@@ -27,7 +27,7 @@
         bulletList: BulletList,
 )
 
-@(paymentReference: String, email: String, srn: Srn, schemeDashboardUrl: String, dueDateFormatted: String)(implicit request: Request[?], messages: Messages)
+@(paymentReference: String, email: String, srn: Srn, schemeDashboardUrl: String, dueDateFormatted: String, schemeName: String)(implicit request: Request[?], messages: Messages)
 
 @panelContent = {
     @paragraph(
@@ -82,7 +82,7 @@
             Html(messages("confirmation.progress.guidance.usecase2")),
                 link(
                     id = "progress-link-2",
-                    text = messages("confirmation.progress.guidance.usecase2.link.text"),
+                    text = messages("confirmation.progress.guidance.usecase2.link.text", schemeName),
                     href = schemeDashboardUrl
             ),
     ))),
