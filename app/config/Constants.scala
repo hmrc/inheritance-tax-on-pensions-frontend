@@ -68,6 +68,7 @@ object Constants {
     val formGroupErrorCssClass = "govuk-form-group--error"
 
     val linkNoVisitedStateCssClass = "govuk-link govuk-link--no-visited-state"
+    val linkWithVisitedStateCssClass = "govuk-link"
 
     val jsVisibleCssClass = "hmrc-!-js-visible"
     val displayNonePrintCssClass = "govuk-!-display-none-print"

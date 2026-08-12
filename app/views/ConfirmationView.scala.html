@@ -24,18 +24,18 @@
         strongPanelText: StrongPanelText,
         subHeading: SubHeading,
         link: Link,
-        bulletList: BulletList,
+        linkWithVisitedState: LinkWithVisitedState,
+        bulletList: BulletList
 )
 
 @(paymentReference: String, email: String, srn: Srn, schemeDashboardUrl: String, dueDateFormatted: String, schemeName: String)(implicit request: Request[?], messages: Messages)
-
 @panelContent = {
     @paragraph(
         content = HtmlContent(HtmlFormat.fill(Seq(
             Html(messages("confirmation.panel.body.reference")),
             strongPanelText(paymentReference)
         ))),
-    classes = ""
+    classes = "govuk-!-margin-bottom-0"
     )
 }
 
@@ -53,15 +53,14 @@
     @paragraph(
         content = HtmlContent(HtmlFormat.fill(Seq(
             Html(messages("confirmation.what.happens.next.p1.pretext")),
-                link(
+                linkWithVisitedState(
                     id = "find-payment-link",
                     text = messages("confirmation.what.happens.next.p1.link.text"),
                     href = messages("confirmation.what.happens.next.p1.link.url"),
                     newTab = true
             ),
-            Html(messages("site.stop"))
-            )),
-        ))
+        )),
+    ))
 
     @paragraph(messages("confirmation.what.happens.next.p2", dueDateFormatted))
 
@@ -72,7 +71,7 @@
     @bulletList(Seq(
          HtmlContent(HtmlFormat.fill(Seq(
             Html(messages("confirmation.progress.guidance.usecase1")),
-                link(
+                linkWithVisitedState(
                     id = "progress-link",
                     text = messages("confirmation.progress.guidance.usecase1.link.text"),
                     href = controllers.routes.SubmissionListController.onPageLoad(srn).url
@@ -80,7 +79,7 @@
     ))),
         HtmlContent(HtmlFormat.fill(Seq(
             Html(messages("confirmation.progress.guidance.usecase2")),
-                link(
+                linkWithVisitedState(
                     id = "progress-link-2",
                     text = messages("confirmation.progress.guidance.usecase2.link.text", schemeName),
                     href = schemeDashboardUrl
@@ -90,7 +89,7 @@
 
     @paragraph(
         content = HtmlContent(HtmlFormat.fill(Seq(
-            link(
+            linkWithVisitedState(
                 id = "feedback-link",
                 text = messages("confirmation.feedback"),
                 href = controllers.auth.routes.AuthController.signOut().url
