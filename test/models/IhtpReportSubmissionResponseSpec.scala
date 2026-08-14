@@ -27,26 +27,26 @@ class IhtpReportSubmissionResponseSpec extends SpecBase {
 
     "must successfully read from json" in {
       val json = Json.obj(
-        "processingDate" -> "2026-01-01T00:00:00Z",
+        "processingDateTime" -> "2026-01-01T00:00:00Z",
         "formBundleNumber" -> "bundle-1",
         "paymentReference" -> "payment-1"
       )
 
       val result = json.as[IhtpReportSubmissionResponse]
-      result.processingDate mustBe Instant.parse("2026-01-01T00:00:00Z")
+      result.processingDateTime mustBe Instant.parse("2026-01-01T00:00:00Z")
       result.formBundleNumber mustBe "bundle-1"
       result.paymentReference mustBe "payment-1"
     }
 
     "must successfully write to json" in {
       val response = IhtpReportSubmissionResponse(
-        processingDate = Instant.parse("2026-01-01T00:00:00Z"),
+        processingDateTime = Instant.parse("2026-01-01T00:00:00Z"),
         formBundleNumber = "bundle-1",
         paymentReference = "payment-1"
       )
 
       val json = Json.toJson(response)
-      (json \ "processingDate").as[String] mustBe "2026-01-01T00:00:00Z"
+      (json \ "processingDateTime").as[String] mustBe "2026-01-01T00:00:00Z"
       (json \ "formBundleNumber").as[String] mustBe "bundle-1"
       (json \ "paymentReference").as[String] mustBe "payment-1"
     }

@@ -117,7 +117,7 @@ class InheritanceTaxOnPensionsConnectorSpec extends BaseConnectorSpec {
     "submitReport must" - {
       "successfully submit report" in runningApplication { implicit app =>
         val response = IhtpReportSubmissionResponse(
-          processingDate = Instant.now(clock),
+          processingDateTime = Instant.now(clock),
           formBundleNumber = "bundle-1",
           paymentReference = "payment-1"
         )
