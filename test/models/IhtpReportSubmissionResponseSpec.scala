@@ -19,36 +19,30 @@ package models
 import base.SpecBase
 import play.api.libs.json.Json
 
-import java.time.Instant
-
 class IhtpReportSubmissionResponseSpec extends SpecBase {
 
   "IhtpReportSubmissionResponse" - {
 
     "must successfully read from json" in {
       val json = Json.obj(
-        "processingDateTime" -> "2026-01-01T00:00:00Z",
-        "formBundleNumber" -> "bundle-1",
-        "paymentReference" -> "payment-1"
+        "formBundleNo" -> "bundle-1",
+        "ihtPaymentReference" -> "payment-1"
       )
 
       val result = json.as[IhtpReportSubmissionResponse]
-      result.processingDateTime mustBe Instant.parse("2026-01-01T00:00:00Z")
-      result.formBundleNumber mustBe "bundle-1"
-      result.paymentReference mustBe "payment-1"
+      result.formBundleNo mustBe "bundle-1"
+      result.ihtPaymentReference mustBe "payment-1"
     }
 
     "must successfully write to json" in {
       val response = IhtpReportSubmissionResponse(
-        processingDateTime = Instant.parse("2026-01-01T00:00:00Z"),
-        formBundleNumber = "bundle-1",
-        paymentReference = "payment-1"
+        formBundleNo = "bundle-1",
+        ihtPaymentReference = "payment-1"
       )
 
       val json = Json.toJson(response)
-      (json \ "processingDateTime").as[String] mustBe "2026-01-01T00:00:00Z"
-      (json \ "formBundleNumber").as[String] mustBe "bundle-1"
-      (json \ "paymentReference").as[String] mustBe "payment-1"
+      (json \ "formBundleNo").as[String] mustBe "bundle-1"
+      (json \ "ihtPaymentReference").as[String] mustBe "payment-1"
     }
   }
 }

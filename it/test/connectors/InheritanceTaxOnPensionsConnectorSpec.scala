@@ -117,9 +117,8 @@ class InheritanceTaxOnPensionsConnectorSpec extends BaseConnectorSpec {
     "submitReport must" - {
       "successfully submit report" in runningApplication { implicit app =>
         val response = IhtpReportSubmissionResponse(
-          processingDateTime = Instant.now(clock),
-          formBundleNumber = "bundle-1",
-          paymentReference = "payment-1"
+          formBundleNo = "bundle-1",
+          ihtPaymentReference = "payment-1"
         )
         val jsonResponse: String = Json.toJson(response).toString()
         wireMockServer.stubFor(

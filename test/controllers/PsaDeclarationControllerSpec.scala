@@ -30,8 +30,6 @@ import org.mockito.Mockito._
 
 import scala.concurrent.Future
 
-import java.time.Instant
-
 class PsaDeclarationControllerSpec extends SpecBase with MockitoSugar {
 
   lazy val psaDeclarationRoute: String = routes.PsaDeclarationController.onPageLoad(srn).url
@@ -60,7 +58,7 @@ class PsaDeclarationControllerSpec extends SpecBase with MockitoSugar {
 
     "must redirect to ConfirmationController when submission is successful" in {
       val mockReportSubmissionService = mock[ReportSubmissionService]
-      val response = IhtpReportSubmissionResponse(Instant.now(), "formBundle", "paymentRef")
+      val response = IhtpReportSubmissionResponse("formBundle", "paymentRef")
       when(mockReportSubmissionService.submitReport(any())(using any(), any()))
         .thenReturn(Future.successful(Right(response)))
 

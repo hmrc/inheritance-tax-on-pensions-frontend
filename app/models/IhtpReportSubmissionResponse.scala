@@ -18,9 +18,7 @@ package models
 
 import play.api.libs.json.{Json, OFormat}
 
-import java.time.Instant
-
-case class IhtpReportSubmissionResponse(processingDateTime: Instant, formBundleNumber: String, paymentReference: String)
+case class IhtpReportSubmissionResponse(formBundleNo: String, ihtPaymentReference: String)
 
 object IhtpReportSubmissionResponse {
   implicit val formats: OFormat[IhtpReportSubmissionResponse] = Json.format[IhtpReportSubmissionResponse]

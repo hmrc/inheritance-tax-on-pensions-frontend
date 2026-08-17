@@ -32,8 +32,6 @@ import uk.gov.hmrc.http.UpstreamErrorResponse
 
 import scala.concurrent.Future
 
-import java.time.Instant
-
 class PspDeclarationControllerSpec extends SpecBase with MockitoSugar {
 
   val formProvider = new PspDeclarationFormProvider()
@@ -60,7 +58,7 @@ class PspDeclarationControllerSpec extends SpecBase with MockitoSugar {
 
     "must redirect to ConfirmationController when submission is successful" in {
       val mockReportSubmissionService = mock[ReportSubmissionService]
-      val response = IhtpReportSubmissionResponse(Instant.now(), "formBundle", "paymentRef")
+      val response = IhtpReportSubmissionResponse("formBundle", "paymentRef")
       when(mockReportSubmissionService.submitReport(any())(using any(), any()))
         .thenReturn(Future.successful(Right(response)))
 

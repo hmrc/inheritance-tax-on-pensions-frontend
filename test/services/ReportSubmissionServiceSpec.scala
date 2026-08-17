@@ -28,8 +28,6 @@ import org.mockito.ArgumentMatchers.{any, argThat}
 
 import scala.concurrent.Future
 
-import java.time.Instant
-
 class ReportSubmissionServiceSpec extends SpecBase {
 
   implicit val hc: HeaderCarrier = HeaderCarrier()
@@ -39,7 +37,7 @@ class ReportSubmissionServiceSpec extends SpecBase {
   "submitReport" - {
 
     "must return success if connector returns success" in new Setup {
-      val response = IhtpReportSubmissionResponse(Instant.now(), "formBundle", "paymentRef")
+      val response = IhtpReportSubmissionResponse("formBundle", "paymentRef")
       val userAnswers: UserAnswers = emptyUserAnswers
       when(mockConnector.submitReport(any(), any(), any(), any(), any(), any())(using any()))
         .thenReturn(Future.successful(Right(response)))
@@ -61,7 +59,7 @@ class ReportSubmissionServiceSpec extends SpecBase {
     }
 
     "must save payment reference to user answers on successful submission" in new Setup {
-      val response = IhtpReportSubmissionResponse(Instant.now(), "formBundle", "paymentRef")
+      val response = IhtpReportSubmissionResponse("formBundle", "paymentRef")
       val userAnswers: UserAnswers = emptyUserAnswers
 
       when(mockConnector.submitReport(any(), any(), any(), any(), any(), any())(using any()))
@@ -73,7 +71,7 @@ class ReportSubmissionServiceSpec extends SpecBase {
     }
 
     "must handle organisation name correctly" in new Setup {
-      val response = IhtpReportSubmissionResponse(Instant.now(), "formBundle", "paymentRef")
+      val response = IhtpReportSubmissionResponse("formBundle", "paymentRef")
       val userAnswers: UserAnswers = emptyUserAnswers
 
       val orgOnlyMinimalDetails: MinimalDetails = defaultMinimalDetails.copy(
@@ -102,7 +100,7 @@ class ReportSubmissionServiceSpec extends SpecBase {
     }
 
     "must handle individual name correctly" in new Setup {
-      val response = IhtpReportSubmissionResponse(Instant.now(), "formBundle", "paymentRef")
+      val response = IhtpReportSubmissionResponse("formBundle", "paymentRef")
       val userAnswers: UserAnswers = emptyUserAnswers
 
       val individualOnlyMinimalDetails: MinimalDetails = defaultMinimalDetails.copy(
