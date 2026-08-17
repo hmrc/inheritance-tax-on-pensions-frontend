@@ -347,6 +347,16 @@ beneficiaryIndividualName.error.surname.pattern = Enter a valid last name
 beneficiaryIndividualName.checkYourAnswersLabel = Full name of beneficiary
 beneficiaryIndividualName.checkYourAnswersLabel.hidden = full name of beneficiary
 
+beneficiaryList.heading.one = You have added 1 beneficiary
+beneficiaryList.heading = You have added {0} beneficiaries
+beneficiaryList.question = Do you need to add another beneficiary?
+beneficiaryList.error.required = You must select if you wish to add a beneficiary
+beneficiaryList.change.hidden = {0}
+beneficiaryList.remove.hidden = {0} from the list
+
+removeBeneficiary.heading = Are you sure you want to remove {0}?
+removeBeneficiary.error.required = Select if you wish to remove a beneficiary
+
 beneficiaryHasNino.title = Does the beneficiary have a National Insurance number?
 beneficiaryHasNino.heading = Does {0} have a National Insurance number?
 beneficiaryHasNino.checkYourAnswersLabel = Does the beneficiary have a National Insurance number?

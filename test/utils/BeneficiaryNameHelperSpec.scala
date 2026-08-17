@@ -18,8 +18,9 @@ package utils
 
 import org.scalatest.freespec.AnyFreeSpec
 import base.SpecBase
+import models.beneficiary.BeneficiaryType
 import models.{IndividualName, JourneyRole}
-import pages.beneficiary.BeneficiaryNamePage
+import pages.beneficiary.{BeneficiaryNamePage, BeneficiaryTypePage}
 
 class BeneficiaryNameHelperSpec extends AnyFreeSpec with SpecBase {
 
@@ -43,6 +44,18 @@ class BeneficiaryNameHelperSpec extends AnyFreeSpec with SpecBase {
 
     "must return None when the beneficiary name has not been answered" in {
       BeneficiaryNameHelper.fromUserAnswers(emptyUserAnswers, testIndex) mustBe None
+    }
+
+    "must return an organisation beneficiary's name" in {
+      val userAnswers = emptyUserAnswers
+        .set(BeneficiaryTypePage(testIndex), BeneficiaryType.Organisation)
+        .success
+        .value
+        .set(BeneficiaryNamePage(testIndex, JourneyRole.BeneficiaryOrganisation), name)
+        .success
+        .value
+
+      BeneficiaryNameHelper.fromUserAnswers(userAnswers, testIndex) mustBe Some("John Doe")
     }
   }
 
