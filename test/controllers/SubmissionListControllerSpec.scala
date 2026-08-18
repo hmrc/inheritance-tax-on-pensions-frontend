@@ -18,11 +18,12 @@ package controllers
 
 import play.api.test.FakeRequest
 import services.SubmissionListService
+import connectors.InheritanceTaxOnPensionsConnector
 import play.api.inject.bind
 import views.html.SubmissionListView
 import base.SpecBase
 import uk.gov.hmrc.http.UpstreamErrorResponse
-import models.{IhtpOverviewReport, IhtpOverviewResponse, IhtpOverviewSuccess}
+import models._
 import viewmodels.SubmissionListPagination
 import org.mockito.ArgumentMatchers.any
 import play.api.test.Helpers._
@@ -33,20 +34,21 @@ import scala.concurrent.Future
 import java.time.{Instant, LocalDate}
 
 class SubmissionListControllerSpec extends SpecBase {
-
   lazy val onPageLoadUrl: String = routes.SubmissionListController.onPageLoad(srn).url
+  lazy val onAmendUrl: String = routes.SubmissionListController.onAmend(srn, testUuid).url
 
   private val overviewReport = IhtpOverviewReport(
-    fbNumber = "119000004320",
-    submissionDate = Instant.parse("2026-04-10T16:12:49Z"),
-    paymentDueDate = LocalDate.of(2026, 2, 2),
+    uuid = None,
+    fbNumber = Some("119000004320"),
+    submissionDate = Some(Instant.parse("2026-04-10T16:12:49Z")),
+    paymentDueDate = Some(LocalDate.of(2026, 2, 2)),
     ihtpVersion = "001",
     inheritanceTaxReference = "A123456/25A",
     paymentReference = Some("A123456/25A629671"),
     title = Some("Dr"),
-    firstForename = "Peter",
-    secondForename = Some("Michael"),
-    surname = "Smith",
+    firstForename = Some("John"),
+    secondForename = Some("M"),
+    surname = Some("Doe"),
     nino = None,
     ihtpStatus = "Not reconciled"
   )
@@ -60,7 +62,7 @@ class SubmissionListControllerSpec extends SpecBase {
   private val pspSchemeDashboardUrl =
     s"http://localhost:8204/manage-pension-schemes/${srn.value}/dashboard/pension-scheme-details"
 
-  "Submission list controller" - {
+  "onPageLoad" - {
 
     "must return OK and the correct view for a GET" in {
       val mockSubmissionListService = mock[SubmissionListService]
@@ -178,8 +180,8 @@ class SubmissionListControllerSpec extends SpecBase {
       val mockSubmissionListService = mock[SubmissionListService]
       val reports = (1 to 16).map { index =>
         overviewReport.copy(
-          fbNumber = f"1190000043$index%02d",
-          firstForename = if (index % 2 == 0) "Jane" else "John",
+          fbNumber = Some(f"1190000043$index%02d"),
+          firstForename = Some(if (index % 2 == 0) "Jane" else "John"),
           secondForename = Some(s"Middle$index"),
           paymentReference = Some(f"PR$index%09d")
         )
@@ -212,6 +214,32 @@ class SubmissionListControllerSpec extends SpecBase {
           request,
           messages(application)
         ).toString
+      }
+    }
+  }
+
+  "onAmend" - {
+    "must redirect to the right page" in {
+      val mockInheritanceTaxOnPensionsConnector = mock[InheritanceTaxOnPensionsConnector]
+      when(mockInheritanceTaxOnPensionsConnector.setUserAnswers(any(), any(), any(), any(), any())(using any()))
+        .thenReturn(Future.successful(Right(emptyUserAnswers)))
+
+      val application = applicationBuilder(userAnswers = Some(emptyUserAnswers))
+        .overrides(
+          bind[InheritanceTaxOnPensionsConnector].toInstance(mockInheritanceTaxOnPensionsConnector)
+        )
+        .build()
+
+      running(application) {
+        val postRequest = FakeRequest(GET, onAmendUrl)
+          .withFormUrlEncodedBody()
+
+        val result = route(application, postRequest).value
+
+        status(result) mustEqual SEE_OTHER
+        redirectLocation(result).value mustEqual controllers.routes.InheritanceTaxReferenceController
+          .onPageLoad(srn, NormalMode)
+          .url
       }
     }
   }

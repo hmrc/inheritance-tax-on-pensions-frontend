@@ -16,7 +16,8 @@ GET         /account/signed-out                          controllers.auth.Signed
 
 GET         /unauthorised                                controllers.UnauthorisedController.onPageLoad()
 
-GET         /:srn/report-inheritance-tax-on-pension      controllers.SubmissionListController.onPageLoad(srn: Srn)
+GET         /:srn/report-inheritance-tax-on-pension       controllers.SubmissionListController.onPageLoad(srn: Srn)
+GET         /:srn/report-inheritance-tax-on-pension/:uuid controllers.SubmissionListController.onAmend(srn: Srn, uuid: String)
 
 GET         /:srn/start-report-you-will-need             controllers.WhatYouWillNeedController.onPageLoad(srn: Srn)
 POST        /:srn/start-report-you-will-need             controllers.WhatYouWillNeedController.onSubmit(srn: Srn)

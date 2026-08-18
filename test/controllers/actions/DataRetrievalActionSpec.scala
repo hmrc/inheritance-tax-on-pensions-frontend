@@ -33,7 +33,7 @@ import scala.concurrent.Future
 class DataRetrievalActionSpec extends SpecBase with MockitoSugar {
 
   val request: AllowedAccessRequest[AnyContentAsEmpty.type] = allowedAccessRequestGen(
-    FakeRequest().withSession("uuid" -> "test-uuid")
+    FakeRequest().withSession("uuid" -> testUuid)
   ).sample.value
 
   class Harness(userAnswersService: UserAnswersService) extends DataRetrievalActionImpl(userAnswersService) {
@@ -61,7 +61,7 @@ class DataRetrievalActionSpec extends SpecBase with MockitoSugar {
 
       val userAnswersService: UserAnswersService = mock[UserAnswersService]
       when(userAnswersService.fetch(any())(using any(), any()))
-        .thenReturn(Future(Right(UserAnswers("id", srnGen.sample.value.toString, "test-uuid"))))
+        .thenReturn(Future(Right(UserAnswers("id", srnGen.sample.value.toString, testUuid))))
       val action = new Harness(userAnswersService)
 
       "must build a userAnswers object and add it to the request" in {

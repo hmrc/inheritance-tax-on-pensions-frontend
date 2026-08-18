@@ -31,6 +31,7 @@ trait TestValues extends Generators {
   val testPaymentNoticeDate: LocalDate = LocalDate.of(2026, 2, 2)
   val testIndex: Int = 0
   val testInvalidBeneficiaryIndexes: List[Int] = List(-1, 30)
+  val testUuid = "test-uuid"
 
   val defaultSchemeDetails: SchemeDetails = SchemeDetails(
     schemeName = schemeName,

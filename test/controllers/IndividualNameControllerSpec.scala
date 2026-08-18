@@ -89,7 +89,7 @@ class IndividualNameControllerSpec extends SpecBase {
 
       s"must populate the view correctly on a GET when ${journeyRole.name} has previously been answered" in {
 
-        val userAnswers = UserAnswers(userAnswersId, srnGen.sample.value.toString, "test-uuid")
+        val userAnswers = UserAnswers(userAnswersId, srnGen.sample.value.toString, testUuid)
           .set(IndividualNamePage(journeyRole), individualName)
           .success
           .value
@@ -189,7 +189,7 @@ class IndividualNameControllerSpec extends SpecBase {
       val existingAnswers = UserAnswers(
         userAnswersId,
         srnGen.sample.value.toString,
-        "test-uuid",
+        testUuid,
         Json.obj(
           "prDetails" -> Json.obj(
             "individual" -> Json.obj(
@@ -281,7 +281,7 @@ class IndividualNameControllerSpec extends SpecBase {
       val existingAnswers = UserAnswers(
         userAnswersId,
         srnGen.sample.value.toString,
-        "test-uuid",
+        testUuid,
         Json.obj(
           "prDetails" -> Json.obj(
             "individual" -> Json.obj(
@@ -328,7 +328,7 @@ class IndividualNameControllerSpec extends SpecBase {
       val existingAnswers = UserAnswers(
         userAnswersId,
         srnGen.sample.value.toString,
-        "test-uuid",
+        testUuid,
         Json.obj(
           "prDetails" -> Json.obj(
             "organisation" -> Json.obj(

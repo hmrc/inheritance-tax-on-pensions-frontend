@@ -17,8 +17,8 @@
 package controllers
 
 import play.api.test.FakeRequest
-import play.api.test.Helpers.*
-import pages.{PaymentNoticeDatePage, PaymentReferencePage}
+import play.api.test.Helpers._
+import pages.{IHTPaymentReferencePage, PaymentNoticeDatePage}
 import views.html.ConfirmationView
 import base.SpecBase
 import models.{SchemeId, UserAnswers}
@@ -29,8 +29,13 @@ class ConfirmationControllerSpec extends SpecBase {
 
   val testSrn: SchemeId.Srn = srn
   val url: String = "http://localhost:8204/manage-pension-schemes/pension-scheme-summary/" + testSrn.value
-  val userAnswersWithDueDate: UserAnswers =
-    emptyUserAnswers.set(PaymentNoticeDatePage, testPaymentNoticeDate).success.value
+  val userAnswersWithDueDate: UserAnswers = emptyUserAnswers
+    .set(PaymentNoticeDatePage, testPaymentNoticeDate)
+    .success
+    .value
+    .set(IHTPaymentReferencePage, "A123456/25A629671")
+    .success
+    .value
   val formattedDate: String = testPaymentNoticeDate.plusDays(35).format(DateTimeFormatter.ofPattern("d MMM yyyy"))
 
   "Confirmation Controller" - {
@@ -55,7 +60,7 @@ class ConfirmationControllerSpec extends SpecBase {
     }
 
     "must return OK and the correct view for a GET when payment reference is present in user answers" in {
-      val userAnswersWithPaymentRef = userAnswersWithDueDate.set(PaymentReferencePage, "000012345321").success.value
+      val userAnswersWithPaymentRef = userAnswersWithDueDate.set(IHTPaymentReferencePage, "000012345321").success.value
 
       val application = applicationBuilder(userAnswers = Some(userAnswersWithPaymentRef), usesSession = true).build()
 

@@ -20,7 +20,7 @@ import services.SubmissionListService
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import config.FrontendAppConfig
 import controllers.actions.{AllowAccessActionProvider, IdentifierAction}
-import models.IhtpOverviewReport
+import models.{IhtpOverviewReport, NormalMode}
 import views.html.SubmissionListView
 import models.SchemeId.Srn
 import play.api.i18n.I18nSupport
@@ -72,6 +72,19 @@ class SubmissionListController @Inject() (
           Redirect(routes.JourneyRecoveryController.onPageLoad())
       }
     }
+
+  def onAmend(srn: Srn, uuid: String): Action[AnyContent] =
+    identify
+      .andThen(allowAccess(srn)) { implicit request =>
+        val updatedSession = if (request.session.get("uuid").contains(uuid)) {
+          request.session
+        } else {
+          request.session + ("uuid" -> uuid)
+        }
+
+        Redirect(controllers.routes.InheritanceTaxReferenceController.onPageLoad(srn, NormalMode))
+          .withSession(updatedSession)
+      }
 
   private def paginate(
     reports: Seq[IhtpOverviewReport]

@@ -49,5 +49,6 @@ class WhatYouWillNeedController @Inject() (
       .andThen(getData)
       .andThen(requireData) { implicit request =>
         Redirect(routes.InheritanceTaxReferenceController.onPageLoad(srn, NormalMode))
+          .removingFromSession("uuid")
       }
 }

@@ -67,9 +67,6 @@ class ReportSubmissionServiceSpec extends SpecBase {
       when(mockConnector.submitReport(any(), any(), any(), any(), any(), any())(using any()))
         .thenReturn(Future.successful(Right(response)))
 
-      when(mockUserAnswersService.set(any())(using any(), any()))
-        .thenReturn(Future.successful(Right(userAnswers)))
-
       whenReady(testService.submitReport(userAnswers)) { _ =>
         succeed
       }
@@ -142,7 +139,6 @@ class ReportSubmissionServiceSpec extends SpecBase {
 
   class Setup {
     val mockConnector: InheritanceTaxOnPensionsConnector = mock[InheritanceTaxOnPensionsConnector]
-    val mockUserAnswersService: UserAnswersService = mock[UserAnswersService]
-    val testService: ReportSubmissionService = new ReportSubmissionService(mockConnector, mockUserAnswersService)
+    val testService: ReportSubmissionService = new ReportSubmissionService(mockConnector)
   }
 }

@@ -55,7 +55,7 @@ class BirthDeathDatesControllerSpec extends SpecBase with MockitoSugar {
 
   lazy val birthDeathDatesRoute: String = routes.BirthDeathDatesController.onPageLoad(srn, NormalMode).url
 
-  override val emptyUserAnswers = UserAnswers(userAnswersId, srnGen.sample.value.toString, "test-uuid")
+  override val emptyUserAnswers = UserAnswers(userAnswersId, srnGen.sample.value.toString, testUuid)
   private val userAnswersWithDeceasedName = emptyUserAnswers
     .set(IndividualNamePage(JourneyRole.Deceased), nameOfDeceased)
     .success
