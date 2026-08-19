@@ -23,8 +23,9 @@ import views.html.beneficiary.RemoveBeneficiaryView
 import base.SpecBase
 import forms.beneficiary.RemoveBeneficiaryFormProvider
 import models.beneficiary.BeneficiaryType
-import models.JourneyRole
-import pages.beneficiary.{BeneficiaryNamePage, BeneficiaryTypePage}
+import models.{JourneyRole, NormalMode, UserAnswers}
+import pages.beneficiary._
+import org.mockito.ArgumentCaptor
 import org.mockito.ArgumentMatchers.any
 import play.api.test.Helpers._
 import org.mockito.Mockito._
@@ -43,6 +44,22 @@ class RemoveBeneficiaryControllerSpec extends SpecBase {
     .success
     .value
 
+  private val secondBeneficiaryName = individualName.copy(firstForename = "Jane", secondForename = None)
+
+  private val answersWithTwoBeneficiaries = answersWithBeneficiary
+    .set(BeneficiaryHasNinoPage(testIndex), true)
+    .success
+    .value
+    .set(BeneficiaryTypePage(testIndex + 1), BeneficiaryType.Individual)
+    .success
+    .value
+    .set(BeneficiaryNamePage(testIndex + 1, JourneyRole.BeneficiaryIndividual), secondBeneficiaryName)
+    .success
+    .value
+    .set(BeneficiaryHasNinoPage(testIndex + 1), false)
+    .success
+    .value
+
   "RemoveBeneficiaryController" - {
     "must return OK and the correct view for a GET" in {
       val application = applicationBuilder(userAnswers = Some(answersWithBeneficiary), usesSession = true).build()
@@ -58,7 +75,38 @@ class RemoveBeneficiaryControllerSpec extends SpecBase {
       }
     }
 
-    "must remove the beneficiary and return to the beneficiary list when Yes is submitted" in {
+    "must remove all data for the beneficiary and return to the beneficiary list when another remains" in {
+      val mockConnector = mock[InheritanceTaxOnPensionsConnector]
+      when(mockConnector.setUserAnswers(any(), any(), any(), any(), any())(using any()))
+        .thenReturn(Future.successful(Right(emptyUserAnswers)))
+      val application = applicationBuilder(userAnswers = Some(answersWithTwoBeneficiaries), usesSession = true)
+        .overrides(bind[InheritanceTaxOnPensionsConnector].toInstance(mockConnector))
+        .build()
+
+      running(application) {
+        val request = FakeRequest(POST, routeUrl).withFormUrlEncodedBody("value" -> "true")
+        val result = route(application, request).value
+
+        status(result) mustEqual SEE_OTHER
+        redirectLocation(result).value mustEqual routes.BeneficiaryListController.onPageLoad(srn).url
+
+        val userAnswersCaptor: ArgumentCaptor[UserAnswers] = ArgumentCaptor.forClass(classOf[UserAnswers])
+        verify(mockConnector, times(1))
+          .setUserAnswers(userAnswersCaptor.capture(), any(), any(), any(), any())(using any())
+
+        val savedAnswers = userAnswersCaptor.getValue
+        savedAnswers.get(BeneficiariesPage()).value.beneficiaries.size mustEqual 1
+        savedAnswers
+          .get(BeneficiaryNamePage(testIndex, JourneyRole.BeneficiaryIndividual))
+          .value mustEqual secondBeneficiaryName
+        savedAnswers.get(BeneficiaryHasNinoPage(testIndex)).value mustBe false
+        savedAnswers.get(BeneficiaryTypePage(testIndex + 1)) mustBe None
+        savedAnswers.get(BeneficiaryNamePage(testIndex + 1, JourneyRole.BeneficiaryIndividual)) mustBe None
+        savedAnswers.get(BeneficiaryHasNinoPage(testIndex + 1)) mustBe None
+      }
+    }
+
+    "must remove the last beneficiary and return to the beneficiaries known page" in {
       val mockConnector = mock[InheritanceTaxOnPensionsConnector]
       when(mockConnector.setUserAnswers(any(), any(), any(), any(), any())(using any()))
         .thenReturn(Future.successful(Right(emptyUserAnswers)))
@@ -71,8 +119,13 @@ class RemoveBeneficiaryControllerSpec extends SpecBase {
         val result = route(application, request).value
 
         status(result) mustEqual SEE_OTHER
-        redirectLocation(result).value mustEqual routes.BeneficiaryListController.onPageLoad(srn).url
-        verify(mockConnector, times(1)).setUserAnswers(any(), any(), any(), any(), any())(using any())
+        redirectLocation(result).value mustEqual
+          controllers.routes.AreBeneficiariesKnownController.onPageLoad(srn, NormalMode).url
+
+        val userAnswersCaptor: ArgumentCaptor[UserAnswers] = ArgumentCaptor.forClass(classOf[UserAnswers])
+        verify(mockConnector, times(1))
+          .setUserAnswers(userAnswersCaptor.capture(), any(), any(), any(), any())(using any())
+        userAnswersCaptor.getValue.get(BeneficiariesPage()).value.beneficiaries mustBe empty
       }
     }
 
@@ -111,6 +164,18 @@ class RemoveBeneficiaryControllerSpec extends SpecBase {
 
       running(application) {
         val result = route(application, FakeRequest(GET, routeUrl)).value
+
+        status(result) mustEqual SEE_OTHER
+        redirectLocation(result).value mustEqual controllers.routes.JourneyRecoveryController.onPageLoad().url
+      }
+    }
+
+    "must redirect to Journey Recovery on submit when the beneficiary name is missing" in {
+      val application = applicationBuilder(userAnswers = Some(emptyUserAnswers), usesSession = true).build()
+
+      running(application) {
+        val request = FakeRequest(POST, routeUrl).withFormUrlEncodedBody("value" -> "true")
+        val result = route(application, request).value
 
         status(result) mustEqual SEE_OTHER
         redirectLocation(result).value mustEqual controllers.routes.JourneyRecoveryController.onPageLoad().url

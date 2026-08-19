@@ -24,7 +24,8 @@ import models.SchemeId.Srn
 import views.html.beneficiary.RemoveBeneficiaryView
 import controllers.actions._
 import forms.beneficiary.RemoveBeneficiaryFormProvider
-import pages.beneficiary.BeneficiaryElementPage
+import models.NormalMode
+import pages.beneficiary.{BeneficiariesPage, BeneficiaryElementPage}
 import play.api.i18n.MessagesApi
 
 import scala.concurrent.{ExecutionContext, Future}
@@ -78,7 +79,16 @@ class RemoveBeneficiaryController @Inject() (
                   for {
                     updatedAnswers <- Future.fromTry(request.userAnswers.remove(BeneficiaryElementPage(index)))
                     _ <- userAnswersService.set(updatedAnswers)(using hc, request.request)
-                  } yield Redirect(routes.BeneficiaryListController.onPageLoad(srn))
+                  } yield {
+                    val nextPage = updatedAnswers.get(BeneficiariesPage()).map(_.beneficiaries) match {
+                      case Some(remainingBeneficiaries) if remainingBeneficiaries.nonEmpty =>
+                        routes.BeneficiaryListController.onPageLoad(srn)
+                      case _ =>
+                        controllers.routes.AreBeneficiariesKnownController.onPageLoad(srn, NormalMode)
+                    }
+
+                    Redirect(nextPage)
+                  }
                 } else {
                   Future.successful(Redirect(routes.BeneficiaryListController.onPageLoad(srn)))
                 }
