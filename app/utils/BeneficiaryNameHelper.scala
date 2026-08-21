@@ -16,15 +16,23 @@
 
 package utils
 
+import models.beneficiary.BeneficiaryType
 import models.{IndividualName, JourneyRole, UserAnswers}
-import pages.beneficiary.BeneficiaryNamePage
+import pages.beneficiary.{BeneficiaryNamePage, BeneficiaryTypePage}
 
 object BeneficiaryNameHelper {
 
   def fromUserAnswers(userAnswers: UserAnswers, index: Int): Option[String] =
-    userAnswers
-      .get(BeneficiaryNamePage(index, JourneyRole.BeneficiaryIndividual))
-      .map(displayName)
+    userAnswers.get(BeneficiaryTypePage(index)) match {
+      case Some(BeneficiaryType.Organisation) =>
+        userAnswers
+          .get(BeneficiaryNamePage(index, JourneyRole.BeneficiaryOrganisation))
+          .map(displayName)
+      case _ =>
+        userAnswers
+          .get(BeneficiaryNamePage(index, JourneyRole.BeneficiaryIndividual))
+          .map(displayName)
+    }
 
   def withName[A](userAnswers: UserAnswers, index: Int)(ifMissing: => A)(f: String => A): A =
     fromUserAnswers(userAnswers, index).fold(ifMissing)(f)

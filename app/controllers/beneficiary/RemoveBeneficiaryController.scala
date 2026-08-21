@@ -21,76 +21,78 @@ import utils.BeneficiaryNameHelper
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import controllers.IhtpBaseController
 import models.SchemeId.Srn
-import views.html.beneficiary.BeneficiaryHasNinoView
+import views.html.beneficiary.RemoveBeneficiaryView
 import controllers.actions._
-import forms.beneficiary.BeneficiaryHasNinoFormProvider
-import models.{CheckMode, Mode, NormalMode}
-import pages.beneficiary.BeneficiaryHasNinoPage
+import forms.beneficiary.RemoveBeneficiaryFormProvider
+import models.NormalMode
+import pages.beneficiary.{BeneficiariesPage, BeneficiaryElementPage}
 import play.api.i18n.MessagesApi
 
 import scala.concurrent.{ExecutionContext, Future}
 
 import javax.inject.Inject
 
-class BeneficiaryHasNinoController @Inject() (
+class RemoveBeneficiaryController @Inject() (
   override val messagesApi: MessagesApi,
   identify: IdentifierAction,
   allowAccess: AllowAccessActionWithSessionCacheProvider,
   getData: DataRetrievalAction,
   requireData: DataRequiredAction,
-  formProvider: BeneficiaryHasNinoFormProvider,
+  formProvider: RemoveBeneficiaryFormProvider,
   val controllerComponents: MessagesControllerComponents,
   userAnswersService: UserAnswersService,
-  view: BeneficiaryHasNinoView
+  view: RemoveBeneficiaryView
 )(implicit ec: ExecutionContext)
     extends IhtpBaseController {
 
   private val form = formProvider()
 
-  def onPageLoad(srn: Srn, index: Int, mode: Mode): Action[AnyContent] =
+  def onPageLoad(srn: Srn, index: Int): Action[AnyContent] =
     identify
       .andThen(allowAccess(srn))
       .andThen(getData)
       .andThen(requireData) { implicit request =>
         BeneficiaryNameHelper.withName(request.userAnswers, index)(
-          logAndJourneyRecovery("Beneficiary name is missing, cannot load the beneficiary NINO page")
+          logAndJourneyRecovery("Beneficiary name is missing, cannot load the remove beneficiary page")
         ) { beneficiaryName =>
-          val preparedForm = request.userAnswers.get(BeneficiaryHasNinoPage(index)) match {
-            case None => form
-            case Some(value) => form.fill(value)
-          }
-
-          Ok(view(preparedForm, srn, index, mode, beneficiaryName))
+          Ok(view(form, srn, index, beneficiaryName))
         }
       }
 
-  def onSubmit(srn: Srn, index: Int, mode: Mode): Action[AnyContent] =
+  def onSubmit(srn: Srn, index: Int): Action[AnyContent] =
     identify
       .andThen(allowAccess(srn))
       .andThen(getData)
       .andThen(requireData)
       .async { implicit request =>
-        BeneficiaryNameHelper.withName(request.userAnswers, index) {
+        BeneficiaryNameHelper.withName(request.userAnswers, index)(
           Future.successful(
-            logAndJourneyRecovery("Beneficiary name is missing, cannot submit the beneficiary NINO page")
+            logAndJourneyRecovery("Beneficiary name is missing, cannot submit the remove beneficiary page")
           )
-        } { beneficiaryName =>
+        ) { beneficiaryName =>
           form
             .bindFromRequest()
             .fold(
-              formWithErrors => Future.successful(BadRequest(view(formWithErrors, srn, index, mode, beneficiaryName))),
-              value =>
-                for {
-                  updatedAnswers <- Future.fromTry(request.userAnswers.set(BeneficiaryHasNinoPage(index), value))
-                  _ <- userAnswersService.set(updatedAnswers)(using hc, request.request)
-                } yield Redirect(nextPage(srn, mode))
+              formWithErrors => Future.successful(BadRequest(view(formWithErrors, srn, index, beneficiaryName))),
+              removeBeneficiary =>
+                if (removeBeneficiary) {
+                  for {
+                    updatedAnswers <- Future.fromTry(request.userAnswers.remove(BeneficiaryElementPage(index)))
+                    _ <- userAnswersService.set(updatedAnswers)(using hc, request.request)
+                  } yield {
+                    val nextPage = updatedAnswers.get(BeneficiariesPage()).map(_.beneficiaries) match {
+                      case Some(remainingBeneficiaries) if remainingBeneficiaries.nonEmpty =>
+                        routes.BeneficiaryListController.onPageLoad(srn)
+                      case _ =>
+                        controllers.routes.AreBeneficiariesKnownController.onPageLoad(srn, NormalMode)
+                    }
+
+                    Redirect(nextPage)
+                  }
+                } else {
+                  Future.successful(Redirect(routes.BeneficiaryListController.onPageLoad(srn)))
+                }
             )
         }
       }
-
-  private def nextPage(srn: Srn, mode: Mode) =
-    mode match {
-      case NormalMode => routes.BeneficiaryListController.onPageLoad(srn)
-      case CheckMode => controllers.routes.CheckYourAnswersController.onPageLoad(srn)
-    }
 }

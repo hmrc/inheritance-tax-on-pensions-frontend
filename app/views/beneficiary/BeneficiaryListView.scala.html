@@ -1,0 +1,85 @@
+@*
+ * Copyright 2026 HM Revenue & Customs
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *@
+
+@import models.SchemeId.Srn
+@import viewmodels.LegendSize
+@import viewmodels.beneficiary.BeneficiaryListItem
+
+@this(
+    layout: templates.Layout,
+    formHelper: FormWithCSRF,
+    govukErrorSummary: GovukErrorSummary,
+    govukRadios: GovukRadios,
+    govukButton: GovukButton
+)
+
+@(form: Form[?], srn: Srn, beneficiaries: Seq[BeneficiaryListItem], count: Int)(implicit request: Request[?], messages: Messages)
+
+@headingKey = @{ if (count == 1) "beneficiaryList.heading.one" else "beneficiaryList.heading" }
+@heading = @{ messages(headingKey, count) }
+
+@layout(pageTitle = title(form, heading)) {
+
+    @formHelper(action = controllers.beneficiary.routes.BeneficiaryListController.onSubmit(srn), Symbol("autoComplete") -> "off") {
+
+        @if(form.errors.nonEmpty) {
+            @govukErrorSummary(ErrorSummaryViewModel(form))
+        }
+
+        <h1 class="govuk-heading-l">@heading</h1>
+
+        @if(beneficiaries.nonEmpty) {
+            <div class="govuk-form-group">
+                <dl class="govuk-summary-list hmrc-list-with-actions hmrc-list-with-actions--short">
+                    @for(beneficiary <- beneficiaries) {
+                        <div class="govuk-summary-list__row">
+                            <dt class="govuk-summary-list__key govuk-!-font-weight-regular hmrc-summary-list__key">
+                                @beneficiary.name
+                            </dt>
+                            <dd class="govuk-summary-list__actions hmrc-summary-list__actions">
+                                <ul class="govuk-summary-list__actions-list">
+                                    <li class="govuk-summary-list__actions-list-item">
+                                        <a class="govuk-link" href="@beneficiary.changeUrl">
+                                            <span aria-hidden="true">@messages("site.change")</span>
+                                            <span class="govuk-visually-hidden">@messages("beneficiaryList.change.hidden", beneficiary.name)</span>
+                                        </a>
+                                    </li>
+                                    <li class="govuk-summary-list__actions-list-item">
+                                        <a class="govuk-link" href="@beneficiary.removeUrl">
+                                            <span aria-hidden="true">@messages("site.remove")</span>
+                                            <span class="govuk-visually-hidden">@messages("beneficiaryList.remove.hidden", beneficiary.name)</span>
+                                        </a>
+                                    </li>
+                                </ul>
+                            </dd>
+                        </div>
+                    }
+                </dl>
+            </div>
+        }
+
+        @govukRadios(
+            RadiosViewModel.yesNo(
+                field = form("value"),
+                legend = LegendViewModel(messages("beneficiaryList.question")).withCssClass(LegendSize.Medium.toString)
+            )
+        )
+
+        @govukButton(
+            ButtonViewModel(messages("site.saveAndContinue"))
+        )
+    }
+}

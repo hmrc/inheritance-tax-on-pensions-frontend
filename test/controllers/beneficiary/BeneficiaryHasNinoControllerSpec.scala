@@ -81,7 +81,7 @@ class BeneficiaryHasNinoControllerSpec extends SpecBase {
     }
 
     Seq(true, false).foreach { answer =>
-      s"must save a $answer answer and redirect to the CYA page" in {
+      s"must save a $answer answer and redirect to the beneficiary list in NormalMode" in {
         val mockConnector = mock[InheritanceTaxOnPensionsConnector]
         when(mockConnector.setUserAnswers(any(), any(), any(), any(), any())(using any()))
           .thenReturn(Future.successful(Right(answersWithName)))
@@ -92,6 +92,28 @@ class BeneficiaryHasNinoControllerSpec extends SpecBase {
 
         running(application) {
           val request = FakeRequest(POST, beneficiaryHasNinoRoute).withFormUrlEncodedBody("value" -> answer.toString)
+          val result = route(application, request).value
+
+          status(result) mustEqual SEE_OTHER
+          redirectLocation(result).value mustEqual routes.BeneficiaryListController.onPageLoad(srn).url
+          verify(mockConnector, times(1)).setUserAnswers(any(), any(), any(), any(), any())(using any())
+        }
+      }
+
+      s"must save a $answer answer and redirect to CYA in CheckMode" in {
+        val mockConnector = mock[InheritanceTaxOnPensionsConnector]
+        when(mockConnector.setUserAnswers(any(), any(), any(), any(), any())(using any()))
+          .thenReturn(Future.successful(Right(answersWithName)))
+
+        val application = applicationBuilder(userAnswers = Some(answersWithName), usesSession = true)
+          .overrides(bind[InheritanceTaxOnPensionsConnector].toInstance(mockConnector))
+          .build()
+
+        running(application) {
+          val request = FakeRequest(
+            POST,
+            routes.BeneficiaryHasNinoController.onSubmit(srn, testIndex, CheckMode).url
+          ).withFormUrlEncodedBody("value" -> answer.toString)
           val result = route(application, request).value
 
           status(result) mustEqual SEE_OTHER
