@@ -42,7 +42,7 @@ class SubmissionListControllerSpec extends SpecBase {
     fbNumber = Some("119000004320"),
     submissionDate = Some(Instant.parse("2026-04-10T16:12:49Z")),
     paymentDueDate = Some(LocalDate.of(2026, 2, 2)),
-    ihtpVersion = "001",
+    ihtVersion = "001",
     inheritanceTaxReference = "A123456/25A",
     paymentReference = Some("A123456/25A629671"),
     title = Some("Dr"),

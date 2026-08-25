@@ -37,7 +37,7 @@ case class IhtpOverviewReport(
   fbNumber: Option[String],
   submissionDate: Option[Instant],
   paymentDueDate: Option[LocalDate],
-  ihtpVersion: String,
+  ihtVersion: String,
   inheritanceTaxReference: String,
   paymentReference: Option[String],
   title: Option[String],
