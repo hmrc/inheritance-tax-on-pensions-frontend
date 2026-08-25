@@ -38,6 +38,18 @@ class OrganisationNameControllerSpec extends SpecBase with MockitoSugar {
   private val formProvider = new OrganisationNameFormProvider()
   private val form = formProvider()
 
+  private def userAnswersWithOrganisationDetails(address: Option[models.PrAddress]) = {
+    val details = Json.obj("organisationName" -> testOrganisationName) ++ Json.toJsObject(individualName)
+
+    emptyUserAnswers.copy(
+      data = Json.obj(
+        "prDetails" -> Json.obj(
+          "organisation" -> address.fold(details)(details ++ Json.toJsObject(_))
+        )
+      )
+    )
+  }
+
   lazy val organisationNameRoute: String = routes.OrganisationNameController.onPageLoad(srn, NormalMode).url
 
   "OrganisationName Controller" - {
@@ -113,7 +125,7 @@ class OrganisationNameControllerSpec extends SpecBase with MockitoSugar {
       }
     }
 
-    "must redirect to Check Your Answers when valid data is submitted in CheckMode and organisation PR name is present" in {
+    "must redirect to address lookup when valid data is submitted in CheckMode and the address is missing" in {
 
       val mockSessionRepository = mock[SessionMinimalDetailsRepository]
       val mockConnector = mock[InheritanceTaxOnPensionsConnector]
@@ -122,19 +134,7 @@ class OrganisationNameControllerSpec extends SpecBase with MockitoSugar {
       when(mockConnector.setUserAnswers(any(), any(), any(), any(), any())(using any()))
         .thenReturn(Future.successful(Right(emptyUserAnswers)))
 
-      val userAnswersWithOrgDetails = emptyUserAnswers.copy(
-        data = Json.obj(
-          "prDetails" -> Json.obj(
-            "organisation" -> Json.obj(
-              "organisationName" -> "Test Organisation",
-              "title" -> "Mr",
-              "firstForename" -> "John",
-              "secondForename" -> "William",
-              "surname" -> "Doe"
-            )
-          )
-        )
-      )
+      val userAnswersWithOrgDetails = userAnswersWithOrganisationDetails(None)
 
       val application =
         applicationBuilder(userAnswers = Some(userAnswersWithOrgDetails), usesSession = true)
@@ -148,6 +148,37 @@ class OrganisationNameControllerSpec extends SpecBase with MockitoSugar {
         val request =
           FakeRequest(POST, routes.OrganisationNameController.onPageLoad(srn, CheckMode).url)
             .withFormUrlEncodedBody(("value", "answer"))
+
+        val result = route(application, request).value
+
+        status(result) mustEqual SEE_OTHER
+        redirectLocation(result).value mustEqual routes.AddressLookupStartController
+          .start(srn, CheckMode, JourneyRole.PrOrganisation)
+          .url
+      }
+    }
+
+    "must redirect to Check Your Answers when valid data is submitted in CheckMode and PR details are complete" in {
+
+      val mockSessionRepository = mock[SessionMinimalDetailsRepository]
+      val mockConnector = mock[InheritanceTaxOnPensionsConnector]
+
+      when(mockSessionRepository.set(any())).thenReturn(Future.successful(true))
+      when(mockConnector.setUserAnswers(any(), any(), any(), any(), any())(using any()))
+        .thenReturn(Future.successful(Right(emptyUserAnswers)))
+
+      val userAnswers = userAnswersWithOrganisationDetails(Some(testPrAddress))
+
+      val application = applicationBuilder(userAnswers = Some(userAnswers), usesSession = true)
+        .overrides(
+          bind[SessionMinimalDetailsRepository].toInstance(mockSessionRepository),
+          bind[InheritanceTaxOnPensionsConnector].toInstance(mockConnector)
+        )
+        .build()
+
+      running(application) {
+        val request = FakeRequest(POST, routes.OrganisationNameController.onPageLoad(srn, CheckMode).url)
+          .withFormUrlEncodedBody(("value", "answer"))
 
         val result = route(application, request).value
 

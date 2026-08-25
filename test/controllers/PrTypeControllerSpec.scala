@@ -18,7 +18,7 @@ package controllers
 
 import play.api.test.FakeRequest
 import connectors.InheritanceTaxOnPensionsConnector
-import pages.{IndividualNamePage, OrganisationNamePage, PrTypePage}
+import pages._
 import play.api.inject.bind
 import views.html.PrTypeView
 import base.SpecBase
@@ -38,10 +38,6 @@ class PrTypeControllerSpec extends SpecBase {
 
   val formProvider = new PrTypeFormProvider()
   val form: Form[PrType] = formProvider()
-  val prIndividualName: IndividualName = IndividualName(Some("Mr"), "John", Some("William"), "Doe")
-  val prIndividualAddress: PrAddress =
-    PrAddress("33 Fake Street", Some("Fake Area"), None, Some("Fakeville"), Some("ZZ1 1ZZ"), "GB")
-
   lazy val prTypeRoute: String = routes.PrTypeController.onPageLoad(srn, NormalMode).url
 
   "PrTypeController Controller" - {
@@ -138,10 +134,13 @@ class PrTypeControllerSpec extends SpecBase {
 
     "must clear PR individual details when Organisation is submitted" in {
 
-      val userAnswers = emptyUserAnswers
-        .set(IndividualNamePage(JourneyRole.PrIndividual), prIndividualName)
-        .success
-        .value
+      val userAnswers = emptyUserAnswers.copy(
+        data = Json.obj(
+          "prDetails" -> Json.obj(
+            "individual" -> (Json.toJsObject(individualName) ++ Json.toJsObject(testPrAddress))
+          )
+        )
+      )
 
       val mockInheritanceTaxOnPensionsConnector = mock[InheritanceTaxOnPensionsConnector]
       when(mockInheritanceTaxOnPensionsConnector.setUserAnswers(any(), any(), any(), any(), any())(using any()))
@@ -167,6 +166,7 @@ class PrTypeControllerSpec extends SpecBase {
           .setUserAnswers(userAnswersCaptor.capture(), any(), any(), any(), any())(using any())
 
         userAnswersCaptor.getValue.get(IndividualNamePage(JourneyRole.PrIndividual)) mustBe None
+        userAnswersCaptor.getValue.get(PrIndividualAddressPage) mustBe None
       }
     }
 
@@ -196,7 +196,7 @@ class PrTypeControllerSpec extends SpecBase {
       }
     }
 
-    "must redirect to Check Your Answers when valid Organisation data is submitted in CheckMode and PR name details are present" in {
+    "must redirect to address lookup when Organisation data is submitted in CheckMode and the address is missing" in {
 
       val mockInheritanceTaxOnPensionsConnector = mock[InheritanceTaxOnPensionsConnector]
       when(mockInheritanceTaxOnPensionsConnector.setUserAnswers(any(), any(), any(), any(), any())(using any()))
@@ -206,13 +206,8 @@ class PrTypeControllerSpec extends SpecBase {
         .copy(
           data = Json.obj(
             "prDetails" -> Json.obj(
-              "organisation" -> Json.obj(
-                "organisationName" -> "Test Organisation",
-                "title" -> "Mr",
-                "firstForename" -> "John",
-                "secondForename" -> "William",
-                "surname" -> "Doe"
-              )
+              "organisation" -> (Json.obj("organisationName" -> testOrganisationName)
+                ++ Json.toJsObject(individualName))
             )
           )
         )
@@ -227,6 +222,39 @@ class PrTypeControllerSpec extends SpecBase {
         val request =
           FakeRequest(POST, routes.PrTypeController.onSubmit(srn, CheckMode).url)
             .withFormUrlEncodedBody(("value", PrType.Organisation.toString))
+
+        val result = route(application, request).value
+
+        status(result) mustEqual SEE_OTHER
+        redirectLocation(result).value mustEqual routes.AddressLookupStartController
+          .start(srn, CheckMode, JourneyRole.PrOrganisation)
+          .url
+      }
+    }
+
+    "must redirect to Check Your Answers when complete Organisation data is submitted in CheckMode" in {
+
+      val mockConnector = mock[InheritanceTaxOnPensionsConnector]
+      when(mockConnector.setUserAnswers(any(), any(), any(), any(), any())(using any()))
+        .thenReturn(Future.successful(Right(emptyUserAnswers)))
+
+      val userAnswers = emptyUserAnswers.copy(
+        data = Json.obj(
+          "prDetails" -> Json.obj(
+            "organisation" -> (Json.obj("organisationName" -> testOrganisationName)
+              ++ Json.toJsObject(individualName)
+              ++ Json.toJsObject(testPrAddress))
+          )
+        )
+      )
+
+      val application = applicationBuilder(userAnswers = Some(userAnswers), usesSession = true)
+        .overrides(bind[InheritanceTaxOnPensionsConnector].toInstance(mockConnector))
+        .build()
+
+      running(application) {
+        val request = FakeRequest(POST, routes.PrTypeController.onSubmit(srn, CheckMode).url)
+          .withFormUrlEncodedBody(("value", PrType.Organisation.toString))
 
         val result = route(application, request).value
 
@@ -261,6 +289,34 @@ class PrTypeControllerSpec extends SpecBase {
       }
     }
 
+    "must redirect to address lookup when Individual data is submitted in CheckMode and the address is missing" in {
+
+      val userAnswers = emptyUserAnswers
+        .set(IndividualNamePage(JourneyRole.PrIndividual), individualName)
+        .success
+        .value
+
+      val mockConnector = mock[InheritanceTaxOnPensionsConnector]
+      when(mockConnector.setUserAnswers(any(), any(), any(), any(), any())(using any()))
+        .thenReturn(Future.successful(Right(emptyUserAnswers)))
+
+      val application = applicationBuilder(userAnswers = Some(userAnswers), usesSession = true)
+        .overrides(bind[InheritanceTaxOnPensionsConnector].toInstance(mockConnector))
+        .build()
+
+      running(application) {
+        val request = FakeRequest(POST, routes.PrTypeController.onSubmit(srn, CheckMode).url)
+          .withFormUrlEncodedBody(("value", PrType.Individual.toString))
+
+        val result = route(application, request).value
+
+        status(result) mustEqual SEE_OTHER
+        redirectLocation(result).value mustEqual routes.AddressLookupStartController
+          .start(srn, CheckMode, JourneyRole.PrIndividual)
+          .url
+      }
+    }
+
     "must clear Organisation details when switching from Organisation to Individual" in {
       val mockSessionRepository = mock[SessionMinimalDetailsRepository]
       val mockConnector = mock[InheritanceTaxOnPensionsConnector]
@@ -273,13 +329,9 @@ class PrTypeControllerSpec extends SpecBase {
         .copy(
           data = Json.obj(
             "prDetails" -> Json.obj(
-              "organisation" -> Json.obj(
-                "organisationName" -> "Test Organisation",
-                "title" -> "Mr",
-                "firstForename" -> "John",
-                "secondForename" -> "William",
-                "surname" -> "Doe"
-              )
+              "organisation" -> (Json.obj("organisationName" -> testOrganisationName)
+                ++ Json.toJsObject(individualName)
+                ++ Json.toJsObject(testPrAddress))
             )
           )
         )
@@ -308,7 +360,8 @@ class PrTypeControllerSpec extends SpecBase {
         verify(mockConnector).setUserAnswers(
           argThat { userAnswers =>
             userAnswers.get(OrganisationNamePage).isEmpty &&
-            userAnswers.get(IndividualNamePage(JourneyRole.PrOrganisation)).isEmpty
+            userAnswers.get(IndividualNamePage(JourneyRole.PrOrganisation)).isEmpty &&
+            userAnswers.get(PrOrganisationAddressPage).isEmpty
           },
           any(),
           any(),
@@ -323,7 +376,7 @@ class PrTypeControllerSpec extends SpecBase {
       val userAnswers = emptyUserAnswers.copy(
         data = Json.obj(
           "prDetails" -> Json.obj(
-            "individual" -> (Json.toJsObject(prIndividualName) ++ Json.toJsObject(prIndividualAddress))
+            "individual" -> (Json.toJsObject(individualName) ++ Json.toJsObject(testPrAddress))
           )
         )
       )

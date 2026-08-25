@@ -60,10 +60,13 @@ trait TestValues extends Generators {
   )
   val individualName: IndividualName = IndividualName(
     title = Some("Mr"),
-    firstForename = "John",
-    secondForename = Some("William"),
-    surname = "Doe"
+    firstForename = "Firstname",
+    secondForename = Some("Middlename"),
+    surname = "Lastname"
   )
+  val testOrganisationName = "Testdata Company Ltd"
+  val testPrAddress: PrAddress =
+    PrAddress("1 ABCDE Street", None, None, Some("FGHIJ Town"), Some("AA1 1AA"), "GB")
   val individualNameFormatted: String = s"${individualName.firstForename} ${individualName.surname}"
 
 }

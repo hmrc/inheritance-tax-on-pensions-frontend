@@ -18,7 +18,7 @@ package controllers
 
 import services.UserAnswersService
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
-import pages.{IndividualNamePage, OrganisationNamePage}
+import pages.{IndividualNamePage, OrganisationNamePage, PrOrganisationAddressPage}
 import controllers.actions._
 import forms.OrganisationNameFormProvider
 import models._
@@ -84,6 +84,8 @@ class OrganisationNameController @Inject() (
       case NormalMode => routes.IndividualNameController.onPageLoad(srn, NormalMode, JourneyRole.PrOrganisation)
       case CheckMode if userAnswers.get(IndividualNamePage(JourneyRole.PrOrganisation)).isEmpty =>
         routes.IndividualNameController.onPageLoad(srn, CheckMode, JourneyRole.PrOrganisation)
+      case CheckMode if userAnswers.get(PrOrganisationAddressPage).isEmpty =>
+        routes.AddressLookupStartController.start(srn, CheckMode, JourneyRole.PrOrganisation)
       case CheckMode => routes.CheckYourAnswersController.onPageLoad(srn)
     }
 }

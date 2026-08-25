@@ -40,7 +40,7 @@ class BeneficiaryListControllerSpec extends SpecBase {
 
   private lazy val listItems = Seq(
     BeneficiaryListItem(
-      name = "John Doe",
+      name = individualNameFormatted,
       changeUrl = routes.BeneficiaryNameController
         .onPageLoad(srn, CheckMode, testIndex, JourneyRole.BeneficiaryIndividual)
         .url,

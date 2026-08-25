@@ -35,12 +35,21 @@ class IndividualNameControllerSpec extends SpecBase {
 
   private val formProvider = new IndividualNameFormProvider()
 
-  private val individualName = IndividualName(
-    title = Some("Mr"),
-    firstForename = "John",
-    secondForename = Some("William"),
-    surname = "Doe"
-  )
+  private def userAnswersWithPrDetails(journeyRole: JourneyRole, address: Option[PrAddress]) = {
+    val details = journeyRole match {
+      case JourneyRole.PrOrganisation =>
+        Json.obj("organisationName" -> testOrganisationName) ++ Json.toJsObject(individualName)
+      case _ => Json.toJsObject(individualName)
+    }
+
+    emptyUserAnswers.copy(
+      data = Json.obj(
+        "prDetails" -> Json.obj(
+          journeyRole.name -> address.fold(details)(details ++ Json.toJsObject(_))
+        )
+      )
+    )
+  }
 
   private case class JourneyRoleTestCase(
     journeyRole: JourneyRole,
@@ -154,8 +163,14 @@ class IndividualNameControllerSpec extends SpecBase {
 
           val result = route(application, request).value
 
+          val expectedNextPage = journeyRole match {
+            case JourneyRole.PrIndividual | JourneyRole.PrOrganisation =>
+              routes.AddressLookupStartController.start(srn, CheckMode, journeyRole).url
+            case _ => routes.CheckYourAnswersController.onPageLoad(srn).url
+          }
+
           status(result) mustEqual SEE_OTHER
-          redirectLocation(result).value mustEqual routes.CheckYourAnswersController.onPageLoad(srn).url
+          redirectLocation(result).value mustEqual expectedNextPage
         }
       }
 
@@ -186,25 +201,7 @@ class IndividualNameControllerSpec extends SpecBase {
 
     "must redirect to Check Your Answers when PR individual name is submitted in CheckMode and address is present" in {
 
-      val existingAnswers = UserAnswers(
-        userAnswersId,
-        srnGen.sample.value.toString,
-        testUuid,
-        Json.obj(
-          "prDetails" -> Json.obj(
-            "individual" -> Json.obj(
-              "title" -> "Mr",
-              "firstForename" -> "John",
-              "secondForename" -> "William",
-              "surname" -> "Doe",
-              "addressLine1" -> "1 ABCDE Street",
-              "addressLine2" -> "FGHIJ Town",
-              "ukPostcode" -> "ZZ99 1AA",
-              "country" -> "GB"
-            )
-          )
-        )
-      )
+      val existingAnswers = userAnswersWithPrDetails(JourneyRole.PrIndividual, Some(testPrAddress))
 
       val mockConnector = mock[InheritanceTaxOnPensionsConnector]
       when(mockConnector.setUserAnswers(any(), any(), any(), any(), any())(using any()))
@@ -217,6 +214,30 @@ class IndividualNameControllerSpec extends SpecBase {
       running(application) {
         val request =
           FakeRequest(POST, routes.IndividualNameController.onSubmit(srn, CheckMode, JourneyRole.PrIndividual).url)
+            .withFormUrlEncodedBody(validFormData*)
+
+        val result = route(application, request).value
+
+        status(result) mustEqual SEE_OTHER
+        redirectLocation(result).value mustEqual routes.CheckYourAnswersController.onPageLoad(srn).url
+      }
+    }
+
+    "must redirect to Check Your Answers when organisation PR name is submitted in CheckMode and address is present" in {
+
+      val existingAnswers = userAnswersWithPrDetails(JourneyRole.PrOrganisation, Some(testPrAddress))
+
+      val mockConnector = mock[InheritanceTaxOnPensionsConnector]
+      when(mockConnector.setUserAnswers(any(), any(), any(), any(), any())(using any()))
+        .thenReturn(Future.successful(Right(emptyUserAnswers)))
+
+      val application = applicationBuilder(userAnswers = Some(existingAnswers), usesSession = true)
+        .overrides(bind[InheritanceTaxOnPensionsConnector].toInstance(mockConnector))
+        .build()
+
+      running(application) {
+        val request =
+          FakeRequest(POST, routes.IndividualNameController.onSubmit(srn, CheckMode, JourneyRole.PrOrganisation).url)
             .withFormUrlEncodedBody(validFormData*)
 
         val result = route(application, request).value
@@ -270,7 +291,8 @@ class IndividualNameControllerSpec extends SpecBase {
         controller.nextPage(
           srn,
           NormalMode,
-          JourneyRole.Unknown
+          JourneyRole.Unknown,
+          emptyUserAnswers
         ) mustEqual routes.JourneyRecoveryController
           .onPageLoad()
       }
