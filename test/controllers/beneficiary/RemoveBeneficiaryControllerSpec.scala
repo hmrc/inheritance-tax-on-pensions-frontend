@@ -44,7 +44,7 @@ class RemoveBeneficiaryControllerSpec extends SpecBase {
     .success
     .value
 
-  private val secondBeneficiaryName = individualName.copy(firstForename = "Jane", secondForename = None)
+  private val secondBeneficiaryName = individualName.copy(firstForename = "Testnamefirst", secondForename = None)
 
   private val answersWithTwoBeneficiaries = answersWithBeneficiary
     .set(BeneficiaryHasNinoPage(testIndex), true)
@@ -71,7 +71,7 @@ class RemoveBeneficiaryControllerSpec extends SpecBase {
 
         status(result) mustEqual OK
         contentAsString(result) mustEqual
-          view(form, srn, testIndex, "John Doe")(using request, messages(application)).toString
+          view(form, srn, testIndex, individualNameFormatted)(using request, messages(application)).toString
       }
     }
 
@@ -155,7 +155,10 @@ class RemoveBeneficiaryControllerSpec extends SpecBase {
 
         status(result) mustEqual BAD_REQUEST
         contentAsString(result) mustEqual
-          view(form.bind(Map("value" -> "")), srn, testIndex, "John Doe")(using request, messages(application)).toString
+          view(form.bind(Map("value" -> "")), srn, testIndex, individualNameFormatted)(using
+            request,
+            messages(application)
+          ).toString
       }
     }
 
