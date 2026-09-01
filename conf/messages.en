@@ -352,6 +352,12 @@ beneficiaryIndividualName.error.surname.pattern = Enter a valid last name
 beneficiaryIndividualName.checkYourAnswersLabel = Full name of beneficiary
 beneficiaryIndividualName.checkYourAnswersLabel.hidden = full name of beneficiary
 
+beneficiaryTrustName.heading = Enter the name of the trust
+beneficiaryTrustName.error.required = Enter the name of the organisation or trust
+beneficiaryTrustName.error.length = The name of the organisation or trust should be 160 characters or less
+beneficiaryTrustName.checkYourAnswersLabel = Name of trust
+beneficiaryTrustName.change.hidden = the name of the trust
+
 beneficiaryList.heading.one = You have added 1 beneficiary
 beneficiaryList.heading = You have added {0} beneficiaries
 beneficiaryList.question = Do you need to add another beneficiary?

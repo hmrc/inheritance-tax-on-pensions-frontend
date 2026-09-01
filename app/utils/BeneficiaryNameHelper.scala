@@ -18,16 +18,14 @@ package utils
 
 import models.beneficiary.BeneficiaryType
 import models.{IndividualName, JourneyRole, UserAnswers}
-import pages.beneficiary.{BeneficiaryNamePage, BeneficiaryTypePage}
+import pages.beneficiary.{BeneficiaryNamePage, BeneficiaryTrustNamePage, BeneficiaryTypePage}
 
 object BeneficiaryNameHelper {
 
   def fromUserAnswers(userAnswers: UserAnswers, index: Int): Option[String] =
     userAnswers.get(BeneficiaryTypePage(index)) match {
       case Some(BeneficiaryType.Organisation) =>
-        userAnswers
-          .get(BeneficiaryNamePage(index, JourneyRole.BeneficiaryOrganisation))
-          .map(displayName)
+        userAnswers.get(BeneficiaryTrustNamePage(index))
       case _ =>
         userAnswers
           .get(BeneficiaryNamePage(index, JourneyRole.BeneficiaryIndividual))

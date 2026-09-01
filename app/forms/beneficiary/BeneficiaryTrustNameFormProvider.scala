@@ -14,17 +14,18 @@
  * limitations under the License.
  */
 
-package models.beneficiary
+package forms.beneficiary
 
-import play.api.libs.json.{Json, OFormat}
-import models.IndividualName
+import forms.mappings.Mappings
+import play.api.data.Form
 
-case class BeneficiaryDetail(
-  individual: Option[IndividualName] = None,
-  organisation: Option[BeneficiaryTrustDetails] = None
-)
+import javax.inject.Inject
 
-object BeneficiaryDetail {
-  implicit val BeneficiaryDetailFormat: OFormat[BeneficiaryDetail] =
-    Json.format[BeneficiaryDetail]
+class BeneficiaryTrustNameFormProvider @Inject() extends Mappings {
+
+  def apply(): Form[String] =
+    Form(
+      "value" -> text("beneficiaryTrustName.error.required")
+        .verifying(maxLength(160, "beneficiaryTrustName.error.length"))
+    )
 }

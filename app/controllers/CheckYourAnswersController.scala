@@ -97,6 +97,11 @@ class CheckYourAnswersController @Inject() (
                 rows = Seq(
                   BeneficiaryTypeSummary.row(srn, index, userAnswers),
                   BeneficiaryIndividualNameSummary.row(srn, index, userAnswers),
+                  viewmodels.CheckAnswers.beneficiary.BeneficiaryTrustNameSummary.row(
+                    srn,
+                    index,
+                    userAnswers
+                  ),
                   BeneficiaryHasNinoSummary.row(srn, index, userAnswers)
                 ).flatten
               ).withCard(

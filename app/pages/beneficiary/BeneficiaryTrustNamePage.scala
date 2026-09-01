@@ -14,17 +14,15 @@
  * limitations under the License.
  */
 
-package models.beneficiary
+package pages.beneficiary
 
-import play.api.libs.json.{Json, OFormat}
-import models.IndividualName
+import pages.QuestionPage
+import play.api.libs.json.JsPath
 
-case class BeneficiaryDetail(
-  individual: Option[IndividualName] = None,
-  organisation: Option[BeneficiaryTrustDetails] = None
-)
+case class BeneficiaryTrustNamePage(index: Int) extends QuestionPage[String] {
 
-object BeneficiaryDetail {
-  implicit val BeneficiaryDetailFormat: OFormat[BeneficiaryDetail] =
-    Json.format[BeneficiaryDetail]
+  override def path: JsPath =
+    (JsPath \ "beneficiaries")(index) \ "beneficiaryDetails" \ "organisation" \ "beneficiaryTrstName"
+
+  override def toString: String = "beneficiaryTrustName"
 }
