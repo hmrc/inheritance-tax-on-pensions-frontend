@@ -25,7 +25,7 @@ import controllers.actions._
 import forms.beneficiary.BeneficiaryListFormProvider
 import viewmodels.beneficiary.BeneficiaryListItem
 import models.beneficiary.{Beneficiaries, BeneficiaryType}
-import models.{CheckMode, JourneyRole, UserAnswers}
+import models._
 import pages.beneficiary.BeneficiariesPage
 import play.api.i18n.MessagesApi
 
@@ -95,7 +95,7 @@ class BeneficiaryListController @Inject() (
         BeneficiaryListItem(
           name = name,
           changeUrl = routes.BeneficiaryNameController.onPageLoad(srn, CheckMode, index, journeyRole).url,
-          removeUrl = routes.RemoveBeneficiaryController.onPageLoad(srn, index).url
+          removeUrl = routes.RemoveBeneficiaryController.onPageLoad(srn, NormalMode, index).url
         )
       }
     }

@@ -7,6 +7,7 @@ site.no = No
 site.yes = Yes
 site.continue = Continue
 site.saveAndContinue = Save and continue
+site.saveAsDraft = Save as draft
 site.start = Start now
 site.startAgain = Start again
 site.signIn = Sign in
@@ -269,10 +270,14 @@ addressLookup.international.edit.townLabel = <b>Address line 4</b>
 addressLookup.international.edit.postcodeLabel = <b>Postal code</b>
 addressLookup.international.edit.countryLabel = <b>Country</b>
 
-checkYourAnswers.title = Check and submit the report
-checkYourAnswers.heading = Check and submit the report
+checkYourAnswers.title = Check report details
+checkYourAnswers.heading = Check report details
+checkYourAnswers.deceased.details.heading = Deceased details
+checkYourAnswers.pr.details.heading = PR details
+checkYourAnswers.payment.notice.details.heading = Payment notice details
 checkYourAnswers.beneficiary.details.heading = Beneficiary details
 checkYourAnswers.beneficiary.details.card.title = Beneficiary {0}
+checkYourAnswers.beneficiary.details.card.remove.hidden = {0}
 
 psaDeclaration.title = Declaration
 psaDeclaration.heading = Declaration

@@ -113,8 +113,10 @@ POST        /:srn/change-name-of-beneficiary-organisation/$index<[1-2]?[0-9]>   
 
 GET         /:srn/add-beneficiary                                      controllers.beneficiary.BeneficiaryListController.onPageLoad(srn: Srn)
 POST        /:srn/add-beneficiary                                      controllers.beneficiary.BeneficiaryListController.onSubmit(srn: Srn)
-GET         /:srn/remove-beneficiary/$index<[1-2]?[0-9]>               controllers.beneficiary.RemoveBeneficiaryController.onPageLoad(srn: Srn, index: Int)
-POST        /:srn/remove-beneficiary/$index<[1-2]?[0-9]>               controllers.beneficiary.RemoveBeneficiaryController.onSubmit(srn: Srn, index: Int)
+GET         /:srn/remove-beneficiary/$index<[1-2]?[0-9]>               controllers.beneficiary.RemoveBeneficiaryController.onPageLoad(srn: Srn, mode: Mode = NormalMode, index: Int)
+POST        /:srn/remove-beneficiary/$index<[1-2]?[0-9]>               controllers.beneficiary.RemoveBeneficiaryController.onSubmit(srn: Srn, mode: Mode = NormalMode, index: Int)
+GET         /:srn/change-remove-beneficiary/$index<[1-2]?[0-9]>        controllers.beneficiary.RemoveBeneficiaryController.onPageLoad(srn: Srn, mode: Mode = CheckMode, index: Int)
+POST        /:srn/change-remove-beneficiary/$index<[1-2]?[0-9]>        controllers.beneficiary.RemoveBeneficiaryController.onSubmit(srn: Srn, mode: Mode = CheckMode, index: Int)
 
 GET         /:srn/beneficiary-national-insurance-number/$index<[1-2]?[0-9]>        controllers.beneficiary.BeneficiaryHasNinoController.onPageLoad(srn: Srn, index: Int, mode: Mode = NormalMode)
 POST        /:srn/beneficiary-national-insurance-number/$index<[1-2]?[0-9]>        controllers.beneficiary.BeneficiaryHasNinoController.onSubmit(srn: Srn, index: Int, mode: Mode = NormalMode)

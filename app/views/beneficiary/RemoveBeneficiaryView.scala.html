@@ -25,13 +25,13 @@
     govukButton: GovukButton
 )
 
-@(form: Form[?], srn: Srn, index: Int, beneficiaryName: String)(implicit request: Request[?], messages: Messages)
+@(form: Form[?], srn: Srn, index: Int, mode: Mode, beneficiaryName: String)(implicit request: Request[?], messages: Messages)
 
 @heading = @{ messages("removeBeneficiary.heading", beneficiaryName) }
 
 @layout(pageTitle = title(form, heading)) {
 
-    @formHelper(action = controllers.beneficiary.routes.RemoveBeneficiaryController.onSubmit(srn, index), Symbol("autoComplete") -> "off") {
+    @formHelper(action = controllers.beneficiary.routes.RemoveBeneficiaryController.onSubmit(srn, mode, index), Symbol("autoComplete") -> "off") {
 
         @if(form.errors.nonEmpty) {
             @govukErrorSummary(ErrorSummaryViewModel(form))
