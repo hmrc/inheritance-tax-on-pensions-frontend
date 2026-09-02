@@ -23,6 +23,7 @@ import java.time.{Instant, LocalDate}
 
 class IhtpOverviewResponseSpec extends SpecBase {
 
+  private val validNino: String = ninoGen.sample.value
   private val submissionDate = Instant.parse("2026-04-10T16:12:49Z")
   private val paymentDueDate = LocalDate.of(2026, 2, 2)
 
@@ -38,7 +39,7 @@ class IhtpOverviewResponseSpec extends SpecBase {
     firstForename = Some("Firstname"),
     secondForename = Some("M"),
     surname = Some("Surname"),
-    nino = Some("AB123456C"),
+    nino = Some(validNino),
     ihtpStatus = "Not reconciled"
   )
 
@@ -65,7 +66,7 @@ class IhtpOverviewResponseSpec extends SpecBase {
               "firstForename" -> "Firstname",
               "secondForename" -> "M",
               "surname" -> "Surname",
-              "nino" -> "AB123456C",
+              "nino" -> validNino,
               "ihtpStatus" -> "Not reconciled"
             )
           )
@@ -88,7 +89,7 @@ class IhtpOverviewResponseSpec extends SpecBase {
       (json \ "success" \ "ihtpOverview" \ 0 \ "firstForename").as[String] mustBe "Firstname"
       (json \ "success" \ "ihtpOverview" \ 0 \ "secondForename").as[String] mustBe "M"
       (json \ "success" \ "ihtpOverview" \ 0 \ "surname").as[String] mustBe "Surname"
-      (json \ "success" \ "ihtpOverview" \ 0 \ "nino").as[String] mustBe "AB123456C"
+      (json \ "success" \ "ihtpOverview" \ 0 \ "nino").as[String] mustBe validNino
       (json \ "success" \ "ihtpOverview" \ 0 \ "ihtpStatus").as[String] mustBe "Not reconciled"
     }
 
@@ -158,7 +159,7 @@ class IhtpOverviewResponseSpec extends SpecBase {
         "firstForename" -> "Firstname",
         "secondForename" -> "M",
         "surname" -> "Surname",
-        "nino" -> "AB123456C",
+        "nino" -> validNino,
         "ihtpStatus" -> "Not reconciled"
       )
 
@@ -252,7 +253,7 @@ class IhtpOverviewResponseSpec extends SpecBase {
       report.firstForename mustBe Some("Firstname")
       report.secondForename mustBe Some("M")
       report.surname mustBe Some("Surname")
-      report.nino mustBe Some("AB123456C")
+      report.nino mustBe Some(validNino)
       report.ihtpStatus mustBe "Not reconciled"
       report.copy(
         fbNumber = report.fbNumber,
