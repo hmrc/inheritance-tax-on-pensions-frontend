@@ -23,19 +23,21 @@ import views.html.beneficiary.RemoveBeneficiaryView
 import base.SpecBase
 import forms.beneficiary.RemoveBeneficiaryFormProvider
 import models.beneficiary.BeneficiaryType
-import models.{JourneyRole, NormalMode, UserAnswers}
+import models._
 import pages.beneficiary._
 import org.mockito.ArgumentCaptor
 import org.mockito.ArgumentMatchers.any
 import play.api.test.Helpers._
 import org.mockito.Mockito._
 
+import scala.language.postfixOps
 import scala.concurrent.Future
 
 class RemoveBeneficiaryControllerSpec extends SpecBase {
 
   private val form = new RemoveBeneficiaryFormProvider()()
-  private lazy val routeUrl = routes.RemoveBeneficiaryController.onPageLoad(srn, testIndex).url
+  private def getRouteUrl(mode: Mode) = routes.RemoveBeneficiaryController.onPageLoad(srn, mode, testIndex).url
+  private def postRouteUrl(mode: Mode) = routes.RemoveBeneficiaryController.onSubmit(srn, mode, testIndex).url
   private val answersWithBeneficiary = emptyUserAnswers
     .set(BeneficiaryTypePage(testIndex), BeneficiaryType.Individual)
     .success
@@ -61,141 +63,147 @@ class RemoveBeneficiaryControllerSpec extends SpecBase {
     .value
 
   "RemoveBeneficiaryController" - {
-    "must return OK and the correct view for a GET" in {
-      val application = applicationBuilder(userAnswers = Some(answersWithBeneficiary), usesSession = true).build()
+    List(
+      (NormalMode, "beneficiary list", routes.BeneficiaryListController.onPageLoad(srn).url),
+      (CheckMode, "CYA page", controllers.routes.CheckYourAnswersController.onPageLoad(srn).url)
+    ).foreach { (mode, modeTargetPage, modeUrl) =>
+      s"in mode $mode" - {
+        "must return OK and the correct view for a GET" in {
+          val application = applicationBuilder(userAnswers = Some(answersWithBeneficiary), usesSession = true).build()
 
-      running(application) {
-        val request = FakeRequest(GET, routeUrl)
-        val result = route(application, request).value
-        val view = application.injector.instanceOf[RemoveBeneficiaryView]
+          running(application) {
+            val request = FakeRequest(GET, getRouteUrl(mode))
+            val result = route(application, request).value
+            val view = application.injector.instanceOf[RemoveBeneficiaryView]
 
-        status(result) mustEqual OK
-        contentAsString(result) mustEqual
-          view(form, srn, testIndex, individualNameFormatted)(using request, messages(application)).toString
-      }
-    }
+            status(result) mustEqual OK
+            contentAsString(result) mustEqual
+              view(form, srn, testIndex, mode, individualNameFormatted)(using request, messages(application)).toString
+          }
+        }
 
-    "must remove all data for the beneficiary and return to the beneficiary list when another remains" in {
-      val mockConnector = mock[InheritanceTaxOnPensionsConnector]
-      when(mockConnector.setUserAnswers(any(), any(), any(), any(), any())(using any()))
-        .thenReturn(Future.successful(Right(emptyUserAnswers)))
-      val application = applicationBuilder(userAnswers = Some(answersWithTwoBeneficiaries), usesSession = true)
-        .overrides(bind[InheritanceTaxOnPensionsConnector].toInstance(mockConnector))
-        .build()
+        s"must remove all data for the beneficiary and return to the $modeTargetPage when another remains" in {
+          val mockConnector = mock[InheritanceTaxOnPensionsConnector]
+          when(mockConnector.setUserAnswers(any(), any(), any(), any(), any())(using any()))
+            .thenReturn(Future.successful(Right(emptyUserAnswers)))
+          val application = applicationBuilder(userAnswers = Some(answersWithTwoBeneficiaries), usesSession = true)
+            .overrides(bind[InheritanceTaxOnPensionsConnector].toInstance(mockConnector))
+            .build()
 
-      running(application) {
-        val request = FakeRequest(POST, routeUrl).withFormUrlEncodedBody("value" -> "true")
-        val result = route(application, request).value
+          running(application) {
+            val request = FakeRequest(POST, postRouteUrl(mode)).withFormUrlEncodedBody("value" -> "true")
+            val result = route(application, request).value
 
-        status(result) mustEqual SEE_OTHER
-        redirectLocation(result).value mustEqual routes.BeneficiaryListController.onPageLoad(srn).url
+            status(result) mustEqual SEE_OTHER
+            redirectLocation(result).value must endWith(modeUrl)
 
-        val userAnswersCaptor: ArgumentCaptor[UserAnswers] = ArgumentCaptor.forClass(classOf[UserAnswers])
-        verify(mockConnector, times(1))
-          .setUserAnswers(userAnswersCaptor.capture(), any(), any(), any(), any())(using any())
+            val userAnswersCaptor: ArgumentCaptor[UserAnswers] = ArgumentCaptor.forClass(classOf[UserAnswers])
+            verify(mockConnector, times(1))
+              .setUserAnswers(userAnswersCaptor.capture(), any(), any(), any(), any())(using any())
 
-        val savedAnswers = userAnswersCaptor.getValue
-        savedAnswers.get(BeneficiariesPage()).value.beneficiaries.size mustEqual 1
-        savedAnswers
-          .get(BeneficiaryNamePage(testIndex, JourneyRole.BeneficiaryIndividual))
-          .value mustEqual secondBeneficiaryName
-        savedAnswers.get(BeneficiaryHasNinoPage(testIndex)).value mustBe false
-        savedAnswers.get(BeneficiaryTypePage(testIndex + 1)) mustBe None
-        savedAnswers.get(BeneficiaryNamePage(testIndex + 1, JourneyRole.BeneficiaryIndividual)) mustBe None
-        savedAnswers.get(BeneficiaryHasNinoPage(testIndex + 1)) mustBe None
-      }
-    }
+            val savedAnswers = userAnswersCaptor.getValue
+            savedAnswers.get(BeneficiariesPage()).value.beneficiaries.size mustEqual 1
+            savedAnswers
+              .get(BeneficiaryNamePage(testIndex, JourneyRole.BeneficiaryIndividual))
+              .value mustEqual secondBeneficiaryName
+            savedAnswers.get(BeneficiaryHasNinoPage(testIndex)).value mustBe false
+            savedAnswers.get(BeneficiaryTypePage(testIndex + 1)) mustBe None
+            savedAnswers.get(BeneficiaryNamePage(testIndex + 1, JourneyRole.BeneficiaryIndividual)) mustBe None
+            savedAnswers.get(BeneficiaryHasNinoPage(testIndex + 1)) mustBe None
+          }
+        }
 
-    "must remove the last beneficiary and return to the beneficiaries known page" in {
-      val mockConnector = mock[InheritanceTaxOnPensionsConnector]
-      when(mockConnector.setUserAnswers(any(), any(), any(), any(), any())(using any()))
-        .thenReturn(Future.successful(Right(emptyUserAnswers)))
-      val application = applicationBuilder(userAnswers = Some(answersWithBeneficiary), usesSession = true)
-        .overrides(bind[InheritanceTaxOnPensionsConnector].toInstance(mockConnector))
-        .build()
+        "must remove the last beneficiary and return to the beneficiaries known page" in {
+          val mockConnector = mock[InheritanceTaxOnPensionsConnector]
+          when(mockConnector.setUserAnswers(any(), any(), any(), any(), any())(using any()))
+            .thenReturn(Future.successful(Right(emptyUserAnswers)))
+          val application = applicationBuilder(userAnswers = Some(answersWithBeneficiary), usesSession = true)
+            .overrides(bind[InheritanceTaxOnPensionsConnector].toInstance(mockConnector))
+            .build()
 
-      running(application) {
-        val request = FakeRequest(POST, routeUrl).withFormUrlEncodedBody("value" -> "true")
-        val result = route(application, request).value
+          running(application) {
+            val request = FakeRequest(POST, postRouteUrl(mode)).withFormUrlEncodedBody("value" -> "true")
+            val result = route(application, request).value
 
-        status(result) mustEqual SEE_OTHER
-        redirectLocation(result).value mustEqual
-          controllers.routes.AreBeneficiariesKnownController.onPageLoad(srn, NormalMode).url
+            status(result) mustEqual SEE_OTHER
+            redirectLocation(result).value mustEqual
+              controllers.routes.AreBeneficiariesKnownController.onPageLoad(srn, NormalMode).url
 
-        val userAnswersCaptor: ArgumentCaptor[UserAnswers] = ArgumentCaptor.forClass(classOf[UserAnswers])
-        verify(mockConnector, times(1))
-          .setUserAnswers(userAnswersCaptor.capture(), any(), any(), any(), any())(using any())
-        userAnswersCaptor.getValue.get(BeneficiariesPage()).value.beneficiaries mustBe empty
-      }
-    }
+            val userAnswersCaptor: ArgumentCaptor[UserAnswers] = ArgumentCaptor.forClass(classOf[UserAnswers])
+            verify(mockConnector, times(1))
+              .setUserAnswers(userAnswersCaptor.capture(), any(), any(), any(), any())(using any())
+            userAnswersCaptor.getValue.get(BeneficiariesPage()).value.beneficiaries mustBe empty
+          }
+        }
 
-    "must keep the beneficiary and return to the beneficiary list when No is submitted" in {
-      val mockConnector = mock[InheritanceTaxOnPensionsConnector]
-      val application = applicationBuilder(userAnswers = Some(answersWithBeneficiary), usesSession = true)
-        .overrides(bind[InheritanceTaxOnPensionsConnector].toInstance(mockConnector))
-        .build()
+        s"must keep the beneficiary and return to the $modeTargetPage when No is submittede" in {
+          val mockConnector = mock[InheritanceTaxOnPensionsConnector]
+          val application = applicationBuilder(userAnswers = Some(answersWithBeneficiary), usesSession = true)
+            .overrides(bind[InheritanceTaxOnPensionsConnector].toInstance(mockConnector))
+            .build()
 
-      running(application) {
-        val request = FakeRequest(POST, routeUrl).withFormUrlEncodedBody("value" -> "false")
-        val result = route(application, request).value
+          running(application) {
+            val request = FakeRequest(POST, getRouteUrl(mode)).withFormUrlEncodedBody("value" -> "false")
+            val result = route(application, request).value
 
-        status(result) mustEqual SEE_OTHER
-        redirectLocation(result).value mustEqual routes.BeneficiaryListController.onPageLoad(srn).url
-        verify(mockConnector, never()).setUserAnswers(any(), any(), any(), any(), any())(using any())
-      }
-    }
+            status(result) mustEqual SEE_OTHER
+            redirectLocation(result).value must endWith(modeUrl)
+            verify(mockConnector, never()).setUserAnswers(any(), any(), any(), any(), any())(using any())
+          }
+        }
 
-    "must return a Bad Request when no option is selected" in {
-      val application = applicationBuilder(userAnswers = Some(answersWithBeneficiary), usesSession = true).build()
+        "must return a Bad Request when no option is selected" in {
+          val application = applicationBuilder(userAnswers = Some(answersWithBeneficiary), usesSession = true).build()
 
-      running(application) {
-        val request = FakeRequest(POST, routeUrl).withFormUrlEncodedBody("value" -> "")
-        val result = route(application, request).value
-        val view = application.injector.instanceOf[RemoveBeneficiaryView]
+          running(application) {
+            val request = FakeRequest(POST, postRouteUrl(mode)).withFormUrlEncodedBody("value" -> "")
+            val result = route(application, request).value
+            val view = application.injector.instanceOf[RemoveBeneficiaryView]
 
-        status(result) mustEqual BAD_REQUEST
-        contentAsString(result) mustEqual
-          view(form.bind(Map("value" -> "")), srn, testIndex, individualNameFormatted)(using
-            request,
-            messages(application)
-          ).toString
-      }
-    }
+            status(result) mustEqual BAD_REQUEST
+            contentAsString(result) mustEqual
+              view(form.bind(Map("value" -> "")), srn, testIndex, mode, individualNameFormatted)(using
+                request,
+                messages(application)
+              ).toString
+          }
+        }
 
-    "must redirect to Journey Recovery when the beneficiary name is missing" in {
-      val application = applicationBuilder(userAnswers = Some(emptyUserAnswers), usesSession = true).build()
+        "must redirect to Journey Recovery when the beneficiary name is missing" in {
+          val application = applicationBuilder(userAnswers = Some(emptyUserAnswers), usesSession = true).build()
 
-      running(application) {
-        val result = route(application, FakeRequest(GET, routeUrl)).value
+          running(application) {
+            val result = route(application, FakeRequest(GET, getRouteUrl(mode))).value
 
-        status(result) mustEqual SEE_OTHER
-        redirectLocation(result).value mustEqual controllers.routes.JourneyRecoveryController.onPageLoad().url
-      }
-    }
+            status(result) mustEqual SEE_OTHER
+            redirectLocation(result).value mustEqual controllers.routes.JourneyRecoveryController.onPageLoad().url
+          }
+        }
+        "must redirect to Journey Recovery on submit when the beneficiary name is missing" in {
+          val application = applicationBuilder(userAnswers = Some(emptyUserAnswers), usesSession = true).build()
 
-    "must redirect to Journey Recovery on submit when the beneficiary name is missing" in {
-      val application = applicationBuilder(userAnswers = Some(emptyUserAnswers), usesSession = true).build()
+          running(application) {
+            val request = FakeRequest(POST, postRouteUrl(mode)).withFormUrlEncodedBody("value" -> "true")
+            val result = route(application, request).value
 
-      running(application) {
-        val request = FakeRequest(POST, routeUrl).withFormUrlEncodedBody("value" -> "true")
-        val result = route(application, request).value
+            status(result) mustEqual SEE_OTHER
+            redirectLocation(result).value mustEqual controllers.routes.JourneyRecoveryController.onPageLoad().url
+          }
+        }
 
-        status(result) mustEqual SEE_OTHER
-        redirectLocation(result).value mustEqual controllers.routes.JourneyRecoveryController.onPageLoad().url
-      }
-    }
+        testInvalidBeneficiaryIndexes.foreach { invalidIndex =>
+          s"must return Not Found for invalid index $invalidIndex" in {
+            val application = applicationBuilder(userAnswers = Some(answersWithBeneficiary), usesSession = true).build()
 
-    testInvalidBeneficiaryIndexes.foreach { invalidIndex =>
-      s"must return Not Found for invalid index $invalidIndex" in {
-        val application = applicationBuilder(userAnswers = Some(answersWithBeneficiary), usesSession = true).build()
+            running(application) {
+              val result = route(
+                application,
+                FakeRequest(GET, routes.RemoveBeneficiaryController.onPageLoad(srn, mode, invalidIndex).url)
+              ).value
 
-        running(application) {
-          val result = route(
-            application,
-            FakeRequest(GET, routes.RemoveBeneficiaryController.onPageLoad(srn, invalidIndex).url)
-          ).value
-
-          status(result) mustEqual NOT_FOUND
+              status(result) mustEqual NOT_FOUND
+            }
+          }
         }
       }
     }

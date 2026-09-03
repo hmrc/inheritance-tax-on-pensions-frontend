@@ -17,6 +17,7 @@
 @import components.PageHeading
 @import components.SubHeading
 @import models.SchemeId.Srn
+@import viewmodels.govuk.summarylist.FluentSummaryList
 
 @this(
     layout: templates.Layout,
@@ -27,7 +28,7 @@
     govukButton: GovukButton
 )
 
-@(srn: Srn, list: SummaryList, beneficiaryList: List[SummaryList])(implicit request: Request[?], messages: Messages)
+@(srn: Srn, deceasedDetailsSummaryList: SummaryList, prDetailsSummaryList: SummaryList, paymentNoticeDetailsSummaryList: SummaryList, beneficiaryList: List[SummaryList])(implicit request: Request[?], messages: Messages)
 
 @layout(pageTitle = titleNoForm(messages("checkYourAnswers.title"))) {
 
@@ -35,7 +36,20 @@
 
         @pageHeading(messages("checkYourAnswers.heading"))
 
-        @govukSummaryList(list)
+        @if(deceasedDetailsSummaryList.rows.nonEmpty) {
+            @subHeading(text = messages("checkYourAnswers.deceased.details.heading"))
+            @govukSummaryList(deceasedDetailsSummaryList.withCssClass("govuk-!-margin-bottom-9"))
+        }
+
+        @if(prDetailsSummaryList.rows.nonEmpty) {
+            @subHeading(text = messages("checkYourAnswers.pr.details.heading"))
+            @govukSummaryList(prDetailsSummaryList.withCssClass("govuk-!-margin-bottom-9"))
+        }
+
+        @if(paymentNoticeDetailsSummaryList.rows.nonEmpty) {
+            @subHeading(text = messages("checkYourAnswers.payment.notice.details.heading"))
+            @govukSummaryList(paymentNoticeDetailsSummaryList.withCssClass("govuk-!-margin-bottom-9"))
+        }
 
         @if(beneficiaryList.nonEmpty) {
             @subHeading(text = messages("checkYourAnswers.beneficiary.details.heading"))
@@ -45,9 +59,19 @@
             }
         }
 
+        <div class="govuk-button-group">
         @govukButton(
             ButtonViewModel(messages("site.saveAndContinue"))
         )
+        @govukButton(
+            Button(
+                content = Text(messages("site.saveAsDraft")),
+                id = Some("saved-as-draft-link"),
+                href = Some(routes.SubmissionListController.onPageLoad(srn).url),
+                preventDoubleClick = Some(true)
+            ).asSecondaryButton()
+        )
+        </div>
     }
 
 }

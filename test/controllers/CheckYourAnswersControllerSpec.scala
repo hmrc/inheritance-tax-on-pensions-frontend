@@ -21,12 +21,13 @@ import play.api.test.Helpers._
 import pages._
 import viewmodels.CheckAnswers.beneficiary.{BeneficiaryHasNinoSummary, BeneficiaryTypeSummary}
 import views.html.CheckYourAnswersView
-import base.SpecBase
-import uk.gov.hmrc.govukfrontend.views.viewmodels.summarylist.SummaryList
-import viewmodels.govuk.all.{CardViewModel, SummaryListViewModel}
+import uk.gov.hmrc.govukfrontend.views.viewmodels.summarylist.{Actions, SummaryList}
+import viewmodels.govuk.all.{ActionItemViewModel, CardViewModel, SummaryListViewModel}
 import play.api.libs.json.Json
 import models._
 import viewmodels.CheckAnswers._
+import uk.gov.hmrc.govukfrontend.views.Aliases.Text
+import base.SpecBase
 
 import java.time.LocalDate
 
@@ -83,21 +84,35 @@ class CheckYourAnswersControllerSpec extends SpecBase {
 
         val view = application.injector.instanceOf[CheckYourAnswersView]
 
-        val summaryList = SummaryListViewModel(
+        val deceasedDetailsSummaryList = SummaryListViewModel(
           rows = Seq(
             InheritanceTaxReferenceSummary.row(srn, userAnswers)(using messages(application)).get,
             NameOfDeceasedSummary.row(srn, userAnswers)(using messages(application)).get,
             HasNinoSummary.row(srn, userAnswers)(using messages(application)).get,
             NinoSummary.row(srn, userAnswers)(using messages(application)).get,
-            BirthDeathDatesSummary.row(srn, userAnswers)(using messages(application)).get,
+            BirthDeathDatesSummary.row(srn, userAnswers)(using messages(application)).get
+          )
+        )
+        val prDetailsSummaryList = SummaryListViewModel(
+          rows = Seq(
             PrTypeSummary.row(srn, userAnswers)(using messages(application)).get,
-            PrIndividualNameSummary.row(srn, userAnswers)(using messages(application)).get,
+            PrIndividualNameSummary.row(srn, userAnswers)(using messages(application)).get
+          )
+        )
+        val paymentNoticeDetailsSummaryList = SummaryListViewModel(
+          rows = Seq(
             DidPrSubmitSummary.row(srn, userAnswers)(using messages(application)).get
           )
         )
 
         status(result) mustEqual OK
-        contentAsString(result) mustEqual view(srn, summaryList, emptyBeneficiarySummaryListViewModel)(using
+        contentAsString(result) mustEqual view(
+          srn,
+          deceasedDetailsSummaryList,
+          prDetailsSummaryList,
+          paymentNoticeDetailsSummaryList,
+          emptyBeneficiarySummaryListViewModel
+        )(using
           request,
           messages(application)
         ).toString
@@ -149,21 +164,35 @@ class CheckYourAnswersControllerSpec extends SpecBase {
 
         val view = application.injector.instanceOf[CheckYourAnswersView]
 
-        val summaryList = SummaryListViewModel(
+        val deceasedDetailsSummaryList = SummaryListViewModel(
           rows = Seq(
             InheritanceTaxReferenceSummary.row(srn, userAnswers)(using messages(application)).get,
             NameOfDeceasedSummary.row(srn, userAnswers)(using messages(application)).get,
             HasNinoSummary.row(srn, userAnswers)(using messages(application)).get,
             NoNinoReasonSummary.row(srn, userAnswers)(using messages(application)).get,
-            BirthDeathDatesSummary.row(srn, userAnswers)(using messages(application)).get,
+            BirthDeathDatesSummary.row(srn, userAnswers)(using messages(application)).get
+          )
+        )
+        val prDetailsSummaryList = SummaryListViewModel(
+          rows = Seq(
             PrTypeSummary.row(srn, userAnswers)(using messages(application)).get,
-            PrIndividualNameSummary.row(srn, userAnswers)(using messages(application)).get,
+            PrIndividualNameSummary.row(srn, userAnswers)(using messages(application)).get
+          )
+        )
+        val paymentNoticeDetailsSummaryList = SummaryListViewModel(
+          rows = Seq(
             DidPrSubmitSummary.row(srn, userAnswers)(using messages(application)).get
           )
         )
 
         status(result) mustEqual OK
-        contentAsString(result) mustEqual view(srn, summaryList, emptyBeneficiarySummaryListViewModel)(using
+        contentAsString(result) mustEqual view(
+          srn,
+          deceasedDetailsSummaryList,
+          prDetailsSummaryList,
+          paymentNoticeDetailsSummaryList,
+          emptyBeneficiarySummaryListViewModel
+        )(using
           request,
           messages(application)
         ).toString
@@ -188,7 +217,9 @@ class CheckYourAnswersControllerSpec extends SpecBase {
 
         val view = application.injector.instanceOf[CheckYourAnswersView]
 
-        val summaryList = SummaryListViewModel(
+        val deceasedDetailsSummaryList = emptySummaryList
+        val prDetailsSummaryList = emptySummaryList
+        val paymentNoticeDetailsSummaryList = SummaryListViewModel(
           rows = Seq(
             DidPrSubmitSummary.row(srn, userAnswers)(using messages(application)).get,
             PaymentNoticeDateSummary.row(srn, userAnswers)(using messages(application)).get
@@ -196,7 +227,13 @@ class CheckYourAnswersControllerSpec extends SpecBase {
         )
 
         status(result) mustEqual OK
-        contentAsString(result) mustEqual view(srn, summaryList, emptyBeneficiarySummaryListViewModel)(using
+        contentAsString(result) mustEqual view(
+          srn,
+          deceasedDetailsSummaryList,
+          prDetailsSummaryList,
+          paymentNoticeDetailsSummaryList,
+          emptyBeneficiarySummaryListViewModel
+        )(using
           request,
           messages(application)
         ).toString
@@ -238,20 +275,31 @@ class CheckYourAnswersControllerSpec extends SpecBase {
 
         val view = application.injector.instanceOf[CheckYourAnswersView]
 
-        val summaryList = SummaryListViewModel(
+        val deceasedDetailsSummaryList = emptySummaryList
+        val prDetailsSummaryList = SummaryListViewModel(
           rows = Seq(
             PrTypeSummary.row(srn, userAnswers)(using messages(application)).get,
             PrIndividualNameSummary.row(srn, userAnswers)(using messages(application)).get,
             PrIndividualCountrySummary
               .row(srn, userAnswers, (_: String) => "United Kingdom")(using messages(application))
               .get,
-            PrIndividualAddressSummary.row(srn, userAnswers)(using messages(application)).get,
+            PrIndividualAddressSummary.row(srn, userAnswers)(using messages(application)).get
+          )
+        )
+        val paymentNoticeDetailsSummaryList = SummaryListViewModel(
+          rows = Seq(
             DidPrSubmitSummary.row(srn, userAnswers)(using messages(application)).get
           )
         )
 
         status(result) mustEqual OK
-        contentAsString(result) mustEqual view(srn, summaryList, emptyBeneficiarySummaryListViewModel)(using
+        contentAsString(result) mustEqual view(
+          srn,
+          deceasedDetailsSummaryList,
+          prDetailsSummaryList,
+          paymentNoticeDetailsSummaryList,
+          emptyBeneficiarySummaryListViewModel
+        )(using
           request,
           messages(application)
         ).toString
@@ -294,7 +342,8 @@ class CheckYourAnswersControllerSpec extends SpecBase {
 
         val view = application.injector.instanceOf[CheckYourAnswersView]
 
-        val summaryList = SummaryListViewModel(
+        val deceasedDetailsSummaryList = emptySummaryList
+        val prDetailsSummaryList = SummaryListViewModel(
           rows = Seq(
             PrTypeSummary.row(srn, userAnswers)(using messages(application)).get,
             PrOrganisationNameSummary.row(srn, userAnswers)(using messages(application)).get,
@@ -302,13 +351,23 @@ class CheckYourAnswersControllerSpec extends SpecBase {
             PrOrganisationCountrySummary
               .row(srn, userAnswers, (_: String) => "United Kingdom")(using messages(application))
               .get,
-            PrOrganisationAddressSummary.row(srn, userAnswers)(using messages(application)).get,
+            PrOrganisationAddressSummary.row(srn, userAnswers)(using messages(application)).get
+          )
+        )
+        val paymentNoticeDetailsSummaryList = SummaryListViewModel(
+          rows = Seq(
             DidPrSubmitSummary.row(srn, userAnswers)(using messages(application)).get
           )
         )
 
         status(result) mustEqual OK
-        contentAsString(result) mustEqual view(srn, summaryList, emptyBeneficiarySummaryListViewModel)(using
+        contentAsString(result) mustEqual view(
+          srn,
+          deceasedDetailsSummaryList,
+          prDetailsSummaryList,
+          paymentNoticeDetailsSummaryList,
+          emptyBeneficiarySummaryListViewModel
+        )(using
           request,
           messages(application)
         ).toString
@@ -346,18 +405,51 @@ class CheckYourAnswersControllerSpec extends SpecBase {
               BeneficiaryTypeSummary.row(srn, 0, userAnswers)(using messages(application)).get,
               BeneficiaryHasNinoSummary.row(srn, 0, userAnswers)(using messages(application)).get
             ),
-            card = CardViewModel("Beneficiary 1", 2, None)
+            card = CardViewModel(
+              "Beneficiary 1",
+              2,
+              Some(
+                Actions(
+                  items = Seq(
+                    ActionItemViewModel(
+                      Text("Remove"),
+                      s"""/inheritance-tax-on-pensions/${srn.value}/change-remove-beneficiary/0"""
+                    ).copy(visuallyHiddenText = Some("0"))
+                  )
+                )
+              )
+            )
           ),
           SummaryListViewModel(
             rows = Seq(
               BeneficiaryTypeSummary.row(srn, 1, userAnswers)(using messages(application)).get
             ),
-            card = CardViewModel("Beneficiary 2", 2, None)
+            card = CardViewModel(
+              "Beneficiary 2",
+              2,
+              Some(
+                Actions(
+                  items = Seq(
+                    ActionItemViewModel(
+                      Text("Remove"),
+                      s"""/inheritance-tax-on-pensions/${srn.value}/change-remove-beneficiary/1"""
+                    ).copy(visuallyHiddenText = Some("1"))
+                  )
+                )
+              )
+            )
           )
         )
 
         status(result) mustEqual OK
-        contentAsString(result) mustEqual view(srn, emptySummaryList, beneficiarySummaryList)(using
+        val x = contentAsString(result)
+        x mustEqual view(
+          srn,
+          emptySummaryList,
+          emptySummaryList,
+          emptySummaryList,
+          beneficiarySummaryList
+        )(using
           request,
           messages(application)
         ).toString

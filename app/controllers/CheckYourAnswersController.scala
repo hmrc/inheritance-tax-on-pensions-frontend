@@ -17,6 +17,8 @@
 package controllers
 
 import services.CountryService
+import utils.BeneficiaryNameHelper
+import viewmodels.implicits._
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import com.google.inject.Inject
 import viewmodels.CheckAnswers.beneficiary.{
@@ -25,9 +27,10 @@ import viewmodels.CheckAnswers.beneficiary.{
   BeneficiaryTypeSummary
 }
 import play.i18n.Lang
+import uk.gov.hmrc.govukfrontend.views.viewmodels.summarylist.Actions
 import controllers.actions._
 import models.beneficiary.Beneficiaries
-import models.UserAnswers
+import models.{CheckMode, UserAnswers}
 import pages.beneficiary.BeneficiariesPage
 import views.html.CheckYourAnswersView
 import models.SchemeId.Srn
@@ -53,14 +56,19 @@ class CheckYourAnswersController @Inject() (
 
       val userAnswers: UserAnswers = request.userAnswers
 
-      val list = SummaryListViewModel(
+      val deceasedDetailsSummaryList = SummaryListViewModel(
         rows = Seq(
           InheritanceTaxReferenceSummary.row(srn, userAnswers),
           NameOfDeceasedSummary.row(srn, userAnswers),
           HasNinoSummary.row(srn, userAnswers),
           NinoSummary.row(srn, userAnswers),
           NoNinoReasonSummary.row(srn, userAnswers),
-          BirthDeathDatesSummary.row(srn, userAnswers),
+          BirthDeathDatesSummary.row(srn, userAnswers)
+        ).flatten
+      )
+
+      val prDetailsSummaryList = SummaryListViewModel(
+        rows = Seq(
           PrTypeSummary.row(srn, userAnswers),
           PrIndividualNameSummary.row(srn, userAnswers),
           PrOrganisationNameSummary.row(srn, userAnswers),
@@ -68,7 +76,12 @@ class CheckYourAnswersController @Inject() (
           PrIndividualCountrySummary.row(srn, userAnswers, countryService.nameForCode),
           PrIndividualAddressSummary.row(srn, userAnswers),
           PrOrganisationCountrySummary.row(srn, userAnswers, countryService.nameForCode),
-          PrOrganisationAddressSummary.row(srn, userAnswers),
+          PrOrganisationAddressSummary.row(srn, userAnswers)
+        ).flatten
+      )
+
+      val paymentNoticeDetailsSummaryList = SummaryListViewModel(
+        rows = Seq(
           DidPrSubmitSummary.row(srn, userAnswers),
           PaymentNoticeDateSummary.row(srn, userAnswers),
           AreBeneficiariesKnownSummary.row(srn, userAnswers)
@@ -92,14 +105,35 @@ class CheckYourAnswersController @Inject() (
                     Lang.defaultLang
                   ),
                   2,
-                  None
+                  Some(
+                    Actions(
+                      items = Seq(
+                        ActionItemViewModel(
+                          "site.remove",
+                          controllers.beneficiary.routes.RemoveBeneficiaryController
+                            .onPageLoad(srn, CheckMode, index)
+                            .url
+                        )
+                          .withVisuallyHiddenText(
+                            messagesApi(
+                              "checkYourAnswers.beneficiary.details.card.remove.hidden",
+                              BeneficiaryNameHelper.fromUserAnswers(userAnswers, index).getOrElse(index)
+                            )(using
+                              Lang.defaultLang
+                            )
+                          )
+                      )
+                    )
+                  )
                 )
               )
             }
         )
         .getOrElse(List())
 
-      val result = Ok(view(srn, list, beneficiaryList))
+      val result = Ok(
+        view(srn, deceasedDetailsSummaryList, prDetailsSummaryList, paymentNoticeDetailsSummaryList, beneficiaryList)
+      )
       val uuidFromQuery = request.request.getQueryString("uuid")
 
       uuidFromQuery match {
