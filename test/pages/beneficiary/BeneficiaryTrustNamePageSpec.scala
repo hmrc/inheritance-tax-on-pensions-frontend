@@ -14,17 +14,22 @@
  * limitations under the License.
  */
 
-package models.beneficiary
+package pages.beneficiary
 
-import play.api.libs.json.{Json, OFormat}
-import models.IndividualName
+import base.SpecBase
+import play.api.libs.json.JsPath
 
-case class BeneficiaryDetail(
-  individual: Option[IndividualName] = None,
-  organisation: Option[BeneficiaryTrustDetails] = None
-)
+class BeneficiaryTrustNamePageSpec extends SpecBase {
 
-object BeneficiaryDetail {
-  implicit val BeneficiaryDetailFormat: OFormat[BeneficiaryDetail] =
-    Json.format[BeneficiaryDetail]
+  "BeneficiaryTrustNamePage" - {
+
+    "must use the correct path" in {
+      BeneficiaryTrustNamePage(testIndex).path mustEqual
+        (JsPath \ "beneficiaries")(testIndex) \ "beneficiaryDetails" \ "organisation" \ "beneficiaryTrstName"
+    }
+
+    "must use the correct page name" in {
+      BeneficiaryTrustNamePage(testIndex).toString mustEqual "beneficiaryTrustName"
+    }
+  }
 }
