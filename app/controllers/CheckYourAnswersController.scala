@@ -136,28 +136,17 @@ class CheckYourAnswersController @Inject() (
         )
         .getOrElse(List())
 
-      val result = Ok(
+      Ok(
         view(srn, deceasedDetailsSummaryList, prDetailsSummaryList, paymentNoticeDetailsSummaryList, beneficiaryList)
       )
-      val uuidFromQuery = request.request.getQueryString("uuid")
-
-      uuidFromQuery match {
-        case Some(uuidFromQuery) => result.addingToSession("uuid" -> uuidFromQuery)
-        case _ => result
-      }
     }
 
   def onSubmit(srn: Srn): Action[AnyContent] =
     identify.andThen(allowAccess(srn)).andThen(getData).andThen(requireData) { implicit request =>
-      val uuidFromQuery = request.request.getQueryString("uuid")
-      val redirect = if (request.request.pensionSchemeId.isPSP) {
+      if (request.request.pensionSchemeId.isPSP) {
         Redirect(routes.PspDeclarationController.onPageLoad(srn))
       } else {
         Redirect(routes.PsaDeclarationController.onPageLoad(srn))
-      }
-      uuidFromQuery match {
-        case Some(uuid) => redirect.addingToSession("uuid" -> uuid)
-        case None => redirect
       }
     }
 }
