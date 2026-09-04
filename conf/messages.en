@@ -353,8 +353,8 @@ beneficiaryIndividualName.checkYourAnswersLabel = Full name of beneficiary
 beneficiaryIndividualName.checkYourAnswersLabel.hidden = full name of beneficiary
 
 beneficiaryTrustName.heading = Enter the name of the trust
-beneficiaryTrustName.error.required = Enter the name of the organisation or trust
-beneficiaryTrustName.error.length = The name of the organisation or trust should be 160 characters or less
+beneficiaryTrustName.error.required = Enter the name of the trust
+beneficiaryTrustName.error.length = The name of the trust should be 160 characters or less
 beneficiaryTrustName.checkYourAnswersLabel = Name of trust
 beneficiaryTrustName.change.hidden = the name of the trust
 
