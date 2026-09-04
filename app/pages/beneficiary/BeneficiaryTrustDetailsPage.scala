@@ -23,7 +23,7 @@ import models.beneficiary.BeneficiaryTrustDetails
 case class BeneficiaryTrustDetailsPage(index: Int) extends QuestionPage[BeneficiaryTrustDetails] {
 
   override def path: JsPath =
-    (JsPath \ "beneficiaries")(index) \ "beneficiaryDetails" \ "organisation"
+    (JsPath \ "beneficiaries")(index) \ "beneficiaryDetails" \ "trust"
 
   override def toString: String = "beneficiaryTrustDetails"
 }

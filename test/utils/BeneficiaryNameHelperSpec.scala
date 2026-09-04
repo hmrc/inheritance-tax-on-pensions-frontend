@@ -46,9 +46,9 @@ class BeneficiaryNameHelperSpec extends AnyFreeSpec with SpecBase {
       BeneficiaryNameHelper.fromUserAnswers(emptyUserAnswers, testIndex) mustBe None
     }
 
-    "must return an organisation beneficiary's name" in {
+    "must return a trust beneficiary's name" in {
       val userAnswers = emptyUserAnswers
-        .set(BeneficiaryTypePage(testIndex), BeneficiaryType.Organisation)
+        .set(BeneficiaryTypePage(testIndex), BeneficiaryType.Trust)
         .success
         .value
         .set(BeneficiaryTrustNamePage(testIndex), trustName)

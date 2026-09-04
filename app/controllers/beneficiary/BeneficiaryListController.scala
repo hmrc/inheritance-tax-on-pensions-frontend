@@ -92,7 +92,7 @@ class BeneficiaryListController @Inject() (
             routes.BeneficiaryNameController
               .onPageLoad(srn, CheckMode, index)
               .url
-          case BeneficiaryType.Organisation =>
+          case BeneficiaryType.Trust =>
             routes.BeneficiaryTrustNameController.onPageLoad(srn, index, CheckMode).url
         }
 

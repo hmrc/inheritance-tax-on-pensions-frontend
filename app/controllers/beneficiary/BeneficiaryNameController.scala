@@ -61,7 +61,7 @@ class BeneficiaryNameController @Inject() (
               case Some(individualName) => form.fill(individualName)
             }
 
-            Ok(view(preparedForm, srn, index, mode, journeyRole, None))
+            Ok(view(preparedForm, srn, index, mode, journeyRole))
         }
       }
 
@@ -82,7 +82,7 @@ class BeneficiaryNameController @Inject() (
                 formWithErrors =>
                   Future.successful(
                     BadRequest(
-                      view(formWithErrors, srn, index, mode, journeyRole, None)
+                      view(formWithErrors, srn, index, mode, journeyRole)
                     )
                   ),
                 individualName =>

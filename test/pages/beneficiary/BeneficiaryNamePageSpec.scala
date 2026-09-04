@@ -32,14 +32,6 @@ class BeneficiaryNamePageSpec extends SpecBase {
       ).path mustEqual (JsPath \ "beneficiaries")(testIndex) \ "beneficiaryDetails" \ "individual"
     }
 
-    "must use the beneficiary organisation path for the beneficiary organisation journey role" in {
-
-      BeneficiaryNamePage(
-        testIndex,
-        JourneyRole.BeneficiaryOrganisation
-      ).path mustEqual (JsPath \ "beneficiaries")(testIndex) \ "beneficiaryDetails" \ "organisation"
-    }
-
     "must use the unknown path for the unknown journey role" in {
 
       BeneficiaryNamePage(testIndex, JourneyRole.Unknown).path mustEqual JsPath \ "unknown" \ "unknown"

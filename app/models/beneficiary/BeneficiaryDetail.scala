@@ -21,7 +21,7 @@ import models.IndividualName
 
 case class BeneficiaryDetail(
   individual: Option[IndividualName] = None,
-  organisation: Option[BeneficiaryTrustDetails] = None
+  trust: Option[BeneficiaryTrustDetails] = None
 )
 
 object BeneficiaryDetail {

@@ -95,7 +95,7 @@ class BeneficiaryTypeController @Inject() (
               NormalMode,
               index
             )
-          case BeneficiaryType.Organisation =>
+          case BeneficiaryType.Trust =>
             routes.BeneficiaryTrustNameController.onPageLoad(srn, index, NormalMode)
         }
       case CheckMode =>
@@ -107,7 +107,7 @@ class BeneficiaryTypeController @Inject() (
               CheckMode,
               index
             )
-          case BeneficiaryType.Organisation if userAnswers.get(BeneficiaryTrustNamePage(index)).isEmpty =>
+          case BeneficiaryType.Trust if userAnswers.get(BeneficiaryTrustNamePage(index)).isEmpty =>
             routes.BeneficiaryTrustNameController.onPageLoad(srn, index, CheckMode)
           case _ =>
             controllers.routes.CheckYourAnswersController.onPageLoad(srn)

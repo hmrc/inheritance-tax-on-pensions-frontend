@@ -33,7 +33,7 @@ class BeneficiaryTypePageSpec extends SpecBase {
       BeneficiaryTypePage(testIndex).toString mustEqual "beneficiaryType"
     }
 
-    "must remove individual beneficiary details when Organisation is selected" in {
+    "must remove individual beneficiary details when Trust is selected" in {
       val userAnswers = emptyUserAnswers
         .set(BeneficiaryNamePage(testIndex, JourneyRole.BeneficiaryIndividual), individualName)
         .success
@@ -42,13 +42,13 @@ class BeneficiaryTypePageSpec extends SpecBase {
         .success
         .value
 
-      val updatedAnswers = userAnswers.set(BeneficiaryTypePage(testIndex), BeneficiaryType.Organisation).success.value
+      val updatedAnswers = userAnswers.set(BeneficiaryTypePage(testIndex), BeneficiaryType.Trust).success.value
 
       updatedAnswers.get(BeneficiaryNamePage(testIndex, JourneyRole.BeneficiaryIndividual)) mustBe None
       updatedAnswers.get(BeneficiaryHasNinoPage(testIndex)) mustBe None
     }
 
-    "must remove organisation beneficiary details when Individual is selected" in {
+    "must remove trust beneficiary details when Individual is selected" in {
       val userAnswers = emptyUserAnswers
         .set(BeneficiaryTrustNamePage(testIndex), trustName)
         .success
