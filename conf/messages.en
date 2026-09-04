@@ -181,7 +181,7 @@ prIndividualName.error.secondForename.pattern = Enter a valid middle name
 prIndividualName.error.surname.required = Enter the personal representative''s last name
 prIndividualName.error.surname.length = Last name must be 35 characters or less
 prIndividualName.error.surname.pattern = Enter a valid last name
-prIndividualName.checkYourAnswersLabel.hidden = the name of personal representative
+prIndividualName.checkYourAnswersLabel.hidden = the name of the PR
 
 prOrganisationName.title = Enter the full name of the PR at {0}
 prOrganisationName.heading = Enter the full name of the PR at {0}
@@ -208,7 +208,7 @@ organisationName.change.hidden = the name of the organisation
 prIndividualAddress.checkYourAnswersLabel = Address of PR
 prIndividualAddress.checkYourAnswersLabel.hidden = the address of personal representative
 prIndividualCountry.checkYourAnswersLabel = Country of PR
-prIndividualCountry.checkYourAnswersLabel.hidden = the country of personal representative
+prIndividualCountry.checkYourAnswersLabel.hidden = the address of the PR
 
 prOrganisationAddress.checkYourAnswersLabel = Address of Organisation
 prOrganisationAddress.checkYourAnswersLabel.hidden = address of organisation
@@ -320,7 +320,7 @@ didPrSubmit.title = Did the PR submit the payment notice?
 didPrSubmit.heading = Did {0} submit the payment notice?
 didPrSubmit.checkYourAnswersLabel = Did the PR submit the payment notice?
 didPrSubmit.error.required = Select Yes or No
-didPrSubmit.change.hidden = if PR submit the notice
+didPrSubmit.change.hidden = if PR submit the payment notice
 
 areBeneficiariesKnown.title = Are the beneficiaries known?
 areBeneficiariesKnown.heading = Are the beneficiaries known?
@@ -350,7 +350,7 @@ beneficiaryIndividualName.error.surname.required = Enter the beneficiary's last 
 beneficiaryIndividualName.error.surname.length = Last name must be 35 characters or less
 beneficiaryIndividualName.error.surname.pattern = Enter a valid last name
 beneficiaryIndividualName.checkYourAnswersLabel = Full name of beneficiary
-beneficiaryIndividualName.checkYourAnswersLabel.hidden = full name of beneficiary
+beneficiaryIndividualName.checkYourAnswersLabel.hidden = the full name of the beneficiary
 
 beneficiaryTrustName.heading = Enter the name of the trust
 beneficiaryTrustName.error.required = Enter the name of the trust
