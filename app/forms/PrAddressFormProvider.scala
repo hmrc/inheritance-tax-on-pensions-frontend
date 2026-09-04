@@ -27,8 +27,8 @@ import javax.inject.Inject
 
 class PrAddressFormProvider @Inject() extends Mappings {
 
-  private val addressLineMaxLength = 35
-  private val addressLineRegex = """^[^%$£\r\n]+$"""
+  private val addresslineMaxLength = 35
+  private val addresslineRegex = """^[^%$£\r\n]+$"""
   private val optionalStringFormatter: Formatter[Option[String]] = new Formatter[Option[String]] {
     override def bind(key: String, data: Map[String, String]): Either[Seq[FormError], Option[String]] =
       Right(data.get(key).map(_.trim).filter(_.nonEmpty))
@@ -40,40 +40,40 @@ class PrAddressFormProvider @Inject() extends Mappings {
   def apply(country: String): Form[PrAddress] =
     Form(
       mapping(
-        "addressLine1" -> text("changePrAddress.error.addressLine1.required")
+        "addressline1" -> text("changePrAddress.error.addressline1.required")
           .transform[String](_.trim, identity)
           .verifying(
             firstError(
-              nonBlank("changePrAddress.error.addressLine1.required"),
-              regexp(addressLineRegex, "changePrAddress.error.addressLine1.invalid"),
-              maxLength(addressLineMaxLength, "changePrAddress.error.addressLine1.length")
+              nonBlank("changePrAddress.error.addressline1.required"),
+              regexp(addresslineRegex, "changePrAddress.error.addressline1.invalid"),
+              maxLength(addresslineMaxLength, "changePrAddress.error.addressline1.length")
             )
           ),
-        "addressLine2" -> optionalAddressField(
-          "changePrAddress.error.addressLine2.invalid",
-          "changePrAddress.error.addressLine2.length"
+        "addressline2" -> optionalAddressField(
+          "changePrAddress.error.addressline2.invalid",
+          "changePrAddress.error.addressline2.length"
         ),
-        "addressLine3" -> optionalAddressField(
-          "changePrAddress.error.addressLine3.invalid",
-          "changePrAddress.error.addressLine3.length"
+        "addressline3" -> optionalAddressField(
+          "changePrAddress.error.addressline3.invalid",
+          "changePrAddress.error.addressline3.length"
         ),
-        "addressLine4" -> optionalAddressField(
-          "changePrAddress.error.addressLine4.invalid",
-          "changePrAddress.error.addressLine4.length"
+        "addressline4" -> optionalAddressField(
+          "changePrAddress.error.addressline4.invalid",
+          "changePrAddress.error.addressline4.length"
         ),
         "ukPostcode" -> optionalAddressField(
           "changePrAddress.error.ukPostcode.invalid",
           "changePrAddress.error.ukPostcode.length"
         )
-      )((addressLine1, addressLine2, addressLine3, addressLine4, ukPostcode) =>
-        PrAddress(addressLine1, addressLine2, addressLine3, addressLine4, ukPostcode, country)
+      )((addressline1, addressline2, addressline3, addressline4, ukPostcode) =>
+        PrAddress(addressline1, addressline2, addressline3, addressline4, ukPostcode, country)
       )(address =>
         Some(
           (
-            address.addressLine1,
-            address.addressLine2,
-            address.addressLine3,
-            address.addressLine4,
+            address.addressline1,
+            address.addressline2,
+            address.addressline3,
+            address.addressline4,
             address.ukPostcode
           )
         )
@@ -84,8 +84,8 @@ class PrAddressFormProvider @Inject() extends Mappings {
     of(using optionalStringFormatter)
       .verifying(
         firstError(
-          optionalConstraint(regexp(addressLineRegex, invalidKey)),
-          optionalConstraint(maxLength(addressLineMaxLength, lengthKey))
+          optionalConstraint(regexp(addresslineRegex, invalidKey)),
+          optionalConstraint(maxLength(addresslineMaxLength, lengthKey))
         )
       )
 

@@ -37,10 +37,10 @@ class PrOrganisationAddressSummarySpec extends SpecBase {
     "must return a row when data is present" in {
 
       val address = PrAddress(
-        addressLine1 = "33 AB Street",
-        addressLine2 = Some("AB Area"),
-        addressLine3 = Some("AB County"),
-        addressLine4 = Some("ABville"),
+        addressline1 = "33 AB Street",
+        addressline2 = Some("AB Area"),
+        addressline3 = Some("AB County"),
+        addressline4 = Some("ABville"),
         ukPostcode = Some("AA1 1AA"),
         country = "GB"
       )
@@ -67,10 +67,10 @@ class PrOrganisationAddressSummarySpec extends SpecBase {
     "must show only address line 1 when the optional address fields are absent" in {
 
       val address = PrAddress(
-        addressLine1 = "33 AB Street",
-        addressLine2 = None,
-        addressLine3 = None,
-        addressLine4 = None,
+        addressline1 = "33 AB Street",
+        addressline2 = None,
+        addressline3 = None,
+        addressline4 = None,
         ukPostcode = None,
         country = "GB"
       )

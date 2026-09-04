@@ -34,10 +34,10 @@ object PrIndividualAddressSummary {
   )(implicit messages: Messages): Option[SummaryListRow] =
     answers.get(PrIndividualAddressPage).map { answer =>
       val address = Seq(
-        Some(answer.addressLine1),
-        answer.addressLine2,
-        answer.addressLine3,
-        answer.addressLine4,
+        Some(answer.addressline1),
+        answer.addressline2,
+        answer.addressline3,
+        answer.addressline4,
         answer.ukPostcode
       ).flatten.map(line => HtmlFormat.escape(line).toString).mkString("<br>")
 

@@ -127,10 +127,10 @@ class ChangePrAddressController @Inject() (
 
   private def prWithoutAddressFields(userAnswers: UserAnswers, prTypeKey: String): JsObject =
     Seq(
-      "addressLine1",
-      "addressLine2",
-      "addressLine3",
-      "addressLine4",
+      "addressline1",
+      "addressline2",
+      "addressline3",
+      "addressline4",
       "ukPostcode",
       "country"
     ).foldLeft(

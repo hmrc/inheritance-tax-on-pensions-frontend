@@ -37,10 +37,10 @@ class PrAddressSpec extends SpecBase {
       )
 
       PrAddress.fromAlfAddressData(addressData) mustBe PrAddress(
-        addressLine1 = "33 AB Street",
-        addressLine2 = Some("AB Area"),
-        addressLine3 = Some("AB County"),
-        addressLine4 = Some("ABville"),
+        addressline1 = "33 AB Street",
+        addressline2 = Some("AB Area"),
+        addressline3 = Some("AB County"),
+        addressline4 = Some("ABville"),
         ukPostcode = Some("ZZ1 1ZZ"),
         country = "GB"
       )
@@ -60,10 +60,10 @@ class PrAddressSpec extends SpecBase {
       )
 
       PrAddress.fromAlfAddressData(addressData) mustBe PrAddress(
-        addressLine1 = "33 AB Street",
-        addressLine2 = Some("ABville"),
-        addressLine3 = None,
-        addressLine4 = None,
+        addressline1 = "33 AB Street",
+        addressline2 = Some("ABville"),
+        addressline3 = None,
+        addressline4 = None,
         ukPostcode = Some("ZZ1 1ZZ"),
         country = "GB"
       )
@@ -84,10 +84,10 @@ class PrAddressSpec extends SpecBase {
       )
 
       PrAddress.fromAlfAddressData(addressData) mustBe PrAddress(
-        addressLine1 = "PO Box 999",
-        addressLine2 = Some("33 AB Street"),
-        addressLine3 = Some("AB Area"),
-        addressLine4 = Some("ABville"),
+        addressline1 = "PO Box 999",
+        addressline2 = Some("33 AB Street"),
+        addressline3 = Some("AB Area"),
+        addressline4 = Some("ABville"),
         ukPostcode = Some("ZZ1 1ZZ"),
         country = "GB"
       )
@@ -108,10 +108,10 @@ class PrAddressSpec extends SpecBase {
       )
 
       PrAddress.fromAlfAddressData(addressData) mustBe PrAddress(
-        addressLine1 = "PO Box 999",
-        addressLine2 = Some("AB Area"),
-        addressLine3 = None,
-        addressLine4 = Some("ABville"),
+        addressline1 = "PO Box 999",
+        addressline2 = Some("AB Area"),
+        addressline3 = None,
+        addressline4 = Some("ABville"),
         ukPostcode = Some("ZZ1 1ZZ"),
         country = "GB"
       )
@@ -132,10 +132,10 @@ class PrAddressSpec extends SpecBase {
       )
 
       PrAddress.fromAlfAddressData(addressData) mustBe PrAddress(
-        addressLine1 = "PO Box 999",
-        addressLine2 = Some("ABville"),
-        addressLine3 = None,
-        addressLine4 = None,
+        addressline1 = "PO Box 999",
+        addressline2 = Some("ABville"),
+        addressline3 = None,
+        addressline4 = None,
         ukPostcode = Some("ZZ1 1ZZ"),
         country = "GB"
       )
@@ -155,10 +155,10 @@ class PrAddressSpec extends SpecBase {
       )
 
       PrAddress.fromAlfAddressData(addressData) mustBe PrAddress(
-        addressLine1 = "PO Box 999",
-        addressLine2 = Some("ABville"),
-        addressLine3 = None,
-        addressLine4 = None,
+        addressline1 = "PO Box 999",
+        addressline2 = Some("ABville"),
+        addressline3 = None,
+        addressline4 = None,
         ukPostcode = Some("ZZ1 1ZZ"),
         country = "GB"
       )
@@ -178,10 +178,10 @@ class PrAddressSpec extends SpecBase {
       )
 
       PrAddress.fromAlfAddressData(addressData) mustBe PrAddress(
-        addressLine1 = "33 AB Street",
-        addressLine2 = Some("ABville"),
-        addressLine3 = None,
-        addressLine4 = None,
+        addressline1 = "33 AB Street",
+        addressline2 = Some("ABville"),
+        addressline3 = None,
+        addressline4 = None,
         ukPostcode = Some("ZZ1 1ZZ"),
         country = "GB"
       )
