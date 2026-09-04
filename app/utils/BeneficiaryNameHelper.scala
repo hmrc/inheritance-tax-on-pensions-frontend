@@ -24,7 +24,7 @@ object BeneficiaryNameHelper {
 
   def fromUserAnswers(userAnswers: UserAnswers, index: Int): Option[String] =
     userAnswers.get(BeneficiaryTypePage(index)) match {
-      case Some(BeneficiaryType.Organisation) =>
+      case Some(BeneficiaryType.Trust) =>
         userAnswers.get(BeneficiaryTrustNamePage(index))
       case _ =>
         userAnswers

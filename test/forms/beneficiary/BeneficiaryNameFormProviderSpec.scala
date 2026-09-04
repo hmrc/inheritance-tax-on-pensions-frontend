@@ -23,7 +23,6 @@ import play.api.data.FormError
 class BeneficiaryNameFormProviderSpec extends forms.behaviours.StringFieldBehaviours {
 
   private val form = new BeneficiaryNameFormProvider()(JourneyRole.BeneficiaryIndividual)
-  private val organisationForm = new BeneficiaryNameFormProvider()(JourneyRole.BeneficiaryOrganisation)
 
   "BeneficiaryNameFormProvider" - {
 
@@ -145,52 +144,5 @@ class BeneficiaryNameFormProviderSpec extends forms.behaviours.StringFieldBehavi
       )
     }
 
-    "must use organisation PR error keys when firstForename and surname are blank" in {
-
-      val result = organisationForm.bind(Map("firstForename" -> "", "surname" -> ""))
-
-      result.errors must contain(FormError("firstForename", "beneficiaryOrganisationName.error.firstForename.required"))
-      result.errors must contain(FormError("surname", "beneficiaryOrganisationName.error.surname.required"))
-    }
-
-    "must use organisation PR error keys when fields exceed the maximum length" in {
-
-      val result = organisationForm.bind(
-        Map(
-          "title" -> "Title",
-          "firstForename" -> ("A" * 36),
-          "secondForename" -> ("A" * 36),
-          "surname" -> ("A" * 36)
-        )
-      )
-
-      result.errors must contain(FormError("title", "beneficiaryOrganisationName.error.title.length", Seq(4)))
-      result.errors must contain(
-        FormError("firstForename", "beneficiaryOrganisationName.error.firstForename.length", Seq(35))
-      )
-      result.errors must contain(
-        FormError("secondForename", "beneficiaryOrganisationName.error.secondForename.length", Seq(35))
-      )
-      result.errors must contain(FormError("surname", "beneficiaryOrganisationName.error.surname.length", Seq(35)))
-    }
-
-    "must use organisation PR error keys when fields contain invalid characters" in {
-
-      val result = organisationForm.bind(
-        Map(
-          "title" -> "M12",
-          "firstForename" -> "Firstname1",
-          "secondForename" -> "Middlename1",
-          "surname" -> "Surname1"
-        )
-      )
-
-      (result.errors.map(_.message) must contain).allOf(
-        "beneficiaryOrganisationName.error.title.pattern",
-        "beneficiaryOrganisationName.error.firstForename.pattern",
-        "beneficiaryOrganisationName.error.secondForename.pattern",
-        "beneficiaryOrganisationName.error.surname.pattern"
-      )
-    }
   }
 }

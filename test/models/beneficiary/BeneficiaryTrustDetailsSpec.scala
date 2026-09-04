@@ -42,5 +42,15 @@ class BeneficiaryTrustDetailsSpec extends SpecBase {
     "must fail when beneficiaryTrstName has the wrong type" in {
       Json.obj("beneficiaryTrstName" -> 123).validate[BeneficiaryTrustDetails] mustBe a[JsError]
     }
+
+    "must use the trust key in beneficiary details JSON" in {
+      val details = BeneficiaryDetail(trust = Some(BeneficiaryTrustDetails(trustName)))
+
+      val json = Json.toJson(details)
+
+      (json \ "trust" \ "beneficiaryTrstName").as[String] mustBe trustName
+      (json \ "organisation").toOption mustBe None
+      json.as[BeneficiaryDetail] mustBe details
+    }
   }
 }

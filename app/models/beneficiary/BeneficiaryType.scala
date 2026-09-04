@@ -27,11 +27,11 @@ sealed trait BeneficiaryType
 object BeneficiaryType extends Enumerable.Implicits {
 
   case object Individual extends WithName("individual") with BeneficiaryType
-  case object Organisation extends WithName("organisation") with BeneficiaryType
+  case object Trust extends WithName("trust") with BeneficiaryType
 
   val values: Seq[BeneficiaryType] = Seq(
     Individual,
-    Organisation
+    Trust
   )
 
   def options(implicit messages: Messages): Seq[RadioItem] = values.zipWithIndex.map { case (value, index) =>

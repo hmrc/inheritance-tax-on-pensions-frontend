@@ -135,7 +135,7 @@ class BeneficiaryTypeControllerSpec extends SpecBase {
       }
     }
 
-    "must redirect to the beneficiary trust name page when organisation submitted" in {
+    "must redirect to the beneficiary trust name page when trust submitted" in {
 
       val mockInheritanceTaxOnPensionsConnector = mock[InheritanceTaxOnPensionsConnector]
       when(mockInheritanceTaxOnPensionsConnector.setUserAnswers(any(), any(), any(), any(), any())(using any()))
@@ -150,7 +150,7 @@ class BeneficiaryTypeControllerSpec extends SpecBase {
       running(application) {
         val request =
           FakeRequest(POST, beneficiaryTypeRoute)
-            .withFormUrlEncodedBody(("value", BeneficiaryType.Organisation.toString))
+            .withFormUrlEncodedBody(("value", BeneficiaryType.Trust.toString))
 
         val result = route(application, request).value
 
@@ -193,7 +193,7 @@ class BeneficiaryTypeControllerSpec extends SpecBase {
       }
     }
 
-    "must redirect to the beneficiary trust name page when organisation submitted in CheckMode and the name is missing" in {
+    "must redirect to the beneficiary trust name page when trust submitted in CheckMode and the name is missing" in {
 
       val mockInheritanceTaxOnPensionsConnector = mock[InheritanceTaxOnPensionsConnector]
       when(mockInheritanceTaxOnPensionsConnector.setUserAnswers(any(), any(), any(), any(), any())(using any()))
@@ -208,7 +208,7 @@ class BeneficiaryTypeControllerSpec extends SpecBase {
       running(application) {
         val request =
           FakeRequest(POST, routes.BeneficiaryTypeController.onSubmit(srn, testIndex, CheckMode).url)
-            .withFormUrlEncodedBody(("value", BeneficiaryType.Organisation.toString))
+            .withFormUrlEncodedBody(("value", BeneficiaryType.Trust.toString))
 
         val result = route(application, request).value
 
@@ -222,7 +222,7 @@ class BeneficiaryTypeControllerSpec extends SpecBase {
       }
     }
 
-    "must redirect to the CYA page when organisation submitted in CheckMode and the trust name is present" in {
+    "must redirect to the CYA page when trust submitted in CheckMode and the trust name is present" in {
 
       val userAnswers = emptyUserAnswers
         .set(BeneficiaryTrustNamePage(testIndex), trustName)
@@ -241,7 +241,7 @@ class BeneficiaryTypeControllerSpec extends SpecBase {
       running(application) {
         val request =
           FakeRequest(POST, routes.BeneficiaryTypeController.onSubmit(srn, testIndex, CheckMode).url)
-            .withFormUrlEncodedBody(("value", BeneficiaryType.Organisation.toString))
+            .withFormUrlEncodedBody(("value", BeneficiaryType.Trust.toString))
 
         val result = route(application, request).value
 

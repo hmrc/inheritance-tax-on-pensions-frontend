@@ -31,7 +31,7 @@ case class BeneficiaryTypePage(index: Int) extends QuestionPage[BeneficiaryType]
 
   override def cleanup(value: Option[BeneficiaryType], userAnswers: UserAnswers): Try[UserAnswers] =
     value match {
-      case Some(BeneficiaryType.Organisation) =>
+      case Some(BeneficiaryType.Trust) =>
         for {
           withoutIndividualName <- userAnswers.remove(BeneficiaryNamePage(index, JourneyRole.BeneficiaryIndividual))
           withoutIndividualDetails <- withoutIndividualName.remove(BeneficiaryHasNinoPage(index))

@@ -77,9 +77,9 @@ class BeneficiaryListControllerSpec extends SpecBase {
       }
     }
 
-    "must display an organisation beneficiary with the correct Change link" in {
+    "must display a trust beneficiary with the correct Change link" in {
       val userAnswers = emptyUserAnswers
-        .set(BeneficiaryTypePage(testIndex), BeneficiaryType.Organisation)
+        .set(BeneficiaryTypePage(testIndex), BeneficiaryType.Trust)
         .success
         .value
         .set(BeneficiaryTrustNamePage(testIndex), trustName)
@@ -91,7 +91,7 @@ class BeneficiaryListControllerSpec extends SpecBase {
         val request = FakeRequest(GET, routeUrl)
         val result = route(application, request).value
         val view = application.injector.instanceOf[BeneficiaryListView]
-        val organisationItem = BeneficiaryListItem(
+        val trustItem = BeneficiaryListItem(
           name = trustName,
           changeUrl = routes.BeneficiaryTrustNameController.onPageLoad(srn, testIndex, CheckMode).url,
           removeUrl = routes.RemoveBeneficiaryController.onPageLoad(srn, NormalMode, testIndex).url
@@ -99,7 +99,7 @@ class BeneficiaryListControllerSpec extends SpecBase {
 
         status(result) mustEqual OK
         contentAsString(result) mustEqual
-          view(form, srn, Seq(organisationItem), 1)(using request, messages(application)).toString
+          view(form, srn, Seq(trustItem), 1)(using request, messages(application)).toString
       }
     }
 

@@ -33,9 +33,9 @@
     govukButton: GovukButton
 )
 
-@(form: Form[?], srn: Srn, index: Int, mode: Mode, journeyRole: JourneyRole, organisationName: Option[String] = None)(implicit request: Request[?], messages: Messages)
+@(form: Form[?], srn: Srn, index: Int, mode: Mode, journeyRole: JourneyRole)(implicit request: Request[?], messages: Messages)
 
-@viewModel = @{ BeneficiaryNamePageViewModel(form, journeyRole, organisationName) }
+@viewModel = @{ BeneficiaryNamePageViewModel(form, journeyRole) }
 
 @layout(pageTitle = title(form, viewModel.title)) {
 

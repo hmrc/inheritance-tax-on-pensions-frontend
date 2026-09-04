@@ -25,7 +25,7 @@ class BeneficiaryTrustNamePageSpec extends SpecBase {
 
     "must use the correct path" in {
       BeneficiaryTrustNamePage(testIndex).path mustEqual
-        (JsPath \ "beneficiaries")(testIndex) \ "beneficiaryDetails" \ "organisation" \ "beneficiaryTrstName"
+        (JsPath \ "beneficiaries")(testIndex) \ "beneficiaryDetails" \ "trust" \ "beneficiaryTrstName"
     }
 
     "must use the correct page name" in {

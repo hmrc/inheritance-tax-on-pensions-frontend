@@ -22,7 +22,7 @@ import play.api.libs.json.JsPath
 case class BeneficiaryTrustNamePage(index: Int) extends QuestionPage[String] {
 
   override def path: JsPath =
-    (JsPath \ "beneficiaries")(index) \ "beneficiaryDetails" \ "organisation" \ "beneficiaryTrstName"
+    (JsPath \ "beneficiaries")(index) \ "beneficiaryDetails" \ "trust" \ "beneficiaryTrstName"
 
   override def toString: String = "beneficiaryTrustName"
 }
