@@ -311,8 +311,8 @@ class IndividualNameControllerSpec extends SpecBase {
               "firstForename" -> "Firstname",
               "secondForename" -> "Middlename",
               "surname" -> "Surname",
-              "addressLine1" -> "1 ABCDE Street",
-              "addressLine2" -> "FGHIJ Town",
+              "addressline1" -> "1 ABCDE Street",
+              "addressline2" -> "FGHIJ Town",
               "ukPostcode" -> "ZZ99 1AA",
               "country" -> "GB"
             )
@@ -338,8 +338,8 @@ class IndividualNameControllerSpec extends SpecBase {
         (result.data \ "prDetails" \ "individual" \ "firstForename").as[String] mustEqual "Firstnametwo"
         (result.data \ "prDetails" \ "individual" \ "secondForename").asOpt[String] mustBe None
         (result.data \ "prDetails" \ "individual" \ "surname").as[String] mustEqual "Surname"
-        (result.data \ "prDetails" \ "individual" \ "addressLine1").as[String] mustEqual "1 ABCDE Street"
-        (result.data \ "prDetails" \ "individual" \ "addressLine2").as[String] mustEqual "FGHIJ Town"
+        (result.data \ "prDetails" \ "individual" \ "addressline1").as[String] mustEqual "1 ABCDE Street"
+        (result.data \ "prDetails" \ "individual" \ "addressline2").as[String] mustEqual "FGHIJ Town"
         (result.data \ "prDetails" \ "individual" \ "ukPostcode").as[String] mustEqual "ZZ99 1AA"
         (result.data \ "prDetails" \ "individual" \ "country").as[String] mustEqual "GB"
       }

@@ -36,10 +36,10 @@ class ChangePrAddressControllerSpec extends SpecBase {
 
   private val formProvider = new PrAddressFormProvider()
   private val address = PrAddress(
-    addressLine1 = "1 Street Road",
-    addressLine2 = Some("2 Cathedral Square"),
-    addressLine3 = Some("Newcastle upon Tyne"),
-    addressLine4 = Some("Tyne and Wear"),
+    addressline1 = "1 Street Road",
+    addressline2 = Some("2 Cathedral Square"),
+    addressline3 = Some("Newcastle upon Tyne"),
+    addressline4 = Some("Tyne and Wear"),
     ukPostcode = Some("NE1 1EH"),
     country = "GB"
   )
@@ -113,10 +113,10 @@ class ChangePrAddressControllerSpec extends SpecBase {
           val request =
             FakeRequest(POST, routes.ChangePrAddressController.onSubmit(srn, journeyRole).url)
               .withFormUrlEncodedBody(
-                "addressLine1" -> "10 New Street",
-                "addressLine2" -> "",
-                "addressLine3" -> "",
-                "addressLine4" -> "Newcastle upon Tyne",
+                "addressline1" -> "10 New Street",
+                "addressline2" -> "",
+                "addressline3" -> "",
+                "addressline4" -> "Newcastle upon Tyne",
                 "ukPostcode" -> "NE2 2AA"
               )
 
@@ -132,10 +132,10 @@ class ChangePrAddressControllerSpec extends SpecBase {
           val updatedPrDetails =
             (answersCaptor.getValue.data \ "prDetails" \ journeyRole.name).as[JsObject]
           updatedPrDetails.as[PrAddress] mustBe PrAddress(
-            addressLine1 = "10 New Street",
-            addressLine2 = None,
-            addressLine3 = None,
-            addressLine4 = Some("Newcastle upon Tyne"),
+            addressline1 = "10 New Street",
+            addressline2 = None,
+            addressline3 = None,
+            addressline4 = Some("Newcastle upon Tyne"),
             ukPostcode = Some("NE2 2AA"),
             country = "GB"
           )
@@ -161,10 +161,10 @@ class ChangePrAddressControllerSpec extends SpecBase {
           val request =
             FakeRequest(POST, routes.ChangePrAddressController.onSubmit(srn, journeyRole).url)
               .withFormUrlEncodedBody(
-                "addressLine1" -> "%",
-                "addressLine2" -> "",
-                "addressLine3" -> "",
-                "addressLine4" -> "",
+                "addressline1" -> "%",
+                "addressline2" -> "",
+                "addressline3" -> "",
+                "addressline4" -> "",
                 "ukPostcode" -> ""
               )
 

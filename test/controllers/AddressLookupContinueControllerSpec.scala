@@ -91,10 +91,10 @@ class AddressLookupContinueControllerSpec extends SpecBase {
 
             (userAnswersCaptor.getValue.data \ "prDetails" \ journeyRole.name).as[PrAddress] mustBe
               PrAddress(
-                addressLine1 = "33 AB Street",
-                addressLine2 = Some("AB Area"),
-                addressLine3 = None,
-                addressLine4 = Some("ABville"),
+                addressline1 = "33 AB Street",
+                addressline2 = Some("AB Area"),
+                addressline3 = None,
+                addressline4 = Some("ABville"),
                 ukPostcode = Some("ZZ1 1ZZ"),
                 country = "GB"
               )
@@ -203,10 +203,10 @@ class AddressLookupContinueControllerSpec extends SpecBase {
             "individual" -> Json.obj(
               "firstForename" -> "Firstname",
               "surname" -> "Surname",
-              "addressLine1" -> "33 AB Street",
-              "addressLine2" -> "AB Area",
-              "addressLine3" -> "Some District",
-              "addressLine4" -> "Anytown",
+              "addressline1" -> "33 AB Street",
+              "addressline2" -> "AB Area",
+              "addressline3" -> "Some District",
+              "addressline4" -> "Anytown",
               "ukPostcode" -> "ZZ1 1ZZ",
               "country" -> "GB"
             )
@@ -256,8 +256,8 @@ class AddressLookupContinueControllerSpec extends SpecBase {
         updatedIndividual mustBe Json.obj(
           "firstForename" -> "Firstname",
           "surname" -> "Surname",
-          "addressLine1" -> "11 A Boulevard",
-          "addressLine2" -> "ABville",
+          "addressline1" -> "11 A Boulevard",
+          "addressline2" -> "ABville",
           "ukPostcode" -> "ZZ1 1ZZ",
           "country" -> "GB"
         )
@@ -274,10 +274,10 @@ class AddressLookupContinueControllerSpec extends SpecBase {
           "prDetails" -> Json.obj(
             "organisation" -> Json.obj(
               "organisationName" -> "AB Org",
-              "addressLine1" -> "33 AB Street",
-              "addressLine2" -> "AB Area",
-              "addressLine3" -> "Some District",
-              "addressLine4" -> "Anytown",
+              "addressline1" -> "33 AB Street",
+              "addressline2" -> "AB Area",
+              "addressline3" -> "Some District",
+              "addressline4" -> "Anytown",
               "ukPostcode" -> "ZZ1 1ZZ",
               "country" -> "GB"
             )
@@ -326,8 +326,8 @@ class AddressLookupContinueControllerSpec extends SpecBase {
 
         updatedOrganisation mustBe Json.obj(
           "organisationName" -> "AB Org",
-          "addressLine1" -> "11 A Boulevard",
-          "addressLine2" -> "ABville",
+          "addressline1" -> "11 A Boulevard",
+          "addressline2" -> "ABville",
           "ukPostcode" -> "ZZ1 1ZZ",
           "country" -> "GB"
         )
