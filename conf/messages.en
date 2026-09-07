@@ -332,8 +332,8 @@ beneficiaryType.title = Select the type of beneficiary to add
 beneficiaryType.heading = Select the type of beneficiary to add
 beneficiaryType.hint = Beneficiaries are added one at a time
 beneficiaryType.individual = An individual
-beneficiaryType.trust = An organisation or trust
-beneficiaryType.error.required = You must select individual or organisation
+beneficiaryType.trust = A trust
+beneficiaryType.error.required = You must select individual or trust
 beneficiaryType.checkYourAnswersLabel = Type of beneficiary
 beneficiaryType.change.hidden = the type of beneficiary
 
