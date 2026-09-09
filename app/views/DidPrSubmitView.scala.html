@@ -16,6 +16,7 @@
 
 @import models.SchemeId.Srn
 @import viewmodels.LegendSize
+@import uk.gov.hmrc.govukfrontend.views.viewmodels.radios.RadioItem
 
 @this(
     layout: templates.Layout,
@@ -36,9 +37,13 @@
         }
 
         @govukRadios(
-            RadiosViewModel.yesNo(
+            RadiosViewModel(
                 field = form("value"),
-                legend = LegendViewModel(messages("didPrSubmit.heading", prName)).asPageHeading(LegendSize.Large)
+                legend = LegendViewModel(messages("didPrSubmit.heading")).asPageHeading(LegendSize.Large),
+                items = Seq(
+                    RadioItem(id = Some("value"), value = Some("true"), content = Text(prName)),
+                    RadioItem(id = Some("value-no"), value = Some("false"), content = Text(messages("didPrSubmit.someoneElse")))
+                )
             )
         )
 
