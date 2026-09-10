@@ -25,12 +25,16 @@ import viewmodels.beneficiary.BeneficiaryListItem
 import models.beneficiary.BeneficiaryType
 import models.{CheckMode, JourneyRole, NormalMode}
 import pages.beneficiary.{BeneficiaryNamePage, BeneficiaryTrustNamePage, BeneficiaryTypePage}
+import pages.DidPrSubmitPage
 
 class BeneficiaryListControllerSpec extends SpecBase {
 
   private val form = new BeneficiaryListFormProvider()()
   private lazy val routeUrl = routes.BeneficiaryListController.onPageLoad(srn).url
   private val answersWithBeneficiary = emptyUserAnswers
+    .set(DidPrSubmitPage, true)
+    .success
+    .value
     .set(BeneficiaryTypePage(testIndex), BeneficiaryType.Individual)
     .success
     .value
@@ -64,7 +68,12 @@ class BeneficiaryListControllerSpec extends SpecBase {
     }
 
     "must return OK with an empty list when no beneficiaries have been added" in {
-      val application = applicationBuilder(userAnswers = Some(emptyUserAnswers), usesSession = true).build()
+      val answersWherePrSubmitted = emptyUserAnswers
+        .set(DidPrSubmitPage, true)
+        .success
+        .value
+
+      val application = applicationBuilder(userAnswers = Some(answersWherePrSubmitted), usesSession = true).build()
 
       running(application) {
         val request = FakeRequest(GET, routeUrl)
@@ -79,6 +88,9 @@ class BeneficiaryListControllerSpec extends SpecBase {
 
     "must display a trust beneficiary with the correct Change link" in {
       val userAnswers = emptyUserAnswers
+        .set(DidPrSubmitPage, true)
+        .success
+        .value
         .set(BeneficiaryTypePage(testIndex), BeneficiaryType.Trust)
         .success
         .value
@@ -144,6 +156,9 @@ class BeneficiaryListControllerSpec extends SpecBase {
 
     "must redirect to Journey Recovery when a beneficiary is incomplete" in {
       val incompleteAnswers = emptyUserAnswers
+        .set(DidPrSubmitPage, true)
+        .success
+        .value
         .set(BeneficiaryTypePage(testIndex), BeneficiaryType.Individual)
         .success
         .value
@@ -154,6 +169,32 @@ class BeneficiaryListControllerSpec extends SpecBase {
 
         status(result) mustEqual SEE_OTHER
         redirectLocation(result).value mustEqual controllers.routes.JourneyRecoveryController.onPageLoad().url
+      }
+    }
+
+    "must redirect to CYA when a Pr has not submitted a notice" in {
+      val incompleteAnswers = emptyUserAnswers
+        .set(DidPrSubmitPage, false)
+        .success
+        .value
+      val application = applicationBuilder(userAnswers = Some(incompleteAnswers), usesSession = true).build()
+
+      running(application) {
+        val result = route(application, FakeRequest(GET, routeUrl)).value
+
+        status(result) mustEqual SEE_OTHER
+        redirectLocation(result).value mustEqual controllers.routes.CheckYourAnswersController.onPageLoad(srn).url
+      }
+    }
+
+    "must redirect to CYA when Did Pr submit answer is missing" in {
+      val application = applicationBuilder(userAnswers = Some(emptyUserAnswers), usesSession = true).build()
+
+      running(application) {
+        val result = route(application, FakeRequest(GET, routeUrl)).value
+
+        status(result) mustEqual SEE_OTHER
+        redirectLocation(result).value mustEqual controllers.routes.CheckYourAnswersController.onPageLoad(srn).url
       }
     }
   }

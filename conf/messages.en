@@ -396,3 +396,6 @@ hasNino.heading = Does {0} have a National Insurance number?
 hasNino.checkYourAnswersLabel = Does the deceased have a National Insurance number?
 hasNino.error.required = Select if there is a National Insurance number
 hasNino.change.hidden = if the deceased has a National Insurance number
+
+numberOfBeneficiaries.checkYourAnswersLabel = Number of beneficiaries
+numberOfBeneficiaries.change.hidden = the number of beneficiaries
