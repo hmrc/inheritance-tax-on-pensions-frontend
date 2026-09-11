@@ -25,6 +25,7 @@ trait TestValues extends Generators {
   val srn: SchemeId.Srn = srnGen.sample.get
   val schemeName = "testSchemeName"
   val email = "testEmail@test.com"
+  val inheritanceTaxReference = "A123456/25A"
   val paymentReference = "A123456/25A629671"
   val testDateOfBirth: LocalDate = LocalDate.of(1950, 1, 1)
   val testDateOfDeath: LocalDate = LocalDate.of(2020, 1, 1)
