@@ -21,7 +21,7 @@ import services.ReportSubmissionService
 import play.api.inject.bind
 import views.html.PspDeclarationView
 import base.SpecBase
-import models.IhtpReportSubmissionResponse
+import models.{IhtResponse, IhtpReportSubmissionResponse, SuccessResponse}
 import play.api.data.Form
 import org.scalatestplus.mockito.MockitoSugar
 import org.mockito.ArgumentMatchers.any
@@ -58,7 +58,7 @@ class PspDeclarationControllerSpec extends SpecBase with MockitoSugar {
 
     "must redirect to ConfirmationController when submission is successful" in {
       val mockReportSubmissionService = mock[ReportSubmissionService]
-      val response = IhtpReportSubmissionResponse("formBundle", "paymentRef")
+      val response = IhtpReportSubmissionResponse(SuccessResponse(IhtResponse("formBundle", "paymentRef")))
       when(mockReportSubmissionService.submitReport(any())(using any(), any()))
         .thenReturn(Future.successful(Right(response)))
 
