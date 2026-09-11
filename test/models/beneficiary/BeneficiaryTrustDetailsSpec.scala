@@ -24,7 +24,7 @@ class BeneficiaryTrustDetailsSpec extends SpecBase {
   "BeneficiaryTrustDetails" - {
 
     "must successfully read from json" in {
-      val json = Json.obj("beneficiaryTrstName" -> trustName)
+      val json = Json.obj("beneficiaryTrustName" -> trustName)
 
       json.validate[BeneficiaryTrustDetails] mustBe JsSuccess(BeneficiaryTrustDetails(trustName))
     }
@@ -32,15 +32,15 @@ class BeneficiaryTrustDetailsSpec extends SpecBase {
     "must successfully write to json" in {
       val json = Json.toJson(BeneficiaryTrustDetails(trustName))
 
-      (json \ "beneficiaryTrstName").as[String] mustBe trustName
+      (json \ "beneficiaryTrustName").as[String] mustBe trustName
     }
 
-    "must fail when beneficiaryTrstName is missing" in {
+    "must fail when beneficiaryTrustName is missing" in {
       Json.obj().validate[BeneficiaryTrustDetails] mustBe a[JsError]
     }
 
-    "must fail when beneficiaryTrstName has the wrong type" in {
-      Json.obj("beneficiaryTrstName" -> 123).validate[BeneficiaryTrustDetails] mustBe a[JsError]
+    "must fail when beneficiaryTrustName has the wrong type" in {
+      Json.obj("beneficiaryTrustName" -> 123).validate[BeneficiaryTrustDetails] mustBe a[JsError]
     }
 
     "must use the trust key in beneficiary details JSON" in {
@@ -48,7 +48,7 @@ class BeneficiaryTrustDetailsSpec extends SpecBase {
 
       val json = Json.toJson(details)
 
-      (json \ "trust" \ "beneficiaryTrstName").as[String] mustBe trustName
+      (json \ "trust" \ "beneficiaryTrustName").as[String] mustBe trustName
       (json \ "organisation").toOption mustBe None
       json.as[BeneficiaryDetail] mustBe details
     }

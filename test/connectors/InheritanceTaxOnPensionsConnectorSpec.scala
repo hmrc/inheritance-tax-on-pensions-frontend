@@ -112,9 +112,14 @@ class InheritanceTaxOnPensionsConnectorSpec extends SpecBase {
       val pstr = "12345678"
       val userAnswersId = "user-answers-id"
       val expectedResponse = IhtpReportSubmissionResponse(
-        formBundleNo = "bundle-1",
-        ihtPaymentReference = "payment-1"
+        SuccessResponse(
+          IhtResponse(
+            formBundleNo = "bundle-1",
+            ihtPaymentReference = "payment-1"
+          )
+        )
       )
+
       val mockUrl = s"http://inheritance-tax-on-pensions/inheritance-tax-on-pensions/$pstr/submit-report/$userAnswersId"
 
       when(mockConfig.getSubmitReportUrl(eqTo(pstr), eqTo(userAnswersId))).thenReturn(mockUrl)

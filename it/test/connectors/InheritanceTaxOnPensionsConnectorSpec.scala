@@ -17,7 +17,7 @@
 package connectors
 
 import com.github.tomakehurst.wiremock.client.WireMock.*
-import models.{IhtpReportSubmissionResponse, MinimalDetails, SchemeDetails, UserAnswers}
+import models.{IhtResponse, IhtpReportSubmissionResponse, MinimalDetails, SchemeDetails, SuccessResponse, UserAnswers}
 import play.api.Application
 import play.api.http.Status.*
 import play.api.inject.guice.GuiceApplicationBuilder
@@ -117,8 +117,12 @@ class InheritanceTaxOnPensionsConnectorSpec extends BaseConnectorSpec {
     "submitReport must" - {
       "successfully submit report" in runningApplication { implicit app =>
         val response = IhtpReportSubmissionResponse(
-          formBundleNo = "bundle-1",
-          ihtPaymentReference = "payment-1"
+          SuccessResponse(
+            IhtResponse(
+              formBundleNo = "bundle-1",
+              ihtPaymentReference = "payment-1"
+            )
+          )
         )
         val jsonResponse: String = Json.toJson(response).toString()
         wireMockServer.stubFor(
