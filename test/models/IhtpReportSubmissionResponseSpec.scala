@@ -25,24 +25,32 @@ class IhtpReportSubmissionResponseSpec extends SpecBase {
 
     "must successfully read from json" in {
       val json = Json.obj(
-        "formBundleNo" -> "bundle-1",
-        "ihtPaymentReference" -> "payment-1"
+        "success" -> Json.obj(
+          "ihtResponse" -> Json.obj(
+            "formBundleNo" -> "bundle-1",
+            "ihtPaymentReference" -> "payment-1"
+          )
+        )
       )
 
-      val result = json.as[IhtpReportSubmissionResponse]
-      result.formBundleNo mustBe "bundle-1"
-      result.ihtPaymentReference mustBe "payment-1"
+      val result: IhtpReportSubmissionResponse = json.as[IhtpReportSubmissionResponse]
+      result.success.ihtResponse.formBundleNo mustBe "bundle-1"
+      result.success.ihtResponse.ihtPaymentReference mustBe "payment-1"
     }
 
     "must successfully write to json" in {
       val response = IhtpReportSubmissionResponse(
-        formBundleNo = "bundle-1",
-        ihtPaymentReference = "payment-1"
+        SuccessResponse(
+          IhtResponse(
+            formBundleNo = "bundle-1",
+            ihtPaymentReference = "payment-1"
+          )
+        )
       )
 
       val json = Json.toJson(response)
-      (json \ "formBundleNo").as[String] mustBe "bundle-1"
-      (json \ "ihtPaymentReference").as[String] mustBe "payment-1"
+      (json \ "success" \ "ihtResponse" \ "formBundleNo").as[String] mustBe "bundle-1"
+      (json \ "success" \ "ihtResponse" \ "ihtPaymentReference").as[String] mustBe "payment-1"
     }
   }
 }
