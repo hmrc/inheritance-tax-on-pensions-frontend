@@ -18,6 +18,7 @@ package controllers.beneficiary
 
 import utils.BeneficiaryNameHelper
 import play.api.mvc._
+import pages.DidPrSubmitPage
 import controllers.IhtpBaseController
 import models.SchemeId.Srn
 import views.html.beneficiary.BeneficiaryListView
@@ -49,10 +50,19 @@ class BeneficiaryListController @Inject() (
       .andThen(allowAccess(srn))
       .andThen(getData)
       .andThen(requireData) { implicit request =>
-        beneficiariesAndItems(srn, request.userAnswers) match {
-          case Right((beneficiaries, items)) =>
-            Ok(view(form, srn, items, beneficiaries.beneficiaries.size))
-          case Left(result) => result
+        request.userAnswers
+          .get(DidPrSubmitPage) match { // TODO: This check should be moved when Interest Payable Page in Added
+          case Some(true) =>
+            beneficiariesAndItems(srn, request.userAnswers) match {
+              case Right((beneficiaries, items)) =>
+                Ok(view(form, srn, items, beneficiaries.beneficiaries.size))
+              case Left(result) => result
+            }
+          case Some(false) =>
+            Redirect(controllers.routes.CheckYourAnswersController.onPageLoad(srn))
+          case None =>
+            logger.warn("Did Pr submit answer is missing, cannot load the beneficiary list page")
+            Redirect(controllers.routes.CheckYourAnswersController.onPageLoad(srn))
         }
       }
 
