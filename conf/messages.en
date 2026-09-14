@@ -316,10 +316,11 @@ confirmation.progress.guidance.usecase2.link.text = Scheme Dashboard for {0}
 confirmation.feedback = What did you think of this service?
 confirmation.feedback.append = (takes 30 seconds)
 
-didPrSubmit.title = Did the PR submit the payment notice?
-didPrSubmit.heading = Did {0} submit the payment notice?
+didPrSubmit.title = Who submitted the payment notice?
+didPrSubmit.heading = Who submitted the payment notice?
+didPrSubmit.someoneElse = Someone else
 didPrSubmit.checkYourAnswersLabel = Did the PR submit the payment notice?
-didPrSubmit.error.required = Select Yes or No
+didPrSubmit.error.required = Select who submitted the payment notice
 didPrSubmit.change.hidden = if PR submit the payment notice
 
 areBeneficiariesKnown.title = Are the beneficiaries known?

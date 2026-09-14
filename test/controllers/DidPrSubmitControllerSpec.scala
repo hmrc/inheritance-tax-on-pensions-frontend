@@ -32,9 +32,18 @@ import org.scalatestplus.mockito.MockitoSugar
 
 import scala.concurrent.Future
 
-import java.time.LocalDate
-
 class DidPrSubmitControllerSpec extends SpecBase with MockitoSugar {
+
+  private def assertSubmitterOptions(html: String, prName: String): Unit = {
+    val document = org.jsoup.Jsoup.parse(html)
+    document.title() must startWith("Who submitted the payment notice?")
+    document.select("h1").text() mustBe "Who submitted the payment notice?"
+    document.select("label[for=value]").text() mustBe prName
+    document.select("label[for=value-no]").text() mustBe "Someone else"
+    document.select("input#value").attr("value") mustBe "true"
+    document.select("input#value-no").attr("value") mustBe "false"
+    document.select("button[type=submit]").text() mustBe "Save and continue"
+  }
 
   private val formProvider = new DidPrSubmitFormProvider()
   private val form = formProvider()
@@ -46,17 +55,10 @@ class DidPrSubmitControllerSpec extends SpecBase with MockitoSugar {
     .set(IndividualNamePage(JourneyRole.PrIndividual), individualName)
     .get
 
-  private val organisationPrName = IndividualName(
-    title = Some("Mrs"),
-    firstForename = "Firstnamethree",
-    secondForename = Some("Middlenametwo"),
-    surname = "Surnametwo"
-  )
-
   val userAnswersWithOrganisationPrName: UserAnswers = emptyUserAnswers
     .set(PrTypePage, PrType.Organisation)
     .get
-    .set(IndividualNamePage(JourneyRole.PrOrganisation), organisationPrName)
+    .set(IndividualNamePage(JourneyRole.PrOrganisation), individualName)
     .get
 
   "DidPrSubmit Controller" - {
@@ -72,6 +74,7 @@ class DidPrSubmitControllerSpec extends SpecBase with MockitoSugar {
         val view = application.injector.instanceOf[DidPrSubmitView]
 
         status(result) mustEqual OK
+        assertSubmitterOptions(contentAsString(result), individualNameFormatted)
         contentAsString(result) mustEqual view(form, srn, NormalMode, individualNameFormatted)(using
           request,
           messages(application)
@@ -91,31 +94,35 @@ class DidPrSubmitControllerSpec extends SpecBase with MockitoSugar {
         val view = application.injector.instanceOf[DidPrSubmitView]
 
         status(result) mustEqual OK
-        contentAsString(result) mustEqual view(form, srn, NormalMode, "Firstnamethree Surnametwo")(using
+        assertSubmitterOptions(contentAsString(result), individualNameFormatted)
+        contentAsString(result) mustEqual view(form, srn, NormalMode, individualNameFormatted)(using
           request,
           messages(application)
         ).toString
       }
     }
 
-    "must populate the view correctly on a GET when the question has previously been answered" in {
+    Seq(true, false).foreach { answer =>
+      s"must populate the view correctly on a GET when the previous answer is $answer" in {
 
-      val userAnswers = userAnswersWithPrName.set(DidPrSubmitPage, true).success.value
+        val userAnswers = userAnswersWithPrName.set(DidPrSubmitPage, answer).success.value
 
-      val application = applicationBuilder(userAnswers = Some(userAnswers), usesSession = true).build()
+        val application = applicationBuilder(userAnswers = Some(userAnswers), usesSession = true).build()
 
-      running(application) {
-        val request = FakeRequest(GET, didPrSubmitRoute)
+        running(application) {
+          val request = FakeRequest(GET, didPrSubmitRoute)
 
-        val view = application.injector.instanceOf[DidPrSubmitView]
+          val view = application.injector.instanceOf[DidPrSubmitView]
 
-        val result = route(application, request).value
+          val result = route(application, request).value
 
-        status(result) mustEqual OK
-        contentAsString(result) mustEqual view(form.fill(true), srn, NormalMode, individualNameFormatted)(using
-          request,
-          messages(application)
-        ).toString
+          status(result) mustEqual OK
+          org.jsoup.Jsoup.parse(contentAsString(result)).select("input[checked]").attr("value") mustBe answer.toString
+          contentAsString(result) mustEqual view(form.fill(answer), srn, NormalMode, individualNameFormatted)(using
+            request,
+            messages(application)
+          ).toString
+        }
       }
     }
 
@@ -174,7 +181,7 @@ class DidPrSubmitControllerSpec extends SpecBase with MockitoSugar {
         .thenReturn(Future.successful(Right(userAnswersWithPrName)))
 
       val userAnswers = userAnswersWithPrName
-        .set(PaymentNoticeDatePage, LocalDate.of(2026, 3, 27))
+        .set(PaymentNoticeDatePage, testPaymentNoticeDate)
         .success
         .value
 
@@ -203,7 +210,7 @@ class DidPrSubmitControllerSpec extends SpecBase with MockitoSugar {
           any()
         )(using any())
         userAnswersCaptor.getValue.get(DidPrSubmitPage).value mustEqual false
-        userAnswersCaptor.getValue.get(PaymentNoticeDatePage).value mustEqual LocalDate.of(2026, 3, 27)
+        userAnswersCaptor.getValue.get(PaymentNoticeDatePage).value mustEqual testPaymentNoticeDate
       }
     }
 
@@ -238,7 +245,7 @@ class DidPrSubmitControllerSpec extends SpecBase with MockitoSugar {
         .thenReturn(Future.successful(Right(userAnswersWithPrName)))
 
       val userAnswers = userAnswersWithPrName
-        .set(PaymentNoticeDatePage, LocalDate.of(2026, 3, 27))
+        .set(PaymentNoticeDatePage, testPaymentNoticeDate)
         .success
         .value
 
