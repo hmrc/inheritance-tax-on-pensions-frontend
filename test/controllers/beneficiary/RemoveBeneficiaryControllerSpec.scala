@@ -65,7 +65,11 @@ class RemoveBeneficiaryControllerSpec extends SpecBase {
   "RemoveBeneficiaryController" - {
     List(
       (NormalMode, "beneficiary list", routes.BeneficiaryListController.onPageLoad(srn).url),
-      (CheckMode, "CYA page", controllers.routes.CheckYourAnswersController.onPageLoad(srn).url)
+      (
+        CheckMode,
+        "CYA page",
+        controllers.routes.CheckYourAnswersController.onPageLoad(srn, SummaryRole.CheckYourAnswers).url
+      )
     ).foreach { (mode, modeTargetPage, modeUrl) =>
       s"in mode $mode" - {
         "must return OK and the correct view for a GET" in {

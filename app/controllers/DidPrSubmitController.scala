@@ -89,6 +89,6 @@ class DidPrSubmitController @Inject() (
       case NormalMode => routes.PaymentNoticeDateController.onPageLoad(srn, NormalMode)
       case CheckMode if userAnswers.get(PaymentNoticeDatePage).isEmpty =>
         routes.PaymentNoticeDateController.onPageLoad(srn, CheckMode)
-      case CheckMode => routes.CheckYourAnswersController.onPageLoad(srn)
+      case CheckMode => routes.CheckYourAnswersController.onPageLoad(srn, SummaryRole.CheckYourAnswers)
     }
 }

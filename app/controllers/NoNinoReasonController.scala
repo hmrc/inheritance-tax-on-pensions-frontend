@@ -22,7 +22,7 @@ import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import pages.NoNinoReasonPage
 import controllers.actions._
 import forms.NoNinoReasonFormProvider
-import models.{CheckMode, Mode, NormalMode}
+import models._
 import play.api.i18n.{I18nSupport, MessagesApi}
 import views.html.NoNinoReasonView
 import models.SchemeId.Srn
@@ -88,6 +88,6 @@ class NoNinoReasonController @Inject() (
   private def nextPage(srn: Srn, mode: Mode) =
     mode match {
       case NormalMode => routes.BirthDeathDatesController.onPageLoad(srn, mode)
-      case CheckMode => routes.CheckYourAnswersController.onPageLoad(srn)
+      case CheckMode => routes.CheckYourAnswersController.onPageLoad(srn, SummaryRole.CheckYourAnswers)
     }
 }

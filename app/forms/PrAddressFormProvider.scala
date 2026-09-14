@@ -100,7 +100,7 @@ class PrAddressFormProvider @Inject() extends Mappings with Regex {
         )
       )
 
-  private def optionalUkPostcode(invalidKey: String, lengthKey: String): Mapping[Option[String]] = {
+  private def optionalUkPostcode(invalidKey: String, lengthKey: String): Mapping[Option[String]] =
     of(using optionalStringFormatter)
       .transform(_.map(_.toUpperCase()), identity)
       .verifying(
@@ -109,7 +109,6 @@ class PrAddressFormProvider @Inject() extends Mappings with Regex {
           optionalConstraint(maxLength(ukPostcodeMaxLength, lengthKey))
         )
       )
-  }
 
   private def optionalConstraint(constraint: Constraint[String]): Constraint[Option[String]] =
     Constraint(_.map(constraint.apply).getOrElse(Valid))

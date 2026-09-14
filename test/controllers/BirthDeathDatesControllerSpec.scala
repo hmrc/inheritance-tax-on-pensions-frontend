@@ -154,7 +154,9 @@ class BirthDeathDatesControllerSpec extends SpecBase with MockitoSugar {
           route(application, postRequest(routes.BirthDeathDatesController.onSubmit(srn, CheckMode).url)).value
 
         status(result) mustEqual SEE_OTHER
-        redirectLocation(result).value mustEqual routes.CheckYourAnswersController.onPageLoad(srn).url
+        redirectLocation(result).value mustEqual routes.CheckYourAnswersController
+          .onPageLoad(srn, SummaryRole.CheckYourAnswers)
+          .url
       }
     }
 

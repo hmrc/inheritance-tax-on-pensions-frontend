@@ -28,7 +28,7 @@
     govukButton: GovukButton
 )
 
-@(srn: Srn, deceasedDetailsSummaryList: SummaryList, prDetailsSummaryList: SummaryList, paymentNoticeDetailsSummaryList: SummaryList, beneficiaryList: List[SummaryList])(implicit request: Request[?], messages: Messages)
+@(srn: Srn, deceasedDetailsSummaryList: SummaryList, prDetailsSummaryList: SummaryList, paymentNoticeDetailsSummaryList: SummaryList, beneficiaryList: List[SummaryList], summaryRole: SummaryRole, route: Option[Call])(implicit request: Request[?], messages: Messages)
 
 @layout(pageTitle = titleNoForm(messages("checkYourAnswers.title"))) {
 
@@ -59,19 +59,30 @@
             }
         }
 
-        <div class="govuk-button-group">
-        @govukButton(
-            ButtonViewModel(messages("site.saveAndContinue"))
-        )
-        @govukButton(
-            Button(
+        @if(summaryRole == SummaryRole.CheckYourAnswers) {
+            <div class="govuk-button-group">
+                @govukButton(
+                ButtonViewModel(messages("site.saveAndContinue"))
+                )
+                @govukButton(
+                Button(
                 content = Text(messages("site.saveAsDraft")),
                 id = Some("saved-as-draft-link"),
                 href = Some(routes.SubmissionListController.onPageLoad(srn).url),
                 preventDoubleClick = Some(true)
-            ).asSecondaryButton()
-        )
-        </div>
+                ).asSecondaryButton()
+                )
+            </div>
+        } else if(summaryRole == SummaryRole.Continue && route.isDefined) {
+            <div class="govuk-button-group">
+                @govukButton(
+                Button(
+                content = Text(messages("site.continue")),
+                href = Some(route.get.url)
+                )
+                )
+            </div>
+        }
     }
 
 }

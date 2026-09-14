@@ -18,6 +18,7 @@ package controllers
 
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
+import models.SummaryRole.CheckYourAnswers
 import pages._
 import viewmodels.CheckAnswers.beneficiary.{BeneficiaryHasNinoSummary, BeneficiaryTypeSummary}
 import views.html.CheckYourAnswersView
@@ -59,7 +60,10 @@ class CheckYourAnswersControllerSpec extends SpecBase {
 
             running(application) {
               val result =
-                route(application, FakeRequest(GET, routes.CheckYourAnswersController.onPageLoad(srn).url)).value
+                route(
+                  application,
+                  FakeRequest(GET, routes.CheckYourAnswersController.onPageLoad(srn, CheckYourAnswers).url)
+                ).value
               status(result) mustBe OK
               val document = org.jsoup.Jsoup.parse(contentAsString(result))
               val row = document
@@ -86,7 +90,10 @@ class CheckYourAnswersControllerSpec extends SpecBase {
         .value
       val application = applicationBuilder(Some(answers)).build()
       running(application) {
-        val result = route(application, FakeRequest(GET, routes.CheckYourAnswersController.onPageLoad(srn).url)).value
+        val result = route(
+          application,
+          FakeRequest(GET, routes.CheckYourAnswersController.onPageLoad(srn, CheckYourAnswers).url)
+        ).value
         status(result) mustBe OK
         val document = org.jsoup.Jsoup.parse(contentAsString(result))
         val rows = document.select(".govuk-summary-list__row")
@@ -139,7 +146,8 @@ class CheckYourAnswersControllerSpec extends SpecBase {
       val application = applicationBuilder(userAnswers = Some(userAnswers)).build()
 
       running(application) {
-        val request = FakeRequest(GET, routes.CheckYourAnswersController.onPageLoad(srn).url)
+        val request =
+          FakeRequest(GET, routes.CheckYourAnswersController.onPageLoad(srn, SummaryRole.CheckYourAnswers).url)
 
         val result = route(application, request).value
 
@@ -172,7 +180,9 @@ class CheckYourAnswersControllerSpec extends SpecBase {
           deceasedDetailsSummaryList,
           prDetailsSummaryList,
           paymentNoticeDetailsSummaryList,
-          emptyBeneficiarySummaryListViewModel
+          emptyBeneficiarySummaryListViewModel,
+          CheckYourAnswers,
+          None
         )(using
           request,
           messages(application)
@@ -219,7 +229,8 @@ class CheckYourAnswersControllerSpec extends SpecBase {
       val application = applicationBuilder(userAnswers = Some(userAnswers)).build()
 
       running(application) {
-        val request = FakeRequest(GET, routes.CheckYourAnswersController.onPageLoad(srn).url)
+        val request =
+          FakeRequest(GET, routes.CheckYourAnswersController.onPageLoad(srn, SummaryRole.CheckYourAnswers).url)
 
         val result = route(application, request).value
 
@@ -252,7 +263,9 @@ class CheckYourAnswersControllerSpec extends SpecBase {
           deceasedDetailsSummaryList,
           prDetailsSummaryList,
           paymentNoticeDetailsSummaryList,
-          emptyBeneficiarySummaryListViewModel
+          emptyBeneficiarySummaryListViewModel,
+          CheckYourAnswers,
+          None
         )(using
           request,
           messages(application)
@@ -272,7 +285,8 @@ class CheckYourAnswersControllerSpec extends SpecBase {
       val application = applicationBuilder(userAnswers = Some(userAnswers)).build()
 
       running(application) {
-        val request = FakeRequest(GET, routes.CheckYourAnswersController.onPageLoad(srn).url)
+        val request =
+          FakeRequest(GET, routes.CheckYourAnswersController.onPageLoad(srn, SummaryRole.CheckYourAnswers).url)
 
         val result = route(application, request).value
 
@@ -293,7 +307,9 @@ class CheckYourAnswersControllerSpec extends SpecBase {
           deceasedDetailsSummaryList,
           prDetailsSummaryList,
           paymentNoticeDetailsSummaryList,
-          emptyBeneficiarySummaryListViewModel
+          emptyBeneficiarySummaryListViewModel,
+          CheckYourAnswers,
+          None
         )(using
           request,
           messages(application)
@@ -330,7 +346,8 @@ class CheckYourAnswersControllerSpec extends SpecBase {
       val application = applicationBuilder(userAnswers = Some(userAnswers)).build()
 
       running(application) {
-        val request = FakeRequest(GET, routes.CheckYourAnswersController.onPageLoad(srn).url)
+        val request =
+          FakeRequest(GET, routes.CheckYourAnswersController.onPageLoad(srn, SummaryRole.CheckYourAnswers).url)
 
         val result = route(application, request).value
 
@@ -359,7 +376,9 @@ class CheckYourAnswersControllerSpec extends SpecBase {
           deceasedDetailsSummaryList,
           prDetailsSummaryList,
           paymentNoticeDetailsSummaryList,
-          emptyBeneficiarySummaryListViewModel
+          emptyBeneficiarySummaryListViewModel,
+          CheckYourAnswers,
+          None
         )(using
           request,
           messages(application)
@@ -397,7 +416,8 @@ class CheckYourAnswersControllerSpec extends SpecBase {
       val application = applicationBuilder(userAnswers = Some(userAnswers)).build()
 
       running(application) {
-        val request = FakeRequest(GET, routes.CheckYourAnswersController.onPageLoad(srn).url)
+        val request =
+          FakeRequest(GET, routes.CheckYourAnswersController.onPageLoad(srn, SummaryRole.CheckYourAnswers).url)
 
         val result = route(application, request).value
 
@@ -427,7 +447,9 @@ class CheckYourAnswersControllerSpec extends SpecBase {
           deceasedDetailsSummaryList,
           prDetailsSummaryList,
           paymentNoticeDetailsSummaryList,
-          emptyBeneficiarySummaryListViewModel
+          emptyBeneficiarySummaryListViewModel,
+          CheckYourAnswers,
+          None
         )(using
           request,
           messages(application)
@@ -454,7 +476,8 @@ class CheckYourAnswersControllerSpec extends SpecBase {
       val application = applicationBuilder(userAnswers = Some(userAnswers)).build()
 
       running(application) {
-        val request = FakeRequest(GET, routes.CheckYourAnswersController.onPageLoad(srn).url)
+        val request =
+          FakeRequest(GET, routes.CheckYourAnswersController.onPageLoad(srn, SummaryRole.CheckYourAnswers).url)
 
         val result = route(application, request).value
 
@@ -509,7 +532,9 @@ class CheckYourAnswersControllerSpec extends SpecBase {
           emptySummaryList,
           emptySummaryList,
           emptySummaryList,
-          beneficiarySummaryList
+          beneficiarySummaryList,
+          CheckYourAnswers,
+          None
         )(using
           request,
           messages(application)
@@ -522,7 +547,8 @@ class CheckYourAnswersControllerSpec extends SpecBase {
       val application = applicationBuilder(userAnswers = None).build()
 
       running(application) {
-        val request = FakeRequest(GET, routes.CheckYourAnswersController.onPageLoad(srn).url)
+        val request =
+          FakeRequest(GET, routes.CheckYourAnswersController.onPageLoad(srn, SummaryRole.CheckYourAnswers).url)
 
         val result = route(application, request).value
 
@@ -596,7 +622,8 @@ class CheckYourAnswersControllerSpec extends SpecBase {
       val application = applicationBuilder(userAnswers = Some(userAnswers)).build()
 
       running(application) {
-        val request = FakeRequest(GET, routes.CheckYourAnswersController.onPageLoad(srn).url)
+        val request =
+          FakeRequest(GET, routes.CheckYourAnswersController.onPageLoad(srn, SummaryRole.CheckYourAnswers).url)
 
         val result = route(application, request).value
 
