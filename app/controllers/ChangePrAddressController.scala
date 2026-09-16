@@ -55,7 +55,7 @@ class ChangePrAddressController @Inject() (
                 srn,
                 journeyRole,
                 displayName,
-                isUkAddress(address)
+                formProvider.isUkAddress(address)
               )
             )
           case Left(logMessage) =>
@@ -82,7 +82,7 @@ class ChangePrAddressController @Inject() (
                         srn,
                         journeyRole,
                         displayName,
-                        isUkAddress(existingAddress)
+                        formProvider.isUkAddress(existingAddress)
                       )
                     )
                   ),
@@ -165,7 +165,4 @@ class ChangePrAddressController @Inject() (
       case _ =>
         Left("unsupported journey role, cannot load the change address page")
     }
-
-  private def isUkAddress(address: PrAddress): Boolean =
-    address.country == "GB"
 }

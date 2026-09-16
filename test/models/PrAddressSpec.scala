@@ -41,8 +41,33 @@ class PrAddressSpec extends SpecBase {
         addressline2 = Some("AB Area"),
         addressline3 = Some("AB County"),
         addressline4 = Some("ABville"),
+        addressline5 = None,
         ukPostcode = Some("ZZ1 1ZZ"),
         country = "GB"
+      )
+    }
+
+    "must map ALF postalcode to address line 5 when not GB and address line 5 is present" in {
+
+      val addressData = AlfAddressData(
+        id = Some("GB123"),
+        address = AlfAddress(
+          organisation = None,
+          lines = Seq("33 AB Street", "AB Area", "AB County"),
+          town = Some("ABville"),
+          postcode = Some("123456"),
+          country = AlfCountry("BF", "Burkina Faso")
+        )
+      )
+
+      PrAddress.fromAlfAddressData(addressData) mustBe PrAddress(
+        addressline1 = "33 AB Street",
+        addressline2 = Some("AB Area"),
+        addressline3 = Some("AB County"),
+        addressline4 = Some("ABville"),
+        addressline5 = Some("123456"),
+        ukPostcode = None,
+        country = "BF"
       )
     }
 

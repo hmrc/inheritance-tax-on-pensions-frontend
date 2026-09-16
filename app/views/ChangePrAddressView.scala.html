@@ -91,19 +91,32 @@
             .withSpellcheck(on = false)
         )
 
-        @govukInput(
-            InputViewModel(
-                field = form("ukPostcode"),
-                label = LabelViewModel(
-                    messages(
-                        if(isUkAddress) "changePrAddress.postcode" else "changePrAddress.postalCode"
-                    )
-                ).withCssClass("govuk-label--s")
+        @if(isUkAddress) {
+            @govukInput(
+                InputViewModel(
+                    field = form("ukPostcode"),
+                    label = LabelViewModel(
+                        messages("changePrAddress.postcode")
+                    ).withCssClass("govuk-label--s")
+                )
+                .withWidth(Fixed10)
+                .withAutocomplete("postal-code")
+                .withSpellcheck(on = false)
             )
-            .withWidth(Fixed10)
-            .withAutocomplete("postal-code")
-            .withSpellcheck(on = false)
-        )
+        }
+
+        @if(!isUkAddress) {
+            @govukInput(
+                InputViewModel(
+                    field = form("addressline5"),
+                    label = LabelViewModel(messages("changePrAddress.postalCode"))
+                        .withCssClass("govuk-label--s")
+                )
+                .withWidth(Fixed10)
+                .withAutocomplete("address-line5")
+                .withSpellcheck(on = false)
+            )
+        }
 
         @govukButton(
             ButtonViewModel(messages("site.saveAndContinue"))

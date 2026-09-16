@@ -24,31 +24,50 @@ import play.api.data.FormError
 class PrAddressFormProviderSpec extends AnyFreeSpec with Matchers {
 
   private val country = "GB"
+  private val nonGbCountry = "BF"
   private val addresslineRegex = """^[^%$£\r\n]+$"""
   private val form = new PrAddressFormProvider()(country)
+  private val formNonGb = new PrAddressFormProvider()(nonGbCountry)
   private val validData = Map(
-    "addressline1" -> "1 Street Road",
-    "addressline2" -> "2 Cathedral Square",
-    "addressline3" -> "Newcastle upon Tyne",
+    "addressline1" -> "Line 1",
+    "addressline2" -> "Line 2",
+    "addressline3" -> "City",
     "addressline4" -> "",
-    "ukPostcode" -> "NE1 1EH"
+    "addressline5" -> "Line 5",
+    "ukPostcode" -> ""
   )
-
   "PrAddressFormProvider" - {
 
     "must bind valid data, trim the fields and retain the existing country" in {
       val result = form.bind(
-        validData.updated("addressline1", "  1 Street Road  ").updated("addressline4", "   ")
+        validData.updated("addressline1", "  Line 1  ").updated("addressline4", "   ")
       )
 
       result.errors mustBe empty
       result.value.get mustBe PrAddress(
-        addressline1 = "1 Street Road",
-        addressline2 = Some("2 Cathedral Square"),
-        addressline3 = Some("Newcastle upon Tyne"),
+        addressline1 = "Line 1",
+        addressline2 = Some("Line 2"),
+        addressline3 = Some("City"),
         addressline4 = None,
-        ukPostcode = Some("NE1 1EH"),
+        addressline5 = Some("Line 5"),
+        ukPostcode = None,
         country = country
+      )
+    }
+    "must bind valid data, trim the fields and retain the existing Non-GB country" in {
+      val result = formNonGb.bind(
+        validData.updated("addressline1", "  Line 1  ").updated("addressline4", "   ")
+      )
+
+      result.errors mustBe empty
+      result.value.get mustBe PrAddress(
+        addressline1 = "Line 1",
+        addressline2 = Some("Line 2"),
+        addressline3 = Some("City"),
+        addressline4 = None,
+        addressline5 = Some("Line 5"),
+        ukPostcode = None,
+        country = nonGbCountry
       )
     }
 

@@ -25,7 +25,8 @@ final case class PrAddress(
   addressline3: Option[String],
   addressline4: Option[String],
   ukPostcode: Option[String],
-  country: String
+  country: String,
+  addressline5: Option[String] = None
 )
 
 object PrAddress {
@@ -44,7 +45,14 @@ object PrAddress {
       addressline2 = addressline2,
       addressline3 = lines.lift(2),
       addressline4 = addressline4,
-      ukPostcode = addressData.address.postcode,
+      addressline5 = addressData.address.country.code match {
+        case "GB" => None
+        case _ => addressData.address.postcode
+      },
+      ukPostcode = addressData.address.country.code match {
+        case "GB" => addressData.address.postcode
+        case _ => None
+      },
       country = addressData.address.country.code
     )
   }

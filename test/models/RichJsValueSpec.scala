@@ -264,7 +264,7 @@ class RichJsValueSpec
       val gen = for {
         keys <- Gen.listOf(nonEmptyAlphaStr)
         values <- Gen.listOf(nonEmptyAlphaStr)
-        keyToRemove <- nonEmptyAlphaStr
+        keyToRemove <- nonEmptyAlphaStr.filterNot(keys.contains(_))
         valueToRemove <- nonEmptyAlphaStr
       } yield (keys, values, keyToRemove, valueToRemove)
 

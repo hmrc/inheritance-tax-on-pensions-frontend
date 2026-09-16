@@ -236,6 +236,8 @@ changePrAddress.error.addressline3.invalid = Enter a valid Address Line 3
 changePrAddress.error.addressline3.length = Address Line 3 should be 35 characters or less
 changePrAddress.error.addressline4.invalid = Enter a valid Address Line 4
 changePrAddress.error.addressline4.length = Address Line 4 should be 35 characters or less
+changePrAddress.error.addressline4.invalid = Enter a valid Postal code
+changePrAddress.error.addressline4.length = Postal code be 35 characters or less
 changePrAddress.error.ukPostcode.invalid = Enter a valid Post Code
 changePrAddress.error.ukPostcode.length = Post Code should be 35 characters or less
 

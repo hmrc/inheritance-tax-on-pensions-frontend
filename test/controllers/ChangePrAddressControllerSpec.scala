@@ -36,11 +36,11 @@ class ChangePrAddressControllerSpec extends SpecBase {
 
   private val formProvider = new PrAddressFormProvider()
   private val address = PrAddress(
-    addressline1 = "1 Street Road",
-    addressline2 = Some("2 Cathedral Square"),
-    addressline3 = Some("Newcastle upon Tyne"),
-    addressline4 = Some("Tyne and Wear"),
-    ukPostcode = Some("NE1 1EH"),
+    addressline1 = "Line 1",
+    addressline2 = Some("Line 2"),
+    addressline3 = Some("City"),
+    addressline4 = Some("County"),
+    ukPostcode = None,
     country = "GB"
   )
 
@@ -113,10 +113,10 @@ class ChangePrAddressControllerSpec extends SpecBase {
           val request =
             FakeRequest(POST, routes.ChangePrAddressController.onSubmit(srn, journeyRole).url)
               .withFormUrlEncodedBody(
-                "addressline1" -> "10 New Street",
+                "addressline1" -> "1 Line",
                 "addressline2" -> "",
                 "addressline3" -> "",
-                "addressline4" -> "Newcastle upon Tyne",
+                "addressline4" -> "City",
                 "ukPostcode" -> "NE2 2AA"
               )
 
@@ -132,10 +132,10 @@ class ChangePrAddressControllerSpec extends SpecBase {
           val updatedPrDetails =
             (answersCaptor.getValue.data \ "prDetails" \ journeyRole.name).as[JsObject]
           updatedPrDetails.as[PrAddress] mustBe PrAddress(
-            addressline1 = "10 New Street",
+            addressline1 = "1 Line",
             addressline2 = None,
             addressline3 = None,
-            addressline4 = Some("Newcastle upon Tyne"),
+            addressline4 = Some("City"),
             ukPostcode = Some("NE2 2AA"),
             country = "GB"
           )

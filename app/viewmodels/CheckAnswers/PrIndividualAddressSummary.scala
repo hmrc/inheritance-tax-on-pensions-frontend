@@ -38,6 +38,7 @@ object PrIndividualAddressSummary {
         answer.addressline2,
         answer.addressline3,
         answer.addressline4,
+        answer.addressline5,
         answer.ukPostcode
       ).flatten.map(line => HtmlFormat.escape(line).toString).mkString("<br>")
 

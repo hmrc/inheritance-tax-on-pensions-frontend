@@ -95,6 +95,7 @@ class AddressLookupContinueControllerSpec extends SpecBase {
                 addressline2 = Some("AB Area"),
                 addressline3 = None,
                 addressline4 = Some("ABville"),
+                addressline5 = None,
                 ukPostcode = Some("ZZ1 1ZZ"),
                 country = "GB"
               )

@@ -64,9 +64,13 @@ class PrAddressFormProvider @Inject() extends Mappings {
         "ukPostcode" -> optionalAddressField(
           "changePrAddress.error.ukPostcode.invalid",
           "changePrAddress.error.ukPostcode.length"
+        ),
+        "addressline5" -> optionalAddressField(
+          "changePrAddress.error.addressline5.invalid",
+          "changePrAddress.error.addressline5.length"
         )
-      )((addressline1, addressline2, addressline3, addressline4, ukPostcode) =>
-        PrAddress(addressline1, addressline2, addressline3, addressline4, ukPostcode, country)
+      )((addressline1, addressline2, addressline3, addressline4, ukPostcode, addressline5) =>
+        PrAddress(addressline1, addressline2, addressline3, addressline4, ukPostcode, country, addressline5)
       )(address =>
         Some(
           (
@@ -74,11 +78,18 @@ class PrAddressFormProvider @Inject() extends Mappings {
             address.addressline2,
             address.addressline3,
             address.addressline4,
-            address.ukPostcode
+            address.ukPostcode,
+            address.addressline5
           )
         )
       )
     )
+
+  def isUkAddress(address: PrAddress): Boolean =
+    address.country == "GB"
+
+  def isUkAddress(country: String): Boolean =
+    country == "GB"
 
   private def optionalAddressField(invalidKey: String, lengthKey: String): Mapping[Option[String]] =
     of(using optionalStringFormatter)
