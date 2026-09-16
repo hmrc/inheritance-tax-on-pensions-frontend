@@ -18,6 +18,7 @@ package controllers.beneficiary
 
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
+import pages.DidPrSubmitPage
 import views.html.beneficiary.BeneficiaryListView
 import base.SpecBase
 import forms.beneficiary.BeneficiaryListFormProvider
@@ -25,7 +26,6 @@ import viewmodels.beneficiary.BeneficiaryListItem
 import models.beneficiary.BeneficiaryType
 import models.{CheckMode, JourneyRole, NormalMode}
 import pages.beneficiary.{BeneficiaryNamePage, BeneficiaryTrustNamePage, BeneficiaryTypePage}
-import pages.DidPrSubmitPage
 
 class BeneficiaryListControllerSpec extends SpecBase {
 

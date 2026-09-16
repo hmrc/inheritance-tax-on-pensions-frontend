@@ -16,13 +16,13 @@
 
 package viewmodels.CheckAnswers
 
-import play.api.libs.json.Json
-import base.SpecBase
-import pages.{AreBeneficiariesKnownPage, DidPrSubmitPage}
-import play.api.i18n.Messages
 import play.api.test.Helpers.stubMessages
-import uk.gov.hmrc.govukfrontend.views.Aliases.Text
+import pages.{AreBeneficiariesKnownPage, DidPrSubmitPage}
 import uk.gov.hmrc.govukfrontend.views.viewmodels.summarylist.{ActionItem, Key, Value}
+import play.api.libs.json.Json
+import play.api.i18n.Messages
+import uk.gov.hmrc.govukfrontend.views.Aliases.Text
+import base.SpecBase
 
 class NumberOfBeneficiariesSummarySpec extends SpecBase {
 

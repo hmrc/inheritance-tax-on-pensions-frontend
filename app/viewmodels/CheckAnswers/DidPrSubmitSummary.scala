@@ -16,10 +16,12 @@
 
 package viewmodels.CheckAnswers
 
+import utils.PrNameHelper
 import viewmodels.implicits._
 import pages.DidPrSubmitPage
 import controllers.routes
 import models.SchemeId.Srn
+import uk.gov.hmrc.govukfrontend.views.Aliases.Text
 import uk.gov.hmrc.govukfrontend.views.viewmodels.summarylist.SummaryListRow
 import models.{CheckMode, UserAnswers}
 import play.api.i18n.Messages
@@ -28,17 +30,15 @@ import viewmodels.govuk.summarylist._
 object DidPrSubmitSummary {
 
   def row(srn: Srn, answers: UserAnswers)(implicit messages: Messages): Option[SummaryListRow] =
-    answers.get(DidPrSubmitPage).map { answer =>
-
-      val value = if (answer) "site.yes" else "site.no"
-
-      SummaryListRowViewModel(
-        key = "didPrSubmit.checkYourAnswersLabel",
-        value = ValueViewModel(value),
-        actions = Seq(
-          ActionItemViewModel("site.change", routes.DidPrSubmitController.onPageLoad(srn, CheckMode).url)
-            .withVisuallyHiddenText(messages("didPrSubmit.change.hidden"))
-        )
+    for {
+      answer <- answers.get(DidPrSubmitPage)
+      value <- if (answer) PrNameHelper.fromUserAnswers(answers) else Some(messages("didPrSubmit.someoneElse"))
+    } yield SummaryListRowViewModel(
+      key = "didPrSubmit.checkYourAnswersLabel",
+      value = ValueViewModel(Text(value)),
+      actions = Seq(
+        ActionItemViewModel("site.change", routes.DidPrSubmitController.onPageLoad(srn, CheckMode).url)
+          .withVisuallyHiddenText(messages("didPrSubmit.change.hidden"))
       )
-    }
+    )
 }

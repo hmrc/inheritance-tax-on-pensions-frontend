@@ -29,6 +29,8 @@ import viewmodels.CheckAnswers._
 import uk.gov.hmrc.govukfrontend.views.Aliases.Text
 import base.SpecBase
 
+import scala.jdk.CollectionConverters._
+
 import java.time.LocalDate
 
 class CheckYourAnswersControllerSpec extends SpecBase {
@@ -38,6 +40,41 @@ class CheckYourAnswersControllerSpec extends SpecBase {
   private val emptyBeneficiarySummaryListViewModel = List[SummaryList]()
 
   "CheckYourAnswers Controller" - {
+
+    Seq(PrType.Individual -> JourneyRole.PrIndividual, PrType.Organisation -> JourneyRole.PrOrganisation).foreach {
+      case (prType, role) =>
+        Seq(true, false).foreach { submittedByPr =>
+          s"must display the updated payment notice summary for $prType with submittedByPr=$submittedByPr" in {
+            val userAnswers = emptyUserAnswers
+              .set(PrTypePage, prType)
+              .success
+              .value
+              .set(IndividualNamePage(role), IndividualName(Some("Dr"), "Firstname", Some("Middlename"), "Surname"))
+              .success
+              .value
+              .set(DidPrSubmitPage, submittedByPr)
+              .success
+              .value
+            val application = applicationBuilder(userAnswers = Some(userAnswers)).build()
+
+            running(application) {
+              val result =
+                route(application, FakeRequest(GET, routes.CheckYourAnswersController.onPageLoad(srn).url)).value
+              status(result) mustBe OK
+              val document = org.jsoup.Jsoup.parse(contentAsString(result))
+              val row = document
+                .select(".govuk-summary-list__row")
+                .asScala
+                .find(_.select(".govuk-summary-list__key").text() == "Who submitted the payment notice?")
+                .value
+              row.select(".govuk-summary-list__value").text() mustBe (if (submittedByPr) "Firstname Surname"
+                                                                      else "Someone else")
+              row.select("a").attr("href") mustBe routes.DidPrSubmitController.onPageLoad(srn, CheckMode).url
+              row.select("a").text() mustBe "Change who submitted the payment notice"
+            }
+          }
+        }
+    }
 
     "must return OK and the correct view for a GET" in {
       val userAnswers = emptyUserAnswers
@@ -201,7 +238,7 @@ class CheckYourAnswersControllerSpec extends SpecBase {
 
     "must return OK and include the payment notice date row when present" in {
       val userAnswers = emptyUserAnswers
-        .set(DidPrSubmitPage, true)
+        .set(DidPrSubmitPage, false)
         .success
         .value
         .set(PaymentNoticeDatePage, LocalDate.of(2026, 3, 27))
