@@ -76,6 +76,30 @@ class CheckYourAnswersControllerSpec extends SpecBase {
         }
     }
 
+    "must show IHT payable directly below beneficiaries known with a Change link" in {
+      val answers = emptyUserAnswers
+        .set(AreBeneficiariesKnownPage, false)
+        .success
+        .value
+        .set(IhtPayablePage, BigDecimal("1234.50"))
+        .success
+        .value
+      val application = applicationBuilder(Some(answers)).build()
+      running(application) {
+        val result = route(application, FakeRequest(GET, routes.CheckYourAnswersController.onPageLoad(srn).url)).value
+        status(result) mustBe OK
+        val document = org.jsoup.Jsoup.parse(contentAsString(result))
+        val rows = document.select(".govuk-summary-list__row")
+        rows.size mustBe 2
+        rows.get(0).select(".govuk-summary-list__key").text mustBe "Are the beneficiaries known?"
+        val amountRow = rows.get(1)
+        amountRow.select(".govuk-summary-list__key").text mustBe "Amount of IHT payable"
+        amountRow.select(".govuk-summary-list__value").text mustBe "\u00a31,234.50"
+        amountRow.select("a").attr("href") mustBe routes.IhtPayableController.onPageLoad(srn, CheckMode).url
+        amountRow.select("a .govuk-visually-hidden").text mustBe "the amount of IHT payable"
+      }
+    }
+
     "must return OK and the correct view for a GET" in {
       val userAnswers = emptyUserAnswers
         .set(InheritanceTaxReferencePage, "A123456/25A")

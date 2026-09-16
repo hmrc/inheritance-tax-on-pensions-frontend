@@ -88,10 +88,12 @@ class AreBeneficiariesKnownController @Inject() (
       }
 
   private def nextPage(srn: Srn, mode: Mode, value: Boolean) =
-    mode match {
-      case NormalMode if value =>
-        controllers.beneficiary.routes.BeneficiaryTypeController.onPageLoad(srn, 0, NormalMode)
-      case NormalMode => routes.CheckYourAnswersController.onPageLoad(srn)
-      case CheckMode => routes.CheckYourAnswersController.onPageLoad(srn)
+    if (!value) {
+      routes.IhtPayableController.onPageLoad(srn, mode)
+    } else {
+      mode match {
+        case NormalMode => controllers.beneficiary.routes.BeneficiaryTypeController.onPageLoad(srn, 0, NormalMode)
+        case CheckMode => routes.CheckYourAnswersController.onPageLoad(srn)
+      }
     }
 }
