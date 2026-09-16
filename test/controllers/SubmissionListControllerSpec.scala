@@ -64,6 +64,33 @@ class SubmissionListControllerSpec extends SpecBase {
 
   "onPageLoad" - {
 
+    Seq(false, true).foreach { onlyPaid =>
+      s"must exclude paid reports and link to the paid list (onlyPaid=$onlyPaid)" in {
+        val service = mock[SubmissionListService]
+        val paid = overviewReport.copy(ihtpStatus = "Paid", firstForename = Some("PaidPerson"))
+        val reports = if (onlyPaid) Seq(paid) else Seq(paid, overviewReport)
+        when(service.getSubmissionList()(using any(), any()))
+          .thenReturn(Future.successful(Right(IhtpOverviewResponse(IhtpOverviewSuccess(reports)))))
+        val application = applicationBuilder(userAnswers = None)
+          .overrides(bind[SubmissionListService].toInstance(service))
+          .build()
+        running(application) {
+          val result = route(application, FakeRequest(GET, onPageLoadUrl)).value
+          status(result) mustBe OK
+          val document = org.jsoup.Jsoup.parse(contentAsString(result))
+          document.select("#find-report").size() mustBe 1
+          document.select("fieldset button[type=button]").text() mustBe "Search"
+          document.select("#find-report").first().closest("form") mustBe null
+          (document.select("tbody").text() must not).include("PaidPerson")
+          document.select("tbody tr").size() mustBe (if (onlyPaid) 0 else 1)
+          document.select("#view-reconciled-reports").attr("href") mustBe routes.PaidReportsController
+            .onPageLoad(srn)
+            .url
+          if (onlyPaid) document.text() must include("There are no active reports.")
+        }
+      }
+    }
+
     "must return OK and the correct view for a GET" in {
       val mockSubmissionListService = mock[SubmissionListService]
       when(mockSubmissionListService.getSubmissionList()(using any(), any()))

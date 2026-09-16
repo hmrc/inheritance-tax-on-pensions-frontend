@@ -1,0 +1,92 @@
+@*
+ * Copyright 2026 HM Revenue & Customs
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *@
+
+@import components.{LinkWithHiddenText, Paragraph, SubHeading}
+@import models.IhtpOverviewReport
+@import models.SchemeId.Srn
+@import uk.gov.hmrc.govukfrontend.views.Aliases.{HtmlContent, Text}
+@import utils.{DateTimeFormats, SubmissionListUtil}
+@import viewmodels.SubmissionListPagination
+
+@this(linkWithHiddenText: LinkWithHiddenText, paragraph: Paragraph, subHeading: SubHeading, govukPagination: GovukPagination, submissionListUtil: SubmissionListUtil)
+
+@(srn: Srn, reports: Seq[IhtpOverviewReport], pagination: SubmissionListPagination, paid: Boolean)(implicit messages: Messages)
+
+@tableCaptionId = @{ if(paid) "paid-reports-table-caption" else "active-reports-table-caption" }
+
+@amendPageUrl(uuid: Option[String]) = @{
+    uuid match
+        case None => "#"
+        case Some(u) => s"${controllers.routes.SubmissionListController.onAmend(srn, u).url}"
+}
+
+@reportLink(report: IhtpOverviewReport) = @{
+    HtmlContent(linkWithHiddenText(
+        id                    = s"deceased-name-${report.fbNumber}",
+        text                  = report.deceasedName,
+        href                  = if(paid) "#" else amendPageUrl(report.uuid),
+        visuallyHiddenContent = s" ${messages("submissionList.table.deceasedName.hidden")}"
+    ).toString)
+}
+
+@paymentReferenceContent(report: IhtpOverviewReport) = @{
+    report.paymentReference match {
+        case Some(paymentReference) => HtmlContent(linkWithHiddenText(
+            id                    = s"payment-reference-${report.fbNumber}",
+            text                  = paymentReference,
+            href                  = "#",
+            visuallyHiddenContent = s" ${messages("submissionList.table.paymentReference.hidden")}"
+        ).toString)
+        case None => Text(messages("submissionList.table.paymentReference.unavailable"))
+    }
+}
+
+@if(reports.nonEmpty) {
+    <div class="ihtp-scrollable-pane" role="region" aria-labelledby="@tableCaptionId">
+        <table class="govuk-table">
+            <caption class="govuk-table__caption govuk-table__caption--m" id="@tableCaptionId">@messages(if(paid) "paidReports.caption" else "submissionList.activeReports.caption")</caption>
+            <thead class="govuk-table__head">
+                <tr class="govuk-table__row">
+                    <th scope="col" class="govuk-table__header">@messages("submissionList.table.deceasedName")</th>
+                    <th scope="col" class="govuk-table__header">@messages("submissionList.table.status")</th>
+                    <th scope="col" class="govuk-table__header">@messages("submissionList.table.dueDate")</th>
+                    <th scope="col" class="govuk-table__header">@messages("submissionList.table.paymentReference")</th>
+                </tr>
+            </thead>
+            <tbody class="govuk-table__body">
+                @reports.map { report =>
+                    <tr class="govuk-table__row">
+                        <th scope="row" class="govuk-table__header govuk-!-font-weight-regular">@reportLink(report).asHtml</th>
+                        <td class="govuk-table__cell">@report.ihtpStatus</td>
+                        <td class="govuk-table__cell">@report.paymentDueDate.map(_.format(DateTimeFormats.dateTimeFormat()(using messages.lang))).getOrElse("")</td>
+                        <td class="govuk-table__cell">@paymentReferenceContent(report).asHtml</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+
+    @paragraph(messages("submissionList.showing", pagination.firstItem, pagination.lastItem, pagination.totalReports))
+
+    @if(pagination.totalPages > 1) {
+        @govukPagination(submissionListUtil.buildPagination(srn, paid, pagination))
+    }
+} else {
+    @if(paid) {
+        @subHeading(messages("paidReports.caption"))
+    }
+    @paragraph(messages(if(paid) "paidReports.noReports" else "submissionList.noReports"))
+}

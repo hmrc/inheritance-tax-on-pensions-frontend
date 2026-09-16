@@ -65,7 +65,11 @@ submissionList.pagination.previous = Previous
 submissionList.pagination.next = Next
 submissionList.pagination.page = page
 submissionList.pagination.pageNumber = Page {0}
-submissionList.reconciledReports.link = View all reconciled reports
+submissionList.reconciledReports.link = View paid reports
+paidReports.title = Paid Inheritance Tax on a pension reports
+paidReports.caption = Paid reports
+paidReports.noReports = This scheme does not currently have any paid reports.
+paidReports.returnToActive = Return to active reports
 submissionList.returnToScheme.link = Return to {0}
 
 journeyRecovery.continue.title = Sorry, there is a problem with the service

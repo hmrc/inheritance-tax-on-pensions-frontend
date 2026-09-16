@@ -19,10 +19,8 @@ package controllers
 import services.SubmissionListService
 import utils.SubmissionListUtil
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
-import config.FrontendAppConfig
-import controllers.actions.{AllowAccessActionProvider, IdentifierAction}
-import models.NormalMode
-import views.html.SubmissionListView
+import controllers.actions.{AllowAccessActionWithSessionCacheProvider, IdentifierAction}
+import views.html.PaidReportsView
 import models.SchemeId.Srn
 import play.api.i18n.I18nSupport
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
@@ -31,14 +29,13 @@ import scala.concurrent.ExecutionContext
 
 import javax.inject.Inject
 
-class SubmissionListController @Inject() (
+class PaidReportsController @Inject() (
   val controllerComponents: MessagesControllerComponents,
   identify: IdentifierAction,
-  allowAccess: AllowAccessActionProvider, // Invalidate the authorisation cache and re-authenticate
+  allowAccess: AllowAccessActionWithSessionCacheProvider,
   submissionListService: SubmissionListService,
-  appConfig: FrontendAppConfig,
   submissionListUtil: SubmissionListUtil,
-  view: SubmissionListView
+  view: PaidReportsView
 )(implicit ec: ExecutionContext)
     extends FrontendBaseController
     with I18nSupport {
@@ -46,33 +43,11 @@ class SubmissionListController @Inject() (
   def onPageLoad(srn: Srn): Action[AnyContent] =
     identify.andThen(allowAccess(srn)).async { implicit request =>
       submissionListService.getSubmissionList().map { response =>
-        submissionListUtil.prepare(response, paid = false, request.getQueryString("page")) match {
+        submissionListUtil.prepare(response, paid = true, request.getQueryString("page")) match {
           case Right((reports, pagination)) =>
-            Ok(
-              view(
-                srn,
-                request.schemeDetails.schemeName,
-                reports,
-                pagination,
-                appConfig.schemeDashboardUrl(srn, request.pensionSchemeId)
-              )
-            )
+            Ok(view(srn, request.schemeDetails.schemeName, reports, pagination))
           case Left(_) => Redirect(routes.JourneyRecoveryController.onPageLoad())
         }
       }
     }
-
-  def onAmend(srn: Srn, uuid: String): Action[AnyContent] =
-    identify
-      .andThen(allowAccess(srn)) { implicit request =>
-        val updatedSession = if (request.session.get("uuid").contains(uuid)) {
-          request.session
-        } else {
-          request.session + ("uuid" -> uuid)
-        }
-
-        Redirect(controllers.routes.InheritanceTaxReferenceController.onPageLoad(srn, NormalMode))
-          .withSession(updatedSession)
-      }
-
 }
