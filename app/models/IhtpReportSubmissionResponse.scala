@@ -18,8 +18,22 @@ package models
 
 import play.api.libs.json.{Json, OFormat}
 
-case class IhtpReportSubmissionResponse(formBundleNo: String, ihtPaymentReference: String)
+case class IhtpReportSubmissionResponse(success: SuccessResponse)
 
 object IhtpReportSubmissionResponse {
   implicit val formats: OFormat[IhtpReportSubmissionResponse] = Json.format[IhtpReportSubmissionResponse]
+}
+
+case class SuccessResponse(ihtResponse: IhtResponse)
+
+object SuccessResponse {
+  implicit val successResponseFormat: OFormat[SuccessResponse] =
+    Json.format[SuccessResponse]
+}
+
+case class IhtResponse(formBundleNo: String, ihtPaymentReference: String)
+
+object IhtResponse {
+  implicit val ihtResponseFormat: OFormat[IhtResponse] =
+    Json.format[IhtResponse]
 }
