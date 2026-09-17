@@ -89,8 +89,7 @@ class PrAddressFormProviderSpec extends AnyFreeSpec with Matchers with Regex {
       ("addressline1", "changePrAddress.error.addressline1.invalid"),
       ("addressline2", "changePrAddress.error.addressline2.invalid"),
       ("addressline3", "changePrAddress.error.addressline3.invalid"),
-      ("addressline4", "changePrAddress.error.addressline4.invalid"),
-      ("ukPostcode", "changePrAddress.error.ukPostcode.invalid")
+      ("addressline4", "changePrAddress.error.addressline4.invalid")
     ).foreach { case (field, errorKey) =>
       Seq(
         "%" -> "percent sign",
@@ -111,8 +110,7 @@ class PrAddressFormProviderSpec extends AnyFreeSpec with Matchers with Regex {
       ("addressline1", "changePrAddress.error.addressline1.length"),
       ("addressline2", "changePrAddress.error.addressline2.length"),
       ("addressline3", "changePrAddress.error.addressline3.length"),
-      ("addressline4", "changePrAddress.error.addressline4.length"),
-      ("ukPostcode", "changePrAddress.error.ukPostcode.length")
+      ("addressline4", "changePrAddress.error.addressline4.length")
     ).foreach { case (field, errorKey) =>
       s"must reject $field when it is longer than 35 characters" in {
         val result = form.bind(validData.updated(field, "A" * 36))
@@ -131,6 +129,41 @@ class PrAddressFormProviderSpec extends AnyFreeSpec with Matchers with Regex {
           Seq(addresslineRegex)
         )
       )
+    }
+
+    Seq(
+      "postcode%",
+      "postcode",
+      "INVALID",
+      "12345",
+      "SW1A",
+      "SW1A 2A",
+      "SW1A 2AAA",
+      "T11YEE0"
+    ).foreach { postcode =>
+      s"must reject invalid UK postcode $postcode" in {
+        val result = form.bind(validData.updated("ukPostcode", postcode))
+        result.errors must not be empty
+        result.errors.exists(_.message == "changePrAddress.error.ukPostcode.invalid") mustBe true
+      }
+    }
+
+    Seq(
+      "AB1 1BA",
+      "AB11BA",
+      "ab1 1ba",
+      "ab11ba",
+      "ab121ba",
+      "GIR 0AA",
+      "gir0aa",
+      "FX11XX",
+      "W12DN",
+      "DE128HJ"
+    ).foreach { postcode =>
+      s"must accept valid UK postcode $postcode" in {
+        val result = form.bind(validData.updated("ukPostcode", postcode))
+        result.errors mustBe empty
+      }
     }
   }
 }

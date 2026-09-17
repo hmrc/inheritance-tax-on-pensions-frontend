@@ -28,6 +28,7 @@ import javax.inject.Inject
 class PrAddressFormProvider @Inject() extends Mappings with Regex {
 
   private val addresslineMaxLength = 35
+  private val ukPostcodeMaxLength = 8
   private val optionalStringFormatter: Formatter[Option[String]] = new Formatter[Option[String]] {
     override def bind(key: String, data: Map[String, String]): Either[Seq[FormError], Option[String]] =
       Right(data.get(key).map(_.trim).filter(_.nonEmpty))
@@ -60,7 +61,7 @@ class PrAddressFormProvider @Inject() extends Mappings with Regex {
           "changePrAddress.error.addressline4.invalid",
           "changePrAddress.error.addressline4.length"
         ),
-        "ukPostcode" -> optionalAddressField(
+        "ukPostcode" -> optionalUkPostcode(
           "changePrAddress.error.ukPostcode.invalid",
           "changePrAddress.error.ukPostcode.length"
         ),
@@ -98,6 +99,17 @@ class PrAddressFormProvider @Inject() extends Mappings with Regex {
           optionalConstraint(maxLength(addresslineMaxLength, lengthKey))
         )
       )
+
+  private def optionalUkPostcode(invalidKey: String, lengthKey: String): Mapping[Option[String]] = {
+    of(using optionalStringFormatter)
+      .transform(_.map(_.toUpperCase()), identity)
+      .verifying(
+        firstError(
+          optionalConstraint(regexp(ukPostcodeRegex, invalidKey)),
+          optionalConstraint(maxLength(ukPostcodeMaxLength, lengthKey))
+        )
+      )
+  }
 
   private def optionalConstraint(constraint: Constraint[String]): Constraint[Option[String]] =
     Constraint(_.map(constraint.apply).getOrElse(Valid))
