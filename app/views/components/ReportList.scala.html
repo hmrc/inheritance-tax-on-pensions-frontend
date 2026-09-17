@@ -14,14 +14,14 @@
  * limitations under the License.
  *@
 
-@import components.{LinkWithHiddenText, Paragraph, SubHeading}
+@import components.{LinkWithHiddenText, Paragraph, SubHeading, SectionBreak}
 @import models.IhtpOverviewReport
 @import models.SchemeId.Srn
 @import uk.gov.hmrc.govukfrontend.views.Aliases.{HtmlContent, Text}
 @import utils.{DateTimeFormats, SubmissionListUtil}
 @import viewmodels.SubmissionListPagination
 
-@this(linkWithHiddenText: LinkWithHiddenText, paragraph: Paragraph, subHeading: SubHeading, govukPagination: GovukPagination, submissionListUtil: SubmissionListUtil)
+@this(linkWithHiddenText: LinkWithHiddenText, paragraph: Paragraph, subHeading: SubHeading, govukPagination: GovukPagination, submissionListUtil: SubmissionListUtil, sectionBreak: SectionBreak)
 
 @(srn: Srn, reports: Seq[IhtpOverviewReport], pagination: SubmissionListPagination, paid: Boolean)(implicit messages: Messages)
 
@@ -89,4 +89,5 @@
         @subHeading(messages("paidReports.caption"))
     }
     @paragraph(messages(if(paid) "paidReports.noReports" else "submissionList.noReports"))
+    @sectionBreak("govuk-section-break--l govuk-section-break--visible")
 }
