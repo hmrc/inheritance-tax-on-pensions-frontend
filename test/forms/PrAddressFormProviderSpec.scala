@@ -18,14 +18,14 @@ package forms
 
 import org.scalatest.freespec.AnyFreeSpec
 import org.scalatest.matchers.must.Matchers
+import forms.mappings.Regex
 import models.PrAddress
 import play.api.data.FormError
 
-class PrAddressFormProviderSpec extends AnyFreeSpec with Matchers {
+class PrAddressFormProviderSpec extends AnyFreeSpec with Matchers with Regex {
 
   private val country = "GB"
   private val nonGbCountry = "BF"
-  private val addresslineRegex = """^[^%$£\r\n]+$"""
   private val form = new PrAddressFormProvider()(country)
   private val formNonGb = new PrAddressFormProvider()(nonGbCountry)
   private val validData = Map(

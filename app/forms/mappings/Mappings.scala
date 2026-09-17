@@ -24,13 +24,9 @@ import play.api.data.{FieldMapping, Mapping}
 
 import java.time.LocalDate
 
-trait Mappings extends Formatters with Constraints {
+trait Mappings extends Formatters with Constraints with Regex {
 
-  private val ninoRegex = """^(?!BG|GB|KN|NK|NT|TN|ZZ)[ABCEGHJKLMNOPRSTWXYZ][ABCEGHJKLMNPRSTWXYZ][0-9]{6}[ABCD]$"""
-  private val reasonForNoNinoRegex = """^[a-zA-Z0-9\-’`'" \t,.@/&()]+$"""
   private val reasonForNoNinoMaxLength = 160
-
-  protected val nameRegex: String = "^[A-Za-zÀ-ÖØ-öø-ÿ]+(?:[ '-][A-Za-zÀ-ÖØ-öø-ÿ]+)*$"
 
   protected def text(errorKey: String = "error.required", args: Seq[String] = Seq.empty): FieldMapping[String] =
     of(using stringFormatter(errorKey, args))

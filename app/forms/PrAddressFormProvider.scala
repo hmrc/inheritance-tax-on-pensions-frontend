@@ -17,7 +17,7 @@
 package forms
 
 import play.api.data.format.Formatter
-import forms.mappings.Mappings
+import forms.mappings.{Mappings, Regex}
 import play.api.data.Forms.{mapping, of}
 import play.api.data.validation.{Constraint, Invalid, Valid}
 import models.PrAddress
@@ -25,10 +25,9 @@ import play.api.data.{Form, FormError, Mapping}
 
 import javax.inject.Inject
 
-class PrAddressFormProvider @Inject() extends Mappings {
+class PrAddressFormProvider @Inject() extends Mappings with Regex {
 
   private val addresslineMaxLength = 35
-  private val addresslineRegex = """^[^%$£\r\n]+$"""
   private val optionalStringFormatter: Formatter[Option[String]] = new Formatter[Option[String]] {
     override def bind(key: String, data: Map[String, String]): Either[Seq[FormError], Option[String]] =
       Right(data.get(key).map(_.trim).filter(_.nonEmpty))

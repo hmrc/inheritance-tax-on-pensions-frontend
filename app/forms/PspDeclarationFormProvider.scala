@@ -16,16 +16,12 @@
 
 package forms
 
-import forms.mappings.Mappings
+import forms.mappings.{Mappings, Regex}
 import play.api.data.Form
-
-import scala.util.matching.Regex
 
 import javax.inject.Inject
 
-class PspDeclarationFormProvider @Inject() extends Mappings {
-
-  private val schemeAdminIdRegex: Regex = "^(A[0-9]{7})$".r
+class PspDeclarationFormProvider @Inject() extends Mappings with Regex {
 
   private def sanitiseSchemeAdminId(schemeAdminId: String) =
     if (schemeAdminId.matches(schemeAdminIdRegex.regex)) {
