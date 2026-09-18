@@ -404,3 +404,11 @@ hasNino.change.hidden = if the deceased has a National Insurance number
 
 numberOfBeneficiaries.checkYourAnswersLabel = Number of beneficiaries
 numberOfBeneficiaries.change.hidden = the number of beneficiaries
+
+ihtPayable.title = Enter the amount of Inheritance Tax payable
+ihtPayable.heading = Enter the amount of Inheritance Tax payable
+ihtPayable.hint = Add the amount in pounds and pence
+ihtPayable.error.required = Enter the Inheritance Tax payable amount
+ihtPayable.error.invalid = Enter a valid Inheritance Tax payable amount
+ihtPayable.checkYourAnswersLabel = Amount of IHT payable
+ihtPayable.change.hidden = the amount of IHT payable

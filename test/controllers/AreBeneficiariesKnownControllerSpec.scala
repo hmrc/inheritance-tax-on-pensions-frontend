@@ -53,6 +53,27 @@ class AreBeneficiariesKnownControllerSpec extends SpecBase with MockitoSugar {
 
   "AreBeneficiariesKnown Controller" - {
 
+    Seq(false, true).foreach { known =>
+      s"must route correctly when beneficiaries known is changed to $known in CheckMode" in {
+        val service = mock[services.UserAnswersService]
+        when(service.set(any())(using any(), any())).thenReturn(Future.successful(Right(userAnswersWithDidPrSubmit)))
+        val application = applicationBuilder(Some(userAnswersWithDidPrSubmit), usesSession = true)
+          .overrides(bind[services.UserAnswersService].toInstance(service))
+          .build()
+        running(application) {
+          val result = route(
+            application,
+            postRequest(known.toString, routes.AreBeneficiariesKnownController.onSubmit(srn, CheckMode).url)
+          ).value
+          status(result) mustBe SEE_OTHER
+          val expected =
+            if (known) routes.CheckYourAnswersController.onPageLoad(srn).url
+            else routes.IhtPayableController.onPageLoad(srn, CheckMode).url
+          redirectLocation(result).value mustBe expected
+        }
+      }
+    }
+
     "must return OK and the correct view for a GET when PR submitted the payment notice" in {
       val application = applicationBuilder(userAnswers = Some(userAnswersWithDidPrSubmit), usesSession = true).build()
 
@@ -125,7 +146,7 @@ class AreBeneficiariesKnownControllerSpec extends SpecBase with MockitoSugar {
       }
     }
 
-    "must redirect to Check Your Answers when No is submitted" in {
+    "must redirect to IHT payable when No is submitted" in {
       val mockInheritanceTaxOnPensionsConnector = mock[InheritanceTaxOnPensionsConnector]
       when(mockInheritanceTaxOnPensionsConnector.setUserAnswers(any(), any(), any(), any(), any())(using any()))
         .thenReturn(Future.successful(Right(userAnswersWithDidPrSubmit)))
@@ -140,7 +161,7 @@ class AreBeneficiariesKnownControllerSpec extends SpecBase with MockitoSugar {
         val result = route(application, postRequest("false")).value
 
         status(result) mustEqual SEE_OTHER
-        redirectLocation(result).value mustEqual routes.CheckYourAnswersController.onPageLoad(srn).url
+        redirectLocation(result).value mustEqual routes.IhtPayableController.onPageLoad(srn, NormalMode).url
       }
     }
 

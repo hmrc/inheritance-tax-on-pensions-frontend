@@ -17,19 +17,8 @@
 package pages
 
 import play.api.libs.json.JsPath
-import models.UserAnswers
 
-import scala.util.Try
-
-case object AreBeneficiariesKnownPage extends QuestionPage[Boolean] {
-
-  override def path: JsPath = JsPath \ toString
-
-  override def toString: String = "areBeneficiariesKnown"
-
-  override def cleanup(value: Option[Boolean], userAnswers: UserAnswers): Try[UserAnswers] =
-    value match {
-      case Some(false) => super.cleanup(value, userAnswers)
-      case _ => userAnswers.remove(IhtPayablePage)
-    }
+case object IhtPayablePage extends QuestionPage[BigDecimal] {
+  override def path: JsPath = JsPath \ "ihtTaxInformation" \ "totalIhtPayable"
+  override def toString: String = "totalIhtPayable"
 }
