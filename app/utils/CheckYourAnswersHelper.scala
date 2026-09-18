@@ -16,11 +16,12 @@
 
 package utils
 
-import models.JourneyRole.{PrIndividual, PrOrganisation}
+import models.JourneyRole.{BeneficiaryIndividual, PrIndividual, PrOrganisation}
 import play.api.mvc.Call
 import pages._
 import controllers.routes
 import models.SchemeId.Srn
+import models.beneficiary.BeneficiaryType
 import models.{NormalMode, PrType, UserAnswers}
 
 object CheckYourAnswersHelper {
@@ -30,9 +31,16 @@ object CheckYourAnswersHelper {
     call: Call
   )
 
-  def findPageToContinue(answers: UserAnswers, srn: Srn): Option[Call] = {
-    // Reference and deceased name are needed to reach this point
-    lazy val continuationPages = Seq(
+  def findPageToContinue(userAnswers: UserAnswers, srn: Srn): Option[Call] = {
+    val allPages = getDeceasedPages(srn) :++ getPrPages(srn) :++ getBeneficiariesPages(userAnswers, srn)
+    val found = allPages
+      .find(_.isUnanswered(userAnswers))
+      .map(_.call)
+    found
+  }
+
+  private def getDeceasedPages(srn: Srn) =
+    Seq(
       ContinuationPage(
         answers => answers.get(HasNinoPage).isEmpty,
         routes.HasNinoController.onPageLoad(srn, NormalMode)
@@ -48,7 +56,11 @@ object CheckYourAnswersHelper {
       ContinuationPage(
         answers => answers.get(BirthDeathDatesPage).isEmpty,
         routes.BirthDeathDatesController.onPageLoad(srn, NormalMode)
-      ),
+      )
+    )
+
+  private def getPrPages(srn: Srn) =
+    Seq(
       ContinuationPage(
         answers => answers.get(PrTypePage).isEmpty,
         routes.PrTypeController.onPageLoad(srn, NormalMode)
@@ -92,35 +104,30 @@ object CheckYourAnswersHelper {
       )
     )
 
+  private def getBeneficiaryPages(srn: Srn, i: Int) =
+    Seq(
+      ContinuationPage(
+        answers =>
+          answers.get(beneficiary.BeneficiaryTypePage(i)).contains(BeneficiaryType.Individual) &&
+            answers.get(beneficiary.BeneficiaryNamePage(i, BeneficiaryIndividual)).isEmpty,
+        controllers.beneficiary.routes.BeneficiaryNameController.onPageLoad(srn, NormalMode, i)
+      ),
+      ContinuationPage(
+        answers =>
+          answers.get(beneficiary.BeneficiaryTypePage(i)).contains(BeneficiaryType.Trust) &&
+            answers.get(pages.beneficiary.BeneficiaryTrustNamePage(i)).isEmpty,
+        controllers.beneficiary.routes.BeneficiaryTrustNameController.onPageLoad(srn, i, NormalMode)
+      ),
+      ContinuationPage(
+        answers => answers.get(pages.beneficiary.BeneficiaryHasNinoPage(i)).isEmpty,
+        controllers.beneficiary.routes.BeneficiaryHasNinoController.onPageLoad(srn, i, NormalMode)
+      )
+    )
+
+  private def getBeneficiariesPages(answers: UserAnswers, srn: Srn) = {
     val numberOfBeneficiaries =
       answers.get(pages.beneficiary.BeneficiariesPage()).map(_.beneficiaries.size).getOrElse(0)
 
-    if (numberOfBeneficiaries > 0) {
-      for (i <- 1 to numberOfBeneficiaries)
-        continuationPages :++ Seq(
-          ContinuationPage(
-            answers => answers.get(pages.beneficiary.BeneficiaryTypePage(i)).isEmpty,
-            controllers.beneficiary.routes.BeneficiaryTypeController.onPageLoad(srn, i, NormalMode)
-          ),
-          ContinuationPage(
-            answers => answers.get(pages.beneficiary.BeneficiaryNamePage(i, PrIndividual)).isEmpty,
-            controllers.beneficiary.routes.BeneficiaryNameController.onPageLoad(srn, NormalMode, i)
-          ),
-          ContinuationPage(
-            answers => answers.get(pages.beneficiary.BeneficiaryTrustNamePage(i)).isEmpty,
-            controllers.beneficiary.routes.BeneficiaryTrustNameController.onPageLoad(srn, i, NormalMode)
-          ),
-          ContinuationPage(
-            answers => answers.get(pages.beneficiary.BeneficiaryHasNinoPage(i)).isEmpty,
-            controllers.beneficiary.routes.BeneficiaryHasNinoController.onPageLoad(srn, i, NormalMode)
-          ),
-          ContinuationPage(
-            answers => answers.get(pages.beneficiary.BeneficiaryNamePage(i, PrOrganisation)).isEmpty,
-            controllers.beneficiary.routes.BeneficiaryNameController.onPageLoad(srn, NormalMode, i)
-          )
-        )
-    }
-
-    continuationPages.find(_.isUnanswered(answers)).map(_.call)
+    (0 until numberOfBeneficiaries).flatMap(i => getBeneficiaryPages(srn, i))
   }
 }
