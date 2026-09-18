@@ -18,7 +18,6 @@ package controllers
 
 import play.api.test.FakeRequest
 import play.api.mvc.{AnyContentAsEmpty, AnyContentAsFormUrlEncoded}
-import connectors.InheritanceTaxOnPensionsConnector
 import pages.{AreBeneficiariesKnownPage, DidPrSubmitPage}
 import play.api.inject.bind
 import views.html.AreBeneficiariesKnownView
@@ -29,6 +28,8 @@ import org.scalatestplus.mockito.MockitoSugar
 import org.mockito.ArgumentMatchers.any
 import play.api.test.Helpers._
 import org.mockito.Mockito.when
+import models.SummaryRole.CheckYourAnswers
+import connectors.InheritanceTaxOnPensionsConnector
 
 import scala.concurrent.Future
 
@@ -67,7 +68,7 @@ class AreBeneficiariesKnownControllerSpec extends SpecBase with MockitoSugar {
           ).value
           status(result) mustBe SEE_OTHER
           val expected =
-            if (known) routes.CheckYourAnswersController.onPageLoad(srn).url
+            if (known) routes.CheckYourAnswersController.onPageLoad(srn, CheckYourAnswers).url
             else routes.IhtPayableController.onPageLoad(srn, CheckMode).url
           redirectLocation(result).value mustBe expected
         }

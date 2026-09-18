@@ -26,14 +26,16 @@ import viewmodels.CheckAnswers.beneficiary.{
   BeneficiaryIndividualNameSummary,
   BeneficiaryTypeSummary
 }
-import play.i18n.Lang
 import uk.gov.hmrc.govukfrontend.views.viewmodels.summarylist.Actions
 import controllers.actions._
+import play.api.Logging
 import models.beneficiary.Beneficiaries
-import models.{CheckMode, UserAnswers}
+import models.{CheckMode, SummaryRole, UserAnswers}
 import pages.beneficiary.BeneficiariesPage
 import views.html.CheckYourAnswersView
 import models.SchemeId.Srn
+import utils.CheckYourAnswersHelper.findPageToContinue
+import play.i18n.Lang
 import play.api.i18n.{I18nSupport, MessagesApi}
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
 import viewmodels.CheckAnswers._
@@ -49,9 +51,10 @@ class CheckYourAnswersController @Inject() (
   view: CheckYourAnswersView,
   countryService: CountryService
 ) extends FrontendBaseController
-    with I18nSupport {
+    with I18nSupport
+    with Logging {
 
-  def onPageLoad(srn: Srn): Action[AnyContent] =
+  def onPageLoad(srn: Srn, summaryRole: SummaryRole): Action[AnyContent] =
     identify.andThen(allowAccess(srn)).andThen(getData).andThen(requireData) { implicit request =>
 
       val userAnswers: UserAnswers = request.userAnswers
@@ -138,8 +141,20 @@ class CheckYourAnswersController @Inject() (
         )
         .getOrElse(List())
 
+      val continue = findPageToContinue(userAnswers, srn)
+
+      logger.info(s"CheckYourAnswersController.onSubmit: summaryRole = $summaryRole")
+
       Ok(
-        view(srn, deceasedDetailsSummaryList, prDetailsSummaryList, paymentNoticeDetailsSummaryList, beneficiaryList)
+        view(
+          srn,
+          deceasedDetailsSummaryList,
+          prDetailsSummaryList,
+          paymentNoticeDetailsSummaryList,
+          beneficiaryList,
+          summaryRole,
+          continue
+        )
       )
     }
 

@@ -23,7 +23,7 @@ import models.SchemeId.Srn
 import views.html.beneficiary.BeneficiaryTrustNameView
 import controllers.actions._
 import forms.beneficiary.BeneficiaryTrustNameFormProvider
-import models.{Mode, UserAnswers}
+import models.{Mode, SummaryRole, UserAnswers}
 import pages.beneficiary.BeneficiaryTrustNamePage
 import play.api.i18n.MessagesApi
 
@@ -80,7 +80,8 @@ class BeneficiaryTrustNameController @Inject() (
   private def nextPage(srn: Srn, mode: Mode) =
     mode match {
       case models.NormalMode => routes.BeneficiaryListController.onPageLoad(srn)
-      case models.CheckMode => controllers.routes.CheckYourAnswersController.onPageLoad(srn)
+      case models.CheckMode =>
+        controllers.routes.CheckYourAnswersController.onPageLoad(srn, SummaryRole.CheckYourAnswers)
     }
 
   private def saveName(

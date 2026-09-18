@@ -264,8 +264,8 @@ class SubmissionListControllerSpec extends SpecBase {
         val result = route(application, postRequest).value
 
         status(result) mustEqual SEE_OTHER
-        redirectLocation(result).value mustEqual controllers.routes.InheritanceTaxReferenceController
-          .onPageLoad(srn, NormalMode)
+        redirectLocation(result).value mustEqual controllers.routes.CheckYourAnswersController
+          .onPageLoad(srn, SummaryRole.Continue)
           .url
       }
     }

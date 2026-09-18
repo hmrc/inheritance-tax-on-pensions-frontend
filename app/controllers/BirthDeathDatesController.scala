@@ -22,7 +22,7 @@ import play.api.mvc._
 import pages.BirthDeathDatesPage
 import controllers.actions._
 import forms.BirthDeathDatesFormProvider
-import models.{CheckMode, Mode, NormalMode}
+import models._
 import play.api.i18n.MessagesApi
 import views.html.BirthDeathDatesView
 import models.SchemeId.Srn
@@ -90,6 +90,6 @@ class BirthDeathDatesController @Inject() (
   private def nextPage(srn: Srn, mode: Mode) =
     mode match {
       case NormalMode => routes.PrTypeController.onPageLoad(srn, NormalMode)
-      case CheckMode => routes.CheckYourAnswersController.onPageLoad(srn)
+      case CheckMode => routes.CheckYourAnswersController.onPageLoad(srn, SummaryRole.CheckYourAnswers)
     }
 }

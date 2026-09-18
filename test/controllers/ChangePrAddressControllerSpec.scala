@@ -123,7 +123,9 @@ class ChangePrAddressControllerSpec extends SpecBase {
           val result = route(application, request).value
 
           status(result) mustBe SEE_OTHER
-          redirectLocation(result).value mustBe routes.CheckYourAnswersController.onPageLoad(srn).url
+          redirectLocation(result).value mustBe routes.CheckYourAnswersController
+            .onPageLoad(srn, SummaryRole.CheckYourAnswers)
+            .url
 
           val answersCaptor: ArgumentCaptor[UserAnswers] =
             ArgumentCaptor.forClass(classOf[UserAnswers])
