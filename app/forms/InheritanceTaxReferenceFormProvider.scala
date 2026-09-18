@@ -16,19 +16,15 @@
 
 package forms
 
-import forms.mappings.Mappings
+import forms.mappings.{Mappings, Regex}
 import play.api.data.Form
-
-import scala.util.matching.Regex
 
 import javax.inject.Inject
 
-class InheritanceTaxReferenceFormProvider @Inject() extends Mappings {
-
-  private val referenceNumberRegex: Regex = "^[A-Z]\\d{6}/\\d{2}[A-Z]$".r
+class InheritanceTaxReferenceFormProvider @Inject() extends Mappings with Regex {
 
   private def sanitiseReferenceNumber(referenceNumber: String) =
-    if (referenceNumber.matches(referenceNumberRegex.regex)) {
+    if (referenceNumber.matches(ihtReferenceNumberRegex.regex)) {
       referenceNumber
     } else {
       referenceNumber.replaceAll("\\s+", "").toUpperCase
@@ -38,6 +34,6 @@ class InheritanceTaxReferenceFormProvider @Inject() extends Mappings {
     Form(
       "value" -> text("inheritanceTaxReference.error.required")
         .transform[String](sanitiseReferenceNumber, identity)
-        .verifying(regexp(referenceNumberRegex.regex, "inheritanceTaxReference.error.invalid"))
+        .verifying(regexp(ihtReferenceNumberRegex.regex, "inheritanceTaxReference.error.invalid"))
     )
 }

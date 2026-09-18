@@ -113,6 +113,7 @@ class AddressLookupContinueController @Inject() (
       "addressline2",
       "addressline3",
       "addressline4",
+      "addressline5",
       "ukPostcode",
       "country"
     ).foldLeft(

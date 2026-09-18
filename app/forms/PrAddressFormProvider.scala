@@ -17,7 +17,7 @@
 package forms
 
 import play.api.data.format.Formatter
-import forms.mappings.Mappings
+import forms.mappings.{Mappings, Regex}
 import play.api.data.Forms.{mapping, of}
 import play.api.data.validation.{Constraint, Invalid, Valid}
 import models.PrAddress
@@ -25,10 +25,10 @@ import play.api.data.{Form, FormError, Mapping}
 
 import javax.inject.Inject
 
-class PrAddressFormProvider @Inject() extends Mappings {
+class PrAddressFormProvider @Inject() extends Mappings with Regex {
 
   private val addresslineMaxLength = 35
-  private val addresslineRegex = """^[^%$£\r\n]+$"""
+  private val ukPostcodeMaxLength = 8
   private val optionalStringFormatter: Formatter[Option[String]] = new Formatter[Option[String]] {
     override def bind(key: String, data: Map[String, String]): Either[Seq[FormError], Option[String]] =
       Right(data.get(key).map(_.trim).filter(_.nonEmpty))
@@ -61,12 +61,16 @@ class PrAddressFormProvider @Inject() extends Mappings {
           "changePrAddress.error.addressline4.invalid",
           "changePrAddress.error.addressline4.length"
         ),
-        "ukPostcode" -> optionalAddressField(
+        "ukPostcode" -> optionalUkPostcode(
           "changePrAddress.error.ukPostcode.invalid",
           "changePrAddress.error.ukPostcode.length"
+        ),
+        "addressline5" -> optionalAddressField(
+          "changePrAddress.error.addressline5.invalid",
+          "changePrAddress.error.addressline5.length"
         )
-      )((addressline1, addressline2, addressline3, addressline4, ukPostcode) =>
-        PrAddress(addressline1, addressline2, addressline3, addressline4, ukPostcode, country)
+      )((addressline1, addressline2, addressline3, addressline4, ukPostcode, addressline5) =>
+        PrAddress(addressline1, addressline2, addressline3, addressline4, ukPostcode, country, addressline5)
       )(address =>
         Some(
           (
@@ -74,11 +78,18 @@ class PrAddressFormProvider @Inject() extends Mappings {
             address.addressline2,
             address.addressline3,
             address.addressline4,
-            address.ukPostcode
+            address.ukPostcode,
+            address.addressline5
           )
         )
       )
     )
+
+  def isUkAddress(address: PrAddress): Boolean =
+    address.country == "GB"
+
+  def isUkAddress(country: String): Boolean =
+    country == "GB"
 
   private def optionalAddressField(invalidKey: String, lengthKey: String): Mapping[Option[String]] =
     of(using optionalStringFormatter)
@@ -88,6 +99,17 @@ class PrAddressFormProvider @Inject() extends Mappings {
           optionalConstraint(maxLength(addresslineMaxLength, lengthKey))
         )
       )
+
+  private def optionalUkPostcode(invalidKey: String, lengthKey: String): Mapping[Option[String]] = {
+    of(using optionalStringFormatter)
+      .transform(_.map(_.toUpperCase()), identity)
+      .verifying(
+        firstError(
+          optionalConstraint(regexp(ukPostcodeRegex, invalidKey)),
+          optionalConstraint(maxLength(ukPostcodeMaxLength, lengthKey))
+        )
+      )
+  }
 
   private def optionalConstraint(constraint: Constraint[String]): Constraint[Option[String]] =
     Constraint(_.map(constraint.apply).getOrElse(Valid))

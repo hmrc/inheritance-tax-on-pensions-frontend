@@ -64,6 +64,37 @@ class PrIndividualAddressSummarySpec extends SpecBase {
         controllers.routes.ChangePrAddressController.onPageLoad(srn, JourneyRole.PrIndividual).url
     }
 
+    "must return a row when data is present for non-GB address" in {
+
+      val address = PrAddress(
+        addressline1 = "33 AB Street",
+        addressline2 = Some("AB Area"),
+        addressline3 = Some("AB County"),
+        addressline4 = Some("ABville"),
+        addressline5 = Some("123-456"),
+        ukPostcode = None,
+        country = "BF"
+      )
+
+      val userAnswers = emptyUserAnswers.copy(
+        data = Json.obj(
+          "prDetails" -> Json.obj(
+            "individual" -> Json.toJson(address)
+          )
+        )
+      )
+
+      val result = PrIndividualAddressSummary.row(srn, userAnswers)
+
+      result mustBe defined
+      result.value.key.content mustBe Text(messages("prIndividualAddress.checkYourAnswersLabel"))
+      result.value.value.content mustBe HtmlContent(
+        "33 AB Street<br>AB Area<br>AB County<br>ABville<br>123-456"
+      )
+      result.value.actions.value.items.head.href mustBe
+        controllers.routes.ChangePrAddressController.onPageLoad(srn, JourneyRole.PrIndividual).url
+    }
+
     "must show only address line 1 when the optional address fields are absent" in {
 
       val address = PrAddress(

@@ -36,9 +36,15 @@ class DidPrSubmitSummarySpec extends SpecBase {
       case (prType, role) =>
         s"must show the $prType PR's first name and surname without the title or middle name" in {
           val answers = emptyUserAnswers
-            .set(PrTypePage, prType).success.value
-            .set(IndividualNamePage(role), IndividualName(Some("Dr"), "Firstname", Some("Middlename"), "Surname")).success.value
-            .set(DidPrSubmitPage, true).success.value
+            .set(PrTypePage, prType)
+            .success
+            .value
+            .set(IndividualNamePage(role), IndividualName(Some("Dr"), "Firstname", Some("Middlename"), "Surname"))
+            .success
+            .value
+            .set(DidPrSubmitPage, true)
+            .success
+            .value
 
           val row = DidPrSubmitSummary.row(srn, answers).value
           row.key.content mustBe Text(testMessages("didPrSubmit.checkYourAnswersLabel"))
@@ -50,8 +56,12 @@ class DidPrSubmitSummarySpec extends SpecBase {
 
         s"must return None when the $prType PR submitted but their name is missing" in {
           val answers = emptyUserAnswers
-            .set(PrTypePage, prType).success.value
-            .set(DidPrSubmitPage, true).success.value
+            .set(PrTypePage, prType)
+            .success
+            .value
+            .set(DidPrSubmitPage, true)
+            .success
+            .value
 
           DidPrSubmitSummary.row(srn, answers) mustBe None
         }
@@ -64,8 +74,15 @@ class DidPrSubmitSummarySpec extends SpecBase {
 
     "must treat the PR name as plain text" in {
       val answers = emptyUserAnswers
-        .set(IndividualNamePage(JourneyRole.PrIndividual), IndividualName(None, "<Firstname>", None, "O'Name & Surname")).success.value
-        .set(DidPrSubmitPage, true).success.value
+        .set(
+          IndividualNamePage(JourneyRole.PrIndividual),
+          IndividualName(None, "<Firstname>", None, "O'Name & Surname")
+        )
+        .success
+        .value
+        .set(DidPrSubmitPage, true)
+        .success
+        .value
 
       DidPrSubmitSummary.row(srn, answers).value.value.content mustBe Text("<Firstname> O'Name & Surname")
     }
