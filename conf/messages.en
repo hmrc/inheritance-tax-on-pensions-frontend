@@ -285,6 +285,10 @@ checkYourAnswers.beneficiary.details.heading = Beneficiary details
 checkYourAnswers.beneficiary.details.card.title = Beneficiary {0}
 checkYourAnswers.beneficiary.details.card.remove.hidden = {0}
 
+continueAddingDetails.title = Continue adding report details
+continueAddingDetails.heading = Continue adding report details
+continueAddingDetails.hint = Your previous answers have been saved.
+
 psaDeclaration.title = Declaration
 psaDeclaration.heading = Declaration
 psaDeclaration.text.list = By continuing you declare that:

@@ -30,11 +30,17 @@
 
 @(srn: Srn, deceasedDetailsSummaryList: SummaryList, prDetailsSummaryList: SummaryList, paymentNoticeDetailsSummaryList: SummaryList, beneficiaryList: List[SummaryList], continueRoute: Option[Call])(implicit request: Request[?], messages: Messages)
 
-@layout(pageTitle = titleNoForm(messages("checkYourAnswers.title"))) {
+@layout(pageTitle = titleNoForm(messages( if (continueRoute.isDefined) "continueAddingDetails.title" else "checkYourAnswers.title"))) {
 
     @formHelper(action = routes.CheckYourAnswersController.onSubmit(srn), Symbol("autoComplete") -> "off") {
 
-        @pageHeading(messages("checkYourAnswers.heading"))
+        @pageHeading(messages( if (continueRoute.isDefined) "continueAddingDetails.heading" else "checkYourAnswers.heading"))
+
+        @if(continueRoute.isDefined) {
+            <p class="govuk-body">
+                @messages("continueAddingDetails.hint")
+            </p>
+        }
 
         @if(deceasedDetailsSummaryList.rows.nonEmpty) {
             @subHeading(text = messages("checkYourAnswers.deceased.details.heading"))
