@@ -22,7 +22,7 @@ import play.api.inject.bind
 import views.html.beneficiary.BeneficiaryTrustNameView
 import base.SpecBase
 import forms.beneficiary.BeneficiaryTrustNameFormProvider
-import models.{CheckMode, NormalMode, UserAnswers}
+import models._
 import pages.beneficiary.BeneficiaryTrustNamePage
 import org.mockito.ArgumentCaptor
 import org.mockito.ArgumentMatchers.any
@@ -93,7 +93,8 @@ class BeneficiaryTrustNameControllerSpec extends SpecBase {
           val result = route(application, request).value
           val expectedUrl = mode match {
             case NormalMode => routes.BeneficiaryListController.onPageLoad(srn).url
-            case CheckMode => controllers.routes.CheckYourAnswersController.onPageLoad(srn).url
+            case CheckMode =>
+              controllers.routes.CheckYourAnswersController.onPageLoad(srn).url
           }
 
           status(result) mustEqual SEE_OTHER

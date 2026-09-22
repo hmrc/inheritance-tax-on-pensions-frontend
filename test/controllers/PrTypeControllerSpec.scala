@@ -259,7 +259,9 @@ class PrTypeControllerSpec extends SpecBase {
         val result = route(application, request).value
 
         status(result) mustEqual SEE_OTHER
-        redirectLocation(result).value mustEqual routes.CheckYourAnswersController.onPageLoad(srn).url
+        redirectLocation(result).value mustEqual routes.CheckYourAnswersController
+          .onPageLoad(srn)
+          .url
       }
     }
 
@@ -399,7 +401,9 @@ class PrTypeControllerSpec extends SpecBase {
         val result = route(application, request).value
 
         status(result) mustEqual SEE_OTHER
-        redirectLocation(result).value mustEqual routes.CheckYourAnswersController.onPageLoad(srn).url
+        redirectLocation(result).value mustEqual routes.CheckYourAnswersController
+          .onPageLoad(srn)
+          .url
       }
     }
 

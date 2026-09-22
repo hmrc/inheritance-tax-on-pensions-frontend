@@ -78,6 +78,7 @@ GET         /:srn/change-scheme-receive-payment-notice   controllers.PaymentNoti
 POST        /:srn/change-scheme-receive-payment-notice   controllers.PaymentNoticeDateController.onSubmit(srn: Srn, mode: Mode = CheckMode)
 
 GET         /:srn/check-your-answers                     controllers.CheckYourAnswersController.onPageLoad(srn: Srn)
+GET         /:srn/continue-adding-details                controllers.CheckYourAnswersController.onPageLoadContinueMode(srn: Srn)
 POST        /:srn/check-your-answers                     controllers.CheckYourAnswersController.onSubmit(srn: Srn)
 
 GET         /:srn/psa-declaration                        controllers.PsaDeclarationController.onPageLoad(srn: Srn)

@@ -23,7 +23,7 @@ import play.api.inject.bind
 import views.html.OrganisationNameView
 import base.SpecBase
 import play.api.libs.json.Json
-import models.{CheckMode, JourneyRole, NormalMode}
+import models._
 import org.scalatestplus.mockito.MockitoSugar
 import org.mockito.ArgumentMatchers.any
 import play.api.test.Helpers._
@@ -183,7 +183,9 @@ class OrganisationNameControllerSpec extends SpecBase with MockitoSugar {
         val result = route(application, request).value
 
         status(result) mustEqual SEE_OTHER
-        redirectLocation(result).value mustEqual routes.CheckYourAnswersController.onPageLoad(srn).url
+        redirectLocation(result).value mustEqual routes.CheckYourAnswersController
+          .onPageLoad(srn)
+          .url
       }
     }
 

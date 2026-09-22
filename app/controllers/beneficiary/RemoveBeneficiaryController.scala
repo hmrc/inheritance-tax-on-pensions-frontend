@@ -94,7 +94,11 @@ class RemoveBeneficiaryController @Inject() (
                 } else {
                   mode match {
                     case CheckMode =>
-                      Future.successful(Redirect(controllers.routes.CheckYourAnswersController.onPageLoad(srn)))
+                      Future.successful(
+                        Redirect(
+                          controllers.routes.CheckYourAnswersController.onPageLoad(srn)
+                        )
+                      )
                     case _ => Future.successful(Redirect(routes.BeneficiaryListController.onPageLoad(srn)))
                   }
                 }

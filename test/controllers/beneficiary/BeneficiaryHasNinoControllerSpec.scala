@@ -117,7 +117,9 @@ class BeneficiaryHasNinoControllerSpec extends SpecBase {
           val result = route(application, request).value
 
           status(result) mustEqual SEE_OTHER
-          redirectLocation(result).value mustEqual controllers.routes.CheckYourAnswersController.onPageLoad(srn).url
+          redirectLocation(result).value mustEqual controllers.routes.CheckYourAnswersController
+            .onPageLoad(srn)
+            .url
           verify(mockConnector, times(1)).setUserAnswers(any(), any(), any(), any(), any())(using any())
         }
       }

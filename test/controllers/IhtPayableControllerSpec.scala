@@ -66,7 +66,9 @@ class IhtPayableControllerSpec extends SpecBase {
                 .withFormUrlEncodedBody("value" -> "1,234.56")
             ).value
             status(result) mustBe SEE_OTHER
-            redirectLocation(result).value mustBe routes.CheckYourAnswersController.onPageLoad(srn).url
+            redirectLocation(result).value mustBe routes.CheckYourAnswersController
+              .onPageLoad(srn)
+              .url
             val saved = ArgumentCaptor.forClass(classOf[UserAnswers])
             verify(service).set(saved.capture())(using any(), any())
             saved.getValue mustBe answers.set(IhtPayablePage, BigDecimal("1234.56")).success.value

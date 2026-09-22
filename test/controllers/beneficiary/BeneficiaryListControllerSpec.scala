@@ -24,7 +24,7 @@ import base.SpecBase
 import forms.beneficiary.BeneficiaryListFormProvider
 import viewmodels.beneficiary.BeneficiaryListItem
 import models.beneficiary.BeneficiaryType
-import models.{CheckMode, JourneyRole, NormalMode}
+import models._
 import pages.beneficiary.{BeneficiaryNamePage, BeneficiaryTrustNamePage, BeneficiaryTypePage}
 
 class BeneficiaryListControllerSpec extends SpecBase {
@@ -136,7 +136,9 @@ class BeneficiaryListControllerSpec extends SpecBase {
         val result = route(application, request).value
 
         status(result) mustEqual SEE_OTHER
-        redirectLocation(result).value mustEqual controllers.routes.CheckYourAnswersController.onPageLoad(srn).url
+        redirectLocation(result).value mustEqual controllers.routes.CheckYourAnswersController
+          .onPageLoad(srn)
+          .url
       }
     }
 
@@ -183,7 +185,9 @@ class BeneficiaryListControllerSpec extends SpecBase {
         val result = route(application, FakeRequest(GET, routeUrl)).value
 
         status(result) mustEqual SEE_OTHER
-        redirectLocation(result).value mustEqual controllers.routes.CheckYourAnswersController.onPageLoad(srn).url
+        redirectLocation(result).value mustEqual controllers.routes.CheckYourAnswersController
+          .onPageLoad(srn)
+          .url
       }
     }
 
@@ -194,7 +198,9 @@ class BeneficiaryListControllerSpec extends SpecBase {
         val result = route(application, FakeRequest(GET, routeUrl)).value
 
         status(result) mustEqual SEE_OTHER
-        redirectLocation(result).value mustEqual controllers.routes.CheckYourAnswersController.onPageLoad(srn).url
+        redirectLocation(result).value mustEqual controllers.routes.CheckYourAnswersController
+          .onPageLoad(srn)
+          .url
       }
     }
   }

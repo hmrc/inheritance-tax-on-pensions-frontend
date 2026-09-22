@@ -80,7 +80,8 @@ class BeneficiaryTrustNameController @Inject() (
   private def nextPage(srn: Srn, mode: Mode) =
     mode match {
       case models.NormalMode => routes.BeneficiaryListController.onPageLoad(srn)
-      case models.CheckMode => controllers.routes.CheckYourAnswersController.onPageLoad(srn)
+      case models.CheckMode =>
+        controllers.routes.CheckYourAnswersController.onPageLoad(srn)
     }
 
   private def saveName(
