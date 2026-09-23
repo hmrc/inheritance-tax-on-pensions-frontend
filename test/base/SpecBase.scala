@@ -54,8 +54,6 @@ trait SpecBase
   implicit val actorSystem: ActorSystem = ActorSystem("unit-tests")
   implicit val mat: Materializer = Materializer.createMaterializer(actorSystem)
 
-  val userAnswersId: String = "id"
-
   def emptyUserAnswers: UserAnswers = UserAnswers(userAnswersId, srnGen.sample.value.toString, testUuid)
 
   def messages(app: Application): Messages = app.injector.instanceOf[MessagesApi].preferred(FakeRequest())

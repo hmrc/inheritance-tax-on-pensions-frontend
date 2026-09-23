@@ -17,12 +17,14 @@
 package base
 
 import generators.Generators
-import models._
+import models.*
+import play.api.libs.json.Json
 
 import java.time.LocalDate
 
 trait TestValues extends Generators {
   val srn: SchemeId.Srn = srnGen.sample.get
+  val userAnswersId = "id"
   val schemeName = "testSchemeName"
   val email = "testEmail@test.com"
   val inheritanceTaxReference = "A123456/25A"
@@ -70,5 +72,106 @@ trait TestValues extends Generators {
   val testPrAddress: PrAddress =
     PrAddress("1 ABCDE Street", None, None, Some("FGHIJ Town"), Some("AA1 1AA"), "GB")
   val individualNameFormatted: String = s"${individualName.firstForename} ${individualName.surname}"
+
+  def  deceasedPrUserAnswers : UserAnswers =
+    UserAnswers(userAnswersId, srnGen.sample.get.value.toString, testUuid)
+      .copy(
+        data = Json.obj(
+          "inheritanceTaxReference" -> "F123456/25A",
+          "nameOfDeceased" -> Json.obj(
+            "firstForename" -> "dec",
+            "surname" -> "name"
+          ),
+          "hasNino" -> false,
+          "reasonForNoNino" -> "no nino",
+          "birthDeathDates" -> Json.obj(
+            "dateOfBirth" -> "1920-01-01",
+            "dateOfDeath" -> "2026-01-01"
+          ),
+          "didPrSubmit" -> true,
+          "ihtTaxInformation" -> Json.obj(
+            "dateThePensionSchemeReceivedNoticeToPay" -> "2026-01-01"
+          ),
+          "areBeneficiariesKnown" -> true
+        )
+      )
+
+  val prOrganisationUserAnswers: UserAnswers =
+    deceasedPrUserAnswers
+      .copy(
+        data = deceasedPrUserAnswers.data ++ Json.obj(
+          "prType" -> "organisation",
+          "prDetails" -> Json.obj(
+            "organisation" -> Json.obj(
+              "organisationName" -> "AB Org",
+              "title" -> "Mr",
+              "firstForename" -> "Firstname",
+              "secondForename" -> "Middlename",
+              "surname" -> "Surname",
+              "addressline1" -> "33 AB Street",
+              "addressline2" -> "AB Area",
+              "addressline3" -> "Some District",
+              "addressline4" -> "Anytown",
+              "ukPostcode" -> "ZZ1 1ZZ",
+              "country" -> "GB"
+            )
+          )
+        )
+      )
+
+  val prOrganisationUserAnswersNoAddress: UserAnswers =
+    deceasedPrUserAnswers
+      .copy(
+        data = deceasedPrUserAnswers.data ++ Json.obj(
+          "prType" -> "organisation",
+          "prDetails" -> Json.obj(
+            "organisation" -> Json.obj(
+              "organisationName" -> "AB Org",
+              "title" -> "Mr",
+              "firstForename" -> "Firstname",
+              "secondForename" -> "Middlename",
+              "surname" -> "Surname",
+            )
+          )
+        )
+      )
+
+  val prIndividualUserAnswers: UserAnswers =
+    deceasedPrUserAnswers
+      .copy(
+        data = deceasedPrUserAnswers.data ++ Json.obj(
+          "prType" -> "individual",
+          "prDetails" -> Json.obj(
+            "individual" -> Json.obj(
+              "title" -> "Ms",
+              "firstForename" -> "Firstnametwo",
+              "secondForename" -> "Middlenametwo",
+              "surname" -> "Surname",
+              "addressline1" -> "33 Fake Street",
+              "addressline2" -> "AB Area",
+              "addressline3" -> "Some District",
+              "addressline4" -> "Anytown",
+              "ukPostcode" -> "ZZ1 1ZZ",
+              "country" -> "GB"
+            )
+          )
+        )
+      )
+
+  val prIndividualUserAnswersNoAddress: UserAnswers =
+    deceasedPrUserAnswers
+      .copy(
+        data = deceasedPrUserAnswers.data ++ Json.obj(
+          "prType" -> "individual",
+          "prDetails" -> Json.obj(
+            "individual" -> Json.obj(
+              "title" -> "Ms",
+              "firstForename" -> "Firstnametwo",
+              "secondForename" -> "Middlenametwo",
+              "surname" -> "Surname"
+            )
+          )
+        )
+      )
 
 }
