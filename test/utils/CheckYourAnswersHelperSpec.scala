@@ -18,11 +18,11 @@ package utils
 
 import models.JourneyRole.{Deceased, PrIndividual, PrOrganisation}
 import org.scalatest.freespec.AnyFreeSpec
-import pages.*
+import pages._
 import controllers.routes
 import base.SpecBase
 import models.beneficiary.BeneficiaryType
-import models.*
+import models._
 
 class CheckYourAnswersHelperSpec extends AnyFreeSpec with SpecBase {
 

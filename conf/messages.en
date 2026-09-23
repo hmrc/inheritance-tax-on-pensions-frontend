@@ -333,8 +333,8 @@ didPrSubmit.checkYourAnswersLabel = Who submitted the payment notice?
 didPrSubmit.error.required = Select who submitted the payment notice
 didPrSubmit.change.hidden = who submitted the payment notice
 
-areBeneficiariesKnown.title = Are the beneficiaries known?
-areBeneficiariesKnown.heading = Are the beneficiaries known?
+areBeneficiariesKnown.title = Does the payment notice contain beneficiary details?
+areBeneficiariesKnown.heading = Does the payment notice contain beneficiary details?
 areBeneficiariesKnown.checkYourAnswersLabel = Are the beneficiaries known?
 areBeneficiariesKnown.change.hidden = whether the beneficiaries are known
 areBeneficiariesKnown.error.required = You must select one option
