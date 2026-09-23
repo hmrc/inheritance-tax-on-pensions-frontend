@@ -19,18 +19,24 @@ package forms.mappings
 import scala.util.matching
 
 trait Regex {
-  val addressLineRegex: String = """^[^%$£\r\n]+$"""
+  // This allows European characters
+  val europeanCharacterRange: String = "a-zA-Z\u00C0-\u00FF\u0100-\u024F\u0370-\u03FF\u0400-\u04FF"
+
+  // Fallback if above nameRegex can't be used, allows West European (latin) characters only:
+  val westEuropeanCharacterRange: String = "A-Za-zÀ-ÖØ-öø-ÿ"
+
+  val addressLineRegex: String = s"^[${europeanCharacterRange}0-9 \\-,.'\\/#:;º@_\\[\\]\\?\\(\\)\\&]+$$"
 
   val ukPostcodeRegex: String = """^GIR ?0AA$|^[A-Z]{1,2}[0-9][0-9A-Z]? ?[0-9][A-Z]{2}$"""
 
-  val ninoRegex: String = """^(?!BG|GB|KN|NK|NT|TN|ZZ)[ABCEGHJKLMNOPRSTWXYZ][ABCEGHJKLMNPRSTWXYZ][0-9]{6}[ABCD]$"""
+  val reasonForNoNinoRegex: String = """^[a-zA-Z0-9\- \t,./()]+$"""
 
-  val reasonForNoNinoRegex: String = """^[a-zA-Z0-9\-’`'" \t,.@/&()]+$"""
+  val nameRegex: String = s"^[${europeanCharacterRange}]+(?:[ '-][${europeanCharacterRange}]+)*$$"
 
-  val nameRegex: String = "^[A-Za-zÀ-ÖØ-öø-ÿ]+(?:[ '-][A-Za-zÀ-ÖØ-öø-ÿ]+)*$"
-
-  val ihtReferenceNumberRegex: matching.Regex = "^[A-Z]\\d{6}/\\d{2}[A-Z]$".r
+  val ihtReferenceNumberRegex: String = "^[A,F]\\d{6}/\\d{2}[A-Z]$"
 
   val schemeAdminIdRegex: matching.Regex = "^(A[0-9]{7})$".r
+
+  val orgAndTrustNameRegex: String = s"^[${westEuropeanCharacterRange}0-9 \\-,.'\\/@_\\[\\]\\(\\)\\&]+$$"
 
 }

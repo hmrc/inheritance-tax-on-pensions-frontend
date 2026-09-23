@@ -32,7 +32,7 @@ class IndividualNameFormProviderSpec extends forms.behaviours.StringFieldBehavio
         "title" -> "Mr",
         "firstForename" -> "Firstname",
         "secondForename" -> "Middlename",
-        "surname" -> "Surname"
+        "surname" -> "München Kraków Αθήνα Київ"
       )
 
       val result = form.bind(data)
@@ -43,7 +43,7 @@ class IndividualNameFormProviderSpec extends forms.behaviours.StringFieldBehavio
           title = Some("Mr"),
           firstForename = "Firstname",
           secondForename = Some("Middlename"),
-          surname = "Surname"
+          surname = "München Kraków Αθήνα Київ"
         )
       )
     }
@@ -87,6 +87,25 @@ class IndividualNameFormProviderSpec extends forms.behaviours.StringFieldBehavio
           "firstForename" -> "Firstname1",
           "secondForename" -> "Middlename1",
           "surname" -> "Surname1"
+        )
+      )
+
+      (result.errors.map(_.message) must contain).allOf(
+        "prIndividualName.error.title.pattern",
+        "prIndividualName.error.firstForename.pattern",
+        "prIndividualName.error.secondForename.pattern",
+        "prIndividualName.error.surname.pattern"
+      )
+    }
+
+    "must fail when fields contain invalid script characters" in {
+
+      val result = form.bind(
+        Map(
+          "title" -> "M<",
+          "firstForename" -> "Firstname>",
+          "secondForename" -> "Middlename\"",
+          "surname" -> "Surname&"
         )
       )
 
