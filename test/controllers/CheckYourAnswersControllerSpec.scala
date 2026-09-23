@@ -16,21 +16,22 @@
 
 package controllers
 
-import play.api.test.Helpers.*
-import pages.*
+import play.api.test.Helpers._
+import pages._
 import viewmodels.CheckAnswers.beneficiary.{BeneficiaryHasNinoSummary, BeneficiaryTypeSummary}
 import views.html.CheckYourAnswersView
 import uk.gov.hmrc.govukfrontend.views.viewmodels.summarylist.{Actions, SummaryList}
 import viewmodels.govuk.all.{ActionItemViewModel, CardViewModel, SummaryListViewModel}
 import play.api.libs.json.Json
-import models.*
-import viewmodels.CheckAnswers.*
+import models._
+import viewmodels.CheckAnswers._
 import models.JourneyRole.{Deceased, PrIndividual}
 import play.api.test.FakeRequest
 import uk.gov.hmrc.govukfrontend.views.Aliases.Text
 import base.SpecBase
 
-import scala.jdk.CollectionConverters.*
+import scala.jdk.CollectionConverters._
+
 import java.time.LocalDate
 
 class CheckYourAnswersControllerSpec extends SpecBase {
@@ -131,7 +132,7 @@ class CheckYourAnswersControllerSpec extends SpecBase {
           val document = org.jsoup.Jsoup.parse(contentAsString(result))
           val rows = document.select(".govuk-summary-list__row")
           rows.size mustBe 2
-          rows.get(0).select(".govuk-summary-list__key").text mustBe "Are the beneficiaries known?"
+          rows.get(0).select(".govuk-summary-list__key").text mustBe "Does the payment notice contain beneficiary details?"
           val amountRow = rows.get(1)
           amountRow.select(".govuk-summary-list__key").text mustBe "Amount of IHT payable"
           amountRow.select(".govuk-summary-list__value").text mustBe "\u00a31,234.50"

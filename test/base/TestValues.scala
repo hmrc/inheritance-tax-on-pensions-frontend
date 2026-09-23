@@ -17,8 +17,8 @@
 package base
 
 import generators.Generators
-import models.*
 import play.api.libs.json.Json
+import models._
 
 import java.time.LocalDate
 
@@ -73,7 +73,7 @@ trait TestValues extends Generators {
     PrAddress("1 ABCDE Street", None, None, Some("FGHIJ Town"), Some("AA1 1AA"), "GB")
   val individualNameFormatted: String = s"${individualName.firstForename} ${individualName.surname}"
 
-  def  deceasedPrUserAnswers : UserAnswers =
+  def deceasedPrUserAnswers: UserAnswers =
     UserAnswers(userAnswersId, srnGen.sample.get.value.toString, testUuid)
       .copy(
         data = Json.obj(
@@ -130,7 +130,7 @@ trait TestValues extends Generators {
               "title" -> "Mr",
               "firstForename" -> "Firstname",
               "secondForename" -> "Middlename",
-              "surname" -> "Surname",
+              "surname" -> "Surname"
             )
           )
         )
