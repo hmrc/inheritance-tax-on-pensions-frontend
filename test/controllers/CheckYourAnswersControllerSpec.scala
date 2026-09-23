@@ -132,7 +132,7 @@ class CheckYourAnswersControllerSpec extends SpecBase {
           val document = org.jsoup.Jsoup.parse(contentAsString(result))
           val rows = document.select(".govuk-summary-list__row")
           rows.size mustBe 2
-          rows.get(0).select(".govuk-summary-list__key").text mustBe "Are the beneficiaries known?"
+          rows.get(0).select(".govuk-summary-list__key").text mustBe "Does the payment notice contain beneficiary details?"
           val amountRow = rows.get(1)
           amountRow.select(".govuk-summary-list__key").text mustBe "Amount of IHT payable"
           amountRow.select(".govuk-summary-list__value").text mustBe "\u00a31,234.50"
