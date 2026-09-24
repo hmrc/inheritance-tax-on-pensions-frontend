@@ -99,9 +99,9 @@ class PrAddressControllerSpec extends SpecBase {
           Json.obj(
             "prDetails" -> Json.obj(
               "individual" -> Json.obj(
-                "addressline1" -> "Old address",
-                "addressline2" -> "Old second line",
-                "addressline3" -> "Old third line",
+                "addressLine1" -> "Old address",
+                "addressLine2" -> "Old second line",
+                "addressLine3" -> "Old third line",
                 "country" -> "FR"
               )
             )

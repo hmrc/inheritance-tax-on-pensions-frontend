@@ -49,8 +49,8 @@
 
         @govukInput(
             InputViewModel(
-                field = form("addressline1"),
-                label = LabelViewModel(messages("changePrAddress.addressline1"))
+                field = form("addressLine1"),
+                label = LabelViewModel(messages("changePrAddress.addressLine1"))
                     .withCssClass("govuk-label--s")
             )
             .withWidth(Fixed20)
@@ -60,8 +60,8 @@
 
         @govukInput(
             InputViewModel(
-                field = form("addressline2"),
-                label = LabelViewModel(messages("changePrAddress.addressline2"))
+                field = form("addressLine2"),
+                label = LabelViewModel(messages("changePrAddress.addressLine2"))
                     .withCssClass("govuk-label--s")
             )
             .withWidth(Fixed20)
@@ -71,8 +71,8 @@
 
         @govukInput(
             InputViewModel(
-                field = form("addressline3"),
-                label = LabelViewModel(messages("changePrAddress.addressline3"))
+                field = form("addressLine3"),
+                label = LabelViewModel(messages("changePrAddress.addressLine3"))
                     .withCssClass("govuk-label--s")
             )
             .withWidth(Fixed20)
@@ -82,8 +82,8 @@
 
         @govukInput(
             InputViewModel(
-                field = form("addressline4"),
-                label = LabelViewModel(messages("changePrAddress.addressline4"))
+                field = form("addressLine4"),
+                label = LabelViewModel(messages("changePrAddress.addressLine4"))
                     .withCssClass("govuk-label--s")
             )
             .withWidth(Fixed20)
@@ -94,7 +94,7 @@
         @if(isUkAddress) {
             @govukInput(
                 InputViewModel(
-                    field = form("ukPostcode"),
+                    field = form("postCode"),
                     label = LabelViewModel(
                         messages("changePrAddress.postcode")
                     ).withCssClass("govuk-label--s")
@@ -108,7 +108,7 @@
         @if(!isUkAddress) {
             @govukInput(
                 InputViewModel(
-                    field = form("addressline5"),
+                    field = form("addressLine5"),
                     label = LabelViewModel(messages("changePrAddress.postalCode"))
                         .withCssClass("govuk-label--s")
                 )

@@ -27,7 +27,7 @@ import javax.inject.Inject
 
 class PrAddressFormProvider @Inject() extends Mappings with Regex {
 
-  private val addresslineMaxLength = 35
+  private val addressLineMaxLength = 35
   private val ukPostcodeMaxLength = 8
   private val optionalStringFormatter: Formatter[Option[String]] = new Formatter[Option[String]] {
     override def bind(key: String, data: Map[String, String]): Either[Seq[FormError], Option[String]] =
@@ -40,46 +40,46 @@ class PrAddressFormProvider @Inject() extends Mappings with Regex {
   def apply(country: String): Form[PrAddress] =
     Form(
       mapping(
-        "addressline1" -> text("changePrAddress.error.addressline1.required")
+        "addressLine1" -> text("changePrAddress.error.addressLine1.required")
           .transform[String](_.trim, identity)
           .verifying(
             firstError(
-              nonBlank("changePrAddress.error.addressline1.required"),
-              regexp(addresslineRegex, "changePrAddress.error.addressline1.invalid"),
-              maxLength(addresslineMaxLength, "changePrAddress.error.addressline1.length")
+              nonBlank("changePrAddress.error.addressLine1.required"),
+              regexp(addressLineRegex, "changePrAddress.error.addressLine1.invalid"),
+              maxLength(addressLineMaxLength, "changePrAddress.error.addressLine1.length")
             )
           ),
-        "addressline2" -> optionalAddressField(
-          "changePrAddress.error.addressline2.invalid",
-          "changePrAddress.error.addressline2.length"
+        "addressLine2" -> optionalAddressField(
+          "changePrAddress.error.addressLine2.invalid",
+          "changePrAddress.error.addressLine2.length"
         ),
-        "addressline3" -> optionalAddressField(
-          "changePrAddress.error.addressline3.invalid",
-          "changePrAddress.error.addressline3.length"
+        "addressLine3" -> optionalAddressField(
+          "changePrAddress.error.addressLine3.invalid",
+          "changePrAddress.error.addressLine3.length"
         ),
-        "addressline4" -> optionalAddressField(
-          "changePrAddress.error.addressline4.invalid",
-          "changePrAddress.error.addressline4.length"
+        "addressLine4" -> optionalAddressField(
+          "changePrAddress.error.addressLine4.invalid",
+          "changePrAddress.error.addressLine4.length"
         ),
-        "ukPostcode" -> optionalUkPostcode(
-          "changePrAddress.error.ukPostcode.invalid",
-          "changePrAddress.error.ukPostcode.length"
+        "postCode" -> optionalUkPostcode(
+          "changePrAddress.error.postCode.invalid",
+          "changePrAddress.error.postCode.length"
         ),
-        "addressline5" -> optionalAddressField(
-          "changePrAddress.error.addressline5.invalid",
-          "changePrAddress.error.addressline5.length"
+        "addressLine5" -> optionalAddressField(
+          "changePrAddress.error.addressLine5.invalid",
+          "changePrAddress.error.addressLine5.length"
         )
-      )((addressline1, addressline2, addressline3, addressline4, ukPostcode, addressline5) =>
-        PrAddress(addressline1, addressline2, addressline3, addressline4, ukPostcode, country, addressline5)
+      )((addressLine1, addressLine2, addressLine3, addressLine4, postCode, addressLine5) =>
+        PrAddress(addressLine1, addressLine2, addressLine3, addressLine4, postCode, country, addressLine5)
       )(address =>
         Some(
           (
-            address.addressline1,
-            address.addressline2,
-            address.addressline3,
-            address.addressline4,
-            address.ukPostcode,
-            address.addressline5
+            address.addressLine1,
+            address.addressLine2,
+            address.addressLine3,
+            address.addressLine4,
+            address.postCode,
+            address.addressLine5
           )
         )
       )
@@ -95,8 +95,8 @@ class PrAddressFormProvider @Inject() extends Mappings with Regex {
     of(using optionalStringFormatter)
       .verifying(
         firstError(
-          optionalConstraint(regexp(addresslineRegex, invalidKey)),
-          optionalConstraint(maxLength(addresslineMaxLength, lengthKey))
+          optionalConstraint(regexp(addressLineRegex, invalidKey)),
+          optionalConstraint(maxLength(addressLineMaxLength, lengthKey))
         )
       )
 

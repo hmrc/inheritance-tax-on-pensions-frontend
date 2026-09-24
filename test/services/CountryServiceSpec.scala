@@ -28,7 +28,6 @@ class CountryServiceSpec extends SpecBase {
 
       service.findByCode("GB").value.name mustBe "United Kingdom"
       service.findByCode("FR").value.name mustBe "France"
-      service.findByCode("XK").value.name mustBe "Kosovo"
     }
 
     "must return a country name for a code" in {

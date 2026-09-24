@@ -20,36 +20,36 @@ import models.addresslookup.AlfAddressData
 import play.api.libs.json.{Json, OFormat}
 
 final case class PrAddress(
-  addressline1: String,
-  addressline2: Option[String],
-  addressline3: Option[String],
-  addressline4: Option[String],
-  ukPostcode: Option[String],
+  addressLine1: String,
+  addressLine2: Option[String],
+  addressLine3: Option[String],
+  addressLine4: Option[String],
+  postCode: Option[String],
   country: String,
-  addressline5: Option[String] = None
+  addressLine5: Option[String] = None
 )
 
 object PrAddress {
   implicit val format: OFormat[PrAddress] = Json.format[PrAddress]
 
   def hasValidFirstAddressLine(addressData: AlfAddressData): Boolean =
-    addresslines(addressData).headOption.exists(_.trim.nonEmpty)
+    addressLines(addressData).headOption.exists(_.trim.nonEmpty)
 
   def fromAlfAddressData(addressData: AlfAddressData): PrAddress = {
-    val lines = addresslines(addressData)
-    val addressline2 = lines.lift(1).orElse(addressData.address.town)
-    val addressline4 = lines.lift(3).orElse(addressData.address.town.filterNot(addressline2.contains))
+    val lines = addressLines(addressData)
+    val addressLine2 = lines.lift(1).orElse(addressData.address.town)
+    val addressLine4 = lines.lift(3).orElse(addressData.address.town.filterNot(addressLine2.contains))
 
     PrAddress(
-      addressline1 = lines.headOption.map(_.trim).getOrElse(""),
-      addressline2 = addressline2,
-      addressline3 = lines.lift(2),
-      addressline4 = addressline4,
-      addressline5 = addressData.address.country.code match {
+      addressLine1 = lines.headOption.map(_.trim).getOrElse(""),
+      addressLine2 = addressLine2,
+      addressLine3 = lines.lift(2),
+      addressLine4 = addressLine4,
+      addressLine5 = addressData.address.country.code match {
         case "GB" => None
         case _ => addressData.address.postcode
       },
-      ukPostcode = addressData.address.country.code match {
+      postCode = addressData.address.country.code match {
         case "GB" => addressData.address.postcode
         case _ => None
       },
@@ -57,7 +57,7 @@ object PrAddress {
     )
   }
 
-  private def addresslines(addressData: AlfAddressData): Seq[String] = {
+  private def addressLines(addressData: AlfAddressData): Seq[String] = {
     val lines = removeTrailingTown(addressData.address.lines.map(_.trim).filter(_.nonEmpty), addressData.address.town)
 
     addressData.address.poBox.map(formatPoBox).filterNot(poBox => lines.exists(line => samePoBox(line, poBox))) match {
