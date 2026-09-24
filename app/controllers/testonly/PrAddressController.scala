@@ -41,7 +41,7 @@ class PrAddressController @Inject() (
 
   private val address = PrAddress("1 ABCDE Street", None, None, Some("FGHIJ Town"), Some("AA1 1AA"), "GB")
   private val addressFields =
-    Seq("addressline1", "addressline2", "addressline3", "addressline4", "ukPostcode", "country")
+    Seq("addressLine1", "addressLine2", "addressLine3", "addressLine4", "postCode", "country")
 
   def seed(srn: Srn): Action[AnyContent] =
     identify

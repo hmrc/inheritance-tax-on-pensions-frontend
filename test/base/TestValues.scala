@@ -108,11 +108,11 @@ trait TestValues extends Generators {
               "firstForename" -> "Firstname",
               "secondForename" -> "Middlename",
               "surname" -> "Surname",
-              "addressline1" -> "33 AB Street",
-              "addressline2" -> "AB Area",
-              "addressline3" -> "Some District",
-              "addressline4" -> "Anytown",
-              "ukPostcode" -> "ZZ1 1ZZ",
+              "addressLine1" -> "33 AB Street",
+              "addressLine2" -> "AB Area",
+              "addressLine3" -> "Some District",
+              "addressLine4" -> "Anytown",
+              "postCode" -> "ZZ1 1ZZ",
               "country" -> "GB"
             )
           )
@@ -147,11 +147,11 @@ trait TestValues extends Generators {
               "firstForename" -> "Firstnametwo",
               "secondForename" -> "Middlenametwo",
               "surname" -> "Surname",
-              "addressline1" -> "33 Fake Street",
-              "addressline2" -> "AB Area",
-              "addressline3" -> "Some District",
-              "addressline4" -> "Anytown",
-              "ukPostcode" -> "ZZ1 1ZZ",
+              "addressLine1" -> "33 Fake Street",
+              "addressLine2" -> "AB Area",
+              "addressLine3" -> "Some District",
+              "addressLine4" -> "Anytown",
+              "postCode" -> "ZZ1 1ZZ",
               "country" -> "GB"
             )
           )

@@ -37,11 +37,11 @@ class PrIndividualAddressSummarySpec extends SpecBase {
     "must return a row when data is present" in {
 
       val address = PrAddress(
-        addressline1 = "33 AB Street",
-        addressline2 = Some("AB Area"),
-        addressline3 = Some("AB County"),
-        addressline4 = Some("ABville"),
-        ukPostcode = Some("AA1 1AA"),
+        addressLine1 = "33 AB Street",
+        addressLine2 = Some("AB Area"),
+        addressLine3 = Some("AB County"),
+        addressLine4 = Some("ABville"),
+        postCode = Some("AA1 1AA"),
         country = "GB"
       )
 
@@ -67,12 +67,12 @@ class PrIndividualAddressSummarySpec extends SpecBase {
     "must return a row when data is present for non-GB address" in {
 
       val address = PrAddress(
-        addressline1 = "33 AB Street",
-        addressline2 = Some("AB Area"),
-        addressline3 = Some("AB County"),
-        addressline4 = Some("ABville"),
-        addressline5 = Some("123-456"),
-        ukPostcode = None,
+        addressLine1 = "33 AB Street",
+        addressLine2 = Some("AB Area"),
+        addressLine3 = Some("AB County"),
+        addressLine4 = Some("ABville"),
+        addressLine5 = Some("123-456"),
+        postCode = None,
         country = "BF"
       )
 
@@ -98,11 +98,11 @@ class PrIndividualAddressSummarySpec extends SpecBase {
     "must show only address line 1 when the optional address fields are absent" in {
 
       val address = PrAddress(
-        addressline1 = "33 AB Street",
-        addressline2 = None,
-        addressline3 = None,
-        addressline4 = None,
-        ukPostcode = None,
+        addressLine1 = "33 AB Street",
+        addressLine2 = None,
+        addressLine3 = None,
+        addressLine4 = None,
+        postCode = None,
         country = "GB"
       )
 

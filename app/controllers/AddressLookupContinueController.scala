@@ -109,12 +109,12 @@ class AddressLookupContinueController @Inject() (
 
   private def prWithoutAddressFields(userAnswers: UserAnswers, prTypeKey: String): JsObject =
     Seq(
-      "addressline1",
-      "addressline2",
-      "addressline3",
-      "addressline4",
-      "addressline5",
-      "ukPostcode",
+      "addressLine1",
+      "addressLine2",
+      "addressLine3",
+      "addressLine4",
+      "addressLine5",
+      "postCode",
       "country"
     ).foldLeft(
       (userAnswers.data \ "prDetails" \ prTypeKey)

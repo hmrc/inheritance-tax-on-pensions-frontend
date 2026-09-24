@@ -29,67 +29,67 @@ class PrAddressFormProviderSpec extends AnyFreeSpec with Matchers with Regex {
   private val form = new PrAddressFormProvider()(country)
   private val formNonGb = new PrAddressFormProvider()(nonGbCountry)
   private val validData = Map(
-    "addressline1" -> "Line 1",
-    "addressline2" -> "Line 2",
-    "addressline3" -> "City",
-    "addressline4" -> "",
-    "addressline5" -> "Line 5",
-    "ukPostcode" -> ""
+    "addressLine1" -> "Line 1",
+    "addressLine2" -> "Line 2",
+    "addressLine3" -> "City",
+    "addressLine4" -> "",
+    "addressLine5" -> "Line 5",
+    "postCode" -> ""
   )
   "PrAddressFormProvider" - {
 
     "must bind valid data, trim the fields and retain the existing country" in {
       val result = form.bind(
-        validData.updated("addressline1", "  Line 1  ").updated("addressline4", "   ")
+        validData.updated("addressLine1", "  Line 1  ").updated("addressLine4", "   ")
       )
 
       result.errors mustBe empty
       result.value.get mustBe PrAddress(
-        addressline1 = "Line 1",
-        addressline2 = Some("Line 2"),
-        addressline3 = Some("City"),
-        addressline4 = None,
-        addressline5 = Some("Line 5"),
-        ukPostcode = None,
+        addressLine1 = "Line 1",
+        addressLine2 = Some("Line 2"),
+        addressLine3 = Some("City"),
+        addressLine4 = None,
+        addressLine5 = Some("Line 5"),
+        postCode = None,
         country = country
       )
     }
     "must bind valid data, trim the fields and retain the existing Non-GB country" in {
       val result = formNonGb.bind(
-        validData.updated("addressline1", "  Line 1  ").updated("addressline4", "   ")
+        validData.updated("addressLine1", "  Line 1  ").updated("addressLine4", "   ")
       )
 
       result.errors mustBe empty
       result.value.get mustBe PrAddress(
-        addressline1 = "Line 1",
-        addressline2 = Some("Line 2"),
-        addressline3 = Some("City"),
-        addressline4 = None,
-        addressline5 = Some("Line 5"),
-        ukPostcode = None,
+        addressLine1 = "Line 1",
+        addressLine2 = Some("Line 2"),
+        addressLine3 = Some("City"),
+        addressLine4 = None,
+        addressLine5 = Some("Line 5"),
+        postCode = None,
         country = nonGbCountry
       )
     }
 
     "must require address line 1" in {
-      val result = form.bind(validData.updated("addressline1", "   "))
+      val result = form.bind(validData.updated("addressLine1", "   "))
 
       result.errors must contain(
-        FormError("addressline1", "changePrAddress.error.addressline1.required")
+        FormError("addressLine1", "changePrAddress.error.addressLine1.required")
       )
     }
 
     "must accept characters other than percent, dollar and pound signs" in {
-      val result = form.bind(validData.updated("addressline1", "Flat #2: \"Rear\" @ Block_B; [A]?"))
+      val result = form.bind(validData.updated("addressLine1", "Flat #2: \"Rear\" @ Block_B; [A]?"))
 
       result.errors mustBe empty
     }
 
     Seq(
-      ("addressline1", "changePrAddress.error.addressline1.invalid"),
-      ("addressline2", "changePrAddress.error.addressline2.invalid"),
-      ("addressline3", "changePrAddress.error.addressline3.invalid"),
-      ("addressline4", "changePrAddress.error.addressline4.invalid")
+      ("addressLine1", "changePrAddress.error.addressLine1.invalid"),
+      ("addressLine2", "changePrAddress.error.addressLine2.invalid"),
+      ("addressLine3", "changePrAddress.error.addressLine3.invalid"),
+      ("addressLine4", "changePrAddress.error.addressLine4.invalid")
     ).foreach { case (field, errorKey) =>
       Seq(
         "%" -> "percent sign",
@@ -101,16 +101,16 @@ class PrAddressFormProviderSpec extends AnyFreeSpec with Matchers with Regex {
         s"must reject a $description in $field" in {
           val result = form.bind(validData.updated(field, s"Invalid${invalidCharacter}Value"))
 
-          result.errors must contain(FormError(field, errorKey, Seq(addresslineRegex)))
+          result.errors must contain(FormError(field, errorKey, Seq(addressLineRegex)))
         }
       }
     }
 
     Seq(
-      ("addressline1", "changePrAddress.error.addressline1.length"),
-      ("addressline2", "changePrAddress.error.addressline2.length"),
-      ("addressline3", "changePrAddress.error.addressline3.length"),
-      ("addressline4", "changePrAddress.error.addressline4.length")
+      ("addressLine1", "changePrAddress.error.addressLine1.length"),
+      ("addressLine2", "changePrAddress.error.addressLine2.length"),
+      ("addressLine3", "changePrAddress.error.addressLine3.length"),
+      ("addressLine4", "changePrAddress.error.addressLine4.length")
     ).foreach { case (field, errorKey) =>
       s"must reject $field when it is longer than 35 characters" in {
         val result = form.bind(validData.updated(field, "A" * 36))
@@ -120,13 +120,13 @@ class PrAddressFormProviderSpec extends AnyFreeSpec with Matchers with Regex {
     }
 
     "must show only the higher-priority invalid-format error for one field" in {
-      val result = form.bind(validData.updated("addressline1", "%" * 36))
+      val result = form.bind(validData.updated("addressLine1", "%" * 36))
 
-      result.errors.filter(_.key == "addressline1") mustBe Seq(
+      result.errors.filter(_.key == "addressLine1") mustBe Seq(
         FormError(
-          "addressline1",
-          "changePrAddress.error.addressline1.invalid",
-          Seq(addresslineRegex)
+          "addressLine1",
+          "changePrAddress.error.addressLine1.invalid",
+          Seq(addressLineRegex)
         )
       )
     }
@@ -142,9 +142,9 @@ class PrAddressFormProviderSpec extends AnyFreeSpec with Matchers with Regex {
       "T11YEE0"
     ).foreach { postcode =>
       s"must reject invalid UK postcode $postcode" in {
-        val result = form.bind(validData.updated("ukPostcode", postcode))
+        val result = form.bind(validData.updated("postCode", postcode))
         result.errors must not be empty
-        result.errors.exists(_.message == "changePrAddress.error.ukPostcode.invalid") mustBe true
+        result.errors.exists(_.message == "changePrAddress.error.postCode.invalid") mustBe true
       }
     }
 
@@ -161,7 +161,7 @@ class PrAddressFormProviderSpec extends AnyFreeSpec with Matchers with Regex {
       "DE128HJ"
     ).foreach { postcode =>
       s"must accept valid UK postcode $postcode" in {
-        val result = form.bind(validData.updated("ukPostcode", postcode))
+        val result = form.bind(validData.updated("postCode", postcode))
         result.errors mustBe empty
       }
     }

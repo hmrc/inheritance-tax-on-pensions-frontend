@@ -132,7 +132,10 @@ class CheckYourAnswersControllerSpec extends SpecBase {
           val document = org.jsoup.Jsoup.parse(contentAsString(result))
           val rows = document.select(".govuk-summary-list__row")
           rows.size mustBe 2
-          rows.get(0).select(".govuk-summary-list__key").text mustBe "Does the payment notice contain beneficiary details?"
+          rows
+            .get(0)
+            .select(".govuk-summary-list__key")
+            .text mustBe "Does the payment notice contain beneficiary details?"
           val amountRow = rows.get(1)
           amountRow.select(".govuk-summary-list__key").text mustBe "Amount of IHT payable"
           amountRow.select(".govuk-summary-list__value").text mustBe "\u00a31,234.50"
@@ -358,11 +361,11 @@ class CheckYourAnswersControllerSpec extends SpecBase {
                   "firstForename" -> "Firstnametwo",
                   "secondForename" -> "Middlenametwo",
                   "surname" -> "Surname",
-                  "addressline1" -> "33 Fake Street",
-                  "addressline2" -> "AB Area",
-                  "addressline3" -> "Some District",
-                  "addressline4" -> "Anytown",
-                  "ukPostcode" -> "ZZ1 1ZZ",
+                  "addressLine1" -> "33 Fake Street",
+                  "addressLine2" -> "AB Area",
+                  "addressLine3" -> "Some District",
+                  "addressLine4" -> "Anytown",
+                  "postCode" -> "ZZ1 1ZZ",
                   "country" -> "GB"
                 )
               )
@@ -427,11 +430,11 @@ class CheckYourAnswersControllerSpec extends SpecBase {
                   "firstForename" -> "Firstnametwo",
                   "secondForename" -> "Middlenametwo",
                   "surname" -> "Surname",
-                  "addressline1" -> "33 Fake Street",
-                  "addressline2" -> "AB Area",
-                  "addressline3" -> "Some District",
-                  "addressline4" -> "Anytown",
-                  "ukPostcode" -> "ZZ1 1ZZ",
+                  "addressLine1" -> "33 Fake Street",
+                  "addressLine2" -> "AB Area",
+                  "addressLine3" -> "Some District",
+                  "addressLine4" -> "Anytown",
+                  "postCode" -> "ZZ1 1ZZ",
                   "country" -> "GB"
                 )
               )

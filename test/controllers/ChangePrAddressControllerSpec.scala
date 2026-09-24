@@ -36,11 +36,11 @@ class ChangePrAddressControllerSpec extends SpecBase {
 
   private val formProvider = new PrAddressFormProvider()
   private val address = PrAddress(
-    addressline1 = "Line 1",
-    addressline2 = Some("Line 2"),
-    addressline3 = Some("City"),
-    addressline4 = Some("County"),
-    ukPostcode = None,
+    addressLine1 = "Line 1",
+    addressLine2 = Some("Line 2"),
+    addressLine3 = Some("City"),
+    addressLine4 = Some("County"),
+    postCode = None,
     country = "GB"
   )
 
@@ -113,11 +113,11 @@ class ChangePrAddressControllerSpec extends SpecBase {
           val request =
             FakeRequest(POST, routes.ChangePrAddressController.onSubmit(srn, journeyRole).url)
               .withFormUrlEncodedBody(
-                "addressline1" -> "1 Line",
-                "addressline2" -> "",
-                "addressline3" -> "",
-                "addressline4" -> "City",
-                "ukPostcode" -> "NE2 2AA"
+                "addressLine1" -> "1 Line",
+                "addressLine2" -> "",
+                "addressLine3" -> "",
+                "addressLine4" -> "City",
+                "postCode" -> "NE2 2AA"
               )
 
           val result = route(application, request).value
@@ -134,11 +134,11 @@ class ChangePrAddressControllerSpec extends SpecBase {
           val updatedPrDetails =
             (answersCaptor.getValue.data \ "prDetails" \ journeyRole.name).as[JsObject]
           updatedPrDetails.as[PrAddress] mustBe PrAddress(
-            addressline1 = "1 Line",
-            addressline2 = None,
-            addressline3 = None,
-            addressline4 = Some("City"),
-            ukPostcode = Some("NE2 2AA"),
+            addressLine1 = "1 Line",
+            addressLine2 = None,
+            addressLine3 = None,
+            addressLine4 = Some("City"),
+            postCode = Some("NE2 2AA"),
             country = "GB"
           )
 
@@ -163,11 +163,11 @@ class ChangePrAddressControllerSpec extends SpecBase {
           val request =
             FakeRequest(POST, routes.ChangePrAddressController.onSubmit(srn, journeyRole).url)
               .withFormUrlEncodedBody(
-                "addressline1" -> "%",
-                "addressline2" -> "",
-                "addressline3" -> "",
-                "addressline4" -> "",
-                "ukPostcode" -> ""
+                "addressLine1" -> "%",
+                "addressLine2" -> "",
+                "addressLine3" -> "",
+                "addressLine4" -> "",
+                "postCode" -> ""
               )
 
           val result = route(application, request).value
@@ -179,7 +179,7 @@ class ChangePrAddressControllerSpec extends SpecBase {
     }
 
     "must use the Postal code label for a non-UK address" in {
-      val nonUkAddress = address.copy(country = "FR", ukPostcode = Some("75001"))
+      val nonUkAddress = address.copy(country = "FR", postCode = Some("75001"))
       val userAnswers = individualAnswers.copy(
         data = individualAnswers.data.deepMerge(
           Json.obj(
