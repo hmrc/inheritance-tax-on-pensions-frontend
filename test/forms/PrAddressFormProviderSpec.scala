@@ -140,7 +140,9 @@ class PrAddressFormProviderSpec extends AnyFreeSpec with Matchers with Regex {
       "SW1A",
       "SW1A 2A",
       "SW1A 2AAA",
-      "T11YEE0"
+      "T11YEE0",
+      "GIR 0AA",
+      "gir0aa",
     ).foreach { postcode =>
       s"must reject invalid UK postcode $postcode" in {
         val result = form.bind(validData.updated("postCode", postcode))
@@ -155,8 +157,6 @@ class PrAddressFormProviderSpec extends AnyFreeSpec with Matchers with Regex {
       "ab1 1ba",
       "ab11ba",
       "ab121ba",
-      "GIR 0AA",
-      "gir0aa",
       "FX11XX",
       "W12DN",
       "DE128HJ"

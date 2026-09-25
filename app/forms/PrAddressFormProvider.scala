@@ -105,7 +105,7 @@ class PrAddressFormProvider @Inject() extends Mappings with Regex {
       .transform(_.map(_.toUpperCase()), identity)
       .verifying(
         firstError(
-          optionalConstraint(regexp(ukPostcodeRegex, invalidKey)),
+          optionalConstraint(regexp(ukPostcodeEtmpsRegularExpr, invalidKey)),
           optionalConstraint(maxLength(ukPostcodeMaxLength, lengthKey))
         )
       )
