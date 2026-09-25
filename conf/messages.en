@@ -139,6 +139,7 @@ birthDeathDates.dateOfDeath.error.required.two = The death date must include {0}
 birthDeathDates.dateOfDeath.error.required = The death date must include {0}
 birthDeathDates.dateOfDeath.error.invalid = Enter a valid death date
 birthDeathDates.dateOfDeath.error.past = The death date must be in the past
+birthDeathDates.dateOfDeath.error.minimum = The death date must be on or after {0}
 birthDeathDates.error.birthBeforeDeath = The birth date must be before the death date
 birthDeathDates.error.birthAfter1900 = The birth date must be after 01/01/1900
 birthDeathDates.change.hidden = the birth or death date

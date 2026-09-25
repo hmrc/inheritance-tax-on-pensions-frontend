@@ -25,6 +25,8 @@ import models.{JourneyRole, Mode, PensionSchemeId}
 
 import scala.concurrent.duration.Duration
 
+import java.time.LocalDate
+
 @Singleton
 class FrontendAppConfig @Inject() (configuration: Configuration) {
 
@@ -82,6 +84,8 @@ class FrontendAppConfig @Inject() (configuration: Configuration) {
   val submissionListPageSize: Int = configuration.get[Int]("submission-list.page-size")
   val submissionListDateFrom: String = configuration.get[String]("submission-list.date-from")
   val submissionListDateTo: String = configuration.get[String]("submission-list.date-to")
+  val earliestDateOfDeath: LocalDate =
+    LocalDate.parse(configuration.get[String]("birth-death-dates.earliest-date-of-death"))
 
   val pensionsAdministrator: Service = configuration.get[Service]("microservice.services.pensionAdministrator")
   val pensionsScheme: Service = configuration.get[Service]("microservice.services.pensionsScheme")
