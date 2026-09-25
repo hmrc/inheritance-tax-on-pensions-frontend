@@ -24,8 +24,6 @@ class NoNinoReasonFormProviderSpec extends StringFieldBehaviours with Regex {
 
   val requiredKey = "noNinoReason.error.required"
   val invalidCharactersKey = "noNinoReason.error.invalid"
-  val lengthKey = "noNinoReason.error.length"
-  val maxLength = 160
 
   val form = new NoNinoReasonFormProvider()()
 
@@ -37,7 +35,7 @@ class NoNinoReasonFormProviderSpec extends StringFieldBehaviours with Regex {
       fieldThatBindsValidData(
         form,
         fieldName,
-        "reason for not having a NINO"
+        "Isn't an adult"
       )
     )
 

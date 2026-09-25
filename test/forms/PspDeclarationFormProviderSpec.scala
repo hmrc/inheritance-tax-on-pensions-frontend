@@ -24,7 +24,6 @@ class PspDeclarationFormProviderSpec extends StringFieldBehaviours {
   val requiredKey = "pspDeclaration.schemeAdminId.error.required"
   val invalidCharactersKey = "pspDeclaration.schemeAdminId.error.invalid"
   val noMatchKey = "pspDeclaration.schemeAdminId.error.noMatch"
-  val maxLength = 8
   val validCharacterRegex = "^(A[0-9]{7})$"
 
   val form = new PspDeclarationFormProvider()(Some("A1234567"))

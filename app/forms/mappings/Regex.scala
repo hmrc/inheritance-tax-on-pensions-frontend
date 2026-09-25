@@ -29,7 +29,7 @@ trait Regex {
 
   val ukPostcodeEtmpsRegularExpr: String = s"^([A-Z]{1,2}[0-9][0-9A-Z]?\\s?[0-9][A-Z]{2}|BFPO\\s?[0-9]{1,3})$$"
 
-  val reasonForNoNinoRegex: String = """^[a-zA-Z0-9\- \t,./()]+$"""
+  val reasonForNoNinoRegex: String = """^[a-zA-Z0-9\- \t,.'/()]+$"""
 
   val nameRegex: String = s"^[${europeanCharacterRange}]+(?:[ '-][${europeanCharacterRange}]+)*$$"
 
