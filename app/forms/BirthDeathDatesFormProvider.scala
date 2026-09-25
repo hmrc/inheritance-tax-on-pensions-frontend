@@ -18,6 +18,7 @@ package forms
 
 import forms.mappings.Mappings
 import play.api.data.Forms.mapping
+import config.FrontendAppConfig
 import models.BirthDeathDates
 import play.api.i18n.Messages
 import play.api.data.{Form, FormError}
@@ -25,13 +26,17 @@ import play.api.data.{Form, FormError}
 import scala.util.Try
 
 import java.time.{LocalDate, Month, ZoneOffset}
+import java.util.Locale
+import java.time.format.DateTimeFormatter
 import javax.inject.Inject
 
-class BirthDeathDatesFormProvider @Inject() extends Mappings {
+class BirthDeathDatesFormProvider @Inject() (appConfig: FrontendAppConfig) extends Mappings {
 
   private val dateOfBirthKey = "dateOfBirth"
   private val dateOfDeathKey = "dateOfDeath"
   private val earliestBirthDate = LocalDate.of(1900, 1, 1)
+  private val earliestDeathDate = appConfig.earliestDateOfDeath
+  private val errorDateFormatter = DateTimeFormatter.ofPattern("d MMMM yyyy", Locale.UK)
 
   def apply()(implicit messages: Messages): Form[BirthDeathDates] =
     Form(
@@ -60,7 +65,7 @@ class BirthDeathDatesFormProvider @Inject() extends Mappings {
 
     val formWithParentErrors = addParentKeyErrors(formWithRangeErrors)
 
-    formWithParentErrors.value match {
+    val validatedForm = formWithParentErrors.value match {
       case None =>
         val hasBirthErrors =
           formWithRangeErrors.errors.exists(e => e.key == dateOfBirthKey || e.key.startsWith(s"$dateOfBirthKey."))
@@ -110,11 +115,28 @@ class BirthDeathDatesFormProvider @Inject() extends Mappings {
 
         withBirthBeforeDeath
     }
+
+    validatedForm.withEarliestDeathDateError
   }
 
   extension (form: Form[BirthDeathDates])
+    private def withEarliestDeathDateError: Form[BirthDeathDates] =
+      if (form.errors.exists(e => e.key == dateOfDeathKey || e.key.startsWith(s"$dateOfDeathKey."))) {
+        form
+      } else {
+        parsedDate(form.data, dateOfDeathKey)
+          .filter(_.isBefore(earliestDeathDate))
+          .fold(form) { _ =>
+            form.withError(
+              dateOfDeathKey,
+              "birthDeathDates.dateOfDeath.error.minimum",
+              earliestDeathDate.format(errorDateFormatter)
+            )
+          }
+      }
+
     private def withEarliestBirthDateError(hasBirthErrors: Boolean): Form[BirthDeathDates] =
-      parsedDateOfBirth(form.data)
+      parsedDate(form.data, dateOfBirthKey)
         .filterNot(_.isAfter(earliestBirthDate))
         .fold(form) { _ =>
           if (form.errors.exists(_.key == dateOfBirthKey) || hasBirthErrors) {
@@ -156,11 +178,11 @@ class BirthDeathDatesFormProvider @Inject() extends Mappings {
       }
     }
 
-  private def parsedDateOfBirth(data: Map[String, String]): Option[LocalDate] =
+  private def parsedDate(data: Map[String, String], key: String): Option[LocalDate] =
     for {
-      day <- formattedInt(data, s"$dateOfBirthKey.day")
-      month <- formattedMonth(data, s"$dateOfBirthKey.month")
-      year <- formattedInt(data, s"$dateOfBirthKey.year")
+      day <- formattedInt(data, s"$key.day")
+      month <- formattedMonth(data, s"$key.month")
+      year <- formattedInt(data, s"$key.year")
       date <- Try(LocalDate.of(year, month, day)).toOption
     } yield date
 

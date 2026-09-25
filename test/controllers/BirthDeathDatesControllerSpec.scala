@@ -20,7 +20,6 @@ import play.api.test.FakeRequest
 import play.api.mvc.{AnyContentAsEmpty, AnyContentAsFormUrlEncoded}
 import connectors.InheritanceTaxOnPensionsConnector
 import pages.{BirthDeathDatesPage, IndividualNamePage}
-import play.api.inject.bind
 import views.html.BirthDeathDatesView
 import base.SpecBase
 import forms.BirthDeathDatesFormProvider
@@ -28,17 +27,25 @@ import models._
 import play.api.i18n.Messages
 import org.mockito.ArgumentMatchers.any
 import play.api.test.Helpers._
-import org.mockito.Mockito.{times, verify, when}
+import org.mockito.Mockito._
+import play.api.inject.bind
+import config.FrontendAppConfig
 import org.mockito.ArgumentCaptor
 import org.scalatestplus.mockito.MockitoSugar
 
 import scala.concurrent.Future
 
+import java.time.LocalDate
+
 class BirthDeathDatesControllerSpec extends SpecBase with MockitoSugar {
 
   private implicit val messages: Messages = stubMessages()
 
-  private val formProvider = new BirthDeathDatesFormProvider()
+  private def formProvider = {
+    val appConfig = mock[FrontendAppConfig]
+    when(appConfig.earliestDateOfDeath).thenReturn(LocalDate.of(1900, 2, 1))
+    new BirthDeathDatesFormProvider(appConfig)
+  }
   private def form = formProvider()
   private val nameOfDeceased = IndividualName(
     title = Some("Mr"),
@@ -76,6 +83,33 @@ class BirthDeathDatesControllerSpec extends SpecBase with MockitoSugar {
       )
 
   "BirthDeathDates Controller" - {
+
+    "must use the default minimum death date for local and non-production environments" in {
+      val application = applicationBuilder(userAnswers = Some(userAnswersWithDeceasedName), usesSession = true).build()
+
+      running(application) {
+        application.injector.instanceOf[FrontendAppConfig].earliestDateOfDeath mustBe LocalDate.of(1900, 2, 1)
+      }
+    }
+
+    "must show the configured minimum date in the error summary and field error without saving" in {
+      val connector = mock[InheritanceTaxOnPensionsConnector]
+      val application = applicationBuilder(userAnswers = Some(userAnswersWithDeceasedName), usesSession = true)
+        .configure("birth-death-dates.earliest-date-of-death" -> "2027-04-06")
+        .overrides(bind[InheritanceTaxOnPensionsConnector].toInstance(connector))
+        .build()
+
+      running(application) {
+        val result = route(application, postRequest()).value
+
+        status(result) mustBe BAD_REQUEST
+        val document = org.jsoup.Jsoup.parse(contentAsString(result))
+        val error = "The death date must be on or after 6 April 2027"
+        document.select(".govuk-error-summary").text must include(error)
+        document.select(".govuk-error-message").text must include(error)
+        verifyNoInteractions(connector)
+      }
+    }
 
     "must return OK and the correct view for a GET" in {
 

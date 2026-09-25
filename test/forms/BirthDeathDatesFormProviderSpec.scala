@@ -16,18 +16,26 @@
 
 package forms
 
-import play.api.test.Helpers.stubMessages
+import config.FrontendAppConfig
 import base.SpecBase
 import models.BirthDeathDates
 import play.api.i18n.Messages
 import play.api.data.FormError
+import play.api.test.Helpers.stubMessages
+import org.mockito.Mockito.when
 
 import java.time.LocalDate
 
 class BirthDeathDatesFormProviderSpec extends SpecBase {
 
   private implicit val messages: Messages = stubMessages()
-  private val formProvider = new BirthDeathDatesFormProvider()
+  private def providerWithMinimum(minimum: LocalDate): BirthDeathDatesFormProvider = {
+    val config = mock[FrontendAppConfig]
+    when(config.earliestDateOfDeath).thenReturn(minimum)
+    new BirthDeathDatesFormProvider(config)
+  }
+
+  private val formProvider = providerWithMinimum(LocalDate.of(1900, 2, 1))
   private def form = formProvider()
 
   private val validData = Map(
@@ -40,6 +48,61 @@ class BirthDeathDatesFormProviderSpec extends SpecBase {
   )
 
   ".bind" - {
+
+    "must reject a death date before the configured minimum and include that date in the error" in {
+      val provider = providerWithMinimum(LocalDate.of(2027, 4, 6))
+      val result = provider.validate(provider().bind(validData))
+
+      result.errors must contain(
+        FormError("dateOfDeath", "birthDeathDates.dateOfDeath.error.minimum", Seq("6 April 2027"))
+      )
+    }
+
+    "must accept a death date on the configured minimum" in {
+      val provider = providerWithMinimum(testDateOfDeath)
+      val result = provider.validate(provider().bind(validData))
+
+      result.errors mustBe empty
+    }
+
+    "must accept a death date after the configured minimum" in {
+      val provider = providerWithMinimum(testDateOfDeath.minusDays(1))
+      val result = provider.validate(provider().bind(validData))
+
+      result.errors mustBe empty
+    }
+
+    "must reject the day immediately before the configured minimum" in {
+      val provider = providerWithMinimum(testDateOfDeath.plusDays(1))
+      val result = provider.validate(provider().bind(validData))
+
+      result.errors.map(_.message) must contain("birthDeathDates.dateOfDeath.error.minimum")
+    }
+
+    "must still check the minimum death date when the birth date is missing" in {
+      val provider = providerWithMinimum(LocalDate.of(2027, 4, 6))
+      val data = validData.filterNot { case (key, _) => key.startsWith("dateOfBirth.") }
+      val result = provider.validate(provider().bind(data))
+
+      result.errors must contain(FormError("dateOfBirth", "birthDeathDates.dateOfBirth.error.required.all"))
+      result.errors must contain(
+        FormError("dateOfDeath", "birthDeathDates.dateOfDeath.error.minimum", Seq("6 April 2027"))
+      )
+    }
+
+    Seq(
+      "missing" -> Map("dateOfDeath.day" -> "", "dateOfDeath.month" -> "", "dateOfDeath.year" -> ""),
+      "invalid" -> Map("dateOfDeath.day" -> "31", "dateOfDeath.month" -> "2"),
+      "future" -> Map("dateOfDeath.year" -> "2999")
+    ).foreach { case (description, invalidDeathDate) =>
+      s"preserve existing errors for a $description death date without adding a minimum error" in {
+        val provider = providerWithMinimum(LocalDate.of(2027, 4, 6))
+        val result = provider.validate(provider().bind(validData ++ invalidDeathDate))
+
+        result.errors must not be empty
+        result.errors.map(_.message) must not contain "birthDeathDates.dateOfDeath.error.minimum"
+      }
+    }
 
     "must bind birth and death dates" in {
       val result = formProvider.validate(form.bind(validData))
