@@ -19,6 +19,7 @@ GET         /unauthorised                                controllers.Unauthorise
 GET         /:srn/report-inheritance-tax-on-pension       controllers.SubmissionListController.onPageLoad(srn: Srn)
 GET         /:srn/paid-reports                            controllers.PaidReportsController.onPageLoad(srn: Srn)
 GET         /:srn/report-inheritance-tax-on-pension/:uuid controllers.SubmissionListController.onAmend(srn: Srn, uuid: String)
+GET         /:srn/report-inheritance-tax-on-pension/change/:fbNumber controllers.SubmissionListController.onChange(srn: Srn, fbNumber: String)
 
 GET         /:srn/start-report-you-will-need             controllers.WhatYouWillNeedController.onPageLoad(srn: Srn)
 POST        /:srn/start-report-you-will-need             controllers.WhatYouWillNeedController.onSubmit(srn: Srn)

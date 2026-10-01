@@ -16,11 +16,12 @@
 
 package controllers
 
-import services.SubmissionListService
+import services.{ReportRetrivalService, SubmissionListService}
 import utils.SubmissionListUtil
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import config.FrontendAppConfig
 import controllers.actions.{AllowAccessActionProvider, IdentifierAction}
+import play.api.Logging
 import views.html.SubmissionListView
 import models.SchemeId.Srn
 import play.api.i18n.I18nSupport
@@ -35,11 +36,13 @@ class SubmissionListController @Inject() (
   identify: IdentifierAction,
   allowAccess: AllowAccessActionProvider, // Invalidate the authorisation cache and re-authenticate
   submissionListService: SubmissionListService,
+  reportRetrivalService: ReportRetrivalService,
   appConfig: FrontendAppConfig,
   submissionListUtil: SubmissionListUtil,
   view: SubmissionListView
 )(implicit ec: ExecutionContext)
     extends FrontendBaseController
+    with Logging
     with I18nSupport {
 
   def onPageLoad(srn: Srn): Action[AnyContent] =
@@ -62,6 +65,7 @@ class SubmissionListController @Inject() (
     }
 
   def onAmend(srn: Srn, uuid: String): Action[AnyContent] =
+    logger.info(s"SubmissionListController.onAmend called with srn: $srn and uuid: $uuid")
     identify
       .andThen(allowAccess(srn)) { implicit request =>
         val updatedSession = if (request.session.get("uuid").contains(uuid)) {
@@ -74,4 +78,24 @@ class SubmissionListController @Inject() (
           .withSession(updatedSession)
       }
 
+  def onChange(srn: Srn, fbNumber: String): Action[AnyContent] = {
+    logger.info(s"SubmissionListController.onChange called with srn: $srn and fbNumber: $fbNumber")
+    identify.andThen(allowAccess(srn)).async { implicit request =>
+      reportRetrivalService
+        .getReport(fbNumber)
+        .map {
+          case Right(response) =>
+            val uuid = response.header("uuid").get
+            val updatedSession = if (request.session.get("uuid").contains(uuid)) {
+              request.session
+            } else {
+              request.session + ("uuid" -> uuid)
+            }
+
+            Redirect(controllers.routes.CheckYourAnswersController.onPageLoad(srn))
+              .withSession(updatedSession)
+          case Left(_) => Redirect(routes.JourneyRecoveryController.onPageLoad())
+        }
+    }
+  }
 }
