@@ -62,7 +62,7 @@ class NoNinoReasonFormProviderSpec extends StringFieldBehaviours with Regex {
             form,
             fieldName,
             invalidCharacter,
-            error = FormError(fieldName, invalidCharactersKey, Seq(reasonForNoNinoRegex))
+            error = FormError(fieldName, invalidCharactersKey, Seq(reasonNoNinoRegex))
           )
         )
       }

@@ -24,11 +24,11 @@ class NoNinoReasonPageSpec extends SpecBase {
   "NoNinoReasonPage" - {
 
     "must use the API-aligned path" in {
-      NoNinoReasonPage.path mustEqual JsPath \ "reasonForNoNino"
+      NoNinoReasonPage.path mustEqual JsPath \ "reasonNoNino"
     }
 
     "must use the API-aligned page name" in {
-      NoNinoReasonPage.toString mustEqual "reasonForNoNino"
+      NoNinoReasonPage.toString mustEqual "reasonNoNino"
     }
   }
 }

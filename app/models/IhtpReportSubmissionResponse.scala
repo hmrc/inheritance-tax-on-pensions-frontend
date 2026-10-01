@@ -18,6 +18,8 @@ package models
 
 import play.api.libs.json.{Json, OFormat}
 
+import java.time.Instant
+
 case class IhtpReportSubmissionResponse(success: SuccessResponse)
 
 object IhtpReportSubmissionResponse {
@@ -31,7 +33,7 @@ object SuccessResponse {
     Json.format[SuccessResponse]
 }
 
-case class IhtResponse(formBundleNo: String, ihtPaymentReference: String)
+case class IhtResponse(formBundleNo: String, ihtPaymentReference: String, processingDate: Instant)
 
 object IhtResponse {
   implicit val ihtResponseFormat: OFormat[IhtResponse] =
