@@ -16,19 +16,22 @@
 
 package controllers
 
-import play.api.test.FakeRequest
 import play.api.mvc.{AnyContentAsEmpty, AnyContentAsFormUrlEncoded}
 import connectors.InheritanceTaxOnPensionsConnector
 import pages.{AreBeneficiariesKnownPage, DidPrSubmitPage}
 import play.api.inject.bind
 import views.html.AreBeneficiariesKnownView
 import base.SpecBase
-import forms.AreBeneficiariesKnownFormProvider
 import models._
+import pages.beneficiary._
 import org.scalatestplus.mockito.MockitoSugar
 import org.mockito.ArgumentMatchers.any
+import models.JourneyRole.BeneficiaryIndividual
+import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import org.mockito.Mockito.when
+import forms.AreBeneficiariesKnownFormProvider
+import models.beneficiary.BeneficiaryType
 
 import scala.concurrent.Future
 
@@ -53,23 +56,67 @@ class AreBeneficiariesKnownControllerSpec extends SpecBase with MockitoSugar {
 
   "AreBeneficiariesKnown Controller" - {
 
-    Seq(false, true).foreach { known =>
-      s"must route correctly when beneficiaries known is changed to $known in CheckMode" in {
-        val service = mock[services.UserAnswersService]
-        when(service.set(any())(using any(), any())).thenReturn(Future.successful(Right(userAnswersWithDidPrSubmit)))
-        val application = applicationBuilder(Some(userAnswersWithDidPrSubmit), usesSession = true)
-          .overrides(bind[services.UserAnswersService].toInstance(service))
-          .build()
-        running(application) {
-          val result = route(
-            application,
-            postRequest(known.toString, routes.AreBeneficiariesKnownController.onSubmit(srn, CheckMode).url)
-          ).value
-          status(result) mustBe SEE_OTHER
-          val expected =
-            if (known) routes.CheckYourAnswersController.onPageLoad(srn).url
-            else routes.IhtPayableController.onPageLoad(srn, CheckMode).url
-          redirectLocation(result).value mustBe expected
+    val unknownBeneficiaries = userAnswersWithDidPrSubmit
+      .set(AreBeneficiariesKnownPage, false)
+      .success
+      .value
+      .set(pages.IhtPayablePage, BigDecimal("100.00"))
+      .success
+      .value
+    val individualWithoutName = userAnswersWithDidPrSubmit
+      .set(AreBeneficiariesKnownPage, true)
+      .success
+      .value
+      .set(BeneficiaryTypePage(0), BeneficiaryType.Individual)
+      .success
+      .value
+    val completeIndividual = individualWithoutName
+      .set(BeneficiaryNamePage(0, BeneficiaryIndividual), individualName)
+      .success
+      .value
+      .set(BeneficiaryHasNinoPage(0), false)
+      .success
+      .value
+
+    Seq(
+      (
+        "No changes to Yes without beneficiaries",
+        unknownBeneficiaries,
+        true,
+        () => controllers.beneficiary.routes.BeneficiaryTypeController.onPageLoad(srn, 0, NormalMode)
+      ),
+      (
+        "an individual name is missing",
+        individualWithoutName,
+        true,
+        () => controllers.beneficiary.routes.BeneficiaryNameController.onPageLoad(srn, NormalMode, 0)
+      ),
+      (
+        "Yes is unchanged with a complete individual",
+        completeIndividual,
+        true,
+        () => routes.CheckYourAnswersController.onPageLoad(srn)
+      ),
+      ("Yes changes to No", completeIndividual, false, () => routes.IhtPayableController.onPageLoad(srn, CheckMode))
+    ).foreach { case (description, answers, known, expected) =>
+      val prSubmittedAnswers =
+        if (known && answers.get(AreBeneficiariesKnownPage).contains(false)) Seq(true, false) else Seq(true)
+      prSubmittedAnswers.foreach { didPrSubmit =>
+        s"must route correctly in CheckMode when $description and PR submitted is $didPrSubmit" in {
+          val userAnswers = answers.set(DidPrSubmitPage, didPrSubmit).success.value
+          val service = mock[services.UserAnswersService]
+          when(service.set(any())(using any(), any())).thenReturn(Future.successful(Right(userAnswers)))
+          val application = applicationBuilder(Some(userAnswers), usesSession = true)
+            .overrides(bind[services.UserAnswersService].toInstance(service))
+            .build()
+          running(application) {
+            val result = route(
+              application,
+              postRequest(known.toString, routes.AreBeneficiariesKnownController.onSubmit(srn, CheckMode).url)
+            ).value
+            status(result) mustBe SEE_OTHER
+            redirectLocation(result).value mustBe expected().url
+          }
         }
       }
     }
