@@ -29,15 +29,23 @@ import viewmodels.govuk.summarylist._
 
 object InheritanceTaxReferenceSummary {
 
-  def row(srn: Srn, answers: UserAnswers)(implicit messages: Messages): Option[SummaryListRow] =
+  def row(srn: Srn, answers: UserAnswers)(implicit messages: Messages): Option[SummaryListRow] = {
+    val actions =
+      (answers.data \ "ihtPaymentReference").asOpt[String] match {
+        case None =>
+          Seq(
+            ActionItemViewModel("site.change", routes.InheritanceTaxReferenceController.onPageLoad(srn, CheckMode).url)
+              .withVisuallyHiddenText(messages("inheritanceTaxReference.change.hidden"))
+          )
+        case Some(_) => Seq()
+      }
+
     answers.get(InheritanceTaxReferencePage).map { answer =>
       SummaryListRowViewModel(
         key = "inheritanceTaxReference.checkYourAnswersLabel",
         value = ValueViewModel(HtmlContent(HtmlFormat.escape(answer).toString)),
-        actions = Seq(
-          ActionItemViewModel("site.change", routes.InheritanceTaxReferenceController.onPageLoad(srn, CheckMode).url)
-            .withVisuallyHiddenText(messages("inheritanceTaxReference.change.hidden"))
-        )
+        actions = actions
       )
     }
+  }
 }

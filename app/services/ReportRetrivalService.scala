@@ -26,17 +26,18 @@ import scala.concurrent.Future
 import javax.inject.Inject
 
 class ReportRetrivalService @Inject() (
- inheritanceTaxOnPensionsConnector: InheritanceTaxOnPensionsConnector,
- appConfig: FrontendAppConfig
+  inheritanceTaxOnPensionsConnector: InheritanceTaxOnPensionsConnector,
+  appConfig: FrontendAppConfig
 ) extends BaseService {
 
-  def getReport(uuid: String)(implicit
+  def getReport(ihtPaymentReference: String, ihtVersion: String)(implicit
     hc: HeaderCarrier,
     request: AllowedAccessRequest[?]
   ): Future[Either[UpstreamErrorResponse, HttpResponse]] =
     inheritanceTaxOnPensionsConnector.getReport(
       request.schemeDetails.pstr,
-      uuid,
+      ihtPaymentReference,
+      ihtVersion,
       schemeAdministratorOrPractitionerName,
       schemeName,
       srnVal,

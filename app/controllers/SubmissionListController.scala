@@ -78,11 +78,13 @@ class SubmissionListController @Inject() (
           .withSession(updatedSession)
       }
 
-  def onChange(srn: Srn, fbNumber: String): Action[AnyContent] = {
-    logger.info(s"SubmissionListController.onChange called with srn: $srn and fbNumber: $fbNumber")
+  def onChange(srn: Srn, ihtPaymentReference: String, ihtVersion: String): Action[AnyContent] = {
+    logger.info(
+      s"SubmissionListController.onChange called with srn: $srn, fbNumber: $ihtPaymentReference and version: $ihtVersion"
+    )
     identify.andThen(allowAccess(srn)).async { implicit request =>
       reportRetrivalService
-        .getReport(fbNumber)
+        .getReport(ihtPaymentReference, ihtVersion)
         .map {
           case Right(response) =>
             val uuid = response.header("uuid").get

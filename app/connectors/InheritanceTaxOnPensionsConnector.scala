@@ -120,13 +120,14 @@ class InheritanceTaxOnPensionsConnector @Inject() (
   def getReport(
     pstr: String,
     ihtPaymentReference: String,
+    ihtVersion: String,
     schemeAdministratorOrPractitionerName: String,
     schemeName: String,
     srnVal: String,
     role: String
   )(implicit hc: HeaderCarrier): Future[Either[UpstreamErrorResponse, HttpResponse]] =
     httpClient
-      .get(url"${config.getReportUrl(pstr, ihtPaymentReference)}")
+      .get(url"${config.getReportUrl(pstr, ihtPaymentReference, ihtVersion)}")
       .transform(
         _.addHttpHeaders(
           SRN_HEADER -> srnVal,

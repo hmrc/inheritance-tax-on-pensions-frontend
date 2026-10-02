@@ -25,7 +25,7 @@ class NoNinoReasonFormProvider @Inject() extends Mappings {
 
   def apply(): Form[String] =
     Form(
-      "noNinoReason" -> reasonForNoNino(
+      "noNinoReason" -> reasonNoNino(
         requiredKey = "noNinoReason.error.required",
         invalidKey = "noNinoReason.error.invalid",
         maxLengthKey = "noNinoReason.error.length"

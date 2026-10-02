@@ -27,6 +27,7 @@ class IhtpReportSubmissionResponseSpec extends SpecBase {
       val json = Json.obj(
         "success" -> Json.obj(
           "ihtResponse" -> Json.obj(
+            "processingDate" -> testProcessingDate.toString,
             "formBundleNo" -> "bundle-1",
             "ihtPaymentReference" -> "payment-1"
           )
@@ -36,6 +37,7 @@ class IhtpReportSubmissionResponseSpec extends SpecBase {
       val result: IhtpReportSubmissionResponse = json.as[IhtpReportSubmissionResponse]
       result.success.ihtResponse.formBundleNo mustBe "bundle-1"
       result.success.ihtResponse.ihtPaymentReference mustBe "payment-1"
+      result.success.ihtResponse.processingDate mustBe testProcessingDate
     }
 
     "must successfully write to json" in {
@@ -43,7 +45,8 @@ class IhtpReportSubmissionResponseSpec extends SpecBase {
         SuccessResponse(
           IhtResponse(
             formBundleNo = "bundle-1",
-            ihtPaymentReference = "payment-1"
+            ihtPaymentReference = "payment-1",
+            processingDate = testProcessingDate
           )
         )
       )
@@ -51,6 +54,7 @@ class IhtpReportSubmissionResponseSpec extends SpecBase {
       val json = Json.toJson(response)
       (json \ "success" \ "ihtResponse" \ "formBundleNo").as[String] mustBe "bundle-1"
       (json \ "success" \ "ihtResponse" \ "ihtPaymentReference").as[String] mustBe "payment-1"
+      (json \ "success" \ "ihtResponse" \ "processingDate").as[String] mustBe testProcessingDate.toString
     }
   }
 }

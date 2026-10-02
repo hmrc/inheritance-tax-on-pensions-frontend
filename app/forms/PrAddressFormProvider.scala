@@ -19,7 +19,7 @@ package forms
 import play.api.data.format.Formatter
 import forms.mappings.{Mappings, Regex}
 import play.api.data.Forms.{mapping, of}
-import play.api.data.validation.{Constraint, Invalid, Valid}
+import play.api.data.validation.{Constraint, Valid}
 import models.PrAddress
 import play.api.data.{Form, FormError, Mapping}
 
@@ -105,17 +105,11 @@ class PrAddressFormProvider @Inject() extends Mappings with Regex {
       .transform(_.map(_.toUpperCase()), identity)
       .verifying(
         firstError(
-          optionalConstraint(regexp(ukPostcodeRegex, invalidKey)),
+          optionalConstraint(regexp(ukPostcodeEtmpsRegularExpr, invalidKey)),
           optionalConstraint(maxLength(ukPostcodeMaxLength, lengthKey))
         )
       )
 
   private def optionalConstraint(constraint: Constraint[String]): Constraint[Option[String]] =
     Constraint(_.map(constraint.apply).getOrElse(Valid))
-
-  private def nonBlank(errorKey: String): Constraint[String] =
-    Constraint {
-      case value if value.nonEmpty => Valid
-      case _ => Invalid(errorKey)
-    }
 }

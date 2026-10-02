@@ -28,7 +28,7 @@
     govukButton: GovukButton
 )
 
-@(srn: Srn, deceasedDetailsSummaryList: SummaryList, prDetailsSummaryList: SummaryList, paymentNoticeDetailsSummaryList: SummaryList, beneficiaryList: List[SummaryList], continueRoute: Option[Call])(implicit request: Request[?], messages: Messages)
+@(srn: Srn, deceasedDetailsSummaryList: SummaryList, prDetailsSummaryList: SummaryList, paymentNoticeDetailsSummaryList: SummaryList, beneficiaryList: List[SummaryList], continueRoute: Option[Call], submitBlocked: Boolean)(implicit request: Request[?], messages: Messages)
 
 @layout(pageTitle = titleNoForm(messages( if (continueRoute.isDefined) "continueAddingDetails.title" else "checkYourAnswers.title"))) {
 
@@ -74,6 +74,7 @@
                     )
                 )
             </div>
+        } else if (submitBlocked) {
         } else {
             <div class="govuk-button-group">
                 @govukButton(

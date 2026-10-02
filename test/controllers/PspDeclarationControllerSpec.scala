@@ -58,7 +58,9 @@ class PspDeclarationControllerSpec extends SpecBase with MockitoSugar {
 
     "must redirect to ConfirmationController when submission is successful" in {
       val mockReportSubmissionService = mock[ReportSubmissionService]
-      val response = IhtpReportSubmissionResponse(SuccessResponse(IhtResponse("formBundle", "paymentRef")))
+      val response = IhtpReportSubmissionResponse(
+        SuccessResponse(IhtResponse("formBundle", "paymentRef", testProcessingDate))
+      )
       when(mockReportSubmissionService.submitReport(any())(using any(), any()))
         .thenReturn(Future.successful(Right(response)))
 
