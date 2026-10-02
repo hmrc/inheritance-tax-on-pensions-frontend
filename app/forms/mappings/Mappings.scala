@@ -26,7 +26,7 @@ import java.time.LocalDate
 
 trait Mappings extends Formatters with Constraints with Regex {
 
-  private val reasonForNoNinoMaxLength = 160
+  private val reasonNoNinoMaxLength = 160
 
   protected def text(errorKey: String = "error.required", args: Seq[String] = Seq.empty): FieldMapping[String] =
     of(using stringFormatter(errorKey, args))
@@ -53,7 +53,7 @@ trait Mappings extends Formatters with Constraints with Regex {
       .verifying(maxLength(maximum, maxLengthKey))
       .verifying(regexp(regex, invalidKey))
 
-  protected def reasonForNoNino(
+  protected def reasonNoNino(
     requiredKey: String,
     invalidKey: String,
     maxLengthKey: String,
@@ -63,8 +63,8 @@ trait Mappings extends Formatters with Constraints with Regex {
       requiredKey = requiredKey,
       invalidKey = invalidKey,
       maxLengthKey = maxLengthKey,
-      regex = reasonForNoNinoRegex,
-      maximum = reasonForNoNinoMaxLength,
+      regex = reasonNoNinoRegex,
+      maximum = reasonNoNinoMaxLength,
       args = args
     )
 

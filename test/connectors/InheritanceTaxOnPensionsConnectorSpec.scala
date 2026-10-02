@@ -115,7 +115,8 @@ class InheritanceTaxOnPensionsConnectorSpec extends SpecBase {
         SuccessResponse(
           IhtResponse(
             formBundleNo = "bundle-1",
-            ihtPaymentReference = "payment-1"
+            ihtPaymentReference = "payment-1",
+            processingDate = testProcessingDate
           )
         )
       )
