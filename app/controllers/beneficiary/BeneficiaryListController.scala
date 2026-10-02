@@ -38,6 +38,7 @@ class BeneficiaryListController @Inject() (
   allowAccess: AllowAccessActionWithSessionCacheProvider,
   getData: DataRetrievalAction,
   requireData: DataRequiredAction,
+  beneficiaryAccess: BeneficiaryAccessAction,
   formProvider: BeneficiaryListFormProvider,
   val controllerComponents: MessagesControllerComponents,
   view: BeneficiaryListView
@@ -49,7 +50,8 @@ class BeneficiaryListController @Inject() (
     identify
       .andThen(allowAccess(srn))
       .andThen(getData)
-      .andThen(requireData) { implicit request =>
+      .andThen(requireData)
+      .andThen(beneficiaryAccess) { implicit request =>
         request.userAnswers
           .get(DidPrSubmitPage) match { // TODO: This check should be moved when Interest Payable Page in Added
           case Some(true) =>
@@ -70,7 +72,8 @@ class BeneficiaryListController @Inject() (
     identify
       .andThen(allowAccess(srn))
       .andThen(getData)
-      .andThen(requireData) { implicit request =>
+      .andThen(requireData)
+      .andThen(beneficiaryAccess) { implicit request =>
         beneficiariesAndItems(srn, request.userAnswers) match {
           case Right((beneficiaries, items)) =>
             form

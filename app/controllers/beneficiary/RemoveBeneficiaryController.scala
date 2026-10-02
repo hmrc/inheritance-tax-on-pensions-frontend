@@ -38,6 +38,7 @@ class RemoveBeneficiaryController @Inject() (
   allowAccess: AllowAccessActionWithSessionCacheProvider,
   getData: DataRetrievalAction,
   requireData: DataRequiredAction,
+  beneficiaryAccess: BeneficiaryAccessAction,
   formProvider: RemoveBeneficiaryFormProvider,
   val controllerComponents: MessagesControllerComponents,
   userAnswersService: UserAnswersService,
@@ -51,7 +52,8 @@ class RemoveBeneficiaryController @Inject() (
     identify
       .andThen(allowAccess(srn))
       .andThen(getData)
-      .andThen(requireData) { implicit request =>
+      .andThen(requireData)
+      .andThen(beneficiaryAccess) { implicit request =>
         BeneficiaryNameHelper.withName(request.userAnswers, index)(
           logAndJourneyRecovery("Beneficiary name is missing, cannot load the remove beneficiary page")
         ) { beneficiaryName =>
@@ -64,6 +66,7 @@ class RemoveBeneficiaryController @Inject() (
       .andThen(allowAccess(srn))
       .andThen(getData)
       .andThen(requireData)
+      .andThen(beneficiaryAccess)
       .async { implicit request =>
         BeneficiaryNameHelper.withName(request.userAnswers, index)(
           Future.successful(
