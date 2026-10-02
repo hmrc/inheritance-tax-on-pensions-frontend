@@ -16,12 +16,11 @@
 
 package controllers
 
-import services.{ReportRetrivalService, SubmissionListService}
+import services.{ReportRetrievalService, SubmissionListService}
 import utils.SubmissionListUtil
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import config.FrontendAppConfig
 import controllers.actions.{AllowAccessActionProvider, IdentifierAction}
-import play.api.Logging
 import views.html.SubmissionListView
 import models.SchemeId.Srn
 import play.api.i18n.I18nSupport
@@ -36,13 +35,12 @@ class SubmissionListController @Inject() (
   identify: IdentifierAction,
   allowAccess: AllowAccessActionProvider, // Invalidate the authorisation cache and re-authenticate
   submissionListService: SubmissionListService,
-  reportRetrivalService: ReportRetrivalService,
+  reportRetrievalService: ReportRetrievalService,
   appConfig: FrontendAppConfig,
   submissionListUtil: SubmissionListUtil,
   view: SubmissionListView
 )(implicit ec: ExecutionContext)
     extends FrontendBaseController
-    with Logging
     with I18nSupport {
 
   def onPageLoad(srn: Srn): Action[AnyContent] =
@@ -65,7 +63,6 @@ class SubmissionListController @Inject() (
     }
 
   def onAmend(srn: Srn, uuid: String): Action[AnyContent] =
-    logger.info(s"SubmissionListController.onAmend called with srn: $srn and uuid: $uuid")
     identify
       .andThen(allowAccess(srn)) { implicit request =>
         val updatedSession = if (request.session.get("uuid").contains(uuid)) {
@@ -78,11 +75,10 @@ class SubmissionListController @Inject() (
           .withSession(updatedSession)
       }
 
-  def onChange(srn: Srn, fbNumber: String): Action[AnyContent] = {
-    logger.info(s"SubmissionListController.onChange called with srn: $srn and fbNumber: $fbNumber")
+  def onChange(srn: Srn, ihtPaymentReference: String, ihtVersion: String): Action[AnyContent] =
     identify.andThen(allowAccess(srn)).async { implicit request =>
-      reportRetrivalService
-        .getReport(fbNumber)
+      reportRetrievalService
+        .getReport(ihtPaymentReference, ihtVersion)
         .map {
           case Right(response) =>
             val uuid = response.header("uuid").get
@@ -97,5 +93,4 @@ class SubmissionListController @Inject() (
           case Left(_) => Redirect(routes.JourneyRecoveryController.onPageLoad())
         }
     }
-  }
 }

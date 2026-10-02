@@ -62,7 +62,7 @@ class PaidReportsControllerSpec extends SpecBase {
 
   "Paid reports" - {
     Seq(true, false).foreach { isPsa =>
-      s"must show only paid reports for isPsa=$isPsa with a dummy search bar and no amendment navigation" in {
+      s"must show only paid reports for isPsa=$isPsa with a dummy search bar and change navigation" in {
         val application = builder(response(Seq(overviewReport, paidReport)), isPsa).build()
         running(application) {
           val result = route(application, FakeRequest(GET, routes.PaidReportsController.onPageLoad(srn).url)).value
@@ -76,7 +76,11 @@ class PaidReportsControllerSpec extends SpecBase {
           document.select("tbody tr").size() mustBe 1
           document.select("tbody td").first().text() mustBe "Paid"
           document.select("tbody th a").text() must include(paidReport.deceasedName)
-          document.select("tbody th a").attr("href") mustBe "#"
+          document
+            .select("tbody th a")
+            .attr(
+              "href"
+            ) mustBe s"/inheritance-tax-on-pensions/${srn.value}/report-inheritance-tax-on-pension/test-uuid"
           document.select("#find-report").size() mustBe 1
           document.select("label[for=find-report]").text() mustBe messages(application)(
             "submissionList.find.input.label"

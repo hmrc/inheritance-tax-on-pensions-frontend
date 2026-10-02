@@ -16,17 +16,20 @@
 
 package controllers
 
-import services.CountryService
+import services.{CountryService, ReportRetrievalService}
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import com.google.inject.Inject
+import pages.IHTPaymentReferencePage
 import utils.CheckYourAnswersHelper.{buildSummaryLists, findPageToContinue}
 import controllers.actions._
-import play.api.Logging
+import play.api.libs.json.JsObject
 import models.UserAnswers
 import views.html.CheckYourAnswersView
 import models.SchemeId.Srn
 import play.api.i18n.{I18nSupport, MessagesApi}
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
+
+import scala.concurrent.ExecutionContext
 
 class CheckYourAnswersController @Inject() (
   override val messagesApi: MessagesApi,
@@ -36,10 +39,11 @@ class CheckYourAnswersController @Inject() (
   requireData: DataRequiredAction,
   val controllerComponents: MessagesControllerComponents,
   view: CheckYourAnswersView,
-  countryService: CountryService
-) extends FrontendBaseController
-    with I18nSupport
-    with Logging {
+  countryService: CountryService,
+  reportRetrievalService: ReportRetrievalService
+)(implicit ec: ExecutionContext)
+    extends FrontendBaseController
+    with I18nSupport {
 
   def onPageLoad(srn: Srn): Action[AnyContent] =
     identify.andThen(allowAccess(srn)).andThen(getData).andThen(requireData) { implicit request =>
@@ -50,18 +54,25 @@ class CheckYourAnswersController @Inject() (
         case Some(value) =>
           Redirect(routes.CheckYourAnswersController.onPageLoadContinueMode(srn))
         case None =>
-          val checkYourAnswersSummaryLists =
-            buildSummaryLists(userAnswers, srn, countryService.nameForCode, messagesApi)
-          Ok(
-            view(
-              srn,
-              checkYourAnswersSummaryLists.deceasedDetailsSummaryList,
-              checkYourAnswersSummaryLists.prDetailsSummaryList,
-              checkYourAnswersSummaryLists.paymentNoticeDetailsSummaryList,
-              checkYourAnswersSummaryLists.beneficiaryList,
-              continuePage
-            )
-          )
+          userAnswers.get(IHTPaymentReferencePage) match {
+            case Some(value) =>
+              Redirect(routes.CheckYourAnswersController.onPageLoadChangeMode(srn))
+            case _ =>
+              val checkYourAnswersSummaryLists =
+                buildSummaryLists(userAnswers, srn, countryService.nameForCode, messagesApi)
+              Ok(
+                view(
+                  srn,
+                  checkYourAnswersSummaryLists.deceasedDetailsSummaryList,
+                  checkYourAnswersSummaryLists.prDetailsSummaryList,
+                  checkYourAnswersSummaryLists.paymentNoticeDetailsSummaryList,
+                  checkYourAnswersSummaryLists.beneficiaryList,
+                  continuePage,
+                  submitBlocked = false,
+                  None
+                )
+              )
+          }
       }
     }
 
@@ -78,9 +89,44 @@ class CheckYourAnswersController @Inject() (
           checkYourAnswersSummaryLists.prDetailsSummaryList,
           checkYourAnswersSummaryLists.paymentNoticeDetailsSummaryList,
           checkYourAnswersSummaryLists.beneficiaryList,
-          continuePage
+          continuePage,
+          submitBlocked = false,
+          None
         )
       )
+    }
+
+  def onPageLoadChangeMode(srn: Srn): Action[AnyContent] =
+    identify.andThen(allowAccess(srn)).andThen(getData).andThen(requireData).async { implicit request =>
+      val userAnswers: UserAnswers = request.userAnswers
+
+      reportRetrievalService
+        .getReport(
+          userAnswers.get(IHTPaymentReferencePage).getOrElse(""),
+          (userAnswers.data \ "ihtVersion").asOpt[String].getOrElse("")
+        )(using hc, request.request)
+        .map {
+          case Right(response) =>
+            if (userAnswers.data == (response.json \ "data").as[JsObject]) {
+              val checkYourAnswersSummaryLists =
+                buildSummaryLists(userAnswers, srn, countryService.nameForCode, messagesApi)
+              Ok(
+                view(
+                  srn,
+                  checkYourAnswersSummaryLists.deceasedDetailsSummaryList,
+                  checkYourAnswersSummaryLists.prDetailsSummaryList,
+                  checkYourAnswersSummaryLists.paymentNoticeDetailsSummaryList,
+                  checkYourAnswersSummaryLists.beneficiaryList,
+                  None,
+                  submitBlocked = true,
+                  Some(request.request.schemeDetails.schemeName)
+                )
+              )
+            } else {
+              Redirect(routes.CheckYourAnswersController.onPageLoadContinueMode(srn))
+            }
+          case Left(_) => Redirect(routes.JourneyRecoveryController.onPageLoad())
+        }
     }
 
   def onSubmit(srn: Srn): Action[AnyContent] =

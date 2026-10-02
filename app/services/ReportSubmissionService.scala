@@ -18,7 +18,6 @@ package services
 
 import com.google.inject.Inject
 import connectors.InheritanceTaxOnPensionsConnector
-import play.api.Logging
 import uk.gov.hmrc.http.{HeaderCarrier, UpstreamErrorResponse}
 import models.{IhtpReportSubmissionResponse, UserAnswers}
 import models.requests.AllowedAccessRequest
@@ -27,8 +26,7 @@ import scala.concurrent.Future
 
 class ReportSubmissionService @Inject() (
   inheritanceTaxOnPensionsConnector: InheritanceTaxOnPensionsConnector
-) extends BaseService
-    with Logging {
+) extends BaseService {
 
   def submitReport(
     userAnswers: UserAnswers

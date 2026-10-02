@@ -14,8 +14,7 @@
  * limitations under the License.
  *@
 
-@import components.PageHeading
-@import components.SubHeading
+@import components.{PageHeading, Paragraph, SubHeading, LinkWithVisitedState}
 @import models.SchemeId.Srn
 @import viewmodels.govuk.summarylist.FluentSummaryList
 
@@ -23,12 +22,14 @@
     layout: templates.Layout,
     formHelper: FormWithCSRF,
     pageHeading: PageHeading,
+    paragraph: Paragraph,
+    linkWithVisitedState: LinkWithVisitedState,
     subHeading: SubHeading,
     govukSummaryList: GovukSummaryList,
     govukButton: GovukButton
 )
 
-@(srn: Srn, deceasedDetailsSummaryList: SummaryList, prDetailsSummaryList: SummaryList, paymentNoticeDetailsSummaryList: SummaryList, beneficiaryList: List[SummaryList], continueRoute: Option[Call])(implicit request: Request[?], messages: Messages)
+@(srn: Srn, deceasedDetailsSummaryList: SummaryList, prDetailsSummaryList: SummaryList, paymentNoticeDetailsSummaryList: SummaryList, beneficiaryList: List[SummaryList], continueRoute: Option[Call], submitBlocked: Boolean, schemeName: Option[String])(implicit request: Request[?], messages: Messages)
 
 @layout(pageTitle = titleNoForm(messages( if (continueRoute.isDefined) "continueAddingDetails.title" else "checkYourAnswers.title"))) {
 
@@ -74,6 +75,7 @@
                     )
                 )
             </div>
+        } else if (submitBlocked) {
         } else {
             <div class="govuk-button-group">
                 @govukButton(
@@ -88,6 +90,17 @@
                     ).asSecondaryButton()
                 )
             </div>
+        }
+
+        @if(submitBlocked) {
+            @paragraph(
+                content = HtmlContent(HtmlFormat.fill(Seq(
+                linkWithVisitedState(
+                    id = "return-to-overview",
+                    text = messages("checkYourAnswers.returnToOverview", schemeName.getOrElse("")),
+                    href = routes.SubmissionListController.onPageLoad(srn).url
+                )
+            ))))
         }
     }
 

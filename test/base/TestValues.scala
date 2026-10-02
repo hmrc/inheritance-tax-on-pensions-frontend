@@ -20,7 +20,7 @@ import generators.Generators
 import play.api.libs.json.Json
 import models._
 
-import java.time.LocalDate
+import java.time.{Instant, LocalDate}
 
 trait TestValues extends Generators {
   val srn: SchemeId.Srn = srnGen.sample.get
@@ -32,6 +32,7 @@ trait TestValues extends Generators {
   val testDateOfBirth: LocalDate = LocalDate.of(1950, 1, 1)
   val testDateOfDeath: LocalDate = LocalDate.of(2020, 1, 1)
   val testPaymentNoticeDate: LocalDate = LocalDate.of(2026, 2, 2)
+  val testProcessingDate: Instant = Instant.parse("2026-08-31T09:26:17Z")
   val testIndex: Int = 0
   val testInvalidBeneficiaryIndexes: List[Int] = List(-1, 30)
   val testUuid = "test-uuid"
@@ -83,7 +84,7 @@ trait TestValues extends Generators {
             "surname" -> "name"
           ),
           "hasNino" -> false,
-          "reasonForNoNino" -> "no nino",
+          "reasonNoNino" -> "no nino",
           "birthDeathDates" -> Json.obj(
             "dateOfBirth" -> "1920-01-01",
             "dateOfDeath" -> "2026-01-01"

@@ -33,17 +33,17 @@
         case Some(u) => s"${controllers.routes.SubmissionListController.onAmend(srn, u).url}"
 }
 
-@changePageUrl(fbNumber: Option[String]) = @{
-    fbNumber match
-        case None => "#1"
-        case Some(u) => s"${controllers.routes.SubmissionListController.onChange(srn, u).url}"
+@changePageUrl(ihtPaymentReference: Option[String], ihtVersion: String) = @{
+    (ihtPaymentReference, ihtVersion) match
+        case (None, _) => "#"
+        case (Some(ref), version) => s"${controllers.routes.SubmissionListController.onChange(srn, ref, version).url}"
 }
 
 @reportLink(report: IhtpOverviewReport) = @{
     HtmlContent(linkWithHiddenText(
         id                    = s"deceased-name-${report.fbNumber}",
         text                  = report.deceasedName,
-        href                  = if(report.ihtpStatus == "Not reconciled") changePageUrl(report.fbNumber) else amendPageUrl(report.uuid),
+        href                  = if(report.ihtpStatus == "Not reconciled") changePageUrl(report.paymentReference, report.ihtVersion) else amendPageUrl(report.uuid),
         visuallyHiddenContent = s" ${messages("submissionList.table.deceasedName.hidden")}"
     ).toString)
 }
