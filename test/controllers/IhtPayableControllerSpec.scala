@@ -43,7 +43,8 @@ class IhtPayableControllerSpec extends SpecBase {
             val result = route(app, FakeRequest(GET, routes.IhtPayableController.onPageLoad(srn, mode).url)).value
             status(result) mustBe OK
             val doc = Jsoup.parse(contentAsString(result))
-            doc.select("h1").text mustBe "Enter the amount of Inheritance Tax payable"
+            messages(app).isDefinedAt("ihtPayable.heading") mustBe true
+            doc.select("h1").text mustBe messages(app)("ihtPayable.heading")
             doc.select("label.govuk-label--l").size mustBe 1
             doc.select("label.govuk-label--xl").size mustBe 0
             doc.select(".govuk-input__prefix").text mustBe "\u00a3"
@@ -88,9 +89,9 @@ class IhtPayableControllerSpec extends SpecBase {
       }
     }
 
-    Seq("" -> "Enter the Inheritance Tax payable amount", "10%" -> "Enter a valid Inheritance Tax payable amount")
-      .foreach { case (input, error) =>
-        s"must show $error without saving" in {
+    Seq("" -> "ihtPayable.error.required", "10%" -> "ihtPayable.error.invalid")
+      .foreach { case (input, errorKey) =>
+        s"must show $errorKey without saving" in {
           val service = mock[UserAnswersService]
           val app = applicationBuilder(Some(answers), usesSession = true)
             .overrides(bind[UserAnswersService].toInstance(service))
@@ -103,7 +104,8 @@ class IhtPayableControllerSpec extends SpecBase {
             ).value
             status(result) mustBe BAD_REQUEST
             val doc = Jsoup.parse(contentAsString(result))
-            doc.select(".govuk-error-summary a").text mustBe error
+            messages(app).isDefinedAt(errorKey) mustBe true
+            doc.select(".govuk-error-summary a").text mustBe messages(app)(errorKey)
             doc.select(".govuk-error-summary a").attr("href") mustBe "#value"
             doc.select("input#value").attr("value") mustBe input
             verifyNoInteractions(service)
