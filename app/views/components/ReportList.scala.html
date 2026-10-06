@@ -85,9 +85,7 @@
         @govukPagination(submissionListUtil.buildPagination(srn, paid, pagination))
     }
 } else {
-    @if(paid) {
-        @subHeading(messages("paidReports.caption"))
-    }
+    @subHeading(messages(if(paid) "paidReports.caption" else "submissionList.activeReports.caption"))
     @paragraph(messages(if(paid) "paidReports.noReports" else "submissionList.noReports"))
     @sectionBreak("govuk-section-break--l govuk-section-break--visible")
 }
