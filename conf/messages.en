@@ -388,12 +388,12 @@ beneficiaryHasNino.checkYourAnswersLabel = Does the beneficiary have a National 
 beneficiaryHasNino.change.hidden = if the beneficiary has a National Insurance number
 beneficiaryHasNino.error.required = Select if the beneficiary has a National Insurance number
 
-nino.title = Enter the National Insurance number of the deceased
-nino.heading = Enter the National Insurance number of {0}
+nino.title = Enter the National Insurance number for the deceased
+nino.heading = Enter the National Insurance number for {0}
 nino.hint = For example, QQ 12 34 56 C
 nino.error.required = Enter the National Insurance number
 nino.error.invalid = Enter the National Insurance number in the correct format
-nino.change.hidden = the National Insurance number of the deceased
+nino.change.hidden = the National Insurance number for the deceased
 nino.checkYourAnswersLabel = National Insurance number
 
 noNinoReason.title = Why does the deceased not have a National Insurance number?
