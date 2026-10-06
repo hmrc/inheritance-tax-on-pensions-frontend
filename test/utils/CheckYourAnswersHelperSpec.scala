@@ -16,7 +16,7 @@
 
 package utils
 
-import models.JourneyRole.{BeneficiaryIndividual, Deceased, PrIndividual, PrOrganisation}
+import models.JourneyRole._
 import org.scalatest.freespec.AnyFreeSpec
 import pages._
 import controllers.routes

@@ -16,31 +16,30 @@
 
 package controllers
 
-import play.api.test.Helpers.*
-import pages.*
+import services.ReportRetrievalService
+import pages._
 import viewmodels.CheckAnswers.beneficiary.{BeneficiaryHasNinoSummary, BeneficiaryTypeSummary}
+import play.api.inject.bind
 import views.html.CheckYourAnswersView
 import uk.gov.hmrc.govukfrontend.views.viewmodels.summarylist.{Actions, SummaryList}
 import viewmodels.govuk.all.{ActionItemViewModel, CardViewModel, SummaryListViewModel}
-import play.api.libs.json.Json
-import models.*
-import viewmodels.CheckAnswers.{DidPrSubmitSummary, *}
+import play.api.libs.json.{Json, JsPath}
+import models._
+import viewmodels.CheckAnswers.{DidPrSubmitSummary, _}
+import org.mockito.ArgumentMatchers.any
 import models.JourneyRole.{BeneficiaryIndividual, Deceased, PrIndividual}
 import play.api.test.FakeRequest
+import play.api.test.Helpers._
+import org.mockito.Mockito.when
 import uk.gov.hmrc.govukfrontend.views.Aliases.Text
 import base.SpecBase
 import models.beneficiary.BeneficiaryType
-import services.ReportRetrievalService
-import org.mockito.Mockito.when
-import org.mockito.ArgumentMatchers.any
-
-import scala.jdk.CollectionConverters.*
-import java.time.LocalDate
-import play.api.libs.json.JsPath
-import play.api.inject.bind
 import uk.gov.hmrc.http.HttpResponse
 
+import scala.jdk.CollectionConverters._
 import scala.concurrent.Future
+
+import java.time.LocalDate
 
 class CheckYourAnswersControllerSpec extends SpecBase {
 

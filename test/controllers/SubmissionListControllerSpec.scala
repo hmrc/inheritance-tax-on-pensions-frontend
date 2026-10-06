@@ -22,13 +22,12 @@ import connectors.InheritanceTaxOnPensionsConnector
 import play.api.inject.bind
 import views.html.SubmissionListView
 import base.SpecBase
-import uk.gov.hmrc.http.UpstreamErrorResponse
+import uk.gov.hmrc.http.{HttpResponse, UpstreamErrorResponse}
 import models._
 import viewmodels.SubmissionListPagination
 import org.mockito.ArgumentMatchers.any
 import play.api.test.Helpers._
 import org.mockito.Mockito.when
-import uk.gov.hmrc.http.HttpResponse
 
 import scala.concurrent.Future
 
@@ -88,7 +87,11 @@ class SubmissionListControllerSpec extends SpecBase {
           document.select("#view-reconciled-reports").attr("href") mustBe routes.PaidReportsController
             .onPageLoad(srn)
             .url
-          if (onlyPaid) document.text() must include("There are no active reports.")
+          if (onlyPaid) {
+            document.select("h2").eachText() must contain("Active reports")
+            document.text() must include("This scheme does not currently have any active reports.")
+            document.select("table.govuk-table").size() mustBe 0
+          }
         }
       }
     }
@@ -191,6 +194,11 @@ class SubmissionListControllerSpec extends SpecBase {
         val view = application.injector.instanceOf[SubmissionListView]
 
         status(result) mustEqual OK
+
+        val document = org.jsoup.Jsoup.parse(contentAsString(result))
+        document.select("h2").eachText() must contain("Active reports")
+        document.text() must include("This scheme does not currently have any active reports.")
+        document.select("table.govuk-table").size() mustBe 0
 
         contentAsString(result) mustEqual view(
           srn,

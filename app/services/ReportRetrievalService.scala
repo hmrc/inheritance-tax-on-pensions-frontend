@@ -17,7 +17,6 @@
 package services
 
 import connectors.InheritanceTaxOnPensionsConnector
-import config.FrontendAppConfig
 import uk.gov.hmrc.http.{HeaderCarrier, UpstreamErrorResponse, _}
 import models.requests.AllowedAccessRequest
 
@@ -26,8 +25,7 @@ import scala.concurrent.Future
 import javax.inject.Inject
 
 class ReportRetrievalService @Inject() (
-  inheritanceTaxOnPensionsConnector: InheritanceTaxOnPensionsConnector,
-  appConfig: FrontendAppConfig
+  inheritanceTaxOnPensionsConnector: InheritanceTaxOnPensionsConnector
 ) extends BaseService {
 
   def getReport(ihtPaymentReference: String, ihtVersion: String)(implicit
