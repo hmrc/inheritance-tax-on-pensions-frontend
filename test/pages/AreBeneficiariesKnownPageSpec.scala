@@ -16,11 +16,12 @@
 
 package pages
 
-import org.scalatest.freespec.AnyFreeSpec
-import org.scalatest.matchers.must.Matchers
+import base.SpecBase
 import play.api.libs.json.JsPath
+import models.beneficiary.BeneficiaryType
+import pages.beneficiary.BeneficiaryTypePage
 
-class AreBeneficiariesKnownPageSpec extends AnyFreeSpec with Matchers {
+class AreBeneficiariesKnownPageSpec extends SpecBase {
 
   "AreBeneficiariesKnownPage" - {
 
@@ -30,6 +31,40 @@ class AreBeneficiariesKnownPageSpec extends AnyFreeSpec with Matchers {
 
     "must use the expected key" in {
       AreBeneficiariesKnownPage.toString mustEqual "areBeneficiariesKnown"
+    }
+
+    "must remove all beneficiaries when Yes changes to No and preserve unrelated answers" in {
+      val userAnswers = emptyUserAnswers
+        .set(AreBeneficiariesKnownPage, true)
+        .success
+        .value
+        .set(IhtPayablePage, BigDecimal(100))
+        .success
+        .value
+        .set(DidPrSubmitPage, true)
+        .success
+        .value
+        .set(BeneficiaryTypePage(0), BeneficiaryType.Individual)
+        .success
+        .value
+        .set(BeneficiaryTypePage(1), BeneficiaryType.Trust)
+        .success
+        .value
+
+      val result = userAnswers.set(AreBeneficiariesKnownPage, false).success.value
+
+      result mustEqual userAnswers.copy(
+        data = (userAnswers.data - "beneficiaries") ++
+          play.api.libs.json.Json.obj("areBeneficiariesKnown" -> false)
+      )
+      (result.set(AreBeneficiariesKnownPage, true).success.value.data \ "beneficiaries").isDefined mustBe false
+    }
+
+    "must allow No to be saved when there are no beneficiaries" in {
+      val result = emptyUserAnswers.set(AreBeneficiariesKnownPage, false).success.value
+
+      result.get(AreBeneficiariesKnownPage) mustBe Some(false)
+      (result.data \ "beneficiaries").isDefined mustBe false
     }
   }
 }

@@ -38,6 +38,7 @@ class BeneficiaryHasNinoController @Inject() (
   allowAccess: AllowAccessActionWithSessionCacheProvider,
   getData: DataRetrievalAction,
   requireData: DataRequiredAction,
+  beneficiaryAccess: BeneficiaryAccessAction,
   formProvider: BeneficiaryHasNinoFormProvider,
   val controllerComponents: MessagesControllerComponents,
   userAnswersService: UserAnswersService,
@@ -51,7 +52,8 @@ class BeneficiaryHasNinoController @Inject() (
     identify
       .andThen(allowAccess(srn))
       .andThen(getData)
-      .andThen(requireData) { implicit request =>
+      .andThen(requireData)
+      .andThen(beneficiaryAccess) { implicit request =>
         BeneficiaryNameHelper.withName(request.userAnswers, index)(
           logAndJourneyRecovery("Beneficiary name is missing, cannot load the beneficiary NINO page")
         ) { beneficiaryName =>
@@ -69,6 +71,7 @@ class BeneficiaryHasNinoController @Inject() (
       .andThen(allowAccess(srn))
       .andThen(getData)
       .andThen(requireData)
+      .andThen(beneficiaryAccess)
       .async { implicit request =>
         BeneficiaryNameHelper.withName(request.userAnswers, index) {
           Future.successful(

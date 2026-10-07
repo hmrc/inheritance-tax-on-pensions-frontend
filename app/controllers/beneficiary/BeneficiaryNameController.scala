@@ -38,6 +38,7 @@ class BeneficiaryNameController @Inject() (
   allowAccess: AllowAccessActionWithSessionCacheProvider,
   getData: DataRetrievalAction,
   requireData: DataRequiredAction,
+  beneficiaryAccess: BeneficiaryAccessAction,
   formProvider: BeneficiaryNameFormProvider,
   val controllerComponents: MessagesControllerComponents,
   userAnswersService: UserAnswersService,
@@ -49,7 +50,8 @@ class BeneficiaryNameController @Inject() (
     identify
       .andThen(allowAccess(srn))
       .andThen(getData)
-      .andThen(requireData) { implicit request =>
+      .andThen(requireData)
+      .andThen(beneficiaryAccess) { implicit request =>
         journeyRole match {
           case JourneyRole.Unknown =>
             logAndJourneyRecovery("unknown journeyRole, cannot load the page")
@@ -70,6 +72,7 @@ class BeneficiaryNameController @Inject() (
       .andThen(allowAccess(srn))
       .andThen(getData)
       .andThen(requireData)
+      .andThen(beneficiaryAccess)
       .async { implicit request =>
         journeyRole match {
           case JourneyRole.Unknown =>

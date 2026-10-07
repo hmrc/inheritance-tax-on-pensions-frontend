@@ -37,6 +37,7 @@ class BeneficiaryTrustNameController @Inject() (
   allowAccess: AllowAccessActionWithSessionCacheProvider,
   getData: DataRetrievalAction,
   requireData: DataRequiredAction,
+  beneficiaryAccess: BeneficiaryAccessAction,
   formProvider: BeneficiaryTrustNameFormProvider,
   val controllerComponents: MessagesControllerComponents,
   userAnswersService: UserAnswersService,
@@ -50,7 +51,8 @@ class BeneficiaryTrustNameController @Inject() (
     identify
       .andThen(allowAccess(srn))
       .andThen(getData)
-      .andThen(requireData) { implicit request =>
+      .andThen(requireData)
+      .andThen(beneficiaryAccess) { implicit request =>
         val preparedForm = request.userAnswers.get(BeneficiaryTrustNamePage(index)) match {
           case Some(name) => form.fill(name)
           case None => form
@@ -64,6 +66,7 @@ class BeneficiaryTrustNameController @Inject() (
       .andThen(allowAccess(srn))
       .andThen(getData)
       .andThen(requireData)
+      .andThen(beneficiaryAccess)
       .async { implicit request =>
         form
           .bindFromRequest()

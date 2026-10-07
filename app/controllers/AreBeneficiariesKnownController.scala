@@ -17,11 +17,12 @@
 package controllers
 
 import services.UserAnswersService
+import utils.CheckYourAnswersHelper
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import pages.{AreBeneficiariesKnownPage, DidPrSubmitPage}
 import controllers.actions._
 import forms.AreBeneficiariesKnownFormProvider
-import models.{CheckMode, Mode, NormalMode}
+import models._
 import play.api.i18n.MessagesApi
 import views.html.AreBeneficiariesKnownView
 import models.SchemeId.Srn
@@ -78,7 +79,7 @@ class AreBeneficiariesKnownController @Inject() (
                   for {
                     updatedAnswers <- Future.fromTry(request.userAnswers.set(AreBeneficiariesKnownPage, value))
                     _ <- userAnswersService.set(updatedAnswers)(using hc, request.request)
-                  } yield Redirect(nextPage(srn, mode, value))
+                  } yield Redirect(nextPage(srn, mode, value, updatedAnswers))
               )
           case None =>
             Future.successful(
@@ -87,13 +88,16 @@ class AreBeneficiariesKnownController @Inject() (
         }
       }
 
-  private def nextPage(srn: Srn, mode: Mode, value: Boolean) =
+  private def nextPage(srn: Srn, mode: Mode, value: Boolean, userAnswers: UserAnswers) =
     if (!value) {
       routes.IhtPayableController.onPageLoad(srn, mode)
     } else {
       mode match {
         case NormalMode => controllers.beneficiary.routes.BeneficiaryTypeController.onPageLoad(srn, 0, NormalMode)
-        case CheckMode => routes.CheckYourAnswersController.onPageLoad(srn)
+        case CheckMode =>
+          CheckYourAnswersHelper
+            .findBeneficiaryPageToContinue(userAnswers, srn)
+            .getOrElse(routes.CheckYourAnswersController.onPageLoad(srn))
       }
     }
 }

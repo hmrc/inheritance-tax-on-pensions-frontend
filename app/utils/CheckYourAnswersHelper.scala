@@ -137,6 +137,11 @@ object CheckYourAnswersHelper {
     found
   }
 
+  def findBeneficiaryPageToContinue(userAnswers: UserAnswers, srn: Srn): Option[Call] =
+    getBeneficiariesPages(userAnswers, srn)
+      .find(_.isUnanswered(userAnswers))
+      .map(_.call)
+
   private def getDeceasedPages(srn: Srn) =
     Seq(
       ContinuationPage(
@@ -203,12 +208,6 @@ object CheckYourAnswersHelper {
       ContinuationPage(
         answers => answers.get(PaymentNoticeDatePage).isEmpty,
         routes.PaymentNoticeDateController.onPageLoad(srn, NormalMode)
-      ),
-      ContinuationPage(
-        answers =>
-          answers.get(AreBeneficiariesKnownPage).getOrElse(false) &&
-            answers.get(pages.beneficiary.BeneficiaryTypePage(0)).isEmpty,
-        controllers.beneficiary.routes.BeneficiaryTypeController.onPageLoad(srn, 0, NormalMode)
       )
     )
 
@@ -238,6 +237,13 @@ object CheckYourAnswersHelper {
     val numberOfBeneficiaries =
       answers.get(pages.beneficiary.BeneficiariesPage()).map(_.beneficiaries.size).getOrElse(0)
 
-    (0 until numberOfBeneficiaries).flatMap(i => getBeneficiaryPages(srn, i))
+    Seq(
+      ContinuationPage(
+        userAnswers =>
+          userAnswers.get(AreBeneficiariesKnownPage).contains(true) &&
+            userAnswers.get(pages.beneficiary.BeneficiaryTypePage(0)).isEmpty,
+        controllers.beneficiary.routes.BeneficiaryTypeController.onPageLoad(srn, 0, NormalMode)
+      )
+    ) ++ (0 until numberOfBeneficiaries).flatMap(i => getBeneficiaryPages(srn, i))
   }
 }
