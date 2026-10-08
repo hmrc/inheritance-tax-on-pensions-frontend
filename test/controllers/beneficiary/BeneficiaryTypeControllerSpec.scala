@@ -18,6 +18,7 @@ package controllers.beneficiary
 
 import play.api.test.FakeRequest
 import connectors.InheritanceTaxOnPensionsConnector
+import pages.AreBeneficiariesKnownPage
 import play.api.inject.bind
 import views.html.beneficiary.BeneficiaryTypeView
 import base.SpecBase
@@ -44,7 +45,8 @@ class BeneficiaryTypeControllerSpec extends SpecBase {
 
     "must return OK and the correct view for a GET" in {
 
-      val application = applicationBuilder(userAnswers = Some(emptyUserAnswers), usesSession = true).build()
+      val userAnswers = emptyUserAnswers.set(AreBeneficiariesKnownPage, true).success.value
+      val application = applicationBuilder(userAnswers = Some(userAnswers), usesSession = true).build()
 
       running(application) {
         val request = FakeRequest(GET, beneficiaryTypeRoute)

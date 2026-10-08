@@ -40,6 +40,7 @@ class BeneficiaryTypeController @Inject() (
   allowAccess: AllowAccessActionWithSessionCacheProvider,
   getData: DataRetrievalAction,
   requireData: DataRequiredAction,
+  beneficiaryAccess: BeneficiaryAccessAction,
   formProvider: BeneficiaryTypeFormProvider,
   val controllerComponents: MessagesControllerComponents,
   userAnswersService: UserAnswersService,
@@ -53,7 +54,8 @@ class BeneficiaryTypeController @Inject() (
     identify
       .andThen(allowAccess(srn))
       .andThen(getData)
-      .andThen(requireData) { implicit request =>
+      .andThen(requireData)
+      .andThen(beneficiaryAccess) { implicit request =>
         val preparedForm: Form[BeneficiaryType] = request.userAnswers.get(BeneficiaryTypePage(index)) match {
           case None => form
           case Some(beneficiaryType) => form.fill(beneficiaryType)
@@ -67,6 +69,7 @@ class BeneficiaryTypeController @Inject() (
       .andThen(allowAccess(srn))
       .andThen(getData)
       .andThen(requireData)
+      .andThen(beneficiaryAccess)
       .async { implicit request =>
         form
           .bindFromRequest()
