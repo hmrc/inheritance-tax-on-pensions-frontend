@@ -121,4 +121,6 @@ class FrontendAppConfig @Inject() (configuration: Configuration) {
   private val inheritanceTaxOnPensionsHost: String =
     configuration.get[Service]("microservice.services.inheritanceTaxOnPensions").baseUrl
 
+  def getReportUrl(pstr: String, ihtPaymentReference: String, ihtVersion: String): String =
+    s"$inheritanceTaxOnPensionsHost/inheritance-tax-on-pensions/ihtp/?pstr=$pstr&ihtPaymentReference=$ihtPaymentReference&versionNumber=$ihtVersion"
 }

@@ -16,7 +16,7 @@
 
 package utils
 
-import models.JourneyRole.{Deceased, PrIndividual, PrOrganisation}
+import models.JourneyRole._
 import org.scalatest.freespec.AnyFreeSpec
 import pages._
 import controllers.routes
@@ -176,6 +176,21 @@ class CheckYourAnswersHelperSpec extends AnyFreeSpec with SpecBase {
       CheckYourAnswersHelper.findPageToContinue(userAnswers, srn).value.url must endWith(
         controllers.beneficiary.routes.BeneficiaryNameController.onPageLoad(srn, NormalMode, 0).url
       )
+    }
+
+    "must return the None if no values are missing" in {
+      val userAnswers = prIndividualUserAnswers
+        .set(pages.beneficiary.BeneficiaryTypePage(0), BeneficiaryType.Individual)
+        .get
+        .set(
+          pages.beneficiary.BeneficiaryNamePage(0, BeneficiaryIndividual),
+          IndividualName(Some("Mr"), "John", Some("James"), "Doe")
+        )
+        .get
+        .set(pages.beneficiary.BeneficiaryHasNinoPage(0), true)
+        .get
+
+      CheckYourAnswersHelper.findPageToContinue(userAnswers, srn) mustBe None
     }
   }
 }

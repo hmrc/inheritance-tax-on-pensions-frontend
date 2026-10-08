@@ -22,7 +22,7 @@ import connectors.InheritanceTaxOnPensionsConnector
 import play.api.inject.bind
 import views.html.SubmissionListView
 import base.SpecBase
-import uk.gov.hmrc.http.UpstreamErrorResponse
+import uk.gov.hmrc.http.{HttpResponse, UpstreamErrorResponse}
 import models._
 import viewmodels.SubmissionListPagination
 import org.mockito.ArgumentMatchers.any
@@ -36,6 +36,7 @@ import java.time.{Instant, LocalDate}
 class SubmissionListControllerSpec extends SpecBase {
   lazy val onPageLoadUrl: String = routes.SubmissionListController.onPageLoad(srn).url
   lazy val onAmendUrl: String = routes.SubmissionListController.onAmend(srn, testUuid).url
+  lazy val onChangeUrl: String = routes.SubmissionListController.onChange(srn, "ihtPaymentReference", "ihtVersion").url
 
   private val overviewReport = IhtpOverviewReport(
     uuid = None,
@@ -268,6 +269,34 @@ class SubmissionListControllerSpec extends SpecBase {
 
       running(application) {
         val postRequest = FakeRequest(GET, onAmendUrl)
+          .withFormUrlEncodedBody()
+
+        val result = route(application, postRequest).value
+
+        status(result) mustEqual SEE_OTHER
+        redirectLocation(result).value mustEqual controllers.routes.CheckYourAnswersController
+          .onPageLoad(srn)
+          .url
+      }
+    }
+  }
+
+  "onChange" - {
+    "must redirect to the right page on change" in {
+      val mockInheritanceTaxOnPensionsConnector = mock[InheritanceTaxOnPensionsConnector]
+      when(
+        mockInheritanceTaxOnPensionsConnector.getReport(any(), any(), any(), any(), any(), any(), any())(using any())
+      )
+        .thenReturn(Future.successful(Right(HttpResponse(OK, headers = Map("uuid" -> Seq(testUuid))))))
+
+      val application = applicationBuilder(userAnswers = Some(emptyUserAnswers))
+        .overrides(
+          bind[InheritanceTaxOnPensionsConnector].toInstance(mockInheritanceTaxOnPensionsConnector)
+        )
+        .build()
+
+      running(application) {
+        val postRequest = FakeRequest(GET, onChangeUrl)
           .withFormUrlEncodedBody()
 
         val result = route(application, postRequest).value

@@ -16,31 +16,29 @@
 
 package services
 
-import com.google.inject.Inject
 import connectors.InheritanceTaxOnPensionsConnector
-import uk.gov.hmrc.http.{HeaderCarrier, UpstreamErrorResponse}
-import models.{IhtpReportSubmissionResponse, UserAnswers}
+import uk.gov.hmrc.http.{HeaderCarrier, UpstreamErrorResponse, _}
 import models.requests.AllowedAccessRequest
 
 import scala.concurrent.Future
 
-class ReportSubmissionService @Inject() (
+import javax.inject.Inject
+
+class ReportRetrievalService @Inject() (
   inheritanceTaxOnPensionsConnector: InheritanceTaxOnPensionsConnector
 ) extends BaseService {
 
-  def submitReport(
-    userAnswers: UserAnswers
-  )(implicit
+  def getReport(ihtPaymentReference: String, ihtVersion: String)(implicit
     hc: HeaderCarrier,
     request: AllowedAccessRequest[?]
-  ): Future[Either[UpstreamErrorResponse, IhtpReportSubmissionResponse]] =
-    inheritanceTaxOnPensionsConnector
-      .submitReport(
-        request.schemeDetails.pstr,
-        userAnswers.id,
-        schemeAdministratorOrPractitionerName,
-        schemeName,
-        srnVal,
-        role
-      )
+  ): Future[Either[UpstreamErrorResponse, HttpResponse]] =
+    inheritanceTaxOnPensionsConnector.getReport(
+      request.schemeDetails.pstr,
+      ihtPaymentReference,
+      ihtVersion,
+      schemeAdministratorOrPractitionerName,
+      schemeName,
+      srnVal,
+      role
+    )
 }

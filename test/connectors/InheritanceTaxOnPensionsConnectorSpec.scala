@@ -239,6 +239,78 @@ class InheritanceTaxOnPensionsConnectorSpec extends SpecBase {
     }
   }
 
+  "getReport" - {
+
+    "must successfully get a report" in new SetUp {
+      val pstr = "12345678"
+      val ihtPaymentReference = "paymentRef"
+      val ihtVersion = "version"
+      val expectedResponse = IhtpOverviewResponse(IhtpOverviewSuccess(Seq.empty))
+      val mockUrl =
+        s"http://inheritance-tax-on-pensions/ihtp/?pstr=$pstr&ihtPaymentReference=$ihtPaymentReference&versionNumber=$ihtVersion"
+
+      when(mockConfig.getReportUrl(eqTo(pstr), eqTo(ihtPaymentReference), eqTo(ihtVersion))).thenReturn(mockUrl)
+
+      when(requestBuilder.execute[Either[UpstreamErrorResponse, IhtpOverviewResponse]](using any(), any()))
+        .thenReturn(Future.successful(Right(expectedResponse)))
+
+      when(requestBuilder.transform(any()))
+        .thenReturn(requestBuilder)
+
+      when(connector.httpClient.get(any())(using any())).thenReturn(requestBuilder)
+
+      whenReady(
+        connector.getReport(
+          pstr,
+          ihtPaymentReference,
+          ihtVersion,
+          schemeAdministratorOrPractitionerName,
+          schemeName,
+          srnVal,
+          role
+        )
+      ) {
+        _ mustBe Right(expectedResponse)
+      }
+
+      verify(connector.httpClient).get(eqTo(url"$mockUrl"))(using any())
+      verify(requestBuilder).transform(any())
+    }
+
+    "must return error when getting the submission list fails" in new SetUp {
+      val pstr = "12345678"
+      val ihtPaymentReference = "paymentRef"
+      val ihtVersion = "version"
+      val errorResponse = UpstreamErrorResponse("Retrieval failed", INTERNAL_SERVER_ERROR)
+      val mockUrl =
+        s"http://inheritance-tax-on-pensions/ihtp/?pstr=$pstr&ihtPaymentReference=$ihtPaymentReference&versionNumber=$ihtVersion"
+
+      when(mockConfig.getReportUrl(eqTo(pstr), eqTo(ihtPaymentReference), eqTo(ihtVersion))).thenReturn(mockUrl)
+
+      when(requestBuilder.execute[Either[UpstreamErrorResponse, IhtpOverviewResponse]](using any(), any()))
+        .thenReturn(Future.successful(Left(errorResponse)))
+
+      when(requestBuilder.transform(any()))
+        .thenReturn(requestBuilder)
+
+      when(connector.httpClient.get(any())(using any())).thenReturn(requestBuilder)
+
+      whenReady(
+        connector.getReport(
+          pstr,
+          ihtPaymentReference,
+          ihtVersion,
+          schemeAdministratorOrPractitionerName,
+          schemeName,
+          srnVal,
+          role
+        )
+      ) {
+        _ mustBe Left(errorResponse)
+      }
+    }
+  }
+
   class SetUp {
 
     val id = "some_id"

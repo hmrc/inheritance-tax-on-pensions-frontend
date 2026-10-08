@@ -19,6 +19,7 @@ GET         /unauthorised                                controllers.Unauthorise
 GET         /:srn/report-inheritance-tax-on-pension       controllers.SubmissionListController.onPageLoad(srn: Srn)
 GET         /:srn/paid-reports                            controllers.PaidReportsController.onPageLoad(srn: Srn)
 GET         /:srn/report-inheritance-tax-on-pension/:uuid controllers.SubmissionListController.onAmend(srn: Srn, uuid: String)
+GET         /:srn/report-inheritance-tax-on-pension/change/:ihtPaymentReference/:ihtVersion controllers.SubmissionListController.onChange(srn: Srn, ihtPaymentReference: String, ihtVersion: String)
 
 GET         /:srn/start-report-you-will-need             controllers.WhatYouWillNeedController.onPageLoad(srn: Srn)
 POST        /:srn/start-report-you-will-need             controllers.WhatYouWillNeedController.onSubmit(srn: Srn)
@@ -79,6 +80,7 @@ POST        /:srn/change-scheme-receive-payment-notice   controllers.PaymentNoti
 
 GET         /:srn/check-your-answers                     controllers.CheckYourAnswersController.onPageLoad(srn: Srn)
 GET         /:srn/continue-adding-details                controllers.CheckYourAnswersController.onPageLoadContinueMode(srn: Srn)
+GET         /:srn/view-change-submitted-report           controllers.CheckYourAnswersController.onPageLoadChangeMode(srn: Srn)
 POST        /:srn/check-your-answers                     controllers.CheckYourAnswersController.onSubmit(srn: Srn)
 
 GET         /:srn/psa-declaration                        controllers.PsaDeclarationController.onPageLoad(srn: Srn)

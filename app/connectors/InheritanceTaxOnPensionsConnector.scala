@@ -116,4 +116,25 @@ class InheritanceTaxOnPensionsConnector @Inject() (
         )
       )
       .execute[Either[UpstreamErrorResponse, IhtpOverviewResponse]]
+
+  def getReport(
+    pstr: String,
+    ihtPaymentReference: String,
+    ihtVersion: String,
+    schemeAdministratorOrPractitionerName: String,
+    schemeName: String,
+    srnVal: String,
+    role: String
+  )(implicit hc: HeaderCarrier): Future[Either[UpstreamErrorResponse, HttpResponse]] =
+    httpClient
+      .get(url"${config.getReportUrl(pstr, ihtPaymentReference, ihtVersion)}")
+      .transform(
+        _.addHttpHeaders(
+          SRN_HEADER -> srnVal,
+          USERNAME_HEADER -> schemeAdministratorOrPractitionerName,
+          SCHEME_NAME_HEADER -> schemeName,
+          ROLE_HEADER -> role
+        )
+      )
+      .execute[Either[UpstreamErrorResponse, HttpResponse]]
 }

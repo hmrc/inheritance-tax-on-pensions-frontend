@@ -16,7 +16,7 @@
 
 package controllers
 
-import services.SubmissionListService
+import services.{ReportRetrievalService, SubmissionListService}
 import utils.SubmissionListUtil
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import config.FrontendAppConfig
@@ -35,6 +35,7 @@ class SubmissionListController @Inject() (
   identify: IdentifierAction,
   allowAccess: AllowAccessActionProvider, // Invalidate the authorisation cache and re-authenticate
   submissionListService: SubmissionListService,
+  reportRetrievalService: ReportRetrievalService,
   appConfig: FrontendAppConfig,
   submissionListUtil: SubmissionListUtil,
   view: SubmissionListView
@@ -74,4 +75,22 @@ class SubmissionListController @Inject() (
           .withSession(updatedSession)
       }
 
+  def onChange(srn: Srn, ihtPaymentReference: String, ihtVersion: String): Action[AnyContent] =
+    identify.andThen(allowAccess(srn)).async { implicit request =>
+      reportRetrievalService
+        .getReport(ihtPaymentReference, ihtVersion)
+        .map {
+          case Right(response) =>
+            val uuid = response.header("uuid").get
+            val updatedSession = if (request.session.get("uuid").contains(uuid)) {
+              request.session
+            } else {
+              request.session + ("uuid" -> uuid)
+            }
+
+            Redirect(controllers.routes.CheckYourAnswersController.onPageLoad(srn))
+              .withSession(updatedSession)
+          case Left(_) => Redirect(routes.JourneyRecoveryController.onPageLoad())
+        }
+    }
 }

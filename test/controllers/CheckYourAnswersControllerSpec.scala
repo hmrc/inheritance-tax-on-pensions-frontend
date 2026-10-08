@@ -16,21 +16,28 @@
 
 package controllers
 
-import play.api.test.Helpers._
+import services.ReportRetrievalService
 import pages._
 import viewmodels.CheckAnswers.beneficiary.{BeneficiaryHasNinoSummary, BeneficiaryTypeSummary}
+import play.api.inject.bind
 import views.html.CheckYourAnswersView
 import uk.gov.hmrc.govukfrontend.views.viewmodels.summarylist.{Actions, SummaryList}
 import viewmodels.govuk.all.{ActionItemViewModel, CardViewModel, SummaryListViewModel}
-import play.api.libs.json.Json
+import play.api.libs.json.{Json, JsPath}
 import models._
-import viewmodels.CheckAnswers._
-import models.JourneyRole.{Deceased, PrIndividual}
+import viewmodels.CheckAnswers.{DidPrSubmitSummary, _}
+import org.mockito.ArgumentMatchers.any
+import models.JourneyRole.{BeneficiaryIndividual, Deceased, PrIndividual}
 import play.api.test.FakeRequest
+import play.api.test.Helpers._
+import org.mockito.Mockito.when
 import uk.gov.hmrc.govukfrontend.views.Aliases.Text
 import base.SpecBase
+import models.beneficiary.BeneficiaryType
+import uk.gov.hmrc.http.HttpResponse
 
 import scala.jdk.CollectionConverters._
+import scala.concurrent.Future
 
 import java.time.LocalDate
 
@@ -44,6 +51,8 @@ class CheckYourAnswersControllerSpec extends SpecBase {
     FakeRequest(GET, routes.CheckYourAnswersController.onPageLoad(srn).url)
   private def onPageLoadContinueFakeRequest =
     FakeRequest(GET, routes.CheckYourAnswersController.onPageLoadContinueMode(srn).url)
+  private def onPageLoadChangeFakeRequest =
+    FakeRequest(GET, routes.CheckYourAnswersController.onPageLoadChangeMode(srn).url)
 
   "CheckYourAnswers Controller" - {
     "onPageLoad redirects to onPageLoadContinueMode when data is incomplete" in {
@@ -72,6 +81,112 @@ class CheckYourAnswersControllerSpec extends SpecBase {
 
         status(result) mustEqual SEE_OTHER
         redirectLocation(result).value mustEqual routes.CheckYourAnswersController.onPageLoadContinueMode(srn).url
+      }
+    }
+
+    "onPageLoad redirects to onPageLoadChangeMode when data has ihtPaymentReference and data is unchanged" in {
+      val userAnswers = prIndividualUserAnswers
+        .set(IHTPaymentReferencePage, "paymentRef")
+        .get
+        .set(pages.beneficiary.BeneficiaryTypePage(0), BeneficiaryType.Individual)
+        .get
+        .set(
+          pages.beneficiary.BeneficiaryNamePage(0, BeneficiaryIndividual),
+          IndividualName(Some("Mr"), "John", Some("James"), "Doe")
+        )
+        .get
+        .set(pages.beneficiary.BeneficiaryHasNinoPage(0), true)
+        .get
+
+      val application = applicationBuilder(userAnswers = Some(userAnswers)).build()
+
+      running(application) {
+        val request =
+          onPageLoadFakeRequest
+
+        val result = route(application, request).value
+
+        status(result) mustEqual SEE_OTHER
+        redirectLocation(result).value mustEqual routes.CheckYourAnswersController.onPageLoadChangeMode(srn).url
+      }
+    }
+
+    "onPageLoadContinueMode" - {
+      "must return OK and the correct view for a GET on change mode" in {
+        val userAnswers = prIndividualUserAnswersNoAddress
+          .set(IHTPaymentReferencePage, "paymentRef")
+          .get
+
+        userAnswers.data.setObject(JsPath \ "ihtVersion", Json.toJson("1.0"))
+
+        val mockReportRetrievalService = mock[ReportRetrievalService]
+        when(mockReportRetrievalService.getReport(any(), any())(using any(), any()))
+          .thenReturn(
+            Future.successful(
+              Right(
+                HttpResponse(
+                  200,
+                  Json
+                    .obj(
+                      "data" -> userAnswers.data
+                    )
+                    .toString()
+                )
+              )
+            )
+          )
+
+        val application = applicationBuilder(userAnswers = Some(userAnswers))
+          .overrides(bind[ReportRetrievalService].toInstance(mockReportRetrievalService))
+          .build()
+
+        running(application) {
+          val request =
+            onPageLoadChangeFakeRequest
+
+          val result = route(application, request).value
+
+          val view = application.injector.instanceOf[CheckYourAnswersView]
+
+          val deceasedDetailsSummaryList = SummaryListViewModel(
+            rows = Seq(
+              InheritanceTaxReferenceSummary.row(srn, userAnswers)(using messages(application)).get,
+              NameOfDeceasedSummary.row(srn, userAnswers)(using messages(application)).get,
+              HasNinoSummary.row(srn, userAnswers)(using messages(application)).get,
+              NoNinoReasonSummary.row(srn, userAnswers)(using messages(application)).get,
+              BirthDeathDatesSummary.row(srn, userAnswers)(using messages(application)).get
+            )
+          )
+          val prDetailsSummaryList = SummaryListViewModel(
+            rows = Seq(
+              PrTypeSummary.row(srn, userAnswers)(using messages(application)).get,
+              PrIndividualNameSummary.row(srn, userAnswers)(using messages(application)).get
+            )
+          )
+          val paymentNoticeDetailsSummaryList = SummaryListViewModel(
+            rows = Seq(
+              DidPrSubmitSummary.row(srn, userAnswers)(using messages(application)).get,
+              PaymentNoticeDateSummary.row(srn, userAnswers)(using messages(application)).get,
+              AreBeneficiariesKnownSummary.row(srn, userAnswers)(using messages(application)).get,
+              NumberOfBeneficiariesSummary.row(srn, userAnswers)(using messages(application)).get
+            )
+          )
+
+          status(result) mustEqual OK
+          contentAsString(result) mustEqual view(
+            srn,
+            deceasedDetailsSummaryList,
+            prDetailsSummaryList,
+            paymentNoticeDetailsSummaryList,
+            emptyBeneficiarySummaryListViewModel,
+            None,
+            submitBlocked = true,
+            Some("testSchemeName")
+          )(using
+            request,
+            messages(application)
+          ).toString
+        }
       }
     }
 
@@ -218,7 +333,9 @@ class CheckYourAnswersControllerSpec extends SpecBase {
             prDetailsSummaryList,
             paymentNoticeDetailsSummaryList,
             emptyBeneficiarySummaryListViewModel,
-            Some(routes.AddressLookupStartController.start(srn = srn, mode = NormalMode, journeyRole = PrIndividual))
+            Some(routes.AddressLookupStartController.start(srn = srn, mode = NormalMode, journeyRole = PrIndividual)),
+            submitBlocked = false,
+            None
           )(using
             request,
             messages(application)
@@ -300,7 +417,9 @@ class CheckYourAnswersControllerSpec extends SpecBase {
             prDetailsSummaryList,
             paymentNoticeDetailsSummaryList,
             emptyBeneficiarySummaryListViewModel,
-            Some(routes.AddressLookupStartController.start(srn = srn, mode = NormalMode, journeyRole = PrIndividual))
+            Some(routes.AddressLookupStartController.start(srn = srn, mode = NormalMode, journeyRole = PrIndividual)),
+            submitBlocked = false,
+            None
           )(using
             request,
             messages(application)
@@ -343,7 +462,9 @@ class CheckYourAnswersControllerSpec extends SpecBase {
             prDetailsSummaryList,
             paymentNoticeDetailsSummaryList,
             emptyBeneficiarySummaryListViewModel,
-            Some(routes.IndividualNameController.onPageLoad(srn = srn, mode = NormalMode, Deceased))
+            Some(routes.IndividualNameController.onPageLoad(srn = srn, mode = NormalMode, Deceased)),
+            submitBlocked = false,
+            None
           )(using
             request,
             messages(application)
@@ -411,7 +532,9 @@ class CheckYourAnswersControllerSpec extends SpecBase {
             prDetailsSummaryList,
             paymentNoticeDetailsSummaryList,
             emptyBeneficiarySummaryListViewModel,
-            Some(routes.IndividualNameController.onPageLoad(srn = srn, mode = NormalMode, Deceased))
+            Some(routes.IndividualNameController.onPageLoad(srn = srn, mode = NormalMode, Deceased)),
+            submitBlocked = false,
+            None
           )(using
             request,
             messages(application)
@@ -481,7 +604,9 @@ class CheckYourAnswersControllerSpec extends SpecBase {
             prDetailsSummaryList,
             paymentNoticeDetailsSummaryList,
             emptyBeneficiarySummaryListViewModel,
-            Some(routes.IndividualNameController.onPageLoad(srn = srn, mode = NormalMode, Deceased))
+            Some(routes.IndividualNameController.onPageLoad(srn = srn, mode = NormalMode, Deceased)),
+            submitBlocked = false,
+            None
           )(using
             request,
             messages(application)
@@ -564,7 +689,9 @@ class CheckYourAnswersControllerSpec extends SpecBase {
             emptySummaryList,
             emptySummaryList,
             beneficiarySummaryList,
-            Some(routes.IndividualNameController.onPageLoad(srn = srn, mode = NormalMode, Deceased))
+            Some(routes.IndividualNameController.onPageLoad(srn = srn, mode = NormalMode, Deceased)),
+            submitBlocked = false,
+            None
           )(using
             request,
             messages(application)
