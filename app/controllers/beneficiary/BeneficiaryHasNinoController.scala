@@ -24,7 +24,7 @@ import models.SchemeId.Srn
 import views.html.beneficiary.BeneficiaryHasNinoView
 import controllers.actions._
 import forms.beneficiary.BeneficiaryHasNinoFormProvider
-import models.{CheckMode, Mode, NormalMode}
+import models.Mode
 import pages.beneficiary.BeneficiaryHasNinoPage
 import play.api.i18n.MessagesApi
 
@@ -86,14 +86,15 @@ class BeneficiaryHasNinoController @Inject() (
                 for {
                   updatedAnswers <- Future.fromTry(request.userAnswers.set(BeneficiaryHasNinoPage(index), value))
                   _ <- userAnswersService.set(updatedAnswers)(using hc, request.request)
-                } yield Redirect(nextPage(srn, mode))
+                } yield Redirect(nextPage(srn, index, mode, value))
             )
         }
       }
 
-  private def nextPage(srn: Srn, mode: Mode) =
-    mode match {
-      case NormalMode => routes.BeneficiaryListController.onPageLoad(srn)
-      case CheckMode => controllers.routes.CheckYourAnswersController.onPageLoad(srn)
+  private def nextPage(srn: Srn, index: Int, mode: Mode, hasNino: Boolean) =
+    if (hasNino) {
+      routes.BeneficiaryNinoController.onPageLoad(srn, index, mode)
+    } else {
+      controllers.routes.CheckYourAnswersController.onPageLoad(srn)
     }
 }

@@ -36,4 +36,3 @@ class BeneficiaryAccessAction @Inject() (implicit val executionContext: Executio
       )
     )
 }
-
