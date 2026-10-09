@@ -21,30 +21,32 @@ import utils.BeneficiaryNameHelper
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import controllers.IhtpBaseController
 import models.SchemeId.Srn
-import views.html.beneficiary.BeneficiaryHasNinoView
+import views.html.beneficiary.BeneficiaryNinoView
 import controllers.actions._
-import forms.beneficiary.BeneficiaryHasNinoFormProvider
-import models.Mode
-import pages.beneficiary.BeneficiaryHasNinoPage
-import play.api.i18n.MessagesApi
+import forms.beneficiary.BeneficiaryNinoFormProvider
+import uk.gov.hmrc.domain.Nino
+import models.{CheckMode, Mode, NormalMode}
+import pages.beneficiary.BeneficiaryNinoPage
+import play.api.i18n.{I18nSupport, MessagesApi}
 
 import scala.concurrent.{ExecutionContext, Future}
 
 import javax.inject.Inject
 
-class BeneficiaryHasNinoController @Inject() (
+class BeneficiaryNinoController @Inject()(
   override val messagesApi: MessagesApi,
-  identify: IdentifierAction,
   allowAccess: AllowAccessActionWithSessionCacheProvider,
+  identify: IdentifierAction,
   getData: DataRetrievalAction,
   requireData: DataRequiredAction,
-  beneficiaryAccess: BeneficiaryAccessAction,
-  formProvider: BeneficiaryHasNinoFormProvider,
+  formProvider: BeneficiaryNinoFormProvider,
   val controllerComponents: MessagesControllerComponents,
   userAnswersService: UserAnswersService,
-  view: BeneficiaryHasNinoView
+  beneficiaryAccess: BeneficiaryAccessAction,
+  view: BeneficiaryNinoView
 )(implicit ec: ExecutionContext)
-    extends IhtpBaseController {
+    extends IhtpBaseController
+    with I18nSupport {
 
   private val form = formProvider()
 
@@ -54,15 +56,14 @@ class BeneficiaryHasNinoController @Inject() (
       .andThen(getData)
       .andThen(requireData)
       .andThen(beneficiaryAccess) { implicit request =>
-        BeneficiaryNameHelper.withName(request.userAnswers, index)(
-          logAndJourneyRecovery("Beneficiary name is missing, cannot load the beneficiary NINO page")
+          BeneficiaryNameHelper.withName(request.userAnswers, index)(
+          logAndJourneyRecovery("Beneficiary name is missing, cannot load the page")
         ) { beneficiaryName =>
-          val preparedForm = request.userAnswers.get(BeneficiaryHasNinoPage(index)) match {
+          val preparedForm = request.userAnswers.get(BeneficiaryNinoPage(index)) match {
             case None => form
-            case Some(value) => form.fill(value)
+            case Some(value) => form.fill(Nino(value))
           }
-
-          Ok(view(preparedForm, srn, index, mode, beneficiaryName))
+          Ok(view(preparedForm, srn, mode, beneficiaryName))
         }
       }
 
@@ -73,28 +74,27 @@ class BeneficiaryHasNinoController @Inject() (
       .andThen(requireData)
       .andThen(beneficiaryAccess)
       .async { implicit request =>
-        BeneficiaryNameHelper.withName(request.userAnswers, index) {
+        BeneficiaryNameHelper.withName(request.userAnswers, index)(
           Future.successful(
-            logAndJourneyRecovery("Beneficiary name is missing, cannot submit the beneficiary NINO page")
+            logAndJourneyRecovery("Beneficiary name is missing, cannot submit the page")
           )
-        } { beneficiaryName =>
+        ) { beneficiaryName =>
           form
             .bindFromRequest()
             .fold(
-              formWithErrors => Future.successful(BadRequest(view(formWithErrors, srn, index, mode, beneficiaryName))),
+              formWithErrors => Future.successful(BadRequest(view(formWithErrors, srn, mode, beneficiaryName))),
               value =>
                 for {
-                  updatedAnswers <- Future.fromTry(request.userAnswers.set(BeneficiaryHasNinoPage(index), value))
+                  updatedAnswers <- Future.fromTry(request.userAnswers.set(BeneficiaryNinoPage(index), value.value))
                   _ <- userAnswersService.set(updatedAnswers)(using hc, request.request)
-                } yield Redirect(nextPage(srn, index, mode, value))
+                } yield Redirect(nextPage(srn, mode))
             )
         }
       }
 
-  private def nextPage(srn: Srn, index: Int, mode: Mode, hasNino: Boolean) =
-    if (hasNino) {
-      routes.BeneficiaryNinoController.onPageLoad(srn, index, mode)
-    } else {
-      controllers.routes.CheckYourAnswersController.onPageLoad(srn)
+  private def nextPage(srn: Srn, mode: Mode) =
+    mode match {
+      case NormalMode => routes.BeneficiaryListController.onPageLoad(srn)
+      case CheckMode => controllers.routes.CheckYourAnswersController.onPageLoad(srn)
     }
 }

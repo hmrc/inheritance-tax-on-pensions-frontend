@@ -422,3 +422,11 @@ ihtPayable.error.required = Enter the amount of Inheritance Tax payable
 ihtPayable.error.invalid = Enter a valid amount of Inheritance Tax payable
 ihtPayable.checkYourAnswersLabel = Amount of IHT payable
 ihtPayable.change.hidden = the amount of IHT payable
+
+beneficiaryNino.title = Enter the National Insurance number for the beneficiary
+beneficiaryNino.heading = Enter the National Insurance number for {0}
+beneficiaryNino.hint = For example, QQ 12 34 56 C
+beneficiaryNino.error.required = Enter the National Insurance number
+beneficiaryNino.error.invalid = Enter the National Insurance number in the correct format
+beneficiaryNino.change.hidden = the National Insurance number for the beneficiary
+beneficiaryNino.checkYourAnswersLabel = National Insurance number
