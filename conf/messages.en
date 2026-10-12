@@ -201,25 +201,25 @@ prOrganisationName.error.secondForename.pattern = Enter a valid middle name
 prOrganisationName.error.surname.required = Enter the last name
 prOrganisationName.error.surname.length = Last name must be 35 characters or less
 prOrganisationName.error.surname.pattern = Enter a valid last name
-prOrganisationName.checkYourAnswersLabel.hidden = full name of PR at the organisation
+prOrganisationName.checkYourAnswersLabel.hidden = the name of the PR at the organisation
 
 organisationName.title = Enter the name of the organisation
 organisationName.heading = Enter the name of the organisation
-organisationName.checkYourAnswersLabel = Organisation name
+organisationName.checkYourAnswersLabel = Name of organisation
 organisationName.error.required = Enter the name of the organisation
 organisationName.error.length = The name of the organisation must be 160 characters or less
 organisationName.error.invalid = Enter a valid organisation name
 organisationName.change.hidden = the name of the organisation
 
 prIndividualAddress.checkYourAnswersLabel = Address of PR
-prIndividualAddress.checkYourAnswersLabel.hidden = the address of personal representative
+prIndividualAddress.checkYourAnswersLabel.hidden = the address of the personal representative
 prIndividualCountry.checkYourAnswersLabel = Country of PR
-prIndividualCountry.checkYourAnswersLabel.hidden = the address of the PR
+prIndividualCountry.checkYourAnswersLabel.hidden = the country of the PR
 
-prOrganisationAddress.checkYourAnswersLabel = Address of Organisation
-prOrganisationAddress.checkYourAnswersLabel.hidden = address of organisation
-prOrganisationCountry.checkYourAnswersLabel = Country of Organisation
-prOrganisationCountry.checkYourAnswersLabel.hidden = the country of organisation
+prOrganisationAddress.checkYourAnswersLabel = Address of organisation
+prOrganisationAddress.checkYourAnswersLabel.hidden = the address of the organisation
+prOrganisationCountry.checkYourAnswersLabel = Country of organisation
+prOrganisationCountry.checkYourAnswersLabel.hidden = the country of the organisation
 
 changePrAddress.title = Enter the address of the PR
 changePrAddress.heading = Enter the address of {0}
@@ -339,7 +339,7 @@ didPrSubmit.change.hidden = who submitted the payment notice
 areBeneficiariesKnown.title = Does the payment notice contain beneficiary details?
 areBeneficiariesKnown.heading = Does the payment notice contain beneficiary details?
 areBeneficiariesKnown.checkYourAnswersLabel = Does the payment notice contain beneficiary details?
-areBeneficiariesKnown.change.hidden = whether the payment notice contains beneficiary details
+areBeneficiariesKnown.change.hidden = if the payment notice contains beneficiary details
 areBeneficiariesKnown.error.required = Select yes or no
 
 beneficiaryType.title = Select the type of beneficiary to add
@@ -364,7 +364,7 @@ beneficiaryIndividualName.error.surname.required = Enter the beneficiary's last 
 beneficiaryIndividualName.error.surname.length = Last name must be 35 characters or less
 beneficiaryIndividualName.error.surname.pattern = Enter a valid last name
 beneficiaryIndividualName.checkYourAnswersLabel = Full name of beneficiary
-beneficiaryIndividualName.checkYourAnswersLabel.hidden = the full name of the beneficiary
+beneficiaryIndividualName.checkYourAnswersLabel.hidden = the name of the beneficiary
 
 beneficiaryTrustName.heading = Enter the name of the trust
 beneficiaryTrustName.error.required = Enter the name of the trust
@@ -403,7 +403,7 @@ noNinoReason.hint = For example, the deceased was not a UK citizen
 noNinoReason.error.required = Enter a reason for no National Insurance number
 noNinoReason.error.length = The reason must be 160 characters or less
 noNinoReason.error.invalid = The reason must not include special characters
-noNinoReason.change.hidden = Reason for missing National Insurance number
+noNinoReason.change.hidden = reason the deceased does not have a National Insurance number
 noNinoReason.checkYourAnswersLabel = Reason for no National Insurance number
 
 hasNino.title = Does the deceased have a National Insurance number?

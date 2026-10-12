@@ -26,11 +26,11 @@
     govukButton: GovukButton
 )
 
-@(form: Form[?], srn: Srn, mode: Mode, beneficiaryName: String)(implicit request: Request[?], messages: Messages)
+@(form: Form[?], srn: Srn, index: Int, mode: Mode, beneficiaryName: String)(implicit request: Request[?], messages: Messages)
 
 @layout(pageTitle = title(form, messages("beneficiaryNino.title"))) {
 
-    @formHelper(action = routes.NinoController.onSubmit(srn, mode)) {
+    @formHelper(action =  controllers.beneficiary.routes.BeneficiaryNinoController.onSubmit(srn, index, mode)) {
 
         @if(form.errors.nonEmpty) {
             @govukErrorSummary(ErrorSummaryViewModel(form))

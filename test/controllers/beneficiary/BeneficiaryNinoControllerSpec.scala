@@ -65,7 +65,7 @@ class BeneficiaryNinoControllerSpec extends SpecBase with MockitoSugar {
         val view = application.injector.instanceOf[BeneficiaryNinoView]
 
         status(result) mustEqual OK
-        contentAsString(result) mustEqual view(form, srn, NormalMode, beneficiaryName)(using
+        contentAsString(result) mustEqual view(form, srn, testIndex, NormalMode, beneficiaryName)(using
           request,
           messages(application)
         ).toString
@@ -89,7 +89,13 @@ class BeneficiaryNinoControllerSpec extends SpecBase with MockitoSugar {
         val result = route(application, request).value
 
         status(result) mustEqual OK
-        contentAsString(result) mustEqual view(form.fill(Nino("AA123456A")), srn, NormalMode, beneficiaryName)(using
+        contentAsString(result) mustEqual view(
+          form.fill(Nino("AA123456A")),
+          srn,
+          testIndex,
+          NormalMode,
+          beneficiaryName
+        )(using
           request,
           messages(application)
         ).toString
@@ -137,7 +143,7 @@ class BeneficiaryNinoControllerSpec extends SpecBase with MockitoSugar {
         val result = route(application, request).value
 
         status(result) mustEqual BAD_REQUEST
-        contentAsString(result) mustEqual view(boundForm, srn, NormalMode, beneficiaryName)(using
+        contentAsString(result) mustEqual view(boundForm, srn, testIndex, NormalMode, beneficiaryName)(using
           request,
           messages(application)
         ).toString

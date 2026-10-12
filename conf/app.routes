@@ -132,10 +132,10 @@ POST        /:srn/beneficiary-national-insurance-number/$index<[1-2]?[0-9]>     
 GET         /:srn/change-beneficiary-national-insurance-number/$index<[1-2]?[0-9]> controllers.beneficiary.BeneficiaryHasNinoController.onPageLoad(srn: Srn, index: Int, mode: Mode = CheckMode)
 POST        /:srn/change-beneficiary-national-insurance-number/$index<[1-2]?[0-9]> controllers.beneficiary.BeneficiaryHasNinoController.onSubmit(srn: Srn, index: Int, mode: Mode = CheckMode)
 
-GET         /:srn/enter-ni-number                        controllers.NinoController.onPageLoad(srn: Srn, mode: Mode = NormalMode)
-POST        /:srn/enter-ni-number                        controllers.NinoController.onSubmit(srn: Srn, mode: Mode = NormalMode)
-GET         /:srn/change-ni-number                       controllers.NinoController.onPageLoad(srn: Srn, mode: Mode = CheckMode)
-POST        /:srn/change-ni-number                       controllers.NinoController.onSubmit(srn: Srn, mode: Mode = CheckMode)
+GET         /:srn/enter-deceased-ni-number                        controllers.NinoController.onPageLoad(srn: Srn, mode: Mode = NormalMode)
+POST        /:srn/enter-deceased-ni-number                        controllers.NinoController.onSubmit(srn: Srn, mode: Mode = NormalMode)
+GET         /:srn/change-deceased-ni-number                       controllers.NinoController.onPageLoad(srn: Srn, mode: Mode = CheckMode)
+POST        /:srn/change-deceased-ni-number                       controllers.NinoController.onSubmit(srn: Srn, mode: Mode = CheckMode)
 
 GET        /:srn/reason-no-ni-number                       controllers.NoNinoReasonController.onPageLoad(srn: Srn, mode: Mode = NormalMode)
 POST       /:srn/reason-no-ni-number                       controllers.NoNinoReasonController.onSubmit(srn: Srn, mode: Mode = NormalMode)
@@ -147,7 +147,7 @@ POST        /:srn/deceased-has-ni-number                    controllers.HasNinoC
 GET         /:srn/change-deceased-has-ni-number             controllers.HasNinoController.onPageLoad(srn: Srn, mode: Mode = CheckMode)
 POST        /:srn/change-deceased-has-ni-number             controllers.HasNinoController.onSubmit(srn: Srn, mode: Mode = CheckMode)
 
-GET         /:srn/enter-beneficiary-ni-number/$index<[1-2]?[0-9]>  controllers.beneficiary.BeneficiaryNinoController.onPageLoad(srn: Srn, index: Int, mode: Mode = NormalMode)
-POST        /:srn/enter-beneficiary-ni-number/$index<[1-2]?[0-9]>  controllers.beneficiary.BeneficiaryNinoController.onSubmit(srn: Srn, index: Int, mode: Mode = NormalMode)
-GET         /:srn/change-beneficiary-ni-number/$index<[1-2]?[0-9]>  controllers.beneficiary.BeneficiaryNinoController.onPageLoad(srn: Srn, index: Int, mode: Mode = CheckMode)
-POST        /:srn/change-beneficiary-ni-number/$index<[1-2]?[0-9]>  controllers.beneficiary.BeneficiaryNinoController.onSubmit(srn: Srn, index: Int, mode: Mode = CheckMode)
+GET         /:srn/enter-ni-number/$index<[1-2]?[0-9]>  controllers.beneficiary.BeneficiaryNinoController.onPageLoad(srn: Srn, index: Int, mode: Mode = NormalMode)
+POST        /:srn/enter-ni-number/$index<[1-2]?[0-9]>  controllers.beneficiary.BeneficiaryNinoController.onSubmit(srn: Srn, index: Int, mode: Mode = NormalMode)
+GET         /:srn/change-ni-number/$index<[1-2]?[0-9]>  controllers.beneficiary.BeneficiaryNinoController.onPageLoad(srn: Srn, index: Int, mode: Mode = CheckMode)
+POST        /:srn/change-ni-number/$index<[1-2]?[0-9]>  controllers.beneficiary.BeneficiaryNinoController.onSubmit(srn: Srn, index: Int, mode: Mode = CheckMode)

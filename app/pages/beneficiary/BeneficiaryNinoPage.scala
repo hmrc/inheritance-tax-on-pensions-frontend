@@ -21,7 +21,8 @@ import play.api.libs.json.JsPath
 
 case class BeneficiaryNinoPage(index: Int) extends QuestionPage[String] {
 
-  override def path: JsPath = JsPath \ toString
+  override def path: JsPath =
+    (JsPath \ "beneficiaries")(index) \ toString
 
   override def toString: String = "nino"
 }

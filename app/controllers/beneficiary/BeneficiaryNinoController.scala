@@ -63,7 +63,7 @@ class BeneficiaryNinoController @Inject() (
             case None => form
             case Some(value) => form.fill(Nino(value))
           }
-          Ok(view(preparedForm, srn, mode, beneficiaryName))
+          Ok(view(preparedForm, srn, index, mode, beneficiaryName))
         }
       }
 
@@ -82,7 +82,7 @@ class BeneficiaryNinoController @Inject() (
           form
             .bindFromRequest()
             .fold(
-              formWithErrors => Future.successful(BadRequest(view(formWithErrors, srn, mode, beneficiaryName))),
+              formWithErrors => Future.successful(BadRequest(view(formWithErrors, srn, index, mode, beneficiaryName))),
               value =>
                 for {
                   updatedAnswers <- Future.fromTry(request.userAnswers.set(BeneficiaryNinoPage(index), value.value))
