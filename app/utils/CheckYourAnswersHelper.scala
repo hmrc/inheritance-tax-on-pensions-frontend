@@ -88,7 +88,8 @@ object CheckYourAnswersHelper {
                   userAnswers
                 ),
                 BeneficiaryHasNinoSummary.row(srn, index, userAnswers),
-                BeneficiaryNinoSummary.row(srn, index, userAnswers)
+                BeneficiaryNinoSummary.row(srn, index, userAnswers),
+                BeneficiaryNoNinoReasonSummary.row(srn, index, userAnswers)
               ).flatten
             ).withCard(
               CardViewModel(

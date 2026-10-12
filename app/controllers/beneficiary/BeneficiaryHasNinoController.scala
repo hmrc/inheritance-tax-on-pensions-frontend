@@ -95,6 +95,6 @@ class BeneficiaryHasNinoController @Inject() (
     if (hasNino) {
       routes.BeneficiaryNinoController.onPageLoad(srn, index, mode)
     } else {
-      controllers.routes.CheckYourAnswersController.onPageLoad(srn)
+      routes.BeneficiaryNoNinoReasonController.onPageLoad(srn, index, mode)
     }
 }

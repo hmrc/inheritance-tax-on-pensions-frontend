@@ -100,7 +100,8 @@ class BeneficiaryHasNinoControllerSpec extends SpecBase {
           verify(mockConnector, times(1)).setUserAnswers(any(), any(), any(), any(), any())(using any())
         }
       }
-      s"must save a false answer and redirect to the CYA page in $mode" in {
+
+      s"must save a false answer and redirect to the noNinoReason page in $mode" in {
         val mockConnector = mock[InheritanceTaxOnPensionsConnector]
         when(mockConnector.setUserAnswers(any(), any(), any(), any(), any())(using any()))
           .thenReturn(Future.successful(Right(answersWithName)))
@@ -117,8 +118,8 @@ class BeneficiaryHasNinoControllerSpec extends SpecBase {
           val result = route(application, request).value
 
           status(result) mustEqual SEE_OTHER
-          redirectLocation(result).value mustEqual controllers.routes.CheckYourAnswersController
-            .onPageLoad(srn)
+          redirectLocation(result).value mustEqual routes.BeneficiaryNoNinoReasonController
+            .onPageLoad(srn, testIndex, mode)
             .url
           verify(mockConnector, times(1)).setUserAnswers(any(), any(), any(), any(), any())(using any())
         }

@@ -180,7 +180,7 @@ class BeneficiaryNinoControllerSpec extends SpecBase with MockitoSugar {
       }
     }
 
-    "must redirect to Journey Recovery for a GET if the deceased name has not been answered" in {
+    "must redirect to Journey Recovery for a GET if the beneficiary name has not been answered" in {
 
       val application = applicationBuilder(userAnswers = Some(emptyUserAnswers), usesSession = true).build()
 
@@ -194,7 +194,7 @@ class BeneficiaryNinoControllerSpec extends SpecBase with MockitoSugar {
       }
     }
 
-    "must redirect to Journey Recovery for a POST if the deceased name has not been answered" in {
+    "must redirect to Journey Recovery for a POST if the beneficiary name has not been answered" in {
 
       val application = applicationBuilder(userAnswers = Some(emptyUserAnswers), usesSession = true).build()
 
