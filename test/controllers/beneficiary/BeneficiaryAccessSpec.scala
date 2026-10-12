@@ -30,11 +30,21 @@ import org.mockito.Mockito.verifyNoInteractions
 class BeneficiaryAccessSpec extends SpecBase {
 
   private val answersChangedToNo = emptyUserAnswers
-    .set(DidPrSubmitPage, true).success.value
-    .set(AreBeneficiariesKnownPage, true).success.value
-    .set(BeneficiaryTypePage(testIndex), BeneficiaryType.Individual).success.value
-    .set(BeneficiaryNamePage(testIndex, JourneyRole.BeneficiaryIndividual), individualName).success.value
-    .set(AreBeneficiariesKnownPage, false).success.value
+    .set(DidPrSubmitPage, true)
+    .success
+    .value
+    .set(AreBeneficiariesKnownPage, true)
+    .success
+    .value
+    .set(BeneficiaryTypePage(testIndex), BeneficiaryType.Individual)
+    .success
+    .value
+    .set(BeneficiaryNamePage(testIndex, JourneyRole.BeneficiaryIndividual), individualName)
+    .success
+    .value
+    .set(AreBeneficiariesKnownPage, false)
+    .success
+    .value
 
   private lazy val beneficiaryPages = Seq(NormalMode, CheckMode).flatMap { mode =>
     Seq(

@@ -23,7 +23,7 @@ import play.api.inject.bind
 import views.html.CheckYourAnswersView
 import uk.gov.hmrc.govukfrontend.views.viewmodels.summarylist.{Actions, SummaryList}
 import viewmodels.govuk.all.{ActionItemViewModel, CardViewModel, SummaryListViewModel}
-import play.api.libs.json.{Json, JsPath}
+import play.api.libs.json.{JsPath, Json}
 import models._
 import viewmodels.CheckAnswers.{DidPrSubmitSummary, _}
 import org.mockito.ArgumentMatchers.any

@@ -87,7 +87,8 @@ object CheckYourAnswersHelper {
                   index,
                   userAnswers
                 ),
-                BeneficiaryHasNinoSummary.row(srn, index, userAnswers)
+                BeneficiaryHasNinoSummary.row(srn, index, userAnswers),
+                BeneficiaryNinoSummary.row(srn, index, userAnswers)
               ).flatten
             ).withCard(
               CardViewModel(

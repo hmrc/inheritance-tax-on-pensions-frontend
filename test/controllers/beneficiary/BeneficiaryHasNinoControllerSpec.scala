@@ -80,8 +80,8 @@ class BeneficiaryHasNinoControllerSpec extends SpecBase {
       }
     }
 
-    Seq(true, false).foreach { answer =>
-      s"must save a $answer answer and redirect to the beneficiary list in NormalMode" in {
+    Seq(NormalMode, CheckMode).foreach { mode =>
+      s"must save a true answer and redirect to the nino page in $mode" in {
         val mockConnector = mock[InheritanceTaxOnPensionsConnector]
         when(mockConnector.setUserAnswers(any(), any(), any(), any(), any())(using any()))
           .thenReturn(Future.successful(Right(answersWithName)))
@@ -91,16 +91,16 @@ class BeneficiaryHasNinoControllerSpec extends SpecBase {
           .build()
 
         running(application) {
-          val request = FakeRequest(POST, beneficiaryHasNinoRoute).withFormUrlEncodedBody("value" -> answer.toString)
+          val request = FakeRequest(POST, routes.BeneficiaryHasNinoController.onSubmit(srn, testIndex, mode).url)
+            .withFormUrlEncodedBody("value" -> "true")
           val result = route(application, request).value
 
           status(result) mustEqual SEE_OTHER
-          redirectLocation(result).value mustEqual routes.BeneficiaryListController.onPageLoad(srn).url
+          redirectLocation(result).value mustEqual routes.BeneficiaryNinoController.onPageLoad(srn, testIndex, mode).url
           verify(mockConnector, times(1)).setUserAnswers(any(), any(), any(), any(), any())(using any())
         }
       }
-
-      s"must save a $answer answer and redirect to CYA in CheckMode" in {
+      s"must save a false answer and redirect to the CYA page in $mode" in {
         val mockConnector = mock[InheritanceTaxOnPensionsConnector]
         when(mockConnector.setUserAnswers(any(), any(), any(), any(), any())(using any()))
           .thenReturn(Future.successful(Right(answersWithName)))
@@ -112,8 +112,8 @@ class BeneficiaryHasNinoControllerSpec extends SpecBase {
         running(application) {
           val request = FakeRequest(
             POST,
-            routes.BeneficiaryHasNinoController.onSubmit(srn, testIndex, CheckMode).url
-          ).withFormUrlEncodedBody("value" -> answer.toString)
+            routes.BeneficiaryHasNinoController.onSubmit(srn, testIndex, mode).url
+          ).withFormUrlEncodedBody("value" -> "false")
           val result = route(application, request).value
 
           status(result) mustEqual SEE_OTHER
