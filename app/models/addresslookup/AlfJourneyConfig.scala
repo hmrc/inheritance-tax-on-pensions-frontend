@@ -62,7 +62,7 @@ object AlfManualAddressEntryConfig {
 
 final case class AlfMandatoryFields(
   addressLine1: Boolean = true,
-  addressLine2: Boolean = true,
+  addressLine2: Boolean = false,
   addressLine3: Boolean = false,
   town: Boolean = false,
   postcode: Boolean = false

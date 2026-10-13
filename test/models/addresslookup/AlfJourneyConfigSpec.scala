@@ -48,7 +48,7 @@ class AlfJourneyConfigSpec extends SpecBase {
           manualAddressEntryConfig = AlfManualAddressEntryConfig(
             mandatoryFields = AlfMandatoryFields(
               addressLine1 = true,
-              addressLine2 = true,
+              addressLine2 = false,
               addressLine3 = false,
               town = true,
               postcode = false
