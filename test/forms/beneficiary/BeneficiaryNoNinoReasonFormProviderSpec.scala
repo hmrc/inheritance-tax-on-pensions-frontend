@@ -18,10 +18,11 @@ package forms.beneficiary
 
 import forms.mappings.Regex
 import forms.behaviours.StringFieldBehaviours
+import base.SpecBase
 import forms.beneficiary.BeneficiaryNoNinoReasonFormProvider
 import play.api.data.FormError
 
-class BeneficiaryNoNinoReasonFormProviderSpec extends StringFieldBehaviours with Regex {
+class BeneficiaryNoNinoReasonFormProviderSpec extends StringFieldBehaviours with Regex with SpecBase {
 
   val requiredKey = "beneficiaryNoNinoReason.error.required"
   val invalidCharactersKey = "beneficiaryNoNinoReason.error.invalid"

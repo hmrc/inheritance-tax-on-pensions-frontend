@@ -39,7 +39,7 @@ class NinoSummarySpec extends org.scalatest.freespec.AnyFreeSpec with SpecBase {
     "must return a row when data is present" in {
 
       val userAnswers = emptyUserAnswers
-        .set(NinoPage, "AA123456A")
+        .set(NinoPage, testNino)
         .success
         .value
 
@@ -47,7 +47,7 @@ class NinoSummarySpec extends org.scalatest.freespec.AnyFreeSpec with SpecBase {
 
       result mustBe defined
       result.get.key.content mustBe Text(messages("nino.checkYourAnswersLabel"))
-      result.get.value.content mustBe HtmlContent("AA123456A")
+      result.get.value.content mustBe HtmlContent(testNino)
       result.get.actions.get.items.head.href mustBe
         controllers.routes.NinoController.onPageLoad(srn, CheckMode).url
     }

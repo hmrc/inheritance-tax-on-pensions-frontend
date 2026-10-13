@@ -36,12 +36,7 @@ class NinoControllerSpec extends SpecBase with MockitoSugar {
 
   private val formProvider = new NinoFormProvider()
   private val form = formProvider()
-  private val nameOfDeceased: IndividualName = IndividualName(
-    title = Some("Mr"),
-    firstForename = "Firstname",
-    secondForename = Some("Middlename"),
-    surname = "Surname"
-  )
+  private val nameOfDeceased: IndividualName = individualName
   private val deceasedName: String = s"${nameOfDeceased.firstForename} ${nameOfDeceased.surname}"
   private val userAnswersWithDeceasedName: UserAnswers = emptyUserAnswers
     .set(IndividualNamePage(JourneyRole.Deceased), nameOfDeceased)
@@ -73,7 +68,7 @@ class NinoControllerSpec extends SpecBase with MockitoSugar {
     "must populate the view correctly on a GET" in {
 
       val userAnswers = userAnswersWithDeceasedName
-        .set(NinoPage, "AA123456A")
+        .set(NinoPage, testNino)
         .success
         .value
 
@@ -87,7 +82,7 @@ class NinoControllerSpec extends SpecBase with MockitoSugar {
         val result = route(application, request).value
 
         status(result) mustEqual OK
-        contentAsString(result) mustEqual view(form.fill(Nino("AA123456A")), srn, NormalMode, deceasedName)(using
+        contentAsString(result) mustEqual view(form.fill(Nino(testNino)), srn, NormalMode, deceasedName)(using
           request,
           messages(application)
         ).toString
@@ -109,7 +104,7 @@ class NinoControllerSpec extends SpecBase with MockitoSugar {
       running(application) {
         val request =
           FakeRequest(POST, ninoRoute)
-            .withFormUrlEncodedBody(("value", "AA123456A"))
+            .withFormUrlEncodedBody(("value", testNino))
 
         val result = route(application, request).value
 
@@ -162,7 +157,7 @@ class NinoControllerSpec extends SpecBase with MockitoSugar {
       running(application) {
         val request =
           FakeRequest(POST, ninoRoute)
-            .withFormUrlEncodedBody(("value", "answer"))
+            .withFormUrlEncodedBody(("value", testNino))
 
         val result = route(application, request).value
 
@@ -192,7 +187,7 @@ class NinoControllerSpec extends SpecBase with MockitoSugar {
       running(application) {
         val request =
           FakeRequest(POST, ninoRoute)
-            .withFormUrlEncodedBody(("value", "answer"))
+            .withFormUrlEncodedBody(("value", testNino))
 
         val result = route(application, request).value
 

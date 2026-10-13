@@ -18,9 +18,10 @@ package forms
 
 import forms.mappings.Regex
 import forms.behaviours.StringFieldBehaviours
+import base.SpecBase
 import play.api.data.FormError
 
-class NoNinoReasonFormProviderSpec extends StringFieldBehaviours with Regex {
+class NoNinoReasonFormProviderSpec extends StringFieldBehaviours with Regex with SpecBase {
 
   val requiredKey = "noNinoReason.error.required"
   val invalidCharactersKey = "noNinoReason.error.invalid"
@@ -35,7 +36,7 @@ class NoNinoReasonFormProviderSpec extends StringFieldBehaviours with Regex {
       fieldThatBindsValidData(
         form,
         fieldName,
-        "Isn't an adult"
+        testReasonNoNino
       )
     )
 

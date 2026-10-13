@@ -36,12 +36,7 @@ class NoNinoReasonControllerSpec extends SpecBase with MockitoSugar {
   private val formProvider = new NoNinoReasonFormProvider()
   private val form = formProvider()
 
-  private val nameOfDeceased: IndividualName = IndividualName(
-    title = Some("Mr"),
-    firstForename = "Firstname",
-    secondForename = Some("Middlename"),
-    surname = "Surname"
-  )
+  private val nameOfDeceased: IndividualName = individualName
   private val deceasedName: String = s"${nameOfDeceased.firstForename} ${nameOfDeceased.surname}"
   private val userAnswersWithDeceasedName: UserAnswers = emptyUserAnswers
     .set(IndividualNamePage(JourneyRole.Deceased), nameOfDeceased)
@@ -74,7 +69,7 @@ class NoNinoReasonControllerSpec extends SpecBase with MockitoSugar {
     "must populate the view correctly on a GET when the question has previously been answered" in {
 
       val userAnswers = userAnswersWithDeceasedName
-        .set(NoNinoReasonPage, "answer")
+        .set(NoNinoReasonPage, testReasonNoNino)
         .success
         .value
 
@@ -88,7 +83,7 @@ class NoNinoReasonControllerSpec extends SpecBase with MockitoSugar {
         val result = route(application, request).value
 
         status(result) mustEqual OK
-        contentAsString(result) mustEqual view(form.fill("answer"), srn, NormalMode, deceasedName)(using
+        contentAsString(result) mustEqual view(form.fill(testReasonNoNino), srn, NormalMode, deceasedName)(using
           request,
           messages(application)
         ).toString
@@ -110,7 +105,7 @@ class NoNinoReasonControllerSpec extends SpecBase with MockitoSugar {
       running(application) {
         val request =
           FakeRequest(POST, noNinoReasonRoute)
-            .withFormUrlEncodedBody(("noNinoReason", "answer"))
+            .withFormUrlEncodedBody(("noNinoReason", testReasonNoNino))
 
         val result = route(application, request).value
 
@@ -163,7 +158,7 @@ class NoNinoReasonControllerSpec extends SpecBase with MockitoSugar {
       running(application) {
         val request =
           FakeRequest(POST, noNinoReasonRoute)
-            .withFormUrlEncodedBody(("noNinoReason", "answer"))
+            .withFormUrlEncodedBody(("noNinoReason", testReasonNoNino))
 
         val result = route(application, request).value
 
@@ -193,7 +188,7 @@ class NoNinoReasonControllerSpec extends SpecBase with MockitoSugar {
       running(application) {
         val request =
           FakeRequest(POST, noNinoReasonRoute)
-            .withFormUrlEncodedBody(("noNinoReason", "answer"))
+            .withFormUrlEncodedBody(("noNinoReason", testReasonNoNino))
 
         val result = route(application, request).value
 

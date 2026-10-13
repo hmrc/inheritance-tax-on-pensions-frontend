@@ -36,6 +36,8 @@ trait TestValues extends Generators {
   val testIndex: Int = 0
   val testInvalidBeneficiaryIndexes: List[Int] = List(-1, 30)
   val testUuid = "test-uuid"
+  val testNino = "AB123456C"
+  val testReasonNoNino = "test reason for no national insurance number"
 
   val defaultSchemeDetails: SchemeDetails = SchemeDetails(
     schemeName = schemeName,
