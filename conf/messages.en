@@ -225,7 +225,7 @@ prOrganisationCountry.checkYourAnswersLabel.hidden = the country of the organisa
 changePrAddress.title = Enter the address of the PR
 changePrAddress.heading = Enter the address of {0}
 changePrAddress.addressLine1 = Address line 1
-changePrAddress.addressLine2 = Address line 2
+changePrAddress.addressLine2 = Address line 2 (optional)
 changePrAddress.addressLine3 = Address line 3 (optional)
 changePrAddress.addressLine4 = Address line 4 (optional)
 changePrAddress.postcode = Postcode (optional)
@@ -345,7 +345,7 @@ areBeneficiariesKnown.error.required = Select yes or no
 
 beneficiaryType.title = Select the type of beneficiary to add
 beneficiaryType.heading = Select the type of beneficiary to add
-beneficiaryType.hint = Beneficiaries are added one at a time
+beneficiaryType.hint = Up to 30 can be added and each one must be reported separately
 beneficiaryType.individual = An individual
 beneficiaryType.trust = A trust
 beneficiaryType.error.required = Select individual or trust
