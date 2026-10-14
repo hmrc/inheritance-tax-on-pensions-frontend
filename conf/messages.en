@@ -344,7 +344,7 @@ areBeneficiariesKnown.error.required = Select yes or no
 
 beneficiaryType.title = Select the type of beneficiary to add
 beneficiaryType.heading = Select the type of beneficiary to add
-beneficiaryType.hint = Beneficiaries are added one at a time
+beneficiaryType.hint = Up to 30 can be added and each one must be reported separately
 beneficiaryType.individual = An individual
 beneficiaryType.trust = A trust
 beneficiaryType.error.required = Select individual or trust
