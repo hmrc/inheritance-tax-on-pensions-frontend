@@ -402,7 +402,7 @@ noNinoReason.heading = Why does {0} not have a National Insurance number?
 noNinoReason.hint = For example, the deceased was not a UK citizen
 noNinoReason.error.required = Enter a reason for no National Insurance number
 noNinoReason.error.length = The reason must be 160 characters or less
-noNinoReason.error.invalid = The reason must not include special characters
+noNinoReason.error.invalid = The reason must not include special characters or line breaks
 noNinoReason.change.hidden = reason the deceased does not have a National Insurance number
 noNinoReason.checkYourAnswersLabel = Reason for no National Insurance number
 
@@ -433,9 +433,9 @@ beneficiaryNino.checkYourAnswersLabel = National Insurance number
 
 beneficiaryNoNinoReason.title = Why does the beneficiary not have a National Insurance number?
 beneficiaryNoNinoReason.heading = Why does {0} not have a National Insurance number?
-beneficiaryNoNinoReason.hint = For example, the beneficiary was not a UK citizen
+beneficiaryNoNinoReason.hint = For example, the beneficiary is not a UK citizen
 beneficiaryNoNinoReason.error.required = Enter a reason for no National Insurance number
 beneficiaryNoNinoReason.error.length = The reason must be 160 characters or less
-beneficiaryNoNinoReason.error.invalid = The reason must not include special characters
+beneficiaryNoNinoReason.error.invalid = The reason must not include special characters or line breaks
 beneficiaryNoNinoReason.change.hidden = reason the beneficiary does not have a National Insurance number
 beneficiaryNoNinoReason.checkYourAnswersLabel = Reason for no National Insurance number
