@@ -74,7 +74,7 @@ class PaidReportsControllerSpec extends SpecBase {
           document.select("#scheme-name-caption").first().ownText() mustBe schemeName
           document.select("#scheme-name-caption").hasClass("govuk-caption-l") mustBe true
           document.select("tbody tr").size() mustBe 1
-          document.select("tbody td").first().text() mustBe "Paid"
+          document.select("tbody td").first().text() mustBe "Tax paid"
           document.select("tbody th a").text() must include(paidReport.deceasedName)
           document
             .select("tbody th a")

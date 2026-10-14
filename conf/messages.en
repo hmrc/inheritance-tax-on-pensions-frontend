@@ -71,6 +71,7 @@ paidReports.caption = Paid reports
 paidReports.noReports = This scheme does not currently have any paid reports.
 paidReports.returnToActive = Return to active reports
 submissionList.returnToScheme.link = Return to {0}
+submissionList.table.status.paid = Tax paid
 
 journeyRecovery.continue.title = Sorry, there is a problem with the service
 journeyRecovery.continue.heading = Sorry, there is a problem with the service
