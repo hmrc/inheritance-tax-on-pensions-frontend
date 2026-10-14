@@ -76,6 +76,7 @@ class AlfJourneyConfigSpec extends SpecBase {
       (json \ "options" \ "allowedCountryCodes").as[Seq[String]] mustBe Seq("GB", "FR")
       (json \ "options" \ "selectPageConfig" \ "showNoneOfTheseOption").as[Boolean] mustBe false
       (json \ "options" \ "manualAddressEntryConfig" \ "mandatoryFields" \ "town").as[Boolean] mustBe true
+      (json \ "options" \ "manualAddressEntryConfig" \ "line1MaxLength").as[Int] mustBe 35
       (json \ "labels" \ "en" \ "countryPickerLabels" \ "heading").as[String] mustBe "Country heading"
       (json \ "labels" \ "en" \ "international" \ "editPageLabels" \ "townLabel").as[String] mustBe "Town"
       json.as[AlfJourneyConfig] mustBe config

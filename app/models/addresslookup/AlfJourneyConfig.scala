@@ -53,7 +53,11 @@ object AlfSelectPageConfig {
 
 final case class AlfManualAddressEntryConfig(
   mandatoryFields: AlfMandatoryFields,
-  showOrganisationName: Boolean = false
+  showOrganisationName: Boolean = false,
+  line1MaxLength: Int = 35,
+  line2MaxLength: Int = 35,
+  line3MaxLength: Int = 35,
+  townMaxLength: Int = 35
 )
 
 object AlfManualAddressEntryConfig {
