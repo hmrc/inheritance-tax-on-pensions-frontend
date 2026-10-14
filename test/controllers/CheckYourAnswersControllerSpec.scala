@@ -360,7 +360,7 @@ class CheckYourAnswersControllerSpec extends SpecBase {
           .get
           .set(HasNinoPage, false)
           .get
-          .set(NoNinoReasonPage, "Firstname Surname reason")
+          .set(NoNinoReasonPage, testReasonNoNino)
           .get
           .set(BirthDeathDatesPage, BirthDeathDates(testDateOfBirth, testDateOfDeath))
           .get

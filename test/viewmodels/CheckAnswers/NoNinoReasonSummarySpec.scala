@@ -39,7 +39,7 @@ class NoNinoReasonSummarySpec extends org.scalatest.freespec.AnyFreeSpec with Sp
     "must return a row when data is present" in {
 
       val userAnswers = emptyUserAnswers
-        .set(NoNinoReasonPage, "AA123456A")
+        .set(NoNinoReasonPage, testReasonNoNino)
         .success
         .value
 
@@ -47,7 +47,7 @@ class NoNinoReasonSummarySpec extends org.scalatest.freespec.AnyFreeSpec with Sp
 
       result mustBe defined
       result.get.key.content mustBe Text(messages("noNinoReason.checkYourAnswersLabel"))
-      result.get.value.content mustBe HtmlContent("AA123456A")
+      result.get.value.content mustBe HtmlContent(testReasonNoNino)
       result.get.actions.get.items.head.href mustBe
         controllers.routes.NoNinoReasonController.onPageLoad(srn, CheckMode).url
     }

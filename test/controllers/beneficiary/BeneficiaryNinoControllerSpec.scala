@@ -37,12 +37,7 @@ class BeneficiaryNinoControllerSpec extends SpecBase with MockitoSugar {
 
   private val formProvider = new BeneficiaryNinoFormProvider()
   private val form = formProvider()
-  private val nameOfBeneficiary: IndividualName = IndividualName(
-    title = Some("Mr"),
-    firstForename = "Firstname",
-    secondForename = Some("Middlename"),
-    surname = "Surname"
-  )
+  private val nameOfBeneficiary: IndividualName = individualName
   private val beneficiaryName: String = s"${nameOfBeneficiary.firstForename} ${nameOfBeneficiary.surname}"
   private val userAnswersWithBeneficiaryName: UserAnswers = emptyUserAnswers
     .set(BeneficiaryNamePage(0, JourneyRole.BeneficiaryIndividual), nameOfBeneficiary)
@@ -75,7 +70,7 @@ class BeneficiaryNinoControllerSpec extends SpecBase with MockitoSugar {
     "must populate the view correctly on a GET" in {
 
       val userAnswers = userAnswersWithBeneficiaryName
-        .set(BeneficiaryNinoPage(0), "AA123456A")
+        .set(BeneficiaryNinoPage(0), testNino)
         .success
         .value
 
@@ -90,7 +85,7 @@ class BeneficiaryNinoControllerSpec extends SpecBase with MockitoSugar {
 
         status(result) mustEqual OK
         contentAsString(result) mustEqual view(
-          form.fill(Nino("AA123456A")),
+          form.fill(Nino(testNino)),
           srn,
           testIndex,
           NormalMode,
@@ -117,7 +112,7 @@ class BeneficiaryNinoControllerSpec extends SpecBase with MockitoSugar {
       running(application) {
         val request =
           FakeRequest(POST, ninoRoute)
-            .withFormUrlEncodedBody(("value", "AA123456A"))
+            .withFormUrlEncodedBody(("value", testNino))
 
         val result = route(application, request).value
 
@@ -171,7 +166,7 @@ class BeneficiaryNinoControllerSpec extends SpecBase with MockitoSugar {
       running(application) {
         val request =
           FakeRequest(POST, ninoRoute)
-            .withFormUrlEncodedBody(("value", "answer"))
+            .withFormUrlEncodedBody(("value", testNino))
 
         val result = route(application, request).value
 
@@ -180,7 +175,7 @@ class BeneficiaryNinoControllerSpec extends SpecBase with MockitoSugar {
       }
     }
 
-    "must redirect to Journey Recovery for a GET if the deceased name has not been answered" in {
+    "must redirect to Journey Recovery for a GET if the beneficiary name has not been answered" in {
 
       val application = applicationBuilder(userAnswers = Some(emptyUserAnswers), usesSession = true).build()
 
@@ -194,14 +189,14 @@ class BeneficiaryNinoControllerSpec extends SpecBase with MockitoSugar {
       }
     }
 
-    "must redirect to Journey Recovery for a POST if the deceased name has not been answered" in {
+    "must redirect to Journey Recovery for a POST if the beneficiary name has not been answered" in {
 
       val application = applicationBuilder(userAnswers = Some(emptyUserAnswers), usesSession = true).build()
 
       running(application) {
         val request =
           FakeRequest(POST, ninoRoute)
-            .withFormUrlEncodedBody(("value", "answer"))
+            .withFormUrlEncodedBody(("value", testNino))
 
         val result = route(application, request).value
 

@@ -41,7 +41,7 @@ class BeneficiaryNinoSummarySpec extends org.scalatest.freespec.AnyFreeSpec with
     "must return a row when data is present" in {
 
       val userAnswers = emptyUserAnswers
-        .set(BeneficiaryNinoPage(testIndex), "AA123456A")
+        .set(BeneficiaryNinoPage(testIndex), testNino)
         .success
         .value
 
@@ -49,7 +49,7 @@ class BeneficiaryNinoSummarySpec extends org.scalatest.freespec.AnyFreeSpec with
 
       result mustBe defined
       result.get.key.content mustBe Text(messages("beneficiaryNino.checkYourAnswersLabel"))
-      result.get.value.content mustBe HtmlContent("AA123456A")
+      result.get.value.content mustBe HtmlContent(testNino)
       result.get.actions.get.items.head.href mustBe
         routes.BeneficiaryNinoController.onPageLoad(srn, testIndex, CheckMode).url
     }

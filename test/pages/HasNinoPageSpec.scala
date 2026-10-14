@@ -41,7 +41,7 @@ class HasNinoPageSpec extends SpecBase {
 
     "must remove no Nino reason when Nino is selected" in {
       val userAnswers = emptyUserAnswers
-        .set(NoNinoReasonPage, "Test reason")
+        .set(NoNinoReasonPage, testReasonNoNino)
         .success
         .value
 
