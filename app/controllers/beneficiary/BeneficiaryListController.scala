@@ -26,7 +26,7 @@ import controllers.actions._
 import forms.beneficiary.BeneficiaryListFormProvider
 import viewmodels.beneficiary.BeneficiaryListItem
 import models.beneficiary.{Beneficiaries, BeneficiaryType}
-import models.{CheckMode, NormalMode, UserAnswers}
+import models._
 import pages.beneficiary.BeneficiariesPage
 import play.api.i18n.MessagesApi
 
@@ -103,7 +103,7 @@ class BeneficiaryListController @Inject() (
         val changeUrl = beneficiary.beneficiaryType match {
           case BeneficiaryType.Individual =>
             routes.BeneficiaryNameController
-              .onPageLoad(srn, CheckMode, index)
+              .onPageLoad(srn, CheckMode, index, JourneyRole.BeneficiaryIndividual)
               .url
           case BeneficiaryType.Trust =>
             routes.BeneficiaryTrustNameController.onPageLoad(srn, index, CheckMode).url

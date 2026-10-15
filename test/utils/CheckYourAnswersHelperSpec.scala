@@ -174,7 +174,9 @@ class CheckYourAnswersHelperSpec extends AnyFreeSpec with SpecBase {
         .get
 
       CheckYourAnswersHelper.findPageToContinue(userAnswers, srn).value.url must endWith(
-        controllers.beneficiary.routes.BeneficiaryNameController.onPageLoad(srn, NormalMode, 0).url
+        controllers.beneficiary.routes.BeneficiaryNameController
+          .onPageLoad(srn, NormalMode, 0, BeneficiaryIndividual)
+          .url
       )
     }
 

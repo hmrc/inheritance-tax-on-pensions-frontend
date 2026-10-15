@@ -115,6 +115,11 @@ POST        /:srn/enter-name-of-beneficiary/$index<[1-2]?[0-9]>     controllers.
 GET         /:srn/change-name-of-beneficiary/$index<[1-2]?[0-9]>    controllers.beneficiary.BeneficiaryNameController.onPageLoad(srn: Srn, mode: Mode = CheckMode, index: Int, journeyRole: JourneyRole = JourneyRole.BeneficiaryIndividual)
 POST        /:srn/change-name-of-beneficiary/$index<[1-2]?[0-9]>    controllers.beneficiary.BeneficiaryNameController.onSubmit(srn: Srn, mode: Mode = CheckMode, index: Int, journeyRole: JourneyRole = JourneyRole.BeneficiaryIndividual)
 
+GET         /:srn/beneficiary-organisation-contact/$index<[1-2]?[0-9]>     controllers.beneficiary.BeneficiaryNameController.onPageLoad(srn: Srn, mode: Mode = NormalMode, index: Int, journeyRole: JourneyRole = JourneyRole.BeneficiaryTrust)
+POST        /:srn/beneficiary-organisation-contact/$index<[1-2]?[0-9]>     controllers.beneficiary.BeneficiaryNameController.onSubmit(srn: Srn, mode: Mode = NormalMode, index: Int, journeyRole: JourneyRole = JourneyRole.BeneficiaryTrust)
+GET         /:srn/change-beneficiary-organisation-contact/$index<[1-2]?[0-9]>    controllers.beneficiary.BeneficiaryNameController.onPageLoad(srn: Srn, mode: Mode = CheckMode, index: Int, journeyRole: JourneyRole = JourneyRole.BeneficiaryTrust)
+POST        /:srn/change-beneficiary-organisation-contact/$index<[1-2]?[0-9]>    controllers.beneficiary.BeneficiaryNameController.onSubmit(srn: Srn, mode: Mode = CheckMode, index: Int, journeyRole: JourneyRole = JourneyRole.BeneficiaryTrust)
+
 GET         /:srn/beneficiary-organisation-details/$index<[1-2]?[0-9]>           controllers.beneficiary.BeneficiaryTrustNameController.onPageLoad(srn: Srn, index: Int, mode: Mode = NormalMode)
 POST        /:srn/beneficiary-organisation-details/$index<[1-2]?[0-9]>           controllers.beneficiary.BeneficiaryTrustNameController.onSubmit(srn: Srn, index: Int, mode: Mode = NormalMode)
 GET         /:srn/change-beneficiary-organisation-details/$index<[1-2]?[0-9]>    controllers.beneficiary.BeneficiaryTrustNameController.onPageLoad(srn: Srn, index: Int, mode: Mode = CheckMode)

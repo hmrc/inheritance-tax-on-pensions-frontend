@@ -23,8 +23,9 @@ import models.SchemeId.Srn
 import views.html.beneficiary.BeneficiaryNameView
 import controllers.actions._
 import forms.beneficiary.BeneficiaryNameFormProvider
+import play.api.libs.json._
 import models._
-import pages.beneficiary.{BeneficiaryHasNinoPage, BeneficiaryNamePage}
+import pages.beneficiary.{BeneficiaryHasNinoPage, BeneficiaryNamePage, BeneficiaryTrustNamePage}
 import play.api.i18n.MessagesApi
 
 import scala.concurrent.{ExecutionContext, Future}
@@ -63,7 +64,7 @@ class BeneficiaryNameController @Inject() (
               case Some(individualName) => form.fill(individualName)
             }
 
-            Ok(view(preparedForm, srn, index, mode, journeyRole))
+            Ok(view(preparedForm, srn, index, mode, journeyRole, trustName(request.userAnswers, index, journeyRole)))
         }
       }
 
@@ -85,26 +86,53 @@ class BeneficiaryNameController @Inject() (
                 formWithErrors =>
                   Future.successful(
                     BadRequest(
-                      view(formWithErrors, srn, index, mode, journeyRole)
+                      view(
+                        formWithErrors,
+                        srn,
+                        index,
+                        mode,
+                        journeyRole,
+                        trustName(request.userAnswers, index, journeyRole)
+                      )
                     )
                   ),
                 individualName =>
                   for {
                     updatedAnswers <- Future
-                      .fromTry(addIndividualName(index, request.userAnswers, journeyRole, individualName))
+                      .fromTry(addBeneficiaryName(request.userAnswers, index, journeyRole, individualName))
                     _ <- userAnswersService.set(updatedAnswers)(using hc, request.request)
                   } yield Redirect(nextPage(srn, index, mode, journeyRole, updatedAnswers))
               )
         }
       }
 
-  private[controllers] def addIndividualName(
-    index: Int,
+  private[controllers] def addBeneficiaryName(
     userAnswers: UserAnswers,
+    index: Int,
     journeyRole: JourneyRole,
     individualName: IndividualName
-  ): Try[UserAnswers] =
-    userAnswers.set(BeneficiaryNamePage(index, journeyRole), individualName)
+  ): Try[UserAnswers] = Try {
+    val beneficiaries = (userAnswers.data \ "beneficiaries").as[JsArray]
+    val beneficiary = beneficiaries.value(index).as[JsObject]
+    val details = (beneficiary \ "beneficiaryDetails").asOpt[JsObject].getOrElse(Json.obj())
+    val beneficiaryType = journeyRole.name
+    val existing = details.value.get(beneficiaryType).collect { case obj: JsObject => obj }.getOrElse(Json.obj())
+
+    val updatedBeneficiary = beneficiary ++ Json.obj(
+      "beneficiaryDetails" -> (details ++ Json.obj(
+        beneficiaryType -> existing.deepMerge(Json.toJson(individualName).as[JsObject])
+      ))
+    )
+
+    userAnswers.copy(
+      data = userAnswers.data ++ Json.obj(
+        "beneficiaries" -> JsArray(beneficiaries.value.updated(index, updatedBeneficiary))
+      )
+    )
+  }
+
+  private def trustName(userAnswers: UserAnswers, index: Int, journeyRole: JourneyRole): Option[String] =
+    Option.when(journeyRole == JourneyRole.BeneficiaryTrust)(userAnswers.get(BeneficiaryTrustNamePage(index))).flatten
 
   private[controllers] def nextPage(
     srn: Srn,
@@ -120,6 +148,12 @@ class BeneficiaryNameController @Inject() (
             controllers.beneficiary.routes.BeneficiaryHasNinoController.onPageLoad(srn, index, NormalMode)
           case CheckMode if userAnswers.get(BeneficiaryHasNinoPage(index)).isEmpty =>
             controllers.beneficiary.routes.BeneficiaryHasNinoController.onPageLoad(srn, index, CheckMode)
+          case CheckMode => routes.CheckYourAnswersController.onPageLoad(srn)
+        }
+      case JourneyRole.BeneficiaryTrust =>
+        mode match {
+          case NormalMode =>
+            controllers.beneficiary.routes.BeneficiaryListController.onPageLoad(srn)
           case CheckMode => routes.CheckYourAnswersController.onPageLoad(srn)
         }
       case _ => routes.JourneyRecoveryController.onPageLoad()

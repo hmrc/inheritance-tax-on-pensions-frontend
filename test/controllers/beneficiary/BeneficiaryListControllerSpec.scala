@@ -46,7 +46,7 @@ class BeneficiaryListControllerSpec extends SpecBase {
     BeneficiaryListItem(
       name = individualNameFormatted,
       changeUrl = routes.BeneficiaryNameController
-        .onPageLoad(srn, CheckMode, testIndex)
+        .onPageLoad(srn, CheckMode, testIndex, JourneyRole.BeneficiaryIndividual)
         .url,
       removeUrl = routes.RemoveBeneficiaryController.onPageLoad(srn, NormalMode, testIndex).url
     )

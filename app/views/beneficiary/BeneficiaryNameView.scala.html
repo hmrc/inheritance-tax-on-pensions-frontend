@@ -33,13 +33,13 @@
     govukButton: GovukButton
 )
 
-@(form: Form[?], srn: Srn, index: Int, mode: Mode, journeyRole: JourneyRole)(implicit request: Request[?], messages: Messages)
+@(form: Form[?], srn: Srn, index: Int, mode: Mode, journeyRole: JourneyRole, trustName: Option[String] = None)(implicit request: Request[?], messages: Messages)
 
-@viewModel = @{ BeneficiaryNamePageViewModel(form, journeyRole) }
+@viewModel = @{ BeneficiaryNamePageViewModel(form, journeyRole, trustName) }
 
 @layout(pageTitle = title(form, viewModel.title)) {
 
-    @formHelper(action = controllers.beneficiary.routes.BeneficiaryNameController.onSubmit(srn, mode, index), Symbol("autoComplete") -> "off") {
+    @formHelper(action = controllers.beneficiary.routes.BeneficiaryNameController.onSubmit(srn, mode, index, journeyRole), Symbol("autoComplete") -> "off") {
 
         @if(form.errors.nonEmpty) {
             @govukErrorSummary(ErrorSummaryViewModel(form))
