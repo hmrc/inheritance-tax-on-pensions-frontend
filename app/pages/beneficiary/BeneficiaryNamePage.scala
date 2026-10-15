@@ -26,6 +26,8 @@ case class BeneficiaryNamePage(index: Int, journeyRole: JourneyRole) extends Que
     journeyRole match {
       case JourneyRole.BeneficiaryIndividual =>
         (JsPath \ "beneficiaries")(index) \ "beneficiaryDetails" \ "individual"
+      case JourneyRole.BeneficiaryTrust =>
+        (JsPath \ "beneficiaries")(index) \ "beneficiaryDetails" \ "trust"
       case _ => JsPath \ "unknown" \ toString
     }
 

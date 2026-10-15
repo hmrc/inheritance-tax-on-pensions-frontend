@@ -50,7 +50,7 @@ class BeneficiaryAccessSpec extends SpecBase {
     Seq(
       routes.BeneficiaryTypeController.onPageLoad(srn, testIndex, mode).url ->
         Seq("value" -> BeneficiaryType.Individual.toString),
-      routes.BeneficiaryNameController.onPageLoad(srn, mode, testIndex).url ->
+      routes.BeneficiaryNameController.onPageLoad(srn, mode, testIndex, JourneyRole.BeneficiaryIndividual).url ->
         Seq("firstForename" -> "Jane", "surname" -> "Smith"),
       routes.BeneficiaryTrustNameController.onPageLoad(srn, testIndex, mode).url ->
         Seq("value" -> trustName),

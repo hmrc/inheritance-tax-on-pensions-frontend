@@ -18,6 +18,7 @@ package base
 
 import pages.AreBeneficiariesKnownPage
 import generators.Generators
+import play.api.libs.json.{JsArray, Json}
 import play.api.libs.json.Json
 import models.beneficiary.BeneficiaryType
 import models._
@@ -184,6 +185,38 @@ trait TestValues extends Generators {
               "firstForename" -> "Firstnametwo",
               "secondForename" -> "Middlenametwo",
               "surname" -> "Surname"
+            )
+          )
+        )
+      )
+
+  val userAnswersWithMultipleBeneficiaries: UserAnswers =
+    deceasedPrUserAnswers
+      .copy(
+        data = deceasedPrUserAnswers.data ++ Json.obj(
+          "beneficiaries" -> JsArray(
+            Seq(
+              Json.obj(
+                "beneficiaryType" -> "individual",
+                "beneficiaryDetails" -> Json.obj(
+                  "individual" -> Json.obj(
+                    "firstForename" -> "ben",
+                    "surname" -> "ben"
+                  )
+                ),
+                "hasNino" -> false,
+                "reasonNoNino" -> "r"
+              ),
+              Json.obj(
+                "beneficiaryType" -> "trust",
+                "beneficiaryDetails" -> Json.obj(
+                  "trust" -> Json.obj(
+                    "beneficiaryTrustName" -> "trust",
+                    "firstForename" -> "rep",
+                    "surname" -> "rep"
+                  )
+                )
+              )
             )
           )
         )
