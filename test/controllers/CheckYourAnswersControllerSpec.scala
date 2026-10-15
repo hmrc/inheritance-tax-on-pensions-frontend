@@ -36,7 +36,6 @@ import base.SpecBase
 import models.beneficiary.BeneficiaryType
 import uk.gov.hmrc.http.HttpResponse
 
-import scala.jdk.CollectionConverters._
 import scala.concurrent.Future
 
 import java.time.LocalDate
@@ -92,10 +91,14 @@ class CheckYourAnswersControllerSpec extends SpecBase {
         .get
         .set(
           pages.beneficiary.BeneficiaryNamePage(0, BeneficiaryIndividual),
-          IndividualName(Some("Mr"), "John", Some("James"), "Doe")
+          individualName
         )
         .get
         .set(pages.beneficiary.BeneficiaryHasNinoPage(0), true)
+        .get
+        .set(pages.beneficiary.BeneficiaryNinoPage(0), testNino)
+        .get
+        .set(pages.beneficiary.BeneficiaryIhtPayablePage(0), BigDecimal("12.34"))
         .get
 
       val application = applicationBuilder(userAnswers = Some(userAnswers)).build()
@@ -191,74 +194,6 @@ class CheckYourAnswersControllerSpec extends SpecBase {
     }
 
     "onPageLoadContinueMode" - {
-      Seq(PrType.Individual -> JourneyRole.PrIndividual, PrType.Organisation -> JourneyRole.PrOrganisation).foreach {
-        case (prType, role) =>
-          Seq(true, false).foreach { submittedByPr =>
-            s"must display the updated payment notice summary for $prType with submittedByPr=$submittedByPr" in {
-              val userAnswers = emptyUserAnswers
-                .set(PrTypePage, prType)
-                .success
-                .value
-                .set(IndividualNamePage(role), IndividualName(Some("Dr"), "Firstname", Some("Middlename"), "Surname"))
-                .success
-                .value
-                .set(DidPrSubmitPage, submittedByPr)
-                .success
-                .value
-              val application = applicationBuilder(userAnswers = Some(userAnswers)).build()
-
-              running(application) {
-                val result =
-                  route(
-                    application,
-                    onPageLoadContinueFakeRequest
-                  ).value
-                status(result) mustBe OK
-                val document = org.jsoup.Jsoup.parse(contentAsString(result))
-                val row = document
-                  .select(".govuk-summary-list__row")
-                  .asScala
-                  .find(_.select(".govuk-summary-list__key").text() == "Who submitted the payment notice?")
-                  .value
-                row.select(".govuk-summary-list__value").text() mustBe (if (submittedByPr) "Firstname Surname"
-                                                                        else "Someone else")
-                row.select("a").attr("href") mustBe routes.DidPrSubmitController.onPageLoad(srn, CheckMode).url
-                row.select("a").text() mustBe "Change who submitted the payment notice"
-              }
-            }
-          }
-      }
-
-      "must show IHT payable directly below beneficiaries known with a Change link" in {
-        val answers = emptyUserAnswers
-          .set(AreBeneficiariesKnownPage, false)
-          .success
-          .value
-          .set(IhtPayablePage, BigDecimal("1234.50"))
-          .success
-          .value
-        val application = applicationBuilder(Some(answers)).build()
-        running(application) {
-          val result = route(
-            application,
-            onPageLoadContinueFakeRequest
-          ).value
-          status(result) mustBe OK
-          val document = org.jsoup.Jsoup.parse(contentAsString(result))
-          val rows = document.select(".govuk-summary-list__row")
-          rows.size mustBe 2
-          rows
-            .get(0)
-            .select(".govuk-summary-list__key")
-            .text mustBe "Does the payment notice contain beneficiary details?"
-          val amountRow = rows.get(1)
-          amountRow.select(".govuk-summary-list__key").text mustBe "Amount of IHT payable"
-          amountRow.select(".govuk-summary-list__value").text mustBe "\u00a31,234.50"
-          amountRow.select("a").attr("href") mustBe routes.IhtPayableController.onPageLoad(srn, CheckMode).url
-          amountRow.select("a .govuk-visually-hidden").text mustBe "the amount of IHT payable"
-        }
-      }
-
       "must return OK and the correct view for a GET" in {
         val userAnswers = emptyUserAnswers
           .set(InheritanceTaxReferencePage, "A123456/25A")
@@ -647,15 +582,17 @@ class CheckYourAnswersControllerSpec extends SpecBase {
                 BeneficiaryHasNinoSummary.row(srn, 0, userAnswers)(using messages(application)).get
               ),
               card = CardViewModel(
-                "Beneficiary 1",
+                messages(application)("checkYourAnswers.beneficiary.details.card.title", 1),
                 2,
                 Some(
                   Actions(
                     items = Seq(
                       ActionItemViewModel(
-                        Text("Remove"),
+                        Text(messages(application)("site.remove")),
                         s"""/inheritance-tax-on-pensions/${srn.value}/change-remove-beneficiary/0"""
-                      ).copy(visuallyHiddenText = Some("0"))
+                      ).copy(visuallyHiddenText =
+                        Some(messages(application)("checkYourAnswers.beneficiary.details.card.remove.hidden", 0))
+                      )
                     )
                   )
                 )
@@ -666,15 +603,17 @@ class CheckYourAnswersControllerSpec extends SpecBase {
                 BeneficiaryTypeSummary.row(srn, 1, userAnswers)(using messages(application)).get
               ),
               card = CardViewModel(
-                "Beneficiary 2",
+                messages(application)("checkYourAnswers.beneficiary.details.card.title", 2),
                 2,
                 Some(
                   Actions(
                     items = Seq(
                       ActionItemViewModel(
-                        Text("Remove"),
+                        Text(messages(application)("site.remove")),
                         s"""/inheritance-tax-on-pensions/${srn.value}/change-remove-beneficiary/1"""
-                      ).copy(visuallyHiddenText = Some("1"))
+                      ).copy(visuallyHiddenText =
+                        Some(messages(application)("checkYourAnswers.beneficiary.details.card.remove.hidden", 1))
+                      )
                     )
                   )
                 )

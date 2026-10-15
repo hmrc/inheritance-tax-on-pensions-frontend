@@ -41,11 +41,15 @@ class BeneficiaryTypePageSpec extends SpecBase {
         .set(BeneficiaryHasNinoPage(testIndex), true)
         .success
         .value
+        .set(BeneficiaryIhtPayablePage(testIndex), BigDecimal("12.34"))
+        .success
+        .value
 
       val updatedAnswers = userAnswers.set(BeneficiaryTypePage(testIndex), BeneficiaryType.Trust).success.value
 
       updatedAnswers.get(BeneficiaryNamePage(testIndex, JourneyRole.BeneficiaryIndividual)) mustBe None
       updatedAnswers.get(BeneficiaryHasNinoPage(testIndex)) mustBe None
+      updatedAnswers.get(BeneficiaryIhtPayablePage(testIndex)) mustBe None
     }
 
     "must remove trust beneficiary details when Individual is selected" in {

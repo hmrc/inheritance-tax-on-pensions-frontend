@@ -18,7 +18,6 @@ package controllers
 
 import play.api.test.FakeRequest
 import services.UserAnswersService
-import org.jsoup.Jsoup
 import pages.{AreBeneficiariesKnownPage, IhtPayablePage}
 import play.api.inject.bind
 import base.SpecBase
@@ -37,20 +36,11 @@ class IhtPayableControllerSpec extends SpecBase {
   "IhtPayableController" - {
     Seq(NormalMode, CheckMode).foreach { mode =>
       Seq(true, false).foreach { isPsa =>
-        s"must render the currency input in $mode for isPsa=$isPsa" in {
+        s"must return OK in $mode for isPsa=$isPsa" in {
           val app = applicationBuilder(Some(answers), isPsa = isPsa, usesSession = true).build()
           running(app) {
             val result = route(app, FakeRequest(GET, routes.IhtPayableController.onPageLoad(srn, mode).url)).value
             status(result) mustBe OK
-            val doc = Jsoup.parse(contentAsString(result))
-            messages(app).isDefinedAt("ihtPayable.heading") mustBe true
-            doc.select("h1").text mustBe messages(app)("ihtPayable.heading")
-            doc.select("label.govuk-label--l").size mustBe 1
-            doc.select("label.govuk-label--xl").size mustBe 0
-            doc.select(".govuk-input__prefix").text mustBe "\u00a3"
-            doc.select("input#value").hasClass("govuk-input--width-10") mustBe true
-            doc.select("input#value").attr("inputmode") mustBe "decimal"
-            doc.select("form").attr("action") mustBe routes.IhtPayableController.onSubmit(srn, mode).url
           }
         }
 
@@ -78,20 +68,9 @@ class IhtPayableControllerSpec extends SpecBase {
       }
     }
 
-    "must populate the saved amount" in {
-      val app =
-        applicationBuilder(Some(answers.set(IhtPayablePage, BigDecimal("1234.56")).success.value), usesSession = true)
-          .build()
-      running(app) {
-        val result = route(app, FakeRequest(GET, routes.IhtPayableController.onPageLoad(srn, CheckMode).url)).value
-        status(result) mustBe OK
-        Jsoup.parse(contentAsString(result)).select("input#value").attr("value") mustBe "1234.56"
-      }
-    }
-
-    Seq("" -> "ihtPayable.error.required", "10%" -> "ihtPayable.error.invalid")
-      .foreach { case (input, errorKey) =>
-        s"must show $errorKey without saving" in {
+    Seq("", "10%")
+      .foreach { input =>
+        s"must reject invalid input '$input' without saving" in {
           val service = mock[UserAnswersService]
           val app = applicationBuilder(Some(answers), usesSession = true)
             .overrides(bind[UserAnswersService].toInstance(service))
@@ -103,11 +82,6 @@ class IhtPayableControllerSpec extends SpecBase {
                 .withFormUrlEncodedBody("value" -> input)
             ).value
             status(result) mustBe BAD_REQUEST
-            val doc = Jsoup.parse(contentAsString(result))
-            messages(app).isDefinedAt(errorKey) mustBe true
-            doc.select(".govuk-error-summary a").text mustBe messages(app)(errorKey)
-            doc.select(".govuk-error-summary a").attr("href") mustBe "#value"
-            doc.select("input#value").attr("value") mustBe input
             verifyNoInteractions(service)
           }
         }

@@ -17,12 +17,13 @@
 package utils
 
 import models.JourneyRole._
-import org.scalatest.freespec.AnyFreeSpec
 import pages._
 import controllers.routes
 import base.SpecBase
 import models.beneficiary.BeneficiaryType
 import models._
+import play.api.test.Helpers.running
+import org.scalatest.freespec.AnyFreeSpec
 
 class CheckYourAnswersHelperSpec extends AnyFreeSpec with SpecBase {
 
@@ -184,13 +185,69 @@ class CheckYourAnswersHelperSpec extends AnyFreeSpec with SpecBase {
         .get
         .set(
           pages.beneficiary.BeneficiaryNamePage(0, BeneficiaryIndividual),
-          IndividualName(Some("Mr"), "John", Some("James"), "Doe")
+          individualName
         )
         .get
         .set(pages.beneficiary.BeneficiaryHasNinoPage(0), true)
         .get
+        .set(pages.beneficiary.BeneficiaryNinoPage(0), testNino)
+        .get
+        .set(pages.beneficiary.BeneficiaryIhtPayablePage(0), BigDecimal("12.34"))
+        .get
 
       CheckYourAnswersHelper.findPageToContinue(userAnswers, srn) mustBe None
+    }
+
+    "must resume at the first individual beneficiary with an unanswered amount and include saved amounts in CYA" in {
+      val completeFirst = prIndividualUserAnswers
+        .set(pages.beneficiary.BeneficiaryTypePage(0), BeneficiaryType.Individual)
+        .success
+        .value
+        .set(pages.beneficiary.BeneficiaryNamePage(0, BeneficiaryIndividual), individualName)
+        .success
+        .value
+        .set(pages.beneficiary.BeneficiaryHasNinoPage(0), false)
+        .success
+        .value
+        .set(pages.beneficiary.BeneficiaryNoNinoReasonPage(0), testReasonNoNino)
+        .success
+        .value
+        .set(pages.beneficiary.BeneficiaryIhtPayablePage(0), BigDecimal("1234.56"))
+        .success
+        .value
+      val missingNino = completeFirst
+        .set(pages.beneficiary.BeneficiaryTypePage(1), BeneficiaryType.Individual)
+        .success
+        .value
+        .set(pages.beneficiary.BeneficiaryNamePage(1, BeneficiaryIndividual), individualName)
+        .success
+        .value
+        .set(pages.beneficiary.BeneficiaryHasNinoPage(1), true)
+        .success
+        .value
+      CheckYourAnswersHelper.findPageToContinue(missingNino, srn).value mustBe
+        controllers.beneficiary.routes.BeneficiaryNinoController.onPageLoad(srn, 1, NormalMode)
+      val missingReason = missingNino.set(pages.beneficiary.BeneficiaryHasNinoPage(1), false).success.value
+      CheckYourAnswersHelper.findPageToContinue(missingReason, srn).value mustBe
+        controllers.beneficiary.routes.BeneficiaryNoNinoReasonController.onPageLoad(srn, 1, NormalMode)
+      val incompleteSecond = missingNino.set(pages.beneficiary.BeneficiaryNinoPage(1), testNino).success.value
+      CheckYourAnswersHelper.findPageToContinue(incompleteSecond, srn).value mustBe
+        controllers.beneficiary.routes.BeneficiaryIhtPayableController.onPageLoad(srn, 1, NormalMode)
+      CheckYourAnswersHelper.findBeneficiaryPageToContinue(incompleteSecond, srn).value mustBe
+        controllers.beneficiary.routes.BeneficiaryIhtPayableController.onPageLoad(srn, 1, NormalMode)
+
+      val app = applicationBuilder().build()
+      running(app) {
+        given play.api.i18n.Messages = messages(app)
+        val lists = CheckYourAnswersHelper.buildSummaryLists(
+          incompleteSecond,
+          srn,
+          identity,
+          app.injector.instanceOf[play.api.i18n.MessagesApi]
+        )
+        lists.beneficiaryList.head.rows.last.value.content mustBe uk.gov.hmrc.govukfrontend.views.Aliases
+          .Text("\u00a31,234.56")
+      }
     }
   }
 }

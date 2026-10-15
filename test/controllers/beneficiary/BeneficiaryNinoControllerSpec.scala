@@ -23,11 +23,11 @@ import base.SpecBase
 import forms.beneficiary.BeneficiaryNinoFormProvider
 import controllers.beneficiary.routes
 import models._
-import pages.beneficiary.{BeneficiaryNamePage, BeneficiaryNinoPage}
+import pages.beneficiary.{BeneficiaryIhtPayablePage, BeneficiaryNamePage, BeneficiaryNinoPage}
 import org.scalatestplus.mockito.MockitoSugar
-import org.mockito.ArgumentMatchers.any
+import org.mockito.ArgumentMatchers.{any, eq => eqTo}
 import play.api.test.Helpers._
-import org.mockito.Mockito.when
+import org.mockito.Mockito.{verify, when}
 import play.api.inject
 import uk.gov.hmrc.domain.Nino
 
@@ -97,27 +97,37 @@ class BeneficiaryNinoControllerSpec extends SpecBase with MockitoSugar {
       }
     }
 
-    "must redirect to the next page when valid data is submitted" in {
+    Seq(
+      (NormalMode, None, routes.BeneficiaryIhtPayableController.onPageLoad(srn, testIndex, NormalMode)),
+      (CheckMode, None, routes.BeneficiaryIhtPayableController.onPageLoad(srn, testIndex, CheckMode)),
+      (CheckMode, Some(BigDecimal("12.34")), controllers.routes.CheckYourAnswersController.onPageLoad(srn))
+    ).foreach { case (mode, savedAmount, nextPage) =>
+      s"must save and follow the next page in $mode with amountAlreadyEntered=${savedAmount.isDefined}" in {
+        val answers = savedAmount.fold(userAnswersWithBeneficiaryName) { amount =>
+          userAnswersWithBeneficiaryName.set(BeneficiaryIhtPayablePage(testIndex), amount).success.value
+        }
+        val mockConnector = mock[InheritanceTaxOnPensionsConnector]
+        when(mockConnector.setUserAnswers(any(), any(), any(), any(), any())(using any()))
+          .thenReturn(Future.successful(Right(answers)))
+        val application = applicationBuilder(Some(answers), usesSession = true)
+          .overrides(inject.bind[InheritanceTaxOnPensionsConnector].toInstance(mockConnector))
+          .build()
 
-      val mockInheritanceTaxOnPensionsConnector = mock[InheritanceTaxOnPensionsConnector]
-      when(mockInheritanceTaxOnPensionsConnector.setUserAnswers(any(), any(), any(), any(), any())(using any()))
-        .thenReturn(Future.successful(Right(userAnswersWithBeneficiaryName)))
+        running(application) {
+          val request = FakeRequest(POST, routes.BeneficiaryNinoController.onSubmit(srn, testIndex, mode).url)
+            .withFormUrlEncodedBody("value" -> testNino)
+          val result = route(application, request).value
 
-      val application = applicationBuilder(userAnswers = Some(userAnswersWithBeneficiaryName), usesSession = true)
-        .overrides(
-          inject.bind[InheritanceTaxOnPensionsConnector].toInstance(mockInheritanceTaxOnPensionsConnector)
-        )
-        .build()
-
-      running(application) {
-        val request =
-          FakeRequest(POST, ninoRoute)
-            .withFormUrlEncodedBody(("value", testNino))
-
-        val result = route(application, request).value
-
-        status(result) mustEqual SEE_OTHER
-        redirectLocation(result).value mustEqual routes.BeneficiaryListController.onPageLoad(srn).url
+          status(result) mustEqual SEE_OTHER
+          redirectLocation(result).value mustEqual nextPage.url
+          verify(mockConnector).setUserAnswers(
+            eqTo(answers.set(BeneficiaryNinoPage(testIndex), testNino).success.value),
+            any(),
+            any(),
+            any(),
+            any()
+          )(using any())
+        }
       }
     }
 

@@ -17,22 +17,20 @@
 package forms
 
 import forms.mappings.Mappings
+import models.CurrencyEntry
 import play.api.data.Form
 
 import javax.inject.Inject
 
-class IhtPayableFormProvider @Inject() extends Mappings {
-  private val MinIhtPayable: BigDecimal = BigDecimal(0)
-  private val MaxIhtPayable: BigDecimal = BigDecimal("999999999.99")
-
-  def apply(): Form[BigDecimal] = Form(
+class CurrencyEntryFormProvider @Inject() extends Mappings {
+  def apply(entry: CurrencyEntry): Form[BigDecimal] = Form(
     "value" -> currency(
-      requiredKey = "ihtPayable.error.required",
-      invalidNumeric = "ihtPayable.error.invalid",
-      nonNumericKey = "ihtPayable.error.invalid"
+      requiredKey = s"${entry.messagePrefix}.error.required",
+      invalidNumeric = s"${entry.messagePrefix}.error.invalid",
+      nonNumericKey = s"${entry.messagePrefix}.error.invalid"
     ).verifying(
-      minimumCurrency(MinIhtPayable, "ihtPayable.error.invalid"),
-      maximumCurrency(MaxIhtPayable, "ihtPayable.error.invalid")
+      minimumCurrency(entry.minimum, s"${entry.messagePrefix}.error.invalid"),
+      maximumCurrency(entry.maximum, entry.maximumErrorKey)
     )
   )
 }
