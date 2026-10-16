@@ -41,4 +41,17 @@ class ReportRetrievalService @Inject() (
       srnVal,
       role
     )
+
+  def getReportByFbNumber(fbNumber: String)(implicit
+    hc: HeaderCarrier,
+    request: AllowedAccessRequest[?]
+  ): Future[Either[UpstreamErrorResponse, HttpResponse]] =
+    inheritanceTaxOnPensionsConnector.getReportByFbNumber(
+      request.schemeDetails.pstr,
+      fbNumber,
+      schemeAdministratorOrPractitionerName,
+      schemeName,
+      srnVal,
+      role
+    )
 }

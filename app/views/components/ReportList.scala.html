@@ -39,11 +39,17 @@
         case (Some(ref), version) => s"${controllers.routes.SubmissionListController.onChange(srn, ref, version).url}"
 }
 
+@viewPaidPageUrl(fbNumber: Option[String]) = @{
+    fbNumber match
+        case None => "#"
+        case Some(fb) => s"${controllers.routes.ViewPaidSubmissionReportController.onViewPaid(srn, fb).url}"
+}
+
 @reportLink(report: IhtpOverviewReport) = @{
     HtmlContent(linkWithHiddenText(
         id                    = s"deceased-name-${report.fbNumber}",
         text                  = report.deceasedName,
-        href                  = if(report.ihtpStatus == "Not reconciled") changePageUrl(report.paymentReference, report.ihtVersion) else amendPageUrl(report.uuid),
+        href                  = if(paid) viewPaidPageUrl(report.fbNumber) else if(report.ihtpStatus == "Not reconciled") changePageUrl(report.paymentReference, report.ihtVersion) else amendPageUrl(report.uuid),
         visuallyHiddenContent = s" ${messages("submissionList.table.deceasedName.hidden")}"
     ).toString)
 }
@@ -53,7 +59,7 @@
         case Some(paymentReference) => HtmlContent(linkWithHiddenText(
             id                    = s"payment-reference-${report.fbNumber}",
             text                  = paymentReference,
-            href                  = "#",
+            href                  = if(paid) viewPaidPageUrl(report.fbNumber) else "#",
             visuallyHiddenContent = s" ${messages("submissionList.table.paymentReference.hidden")}"
         ).toString)
         case None => Text(messages("submissionList.table.paymentReference.unavailable"))

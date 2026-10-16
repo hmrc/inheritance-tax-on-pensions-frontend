@@ -1,0 +1,83 @@
+@*
+ * Copyright 2026 HM Revenue & Customs
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *@
+
+@import components.{LinkWithVisitedState, PageHeading, SubHeading}
+@import config.FrontendAppConfig
+@import models.SchemeId.Srn
+@import uk.gov.hmrc.govukfrontend.views.Aliases.InsetText
+@import viewmodels.govuk.summarylist.FluentSummaryList
+
+@this(
+    layout: templates.Layout,
+    pageHeading: PageHeading,
+    subHeading: SubHeading,
+    linkWithVisitedState: LinkWithVisitedState,
+    govukSummaryList: GovukSummaryList,
+    govukInsetText: GovukInsetText,
+    appConfig: FrontendAppConfig
+)
+
+@(srn: Srn, deceasedDetailsSummaryList: SummaryList, prDetailsSummaryList: SummaryList, paymentNoticeDetailsSummaryList: SummaryList, beneficiaryList: List[SummaryList], schemeName: String)(implicit request: Request[?], messages: Messages)
+
+@insetContent = @{
+    HtmlFormat.fill(Seq(
+        Html(s"${messages("viewPaidSubmissionReport.inset.paid")}<br>${messages("viewPaidSubmissionReport.inset.contact")} "),
+        linkWithVisitedState(
+            id = "contact-hmrc",
+            text = messages("viewPaidSubmissionReport.inset.contact.link"),
+            href = appConfig.urls.managePensionsSchemes.contactHmrc
+        ),
+        Html(".")
+    ))
+}
+
+@layout(pageTitle = titleNoForm(messages("viewPaidSubmissionReport.title"))) {
+
+    @pageHeading(messages("viewPaidSubmissionReport.heading"))
+
+    @govukInsetText(InsetText(content = HtmlContent(insetContent)))
+
+    @if(deceasedDetailsSummaryList.rows.nonEmpty) {
+        @subHeading(text = messages("checkYourAnswers.deceased.details.heading"))
+        @govukSummaryList(deceasedDetailsSummaryList.withCssClass("govuk-!-margin-bottom-9"))
+    }
+
+    @if(prDetailsSummaryList.rows.nonEmpty) {
+        @subHeading(text = messages("checkYourAnswers.pr.details.heading"))
+        @govukSummaryList(prDetailsSummaryList.withCssClass("govuk-!-margin-bottom-9"))
+    }
+
+    @if(paymentNoticeDetailsSummaryList.rows.nonEmpty) {
+        @subHeading(text = messages("checkYourAnswers.payment.notice.details.heading"))
+        @govukSummaryList(paymentNoticeDetailsSummaryList.withCssClass("govuk-!-margin-bottom-9"))
+    }
+
+    @if(beneficiaryList.nonEmpty) {
+        @subHeading(text = messages("checkYourAnswers.beneficiary.details.heading"))
+
+        @beneficiaryList.map { beneficiarySummaryList =>
+            @govukSummaryList(beneficiarySummaryList)
+        }
+    }
+
+    <p class="govuk-body">
+        @linkWithVisitedState(
+            id = "return-to-overview",
+            text = messages("checkYourAnswers.returnToOverview", schemeName),
+            href = routes.SubmissionListController.onPageLoad(srn).url
+        )
+    </p>
+}

@@ -70,6 +70,11 @@ paidReports.title = Paid Inheritance Tax on a pension reports
 paidReports.caption = Paid reports
 paidReports.noReports = This scheme does not currently have any paid reports.
 paidReports.returnToActive = Return to active reports
+viewPaidSubmissionReport.title = View report details
+viewPaidSubmissionReport.heading = View report details
+viewPaidSubmissionReport.inset.paid = This report is paid.
+viewPaidSubmissionReport.inset.contact = If you need to change this report, you must
+viewPaidSubmissionReport.inset.contact.link = contact HMRC
 submissionList.returnToScheme.link = Return to {0}
 submissionList.table.status.paid = Tax paid
 
