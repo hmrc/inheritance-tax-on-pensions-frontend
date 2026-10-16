@@ -16,23 +16,24 @@
 
 package controllers.beneficiary
 
-import play.api.test.FakeRequest
+import base.beneficiary.BeneficiarySpecBase
 import connectors.InheritanceTaxOnPensionsConnector
 import controllers.routes
 import play.api.inject.bind
 import views.html.beneficiary.BeneficiaryNameView
-import base.SpecBase
 import forms.beneficiary.BeneficiaryNameFormProvider
 import controllers.beneficiary.BeneficiaryNameController
 import models._
 import pages.beneficiary.{BeneficiaryHasNinoPage, BeneficiaryNamePage}
 import org.mockito.ArgumentMatchers._
+import models.JourneyRole.{BeneficiaryIndividual, BeneficiaryTrust}
+import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import org.mockito.Mockito.when
 
 import scala.concurrent.Future
 
-class BeneficiaryNameControllerSpec extends SpecBase {
+class BeneficiaryNameControllerSpec extends BeneficiarySpecBase {
 
   private val formProvider = new BeneficiaryNameFormProvider()
 
@@ -52,6 +53,10 @@ class BeneficiaryNameControllerSpec extends SpecBase {
     JourneyRoleTestCase(
       JourneyRole.BeneficiaryIndividual,
       controllers.beneficiary.routes.BeneficiaryHasNinoController.onPageLoad(srn, testIndex, NormalMode).url
+    ),
+    JourneyRoleTestCase(
+      JourneyRole.BeneficiaryTrust,
+      controllers.beneficiary.routes.BeneficiaryListController.onPageLoad(srn).url
     )
   )
 
@@ -112,9 +117,9 @@ class BeneficiaryNameControllerSpec extends SpecBase {
 
         val mockConnector = mock[InheritanceTaxOnPensionsConnector]
         when(mockConnector.setUserAnswers(any(), any(), any(), any(), any())(using any()))
-          .thenReturn(Future.successful(Right(emptyUserAnswers)))
+          .thenReturn(Future.successful(Right(userAnswersWithBeneficiaries)))
 
-        val application = applicationBuilder(userAnswers = Some(emptyUserAnswers), usesSession = true)
+        val application = applicationBuilder(userAnswers = Some(userAnswersWithBeneficiaries), usesSession = true)
           .overrides(bind[InheritanceTaxOnPensionsConnector].toInstance(mockConnector))
           .build()
 
@@ -128,63 +133,6 @@ class BeneficiaryNameControllerSpec extends SpecBase {
 
           status(result) mustEqual SEE_OTHER
           redirectLocation(result).value must endWith(testCase.nextPageUrl)
-        }
-      }
-
-      s"must redirect to the beneficiary NINO page when valid ${journeyRole.name} data is submitted in CheckMode and the NINO question is unanswered" in {
-
-        val mockConnector = mock[InheritanceTaxOnPensionsConnector]
-        when(mockConnector.setUserAnswers(any(), any(), any(), any(), any())(using any()))
-          .thenReturn(Future.successful(Right(emptyUserAnswers)))
-
-        val application = applicationBuilder(userAnswers = Some(emptyUserAnswers), usesSession = true)
-          .overrides(bind[InheritanceTaxOnPensionsConnector].toInstance(mockConnector))
-          .build()
-
-        running(application) {
-          val request =
-            FakeRequest(
-              POST,
-              controllers.beneficiary.routes.BeneficiaryNameController.onSubmit(srn, CheckMode, 0).url
-            )
-              .withFormUrlEncodedBody(validFormData*)
-
-          val result = route(application, request).value
-
-          status(result) mustEqual SEE_OTHER
-          redirectLocation(result).value mustEqual controllers.beneficiary.routes.BeneficiaryHasNinoController
-            .onPageLoad(srn, testIndex, CheckMode)
-            .url
-        }
-      }
-
-      s"must redirect to the CYA page when valid ${journeyRole.name} data is submitted in CheckMode and the NINO question is answered" in {
-
-        val userAnswers = emptyUserAnswers.set(BeneficiaryHasNinoPage(testIndex), true).success.value
-        val mockConnector = mock[InheritanceTaxOnPensionsConnector]
-        when(mockConnector.setUserAnswers(any(), any(), any(), any(), any())(using any()))
-          .thenReturn(Future.successful(Right(userAnswers)))
-
-        val application = applicationBuilder(userAnswers = Some(userAnswers), usesSession = true)
-          .overrides(bind[InheritanceTaxOnPensionsConnector].toInstance(mockConnector))
-          .build()
-
-        running(application) {
-          val request =
-            FakeRequest(
-              POST,
-              controllers.beneficiary.routes.BeneficiaryNameController
-                .onSubmit(srn, CheckMode, testIndex)
-                .url
-            )
-              .withFormUrlEncodedBody(validFormData*)
-
-          val result = route(application, request).value
-
-          status(result) mustEqual SEE_OTHER
-          redirectLocation(result).value mustEqual routes.CheckYourAnswersController
-            .onPageLoad(srn)
-            .url
         }
       }
 
@@ -210,6 +158,123 @@ class BeneficiaryNameControllerSpec extends SpecBase {
             messages(application)
           ).toString
         }
+      }
+    }
+
+    s"must redirect to the beneficiary NINO page when valid beneficiary data is submitted in CheckMode and the NINO question is unanswered" in {
+
+      val mockConnector = mock[InheritanceTaxOnPensionsConnector]
+      when(mockConnector.setUserAnswers(any(), any(), any(), any(), any())(using any()))
+        .thenReturn(Future.successful(Right(userAnswersWithBeneficiaries)))
+
+      val application = applicationBuilder(userAnswers = Some(userAnswersWithBeneficiaries), usesSession = true)
+        .overrides(bind[InheritanceTaxOnPensionsConnector].toInstance(mockConnector))
+        .build()
+
+      running(application) {
+        val request =
+          FakeRequest(
+            POST,
+            controllers.beneficiary.routes.BeneficiaryNameController
+              .onSubmit(srn, CheckMode, 0, BeneficiaryIndividual)
+              .url
+          )
+            .withFormUrlEncodedBody(validFormData*)
+
+        val result = route(application, request).value
+
+        status(result) mustEqual SEE_OTHER
+        redirectLocation(result).value mustEqual controllers.beneficiary.routes.BeneficiaryHasNinoController
+          .onPageLoad(srn, testIndex, CheckMode)
+          .url
+      }
+    }
+
+    "must redirect to the CYA page when valid beneficiary data is submitted in CheckMode and the NINO question is answered" in {
+
+      val userAnswers = emptyUserAnswers.set(BeneficiaryHasNinoPage(testIndex), true).success.value
+      val mockConnector = mock[InheritanceTaxOnPensionsConnector]
+      when(mockConnector.setUserAnswers(any(), any(), any(), any(), any())(using any()))
+        .thenReturn(Future.successful(Right(userAnswers)))
+
+      val application = applicationBuilder(userAnswers = Some(userAnswers), usesSession = true)
+        .overrides(bind[InheritanceTaxOnPensionsConnector].toInstance(mockConnector))
+        .build()
+
+      running(application) {
+        val request =
+          FakeRequest(
+            POST,
+            controllers.beneficiary.routes.BeneficiaryNameController
+              .onSubmit(srn, CheckMode, testIndex, BeneficiaryIndividual)
+              .url
+          )
+            .withFormUrlEncodedBody(validFormData*)
+
+        val result = route(application, request).value
+
+        status(result) mustEqual SEE_OTHER
+        redirectLocation(result).value mustEqual routes.CheckYourAnswersController
+          .onPageLoad(srn)
+          .url
+      }
+    }
+
+    "must redirect to the BeneficiaryList page when valid beneficiary trust data is submitted in NormalMode" in {
+
+      val mockConnector = mock[InheritanceTaxOnPensionsConnector]
+      when(mockConnector.setUserAnswers(any(), any(), any(), any(), any())(using any()))
+        .thenReturn(Future.successful(Right(userAnswersWithBeneficiaries)))
+
+      val application = applicationBuilder(userAnswers = Some(userAnswersWithBeneficiaries), usesSession = true)
+        .overrides(bind[InheritanceTaxOnPensionsConnector].toInstance(mockConnector))
+        .build()
+
+      running(application) {
+        val request =
+          FakeRequest(
+            POST,
+            controllers.beneficiary.routes.BeneficiaryNameController
+              .onSubmit(srn, NormalMode, testIndex, BeneficiaryTrust)
+              .url
+          )
+            .withFormUrlEncodedBody(validFormData*)
+
+        val result = route(application, request).value
+
+        status(result) mustEqual SEE_OTHER
+        redirectLocation(result).value mustEqual controllers.beneficiary.routes.BeneficiaryListController
+          .onPageLoad(srn)
+          .url
+      }
+    }
+
+    "must redirect to the CYA page when valid beneficiary trust data is submitted in CheckMode" in {
+
+      val mockConnector = mock[InheritanceTaxOnPensionsConnector]
+      when(mockConnector.setUserAnswers(any(), any(), any(), any(), any())(using any()))
+        .thenReturn(Future.successful(Right(userAnswersWithBeneficiaries)))
+
+      val application = applicationBuilder(userAnswers = Some(userAnswersWithBeneficiaries), usesSession = true)
+        .overrides(bind[InheritanceTaxOnPensionsConnector].toInstance(mockConnector))
+        .build()
+
+      running(application) {
+        val request =
+          FakeRequest(
+            POST,
+            controllers.beneficiary.routes.BeneficiaryNameController
+              .onSubmit(srn, CheckMode, testIndex, BeneficiaryTrust)
+              .url
+          )
+            .withFormUrlEncodedBody(validFormData*)
+
+        val result = route(application, request).value
+
+        status(result) mustEqual SEE_OTHER
+        redirectLocation(result).value mustEqual routes.CheckYourAnswersController
+          .onPageLoad(srn)
+          .url
       }
     }
 
@@ -262,6 +327,39 @@ class BeneficiaryNameControllerSpec extends SpecBase {
           emptyUserAnswers
         ) mustEqual routes.JourneyRecoveryController
           .onPageLoad()
+      }
+    }
+
+    "must preserve the trust name when updating the trust representative name" in {
+
+      val updatedName = IndividualName(
+        title = Some("Dr"),
+        firstForename = "Firstnametwo",
+        secondForename = None,
+        surname = "Surname"
+      )
+
+      val index = 1
+
+      val application =
+        applicationBuilder(userAnswers = Some(userAnswersWithMultipleBeneficiaries), usesSession = true).build()
+
+      running(application) {
+        val controller = application.injector.instanceOf[BeneficiaryNameController]
+
+        val result =
+          controller
+            .addBeneficiaryName(userAnswersWithMultipleBeneficiaries, index, BeneficiaryTrust, updatedName)
+            .success
+            .value
+
+        val trustPath = (result.data \ "beneficiaries")(index) \ "beneficiaryDetails" \ "trust"
+
+        (trustPath \ "beneficiaryTrustName").as[String] mustEqual "trust"
+        (trustPath \ "title").as[String] mustEqual "Dr"
+        (trustPath \ "firstForename").as[String] mustEqual "Firstnametwo"
+        (trustPath \ "secondForename").asOpt[String] mustBe None
+        (trustPath \ "surname").as[String] mustEqual "Surname"
       }
     }
 

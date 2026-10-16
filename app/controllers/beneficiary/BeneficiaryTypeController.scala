@@ -96,7 +96,8 @@ class BeneficiaryTypeController @Inject() (
             routes.BeneficiaryNameController.onPageLoad(
               srn,
               NormalMode,
-              index
+              index,
+              JourneyRole.BeneficiaryIndividual
             )
           case BeneficiaryType.Trust =>
             routes.BeneficiaryTrustNameController.onPageLoad(srn, index, NormalMode)
@@ -108,7 +109,8 @@ class BeneficiaryTypeController @Inject() (
             routes.BeneficiaryNameController.onPageLoad(
               srn,
               CheckMode,
-              index
+              index,
+              JourneyRole.BeneficiaryIndividual
             )
           case BeneficiaryType.Trust if userAnswers.get(BeneficiaryTrustNamePage(index)).isEmpty =>
             routes.BeneficiaryTrustNameController.onPageLoad(srn, index, CheckMode)

@@ -16,7 +16,6 @@
 
 package controllers.beneficiary
 
-import play.api.test.FakeRequest
 import connectors.InheritanceTaxOnPensionsConnector
 import play.api.inject.bind
 import views.html.beneficiary.BeneficiaryTrustNameView
@@ -26,6 +25,8 @@ import models._
 import pages.beneficiary.BeneficiaryTrustNamePage
 import org.mockito.ArgumentCaptor
 import org.mockito.ArgumentMatchers.any
+import models.JourneyRole.BeneficiaryTrust
+import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import org.mockito.Mockito.{times, verify, when}
 
@@ -92,7 +93,8 @@ class BeneficiaryTrustNameControllerSpec extends SpecBase {
           ).withFormUrlEncodedBody(validFormData*)
           val result = route(application, request).value
           val expectedUrl = mode match {
-            case NormalMode => routes.BeneficiaryListController.onPageLoad(srn).url
+            case NormalMode =>
+              routes.BeneficiaryNameController.onPageLoad(srn, NormalMode, testIndex, BeneficiaryTrust).url
             case CheckMode =>
               controllers.routes.CheckYourAnswersController.onPageLoad(srn).url
           }
