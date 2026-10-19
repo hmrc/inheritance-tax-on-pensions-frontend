@@ -35,12 +35,11 @@
 @insetContent = @{
     HtmlFormat.fill(Seq(
         Html(s"${messages("viewPaidSubmissionReport.inset.paid")}<br>${messages("viewPaidSubmissionReport.inset.contact")} "),
-        linkWithVisitedState(
+        Html(linkWithVisitedState(
             id = "contact-hmrc",
             text = messages("viewPaidSubmissionReport.inset.contact.link"),
             href = appConfig.urls.managePensionsSchemes.contactHmrc
-        ),
-        Html(".")
+        ).toString.trim + ".")
     ))
 }
 
