@@ -16,6 +16,7 @@
 
 package pages.beneficiary
 
+import models.JourneyRole.BeneficiaryTrust
 import pages.QuestionPage
 import play.api.libs.json.JsPath
 import models.beneficiary.BeneficiaryType
@@ -34,11 +35,19 @@ case class BeneficiaryTypePage(index: Int) extends QuestionPage[BeneficiaryType]
       case Some(BeneficiaryType.Trust) =>
         for {
           withoutIndividualName <- userAnswers.remove(BeneficiaryNamePage(index, JourneyRole.BeneficiaryIndividual))
-          withoutIndividualDetails <- withoutIndividualName.remove(BeneficiaryHasNinoPage(index))
+          withoutIndividualDetails <- withoutIndividualName
+            .remove(BeneficiaryHasNinoPage(index))
+            .get
+            .remove(BeneficiaryNinoPage(index))
+            .get
+            .remove(BeneficiaryNoNinoReasonPage(index))
           withoutIndividualAmount <- withoutIndividualDetails.remove(BeneficiaryIhtPayablePage(index))
         } yield withoutIndividualAmount
       case Some(BeneficiaryType.Individual) =>
-        userAnswers.remove(BeneficiaryTrustDetailsPage(index))
+        userAnswers
+          .remove(BeneficiaryTrustDetailsPage(index))
+          .get
+          .remove(BeneficiaryNamePage(index, BeneficiaryTrust))
       case _ => super.cleanup(value, userAnswers)
     }
 }

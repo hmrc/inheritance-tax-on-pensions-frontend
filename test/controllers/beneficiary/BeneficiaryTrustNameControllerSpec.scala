@@ -21,14 +21,15 @@ import play.api.inject.bind
 import views.html.beneficiary.BeneficiaryTrustNameView
 import base.SpecBase
 import forms.beneficiary.BeneficiaryTrustNameFormProvider
-import models._
+import models.*
 import pages.beneficiary.BeneficiaryTrustNamePage
 import org.mockito.ArgumentCaptor
 import org.mockito.ArgumentMatchers.any
 import models.JourneyRole.BeneficiaryTrust
 import play.api.test.FakeRequest
-import play.api.test.Helpers._
+import play.api.test.Helpers.*
 import org.mockito.Mockito.{times, verify, when}
+import play.api.libs.json.{JsArray, Json}
 
 import scala.concurrent.Future
 
@@ -79,10 +80,28 @@ class BeneficiaryTrustNameControllerSpec extends SpecBase {
 
     Seq(NormalMode, CheckMode).foreach { mode =>
       s"must save the trust name and redirect to the correct next page in $mode" in {
+        val userAnswers = emptyUserAnswers
+          .copy(
+            data = emptyUserAnswers.data ++ Json.obj(
+              "beneficiaries" -> JsArray(
+                Seq(
+                  Json.obj(
+                    "beneficiaryDetails" -> Json.obj(
+                      "trust" -> Json.obj(
+                        "firstForename" -> "ben",
+                        "surname" -> "ben"
+                      )
+                    )
+                  )
+                )
+              )
+            )
+          )
+
         val mockConnector = mock[InheritanceTaxOnPensionsConnector]
         when(mockConnector.setUserAnswers(any(), any(), any(), any(), any())(using any()))
-          .thenReturn(Future.successful(Right(emptyUserAnswers)))
-        val application = applicationBuilder(userAnswers = Some(emptyUserAnswers), usesSession = true)
+          .thenReturn(Future.successful(Right(userAnswers)))
+        val application = applicationBuilder(userAnswers = Some(userAnswers), usesSession = true)
           .overrides(bind[InheritanceTaxOnPensionsConnector].toInstance(mockConnector))
           .build()
 
@@ -107,6 +126,32 @@ class BeneficiaryTrustNameControllerSpec extends SpecBase {
             .setUserAnswers(answersCaptor.capture(), any(), any(), any(), any())(using any())
           answersCaptor.getValue.get(BeneficiaryTrustNamePage(testIndex)).value mustEqual trustName
         }
+      }
+    }
+
+    "must save the trust name and redirect to the correct next page in checkMode when no trust representative name" in {
+      val mockConnector = mock[InheritanceTaxOnPensionsConnector]
+      when(mockConnector.setUserAnswers(any(), any(), any(), any(), any())(using any()))
+        .thenReturn(Future.successful(Right(emptyUserAnswers)))
+      val application = applicationBuilder(userAnswers = Some(emptyUserAnswers), usesSession = true)
+        .overrides(bind[InheritanceTaxOnPensionsConnector].toInstance(mockConnector))
+        .build()
+
+      running(application) {
+        val request = FakeRequest(
+          POST,
+          routes.BeneficiaryTrustNameController.onSubmit(srn, testIndex, CheckMode).url
+        ).withFormUrlEncodedBody(validFormData *)
+        val result = route(application, request).value
+        val expectedUrl = routes.BeneficiaryNameController.onPageLoad(srn, CheckMode, testIndex, BeneficiaryTrust).url
+
+        status(result) mustEqual SEE_OTHER
+        redirectLocation(result).value mustEqual expectedUrl
+
+        val answersCaptor = ArgumentCaptor.forClass(classOf[UserAnswers])
+        verify(mockConnector, times(1))
+          .setUserAnswers(answersCaptor.capture(), any(), any(), any(), any())(using any())
+        answersCaptor.getValue.get(BeneficiaryTrustNamePage(testIndex)).value mustEqual trustName
       }
     }
 

@@ -20,6 +20,7 @@ import base.SpecBase
 import play.api.libs.json.JsPath
 import models.beneficiary.BeneficiaryType
 import models.JourneyRole
+import models.JourneyRole.BeneficiaryTrust
 
 class BeneficiaryTypePageSpec extends SpecBase {
 
@@ -41,6 +42,9 @@ class BeneficiaryTypePageSpec extends SpecBase {
         .set(BeneficiaryHasNinoPage(testIndex), true)
         .success
         .value
+        .set(BeneficiaryNinoPage(testIndex), testNino)
+        .success
+        .value
         .set(BeneficiaryIhtPayablePage(testIndex), BigDecimal("12.34"))
         .success
         .value
@@ -49,12 +53,16 @@ class BeneficiaryTypePageSpec extends SpecBase {
 
       updatedAnswers.get(BeneficiaryNamePage(testIndex, JourneyRole.BeneficiaryIndividual)) mustBe None
       updatedAnswers.get(BeneficiaryHasNinoPage(testIndex)) mustBe None
+      updatedAnswers.get(BeneficiaryNinoPage(testIndex)) mustBe None
       updatedAnswers.get(BeneficiaryIhtPayablePage(testIndex)) mustBe None
     }
 
     "must remove trust beneficiary details when Individual is selected" in {
       val userAnswers = emptyUserAnswers
         .set(BeneficiaryTrustNamePage(testIndex), trustName)
+        .success
+        .value
+        .set(BeneficiaryNamePage(testIndex, BeneficiaryTrust), individualName)
         .success
         .value
 

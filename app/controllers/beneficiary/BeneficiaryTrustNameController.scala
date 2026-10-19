@@ -16,6 +16,7 @@
 
 package controllers.beneficiary
 
+import models.JourneyRole.BeneficiaryTrust
 import services.UserAnswersService
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import controllers.IhtpBaseController
@@ -24,7 +25,7 @@ import views.html.beneficiary.BeneficiaryTrustNameView
 import controllers.actions._
 import forms.beneficiary.BeneficiaryTrustNameFormProvider
 import models.{JourneyRole, Mode, UserAnswers}
-import pages.beneficiary.BeneficiaryTrustNamePage
+import pages.beneficiary.{BeneficiaryNamePage, BeneficiaryTrustNamePage}
 import play.api.i18n.MessagesApi
 
 import scala.concurrent.{ExecutionContext, Future}
@@ -76,13 +77,15 @@ class BeneficiaryTrustNameController @Inject() (
               for {
                 updatedAnswers <- saveName(request.userAnswers, index, name)
                 _ <- userAnswersService.set(updatedAnswers)(using hc, request.request)
-              } yield Redirect(nextPage(srn, index, mode))
+              } yield Redirect(nextPage(srn, index, mode, updatedAnswers))
           )
       }
 
-  private def nextPage(srn: Srn, index: Int, mode: Mode) =
+  private def nextPage(srn: Srn, index: Int, mode: Mode, userAnswers: UserAnswers) =
     mode match {
       case models.NormalMode =>
+        routes.BeneficiaryNameController.onPageLoad(srn, mode, index, JourneyRole.BeneficiaryTrust)
+      case models.CheckMode if userAnswers.get(BeneficiaryNamePage(index, BeneficiaryTrust)).isEmpty =>
         routes.BeneficiaryNameController.onPageLoad(srn, mode, index, JourneyRole.BeneficiaryTrust)
       case models.CheckMode =>
         controllers.routes.CheckYourAnswersController.onPageLoad(srn)

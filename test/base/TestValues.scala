@@ -19,7 +19,6 @@ package base
 import pages.AreBeneficiariesKnownPage
 import generators.Generators
 import play.api.libs.json.{JsArray, Json}
-import play.api.libs.json.Json
 import models.beneficiary.BeneficiaryType
 import models._
 import pages.beneficiary._
