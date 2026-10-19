@@ -16,9 +16,12 @@
 
 package base
 
+import pages.AreBeneficiariesKnownPage
 import generators.Generators
 import play.api.libs.json.Json
+import models.beneficiary.BeneficiaryType
 import models._
+import pages.beneficiary._
 
 import java.time.{Instant, LocalDate}
 
@@ -75,6 +78,15 @@ trait TestValues extends Generators {
   val testPrAddress: PrAddress =
     PrAddress("1 ABCDE Street", None, None, Some("FGHIJ Town"), Some("AA1 1AA"), "GB")
   val individualNameFormatted: String = s"${individualName.firstForename} ${individualName.surname}"
+
+  def individualBeneficiaryUserAnswers: UserAnswers =
+    (for {
+      known <- UserAnswers(userAnswersId, srn.value, testUuid).set(AreBeneficiariesKnownPage, true)
+      individual <- known.set(BeneficiaryTypePage(0), BeneficiaryType.Individual)
+      named <- individual.set(BeneficiaryNamePage(0, JourneyRole.BeneficiaryIndividual), individualName)
+      hasNino <- named.set(BeneficiaryHasNinoPage(0), true)
+      withNino <- hasNino.set(BeneficiaryNinoPage(0), testNino)
+    } yield withNino).get
 
   def deceasedPrUserAnswers: UserAnswers =
     UserAnswers(userAnswersId, srnGen.sample.get.value.toString, testUuid)

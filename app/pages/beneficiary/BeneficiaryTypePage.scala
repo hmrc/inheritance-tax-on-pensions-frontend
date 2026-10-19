@@ -35,7 +35,8 @@ case class BeneficiaryTypePage(index: Int) extends QuestionPage[BeneficiaryType]
         for {
           withoutIndividualName <- userAnswers.remove(BeneficiaryNamePage(index, JourneyRole.BeneficiaryIndividual))
           withoutIndividualDetails <- withoutIndividualName.remove(BeneficiaryHasNinoPage(index))
-        } yield withoutIndividualDetails
+          withoutIndividualAmount <- withoutIndividualDetails.remove(BeneficiaryIhtPayablePage(index))
+        } yield withoutIndividualAmount
       case Some(BeneficiaryType.Individual) =>
         userAnswers.remove(BeneficiaryTrustDetailsPage(index))
       case _ => super.cleanup(value, userAnswers)

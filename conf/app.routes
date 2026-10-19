@@ -132,6 +132,11 @@ POST        /:srn/beneficiary-national-insurance-number/$index<[1-2]?[0-9]>     
 GET         /:srn/change-beneficiary-national-insurance-number/$index<[1-2]?[0-9]> controllers.beneficiary.BeneficiaryHasNinoController.onPageLoad(srn: Srn, index: Int, mode: Mode = CheckMode)
 POST        /:srn/change-beneficiary-national-insurance-number/$index<[1-2]?[0-9]> controllers.beneficiary.BeneficiaryHasNinoController.onSubmit(srn: Srn, index: Int, mode: Mode = CheckMode)
 
+GET         /:srn/enter-amount-tax-payable/$index<[1-2]?[0-9]>        controllers.beneficiary.BeneficiaryIhtPayableController.onPageLoad(srn: Srn, index: Int, mode: Mode = NormalMode)
+POST        /:srn/enter-amount-tax-payable/$index<[1-2]?[0-9]>        controllers.beneficiary.BeneficiaryIhtPayableController.onSubmit(srn: Srn, index: Int, mode: Mode = NormalMode)
+GET         /:srn/change-amount-tax-payable/$index<[1-2]?[0-9]>       controllers.beneficiary.BeneficiaryIhtPayableController.onPageLoad(srn: Srn, index: Int, mode: Mode = CheckMode)
+POST        /:srn/change-amount-tax-payable/$index<[1-2]?[0-9]>       controllers.beneficiary.BeneficiaryIhtPayableController.onSubmit(srn: Srn, index: Int, mode: Mode = CheckMode)
+
 GET         /:srn/enter-deceased-ni-number                        controllers.NinoController.onPageLoad(srn: Srn, mode: Mode = NormalMode)
 POST        /:srn/enter-deceased-ni-number                        controllers.NinoController.onSubmit(srn: Srn, mode: Mode = NormalMode)
 GET         /:srn/change-deceased-ni-number                       controllers.NinoController.onPageLoad(srn: Srn, mode: Mode = CheckMode)

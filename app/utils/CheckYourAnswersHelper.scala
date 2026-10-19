@@ -89,7 +89,8 @@ object CheckYourAnswersHelper {
                 ),
                 BeneficiaryHasNinoSummary.row(srn, index, userAnswers),
                 BeneficiaryNinoSummary.row(srn, index, userAnswers),
-                BeneficiaryNoNinoReasonSummary.row(srn, index, userAnswers)
+                BeneficiaryNoNinoReasonSummary.row(srn, index, userAnswers),
+                BeneficiaryIhtPayableSummary.row(srn, index, userAnswers)
               ).flatten
             ).withCard(
               CardViewModel(
@@ -232,6 +233,26 @@ object CheckYourAnswersHelper {
           answers.get(pages.beneficiary.BeneficiaryTypePage(i)).contains(BeneficiaryType.Individual) &&
             answers.get(pages.beneficiary.BeneficiaryHasNinoPage(i)).isEmpty,
         controllers.beneficiary.routes.BeneficiaryHasNinoController.onPageLoad(srn, i, NormalMode)
+      ),
+      ContinuationPage(
+        answers =>
+          answers.get(pages.beneficiary.BeneficiaryTypePage(i)).contains(BeneficiaryType.Individual) &&
+            answers.get(pages.beneficiary.BeneficiaryHasNinoPage(i)).contains(true) &&
+            answers.get(pages.beneficiary.BeneficiaryNinoPage(i)).isEmpty,
+        controllers.beneficiary.routes.BeneficiaryNinoController.onPageLoad(srn, i, NormalMode)
+      ),
+      ContinuationPage(
+        answers =>
+          answers.get(pages.beneficiary.BeneficiaryTypePage(i)).contains(BeneficiaryType.Individual) &&
+            answers.get(pages.beneficiary.BeneficiaryHasNinoPage(i)).contains(false) &&
+            answers.get(pages.beneficiary.BeneficiaryNoNinoReasonPage(i)).isEmpty,
+        controllers.beneficiary.routes.BeneficiaryNoNinoReasonController.onPageLoad(srn, i, NormalMode)
+      ),
+      ContinuationPage(
+        answers =>
+          answers.get(pages.beneficiary.BeneficiaryTypePage(i)).contains(BeneficiaryType.Individual) &&
+            answers.get(pages.beneficiary.BeneficiaryIhtPayablePage(i)).isEmpty,
+        controllers.beneficiary.routes.BeneficiaryIhtPayableController.onPageLoad(srn, i, NormalMode)
       )
     )
 
