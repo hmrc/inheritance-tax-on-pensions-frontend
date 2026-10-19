@@ -25,8 +25,8 @@ import views.html.beneficiary.BeneficiaryNinoView
 import controllers.actions._
 import forms.beneficiary.BeneficiaryNinoFormProvider
 import uk.gov.hmrc.domain.Nino
-import models.{CheckMode, Mode, NormalMode}
-import pages.beneficiary.BeneficiaryNinoPage
+import models._
+import pages.beneficiary.{BeneficiaryIhtPayablePage, BeneficiaryNinoPage}
 import play.api.i18n.{I18nSupport, MessagesApi}
 
 import scala.concurrent.{ExecutionContext, Future}
@@ -87,14 +87,16 @@ class BeneficiaryNinoController @Inject() (
                 for {
                   updatedAnswers <- Future.fromTry(request.userAnswers.set(BeneficiaryNinoPage(index), value.value))
                   _ <- userAnswersService.set(updatedAnswers)(using hc, request.request)
-                } yield Redirect(nextPage(srn, mode))
+                } yield Redirect(nextPage(srn, index, mode, updatedAnswers))
             )
         }
       }
 
-  private def nextPage(srn: Srn, mode: Mode) =
+  private def nextPage(srn: Srn, index: Int, mode: Mode, answers: UserAnswers) =
     mode match {
-      case NormalMode => routes.BeneficiaryListController.onPageLoad(srn)
+      case NormalMode => routes.BeneficiaryIhtPayableController.onPageLoad(srn, index, NormalMode)
+      case CheckMode if answers.get(BeneficiaryIhtPayablePage(index)).isEmpty =>
+        routes.BeneficiaryIhtPayableController.onPageLoad(srn, index, CheckMode)
       case CheckMode => controllers.routes.CheckYourAnswersController.onPageLoad(srn)
     }
 }

@@ -1,0 +1,50 @@
+/*
+ * Copyright 2026 HM Revenue & Customs
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+package viewmodels.CheckAnswers.beneficiary
+
+import utils.BeneficiaryNameHelper
+import viewmodels.implicits._
+import pages.{AreBeneficiariesKnownPage, DidPrSubmitPage}
+import models.SchemeId.Srn
+import uk.gov.hmrc.govukfrontend.views.viewmodels.summarylist.SummaryListRow
+import models.beneficiary.BeneficiaryType
+import models.{CheckMode, UserAnswers}
+import pages.beneficiary.{BeneficiaryIhtPayablePage, BeneficiaryTypePage}
+import play.api.i18n.Messages
+import viewmodels.govuk.summarylist._
+
+import java.util.Locale
+import java.text.NumberFormat
+
+object BeneficiaryIhtPayableSummary {
+  def row(srn: Srn, index: Int, answers: UserAnswers)(implicit messages: Messages): Option[SummaryListRow] =
+    for {
+      beneficiaryType <- answers.get(BeneficiaryTypePage(index)) if beneficiaryType == BeneficiaryType.Individual
+      if answers.get(AreBeneficiariesKnownPage).getOrElse(answers.get(DidPrSubmitPage).contains(false))
+      name <- BeneficiaryNameHelper.fromUserAnswers(answers, index)
+      amount <- answers.get(BeneficiaryIhtPayablePage(index))
+    } yield SummaryListRowViewModel(
+      key = "beneficiaryIhtPayable.checkYourAnswersLabel",
+      value = ValueViewModel(NumberFormat.getCurrencyInstance(Locale.UK).format(amount.bigDecimal)),
+      actions = Seq(
+        ActionItemViewModel(
+          "site.change",
+          controllers.beneficiary.routes.BeneficiaryIhtPayableController.onPageLoad(srn, index, CheckMode).url
+        ).withVisuallyHiddenText(messages("beneficiaryIhtPayable.change.hidden", name))
+      )
+    )
+}

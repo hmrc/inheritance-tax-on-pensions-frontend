@@ -16,63 +16,18 @@
 
 package controllers
 
-import services.UserAnswersService
-import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
-import pages.{AreBeneficiariesKnownPage, IhtPayablePage}
-import controllers.actions._
-import forms.IhtPayableFormProvider
-import models.Mode
-import play.api.i18n.MessagesApi
-import views.html.IhtPayableView
+import play.api.mvc.{Action, AnyContent}
 import models.SchemeId.Srn
-
-import scala.concurrent.{ExecutionContext, Future}
+import models.currency.IhtPayableEntry
+import models.Mode
 
 import javax.inject.Inject
 
-class IhtPayableController @Inject() (
-  override val messagesApi: MessagesApi,
-  identify: IdentifierAction,
-  allowAccess: AllowAccessActionWithSessionCacheProvider,
-  getData: DataRetrievalAction,
-  requireData: DataRequiredAction,
-  formProvider: IhtPayableFormProvider,
-  val controllerComponents: MessagesControllerComponents,
-  userAnswersService: UserAnswersService,
-  view: IhtPayableView
-)(implicit ec: ExecutionContext)
-    extends IhtpBaseController {
-
-  private val form = formProvider()
+class IhtPayableController @Inject() (currencyEntry: CurrencyEntryController) {
 
   def onPageLoad(srn: Srn, mode: Mode): Action[AnyContent] =
-    identify.andThen(allowAccess(srn)).andThen(getData).andThen(requireData) { implicit request =>
-      if (request.userAnswers.get(AreBeneficiariesKnownPage).contains(false)) {
-        val preparedForm = request.userAnswers.get(IhtPayablePage).fold(form)(form.fill)
-        Ok(view(preparedForm, srn, mode))
-      } else {
-        logAndJourneyRecovery("Beneficiaries must be unknown to enter the total IHT payable")
-      }
-    }
+    currencyEntry.onPageLoad(srn, mode, IhtPayableEntry)
 
   def onSubmit(srn: Srn, mode: Mode): Action[AnyContent] =
-    identify.andThen(allowAccess(srn)).andThen(getData).andThen(requireData).async { implicit request =>
-      if (request.userAnswers.get(AreBeneficiariesKnownPage).contains(false)) {
-        form
-          .bindFromRequest()
-          .fold(
-            errors => Future.successful(BadRequest(view(errors, srn, mode))),
-            value =>
-              for {
-                updatedAnswers <- Future.fromTry(request.userAnswers.set(IhtPayablePage, value))
-                saved <- userAnswersService.set(updatedAnswers)(using hc, request.request)
-              } yield saved.fold(
-                _ => logAndJourneyRecovery("Unable to save the IHT payable amount"),
-                _ => Redirect(routes.CheckYourAnswersController.onPageLoad(srn))
-              )
-          )
-      } else {
-        Future.successful(logAndJourneyRecovery("Beneficiaries must be unknown to save the total IHT payable"))
-      }
-    }
+    currencyEntry.onSubmit(srn, mode, IhtPayableEntry)
 }

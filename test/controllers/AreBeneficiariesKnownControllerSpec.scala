@@ -77,6 +77,12 @@ class AreBeneficiariesKnownControllerSpec extends SpecBase with MockitoSugar {
       .set(BeneficiaryHasNinoPage(0), false)
       .success
       .value
+      .set(BeneficiaryNoNinoReasonPage(0), testReasonNoNino)
+      .success
+      .value
+      .set(BeneficiaryIhtPayablePage(0), BigDecimal("12.34"))
+      .success
+      .value
 
     Seq(
       (
