@@ -438,6 +438,10 @@ beneficiaryIhtPayable.error.tooHigh = The amount of Inheritance Tax payable is t
 beneficiaryIhtPayable.checkYourAnswersLabel = Amount of IHT payable
 beneficiaryIhtPayable.change.hidden = the amount of IHT payable for {0}
 
+beneficiaryAddress.checkYourAnswersLabel = Address of beneficiary
+
+beneficiaryInterestPayable.checkYourAnswersLabel = Amount of interest payable
+
 beneficiaryNino.title = Enter the National Insurance number for the beneficiary
 beneficiaryNino.heading = Enter the National Insurance number for {0}
 beneficiaryNino.hint = For example, QQ 12 34 56 C
