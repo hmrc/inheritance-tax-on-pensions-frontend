@@ -18,6 +18,8 @@ GET         /unauthorised                                controllers.Unauthorise
 
 GET         /:srn/report-inheritance-tax-on-pension       controllers.SubmissionListController.onPageLoad(srn: Srn)
 GET         /:srn/paid-reports                            controllers.PaidReportsController.onPageLoad(srn: Srn)
+GET         /:srn/view-paid-submission-report             controllers.ViewPaidSubmissionReportController.onPageLoad(srn: Srn)
+GET         /:srn/view-paid-submission-report/:fbNumber controllers.ViewPaidSubmissionReportController.onViewPaid(srn: Srn, fbNumber: String)
 GET         /:srn/report-inheritance-tax-on-pension/:uuid controllers.SubmissionListController.onAmend(srn: Srn, uuid: String)
 GET         /:srn/report-inheritance-tax-on-pension/change/:ihtPaymentReference/:ihtVersion controllers.SubmissionListController.onChange(srn: Srn, ihtPaymentReference: String, ihtVersion: String)
 

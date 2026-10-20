@@ -123,4 +123,7 @@ class FrontendAppConfig @Inject() (configuration: Configuration) {
 
   def getReportUrl(pstr: String, ihtPaymentReference: String, ihtVersion: String): String =
     s"$inheritanceTaxOnPensionsHost/inheritance-tax-on-pensions/ihtp/?pstr=$pstr&ihtPaymentReference=$ihtPaymentReference&versionNumber=$ihtVersion"
+
+  def getReportByFbNumberUrl(pstr: String, fbNumber: String): String =
+    s"$inheritanceTaxOnPensionsHost/inheritance-tax-on-pensions/ihtp/?pstr=$pstr&fbNumber=$fbNumber"
 }

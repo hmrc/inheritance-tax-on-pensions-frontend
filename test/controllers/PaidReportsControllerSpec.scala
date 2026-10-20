@@ -78,9 +78,14 @@ class PaidReportsControllerSpec extends SpecBase {
           document.select("tbody th a").text() must include(paidReport.deceasedName)
           document
             .select("tbody th a")
-            .attr(
-              "href"
-            ) mustBe s"/inheritance-tax-on-pensions/${srn.value}/report-inheritance-tax-on-pension/test-uuid"
+            .attr("href") mustBe routes.ViewPaidSubmissionReportController
+            .onViewPaid(srn, paidReport.fbNumber.value)
+            .url
+          document
+            .select("tbody td a")
+            .attr("href") mustBe routes.ViewPaidSubmissionReportController
+            .onViewPaid(srn, paidReport.fbNumber.value)
+            .url
           document.select("#find-report").size() mustBe 1
           document.select("label[for=find-report]").text() mustBe messages(application)(
             "submissionList.find.input.label"

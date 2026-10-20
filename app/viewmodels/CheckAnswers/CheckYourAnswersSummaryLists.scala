@@ -23,4 +23,20 @@ case class CheckYourAnswersSummaryLists(
   prDetailsSummaryList: SummaryList,
   paymentNoticeDetailsSummaryList: SummaryList,
   beneficiaryList: List[SummaryList]
-)
+) {
+
+  def asReadOnly: CheckYourAnswersSummaryLists = {
+    def readOnly(list: SummaryList): SummaryList =
+      list.copy(
+        rows = list.rows.map(_.copy(actions = None)),
+        card = list.card.map(_.copy(actions = None))
+      )
+
+    CheckYourAnswersSummaryLists(
+      readOnly(deceasedDetailsSummaryList),
+      readOnly(prDetailsSummaryList),
+      readOnly(paymentNoticeDetailsSummaryList),
+      beneficiaryList.map(readOnly)
+    )
+  }
+}

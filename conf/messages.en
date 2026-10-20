@@ -70,6 +70,11 @@ paidReports.title = Paid Inheritance Tax on a pension reports
 paidReports.caption = Paid reports
 paidReports.noReports = This scheme does not currently have any paid reports.
 paidReports.returnToActive = Return to active reports
+viewPaidSubmissionReport.title = View report details
+viewPaidSubmissionReport.heading = View report details
+viewPaidSubmissionReport.inset.paid = This report is paid.
+viewPaidSubmissionReport.inset.contact = If you need to change this report, you must
+viewPaidSubmissionReport.inset.contact.link = contact HMRC
 submissionList.returnToScheme.link = Return to {0}
 submissionList.table.status.paid = Tax paid
 
@@ -432,6 +437,10 @@ beneficiaryIhtPayable.error.invalid = Enter a valid amount of Inheritance Tax pa
 beneficiaryIhtPayable.error.tooHigh = The amount of Inheritance Tax payable is too high
 beneficiaryIhtPayable.checkYourAnswersLabel = Amount of IHT payable
 beneficiaryIhtPayable.change.hidden = the amount of IHT payable for {0}
+
+beneficiaryAddress.checkYourAnswersLabel = Address of beneficiary
+
+beneficiaryInterestPayable.checkYourAnswersLabel = Amount of interest payable
 
 beneficiaryNino.title = Enter the National Insurance number for the beneficiary
 beneficiaryNino.heading = Enter the National Insurance number for {0}

@@ -90,7 +90,9 @@ object CheckYourAnswersHelper {
                 BeneficiaryHasNinoSummary.row(srn, index, userAnswers),
                 BeneficiaryNinoSummary.row(srn, index, userAnswers),
                 BeneficiaryNoNinoReasonSummary.row(srn, index, userAnswers),
-                BeneficiaryIhtPayableSummary.row(srn, index, userAnswers)
+                BeneficiaryAddressSummary.row(index, userAnswers, countryName),
+                BeneficiaryIhtPayableSummary.row(srn, index, userAnswers),
+                BeneficiaryInterestPayableSummary.row(index, userAnswers)
               ).flatten
             ).withCard(
               CardViewModel(
