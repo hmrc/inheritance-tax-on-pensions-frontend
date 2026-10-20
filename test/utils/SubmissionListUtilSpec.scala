@@ -31,12 +31,12 @@ import java.time.{Instant, LocalDate}
 class SubmissionListUtilSpec extends SpecBase with org.scalatest.EitherValues {
   private val overviewReport = IhtpOverviewReport(
     uuid = None,
-    fbNumber = Some("119000004320"),
+    fbNumber = Some(testFormBundleNumber),
     submissionDate = Some(Instant.parse("2026-04-10T16:12:49Z")),
     paymentDueDate = Some(LocalDate.of(2026, 2, 2)),
     ihtVersion = "001",
-    inheritanceTaxReference = "A123456/25A",
-    paymentReference = Some("A123456/25A629671"),
+    inheritanceTaxReference = inheritanceTaxReference,
+    paymentReference = Some(paymentReference),
     title = Some("Dr"),
     firstForename = Some("Firstname"),
     secondForename = Some("M"),

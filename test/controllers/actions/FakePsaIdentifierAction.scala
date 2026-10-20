@@ -17,7 +17,7 @@
 package controllers.actions
 
 import play.api.mvc._
-import generators.Generators
+import generators.{Generators, TestIdentifiers}
 import models.PensionSchemeId.PsaId
 import org.scalatest.OptionValues
 import models.requests.IdentifierRequest
@@ -35,7 +35,9 @@ class FakePsaIdentifierAction @Inject() (
     with OptionValues {
 
   override def invokeBlock[A](request: Request[A], block: IdentifierRequest[A] => Future[Result]): Future[Result] =
-    block(administratorRequestGen(request).map(_.copy(userId = "id", psaId = PsaId("A1234567"))).sample.value)
+    block(
+      administratorRequestGen(request).map(_.copy(userId = "id", psaId = PsaId(TestIdentifiers.psaId))).sample.value
+    )
 
   override def parser: BodyParser[AnyContent] = bodyParsers.default
 }

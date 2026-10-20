@@ -56,7 +56,7 @@ class CheckYourAnswersControllerSpec extends SpecBase {
   "CheckYourAnswers Controller" - {
     "onPageLoad redirects to onPageLoadContinueMode when data is incomplete" in {
       val userAnswers = emptyUserAnswers
-        .set(InheritanceTaxReferencePage, "A123456/25A")
+        .set(InheritanceTaxReferencePage, inheritanceTaxReference)
         .success
         .value
         .set(
@@ -196,7 +196,7 @@ class CheckYourAnswersControllerSpec extends SpecBase {
     "onPageLoadContinueMode" - {
       "must return OK and the correct view for a GET" in {
         val userAnswers = emptyUserAnswers
-          .set(InheritanceTaxReferencePage, "A123456/25A")
+          .set(InheritanceTaxReferencePage, inheritanceTaxReference)
           .success
           .value
           .set(
@@ -280,7 +280,7 @@ class CheckYourAnswersControllerSpec extends SpecBase {
 
       "must return OK and the correct view for a GET with No Nino reason" in {
         val userAnswers = emptyUserAnswers
-          .set(InheritanceTaxReferencePage, "A123456/25A")
+          .set(InheritanceTaxReferencePage, inheritanceTaxReference)
           .success
           .value
           .set(
@@ -656,7 +656,7 @@ class CheckYourAnswersControllerSpec extends SpecBase {
       "must return OK when UUID is not in query parameter" in {
 
         val userAnswers = emptyUserAnswers
-          .set(InheritanceTaxReferencePage, "A123456/25A")
+          .set(InheritanceTaxReferencePage, inheritanceTaxReference)
           .success
           .value
           .set(

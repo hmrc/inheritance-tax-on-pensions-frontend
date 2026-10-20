@@ -29,8 +29,8 @@ import org.scalacheck.Gen
 
 trait ModelGenerators extends BasicGenerators {
   // identity related
-  val psaIdGen: Gen[PsaId] = nonEmptyString.map(PsaId.apply)
-  val pspIdGen: Gen[PspId] = nonEmptyString.map(PspId.apply)
+  val psaIdGen: Gen[PsaId] = psaIdStringGen.map(PsaId.apply)
+  val pspIdGen: Gen[PspId] = pspIdStringGen.map(PspId.apply)
   val pensionSchemeIdGen: Gen[PensionSchemeId] = Gen.oneOf(psaIdGen, pspIdGen)
   val pensionSchemeUserGen: Gen[PensionSchemeUser] = Gen.oneOf(Administrator, Practitioner)
 

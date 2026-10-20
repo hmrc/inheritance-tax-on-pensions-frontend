@@ -219,18 +219,20 @@ class ConstraintsSpec extends AnyFreeSpec with Matchers with ScalaCheckPropertyC
 
   "isEqual" - {
 
+    val testPsaId = psaIdStringGen.sample.get
+
     "must return Valid for a match on the string" in {
-      val result = isEqual(Some("A1234567"), "pspDeclaration.schemeAdminId.error.noMatch").apply("A1234567")
+      val result = isEqual(Some(testPsaId), "pspDeclaration.schemeAdminId.error.noMatch").apply(testPsaId)
       result `mustEqual` Valid
     }
 
     "must return invalid for an empty string" in {
-      val result = isEqual(Some("A1234567"), "pspDeclaration.schemeAdminId.error.noMatch").apply("")
+      val result = isEqual(Some(testPsaId), "pspDeclaration.schemeAdminId.error.noMatch").apply("")
       result mustEqual Invalid("pspDeclaration.schemeAdminId.error.noMatch")
     }
 
     "must return invalid when no expected value" in {
-      val result = isEqual(None, "pspDeclaration.schemeAdminId.error.noMatch").apply("A1234567")
+      val result = isEqual(None, "pspDeclaration.schemeAdminId.error.noMatch").apply(testPsaId)
       result mustEqual Invalid("pspDeclaration.schemeAdminId.error.noMatch")
     }
   }

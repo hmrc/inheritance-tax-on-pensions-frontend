@@ -63,6 +63,7 @@ lazy val it =
   (project in file("it"))
     .enablePlugins(PlayScala)
     .dependsOn(microservice % "test->test")
+    .settings(libraryDependencies ++= AppDependencies.test)
     .settings(
       scalacOptions ++= Seq(
         "-Wconf:msg=Flag.*repeatedly:s"

@@ -15,6 +15,7 @@ object AppDependencies {
   )
 
   val test = Seq(
+    "uk.gov.hmrc" %% "domain-test-play-30" % "13.0.0",
     "uk.gov.hmrc" %% "bootstrap-test-play-30" % bootstrapVersion,
     "uk.gov.hmrc.mongo" %% "hmrc-mongo-test-play-30" % hmrcMongoVersion,
     "org.scalatestplus" %% "scalacheck-1-18" % "3.2.19.0"

@@ -17,7 +17,7 @@
 package base
 
 import pages.AreBeneficiariesKnownPage
-import generators.Generators
+import generators.{Generators, TestIdentifiers}
 import play.api.libs.json.{JsArray, Json}
 import models.beneficiary.BeneficiaryType
 import models._
@@ -30,8 +30,14 @@ trait TestValues extends Generators {
   val userAnswersId = "id"
   val schemeName = "testSchemeName"
   val email = "testEmail@test.com"
-  val inheritanceTaxReference = "A123456/25A"
-  val paymentReference = "A123456/25A629671"
+  val testPsaId: String = TestIdentifiers.psaId
+  val testPspId: String = TestIdentifiers.pspId
+  val otherPsaId: String = psaIdStringGen.suchThat(_ != testPsaId).sample.get
+  val inheritanceTaxReference: String = ihtReferenceGen.sample.get
+  val secondInheritanceTaxReference: String = ihtReferenceGen.suchThat(_ != inheritanceTaxReference).sample.get
+  val paymentReference: String = inheritanceTaxReference + numericStringLength(6).sample.get
+  val secondPaymentReference: String = secondInheritanceTaxReference + numericStringLength(6).sample.get
+  val testFormBundleNumber: String = formBundleNumberGen.sample.get
   val testDateOfBirth: LocalDate = LocalDate.of(1950, 1, 1)
   val testDateOfDeath: LocalDate = LocalDate.of(2020, 1, 1)
   val testPaymentNoticeDate: LocalDate = LocalDate.of(2026, 2, 2)
@@ -39,7 +45,7 @@ trait TestValues extends Generators {
   val testIndex: Int = 0
   val testInvalidBeneficiaryIndexes: List[Int] = List(-1, 30)
   val testUuid = "test-uuid"
-  val testNino = "AB123456C"
+  val testNino: String = ninoGen.sample.get
   val testReasonNoNino = "test reason for no national insurance number"
 
   val defaultSchemeDetails: SchemeDetails = SchemeDetails(
@@ -47,7 +53,7 @@ trait TestValues extends Generators {
     pstr = "testPSTR",
     schemeStatus = SchemeStatus.Open,
     schemeType = "testSchemeType",
-    authorisingPSAID = Some("A1234567"),
+    authorisingPSAID = Some(testPsaId),
     establishers = List(Establisher(SensitiveString("testFirstName testLastName"), EstablisherKind.Individual))
   )
 
@@ -92,7 +98,7 @@ trait TestValues extends Generators {
     UserAnswers(userAnswersId, srnGen.sample.get.value.toString, testUuid)
       .copy(
         data = Json.obj(
-          "inheritanceTaxReference" -> "F123456/25A",
+          "inheritanceTaxReference" -> inheritanceTaxReference,
           "nameOfDeceased" -> Json.obj(
             "firstForename" -> "dec",
             "surname" -> "name"
