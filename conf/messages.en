@@ -384,8 +384,8 @@ beneficiaryTrustContactName.error.secondForename.pattern = Enter a valid middle 
 beneficiaryTrustContactName.error.surname.required = Enter the last name
 beneficiaryTrustContactName.error.surname.length = Last name must be 35 characters or less
 beneficiaryTrustContactName.error.surname.pattern = Enter a valid last name
-beneficiaryTrustContactName.checkYourAnswersLabel = Full name of the representative at the organisation
-beneficiaryTrustContactName.checkYourAnswersLabel.hidden = the name of the representative at the organisation
+beneficiaryTrustContactName.checkYourAnswersLabel = Representative at the trust
+beneficiaryTrustContactName.checkYourAnswersLabel.hidden = the name of the representative at the trust
 
 beneficiaryTrustName.heading = Enter the name of the trust
 beneficiaryTrustName.error.required = Enter the name of the trust
