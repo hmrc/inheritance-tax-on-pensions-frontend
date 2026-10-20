@@ -17,16 +17,17 @@
 package forms
 
 import forms.behaviours.StringFieldBehaviours
+import base.TestValues
 import play.api.data.FormError
 
-class PspDeclarationFormProviderSpec extends StringFieldBehaviours {
+class PspDeclarationFormProviderSpec extends StringFieldBehaviours with TestValues {
 
   val requiredKey = "pspDeclaration.schemeAdminId.error.required"
   val invalidCharactersKey = "pspDeclaration.schemeAdminId.error.invalid"
   val noMatchKey = "pspDeclaration.schemeAdminId.error.noMatch"
   val validCharacterRegex = "^(A[0-9]{7})$"
 
-  val form = new PspDeclarationFormProvider()(Some("A1234567"))
+  val form = new PspDeclarationFormProvider()(Some(testPsaId))
 
   ".value" - {
 
@@ -36,14 +37,14 @@ class PspDeclarationFormProviderSpec extends StringFieldBehaviours {
       fieldThatBindsValidData(
         form,
         fieldName,
-        "A1234567"
+        testPsaId
       )
     )
 
     "must bind valid SchemeAdminId and ignore whitespace and lowercase" in {
-      val result = form.bind(Map("value" -> "a12  34567"))
+      val result = form.bind(Map("value" -> testPsaId.grouped(2).mkString("  ").toLowerCase(java.util.Locale.ROOT)))
       result.errors mustBe empty
-      result.value mustBe Some("A1234567")
+      result.value mustBe Some(testPsaId)
     }
 
     behave.like(
@@ -64,7 +65,7 @@ class PspDeclarationFormProviderSpec extends StringFieldBehaviours {
     )
 
     "not bind strings where the SchemeAdminId does not match" in {
-      val result = form.bind(Map("value" -> "A1234557"))
+      val result = form.bind(Map("value" -> otherPsaId))
       result.errors mustBe Seq(FormError(fieldName, noMatchKey))
     }
   }

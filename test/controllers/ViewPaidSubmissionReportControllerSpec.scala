@@ -32,7 +32,7 @@ class ViewPaidSubmissionReportControllerSpec extends SpecBase {
 
   private def onPageLoadUrl = routes.ViewPaidSubmissionReportController.onPageLoad(srn).url
   private def onViewPaidUrl =
-    routes.ViewPaidSubmissionReportController.onViewPaid(srn, "119000004362").url
+    routes.ViewPaidSubmissionReportController.onViewPaid(srn, testFormBundleNumber).url
 
   "ViewPaidSubmissionReportController" - {
     Seq(true, false).foreach { isPsa =>
@@ -68,7 +68,7 @@ class ViewPaidSubmissionReportControllerSpec extends SpecBase {
           keys must contain("Full name of PR")
 
           val values = summaryLists.select(".govuk-summary-list__value").eachText()
-          values must contain("F123456/25A")
+          values must contain(inheritanceTaxReference)
           values must contain("dec name")
         }
       }

@@ -33,7 +33,7 @@ class ConfirmationControllerSpec extends SpecBase {
     .set(PaymentNoticeDatePage, testPaymentNoticeDate)
     .success
     .value
-    .set(IHTPaymentReferencePage, "A123456/25A629671")
+    .set(IHTPaymentReferencePage, paymentReference)
     .success
     .value
   val formattedDate: String = testPaymentNoticeDate.plusDays(35).format(DateTimeFormatter.ofPattern("d MMM yyyy"))
@@ -60,7 +60,8 @@ class ConfirmationControllerSpec extends SpecBase {
     }
 
     "must return OK and the correct view for a GET when payment reference is present in user answers" in {
-      val userAnswersWithPaymentRef = userAnswersWithDueDate.set(IHTPaymentReferencePage, "000012345321").success.value
+      val userAnswersWithPaymentRef =
+        userAnswersWithDueDate.set(IHTPaymentReferencePage, paymentReference).success.value
 
       val application = applicationBuilder(userAnswers = Some(userAnswersWithPaymentRef), usesSession = true).build()
 
@@ -72,7 +73,7 @@ class ConfirmationControllerSpec extends SpecBase {
         val view = application.injector.instanceOf[ConfirmationView]
 
         status(result) mustEqual OK
-        contentAsString(result) mustEqual view("000012345321", email, testSrn, url, formattedDate, schemeName)(using
+        contentAsString(result) mustEqual view(paymentReference, email, testSrn, url, formattedDate, schemeName)(using
           request,
           messages(application)
         ).toString
@@ -90,8 +91,7 @@ class ConfirmationControllerSpec extends SpecBase {
         val view = application.injector.instanceOf[ConfirmationView]
 
         status(result) mustEqual OK
-        contentAsString(result) mustEqual view("A123456/25A629671", email, testSrn, url, formattedDate, schemeName)(
-          using
+        contentAsString(result) mustEqual view(paymentReference, email, testSrn, url, formattedDate, schemeName)(using
           request,
           messages(application)
         ).toString

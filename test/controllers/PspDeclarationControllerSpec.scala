@@ -71,7 +71,7 @@ class PspDeclarationControllerSpec extends SpecBase with MockitoSugar {
       running(application) {
         val request =
           FakeRequest(POST, pspDeclarationRoute)
-            .withFormUrlEncodedBody(("value", "A1234567"))
+            .withFormUrlEncodedBody(("value", testPsaId))
 
         val result = route(application, request).value
 
@@ -93,7 +93,7 @@ class PspDeclarationControllerSpec extends SpecBase with MockitoSugar {
       running(application) {
         val request =
           FakeRequest(POST, pspDeclarationRoute)
-            .withFormUrlEncodedBody(("value", "A1234567"))
+            .withFormUrlEncodedBody(("value", testPsaId))
 
         val result = route(application, request).value
 
@@ -132,9 +132,9 @@ class PspDeclarationControllerSpec extends SpecBase with MockitoSugar {
       running(application) {
         val request =
           FakeRequest(POST, pspDeclarationRoute)
-            .withFormUrlEncodedBody(("value", "A1234557"))
+            .withFormUrlEncodedBody(("value", otherPsaId))
 
-        val boundForm = form.bind(Map("value" -> "A1234557"))
+        val boundForm = form.bind(Map("value" -> otherPsaId))
 
         val view = application.injector.instanceOf[PspDeclarationView]
 
@@ -169,7 +169,7 @@ class PspDeclarationControllerSpec extends SpecBase with MockitoSugar {
       running(application) {
         val request =
           FakeRequest(POST, pspDeclarationRoute)
-            .withFormUrlEncodedBody(("value", "A1234567"))
+            .withFormUrlEncodedBody(("value", testPsaId))
 
         val result = route(application, request).value
 

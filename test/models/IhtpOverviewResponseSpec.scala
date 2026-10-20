@@ -29,12 +29,12 @@ class IhtpOverviewResponseSpec extends SpecBase {
 
   private val report = IhtpOverviewReport(
     uuid = None,
-    fbNumber = Some("119000004320"),
+    fbNumber = Some(testFormBundleNumber),
     submissionDate = Some(submissionDate),
     paymentDueDate = Some(paymentDueDate),
     ihtVersion = "001",
-    inheritanceTaxReference = "A123456/25A",
-    paymentReference = Some("A123456/25A629671"),
+    inheritanceTaxReference = inheritanceTaxReference,
+    paymentReference = Some(paymentReference),
     title = Some("Dr"),
     firstForename = Some("Firstname"),
     secondForename = Some("M"),
@@ -56,12 +56,12 @@ class IhtpOverviewResponseSpec extends SpecBase {
         "success" -> Json.obj(
           "ihtpOverview" -> Json.arr(
             Json.obj(
-              "fbNumber" -> "119000004320",
+              "fbNumber" -> testFormBundleNumber,
               "submissionDate" -> "2026-04-10T16:12:49Z",
               "paymentDueDate" -> "2026-02-02",
               "ihtVersion" -> "001",
-              "inheritanceTaxReference" -> "A123456/25A",
-              "paymentReference" -> "A123456/25A629671",
+              "inheritanceTaxReference" -> inheritanceTaxReference,
+              "paymentReference" -> paymentReference,
               "title" -> "Dr",
               "firstForename" -> "Firstname",
               "secondForename" -> "M",
@@ -79,12 +79,12 @@ class IhtpOverviewResponseSpec extends SpecBase {
     "must successfully write to json" in {
       val json = Json.toJson(response)
 
-      (json \ "success" \ "ihtpOverview" \ 0 \ "fbNumber").as[String] mustBe "119000004320"
+      (json \ "success" \ "ihtpOverview" \ 0 \ "fbNumber").as[String] mustBe testFormBundleNumber
       (json \ "success" \ "ihtpOverview" \ 0 \ "submissionDate").as[String] mustBe "2026-04-10T16:12:49Z"
       (json \ "success" \ "ihtpOverview" \ 0 \ "paymentDueDate").as[String] mustBe "2026-02-02"
       (json \ "success" \ "ihtpOverview" \ 0 \ "ihtVersion").as[String] mustBe "001"
-      (json \ "success" \ "ihtpOverview" \ 0 \ "inheritanceTaxReference").as[String] mustBe "A123456/25A"
-      (json \ "success" \ "ihtpOverview" \ 0 \ "paymentReference").as[String] mustBe "A123456/25A629671"
+      (json \ "success" \ "ihtpOverview" \ 0 \ "inheritanceTaxReference").as[String] mustBe inheritanceTaxReference
+      (json \ "success" \ "ihtpOverview" \ 0 \ "paymentReference").as[String] mustBe paymentReference
       (json \ "success" \ "ihtpOverview" \ 0 \ "title").as[String] mustBe "Dr"
       (json \ "success" \ "ihtpOverview" \ 0 \ "firstForename").as[String] mustBe "Firstname"
       (json \ "success" \ "ihtpOverview" \ 0 \ "secondForename").as[String] mustBe "M"
@@ -149,12 +149,12 @@ class IhtpOverviewResponseSpec extends SpecBase {
 
     "must successfully read from json" in {
       val json = Json.obj(
-        "fbNumber" -> "119000004320",
+        "fbNumber" -> testFormBundleNumber,
         "submissionDate" -> "2026-04-10T16:12:49Z",
         "paymentDueDate" -> "2026-02-02",
         "ihtVersion" -> "001",
-        "inheritanceTaxReference" -> "A123456/25A",
-        "paymentReference" -> "A123456/25A629671",
+        "inheritanceTaxReference" -> inheritanceTaxReference,
+        "paymentReference" -> paymentReference,
         "title" -> "Dr",
         "firstForename" -> "Firstname",
         "secondForename" -> "M",
@@ -175,7 +175,7 @@ class IhtpOverviewResponseSpec extends SpecBase {
     "must handle missing optional fields when reading from json" in {
       val json = Json.obj(
         "ihtVersion" -> "000",
-        "inheritanceTaxReference" -> "F654321/25B",
+        "inheritanceTaxReference" -> secondInheritanceTaxReference,
         "ihtpStatus" -> "In progress"
       )
 
@@ -186,7 +186,7 @@ class IhtpOverviewResponseSpec extends SpecBase {
           submissionDate = None,
           paymentDueDate = None,
           ihtVersion = "000",
-          inheritanceTaxReference = "F654321/25B",
+          inheritanceTaxReference = secondInheritanceTaxReference,
           paymentReference = None,
           title = None,
           firstForename = None,
@@ -219,7 +219,7 @@ class IhtpOverviewResponseSpec extends SpecBase {
         .obj(
           "submissionDate" -> "2026-04-10T16:12:49Z",
           "paymentDueDate" -> "2026-02-02",
-          "inheritanceTaxReference" -> "A123456/25A",
+          "inheritanceTaxReference" -> inheritanceTaxReference,
           "firstForename" -> "Firstname",
           "surname" -> "Surname",
           "ihtpStatus" -> "Not reconciled"
@@ -230,11 +230,11 @@ class IhtpOverviewResponseSpec extends SpecBase {
     "must fail to read when date fields have the wrong type" in {
       Json
         .obj(
-          "fbNumber" -> "119000004320",
+          "fbNumber" -> testFormBundleNumber,
           "submissionDate" -> "not-a-date",
           "paymentDueDate" -> "not-a-date",
           "ihtVersion" -> "001",
-          "inheritanceTaxReference" -> "A123456/25A",
+          "inheritanceTaxReference" -> inheritanceTaxReference,
           "firstForename" -> "Firstname",
           "surname" -> "Surname",
           "ihtpStatus" -> "Not reconciled"
@@ -243,12 +243,12 @@ class IhtpOverviewResponseSpec extends SpecBase {
     }
 
     "must expose all case class values" in {
-      report.fbNumber mustBe Some("119000004320")
+      report.fbNumber mustBe Some(testFormBundleNumber)
       report.submissionDate mustBe Some(submissionDate)
       report.paymentDueDate mustBe Some(paymentDueDate)
       report.ihtVersion mustBe "001"
-      report.inheritanceTaxReference mustBe "A123456/25A"
-      report.paymentReference mustBe Some("A123456/25A629671")
+      report.inheritanceTaxReference mustBe inheritanceTaxReference
+      report.paymentReference mustBe Some(paymentReference)
       report.title mustBe Some("Dr")
       report.firstForename mustBe Some("Firstname")
       report.secondForename mustBe Some("M")
@@ -272,7 +272,7 @@ class IhtpOverviewResponseSpec extends SpecBase {
       report.productArity mustBe 13
       report.productPrefix mustBe "IhtpOverviewReport"
       (report.productIterator.toSeq must contain).allOf(
-        Some("119000004320"),
+        Some(testFormBundleNumber),
         "001",
         Some("Firstname"),
         Some("Surname")

@@ -18,9 +18,10 @@ package forms
 
 import forms.mappings.Regex
 import forms.behaviours.StringFieldBehaviours
+import base.TestValues
 import play.api.data.FormError
 
-class InheritanceTaxReferenceFormProviderSpec extends StringFieldBehaviours with Regex {
+class InheritanceTaxReferenceFormProviderSpec extends StringFieldBehaviours with Regex with TestValues {
 
   val requiredKey = "inheritanceTaxReference.error.required"
   val invalidCharactersKey = "inheritanceTaxReference.error.invalid"
@@ -35,14 +36,15 @@ class InheritanceTaxReferenceFormProviderSpec extends StringFieldBehaviours with
       fieldThatBindsValidData(
         form,
         fieldName,
-        "A123456/25A"
+        inheritanceTaxReference
       )
     )
 
     "must bind valid reference number and ignore whitespace and lowercase" in {
-      val result = form.bind(Map("value" -> "a12  3456/25  A  "))
+      val result =
+        form.bind(Map("value" -> inheritanceTaxReference.grouped(2).mkString("  ").toLowerCase(java.util.Locale.ROOT)))
       result.errors mustBe empty
-      result.value mustBe Some("A123456/25A")
+      result.value mustBe Some(inheritanceTaxReference)
     }
 
     behave.like(
@@ -57,7 +59,7 @@ class InheritanceTaxReferenceFormProviderSpec extends StringFieldBehaviours with
       fieldWithRegex(
         form,
         fieldName,
-        "B123456/01A",
+        "B" + inheritanceTaxReference.drop(1),
         error = FormError(fieldName, invalidCharactersKey, Seq(ihtReferenceNumberRegex))
       )
     )

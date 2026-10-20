@@ -31,6 +31,13 @@ You can also execute the [runtests.sh](runtests.sh) file to run both unit and in
 /bin/bash ./runtests.sh
 ```
 
+### Test identifiers
+
+Test fixtures generate tax identifiers at runtime. NINOs use HMRC's `NinoGenerator`; shared generators provide
+format-valid PSA/PSP IDs and IHT references. Payment references combine a generated IHT reference and six digits.
+Fake identifier actions share their generated role IDs with `TestValues` so authorisation and form expectations agree.
+Scheme IDs may remain fixed where they select integration scenarios.
+
 ### License
 
 This code is open source software licensed under the [Apache 2.0 License]("http://www.apache.org/licenses/LICENSE-2.0.html").

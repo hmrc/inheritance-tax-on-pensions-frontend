@@ -71,9 +71,9 @@ class IdentifierActionSpec extends SpecBase with StubPlayBodyParsersFactory {
     new ~(new ~(new ~(internalId, externalId), affinityGroup), Enrolments(enrolments.toSet))
 
   val psaEnrolment: Enrolment =
-    Enrolment(Constants.psaEnrolmentKey, Seq(EnrolmentIdentifier(Constants.psaIdKey, "A000000")), "Activated")
+    Enrolment(Constants.psaEnrolmentKey, Seq(EnrolmentIdentifier(Constants.psaIdKey, testPsaId)), "Activated")
   val pspEnrolment: Enrolment =
-    Enrolment(Constants.pspEnrolmentKey, Seq(EnrolmentIdentifier(Constants.pspIdKey, "A000001")), "Activated")
+    Enrolment(Constants.pspEnrolmentKey, Seq(EnrolmentIdentifier(Constants.pspIdKey, testPspId)), "Activated")
 
   override def beforeEach(): Unit = {
     reset(mockAuthConnector)
@@ -174,7 +174,7 @@ class IdentifierActionSpec extends SpecBase with StubPlayBodyParsersFactory {
         val result = handler.run(FakeRequest())
 
         status(result) mustBe OK
-        (contentAsJson(result) \ "psaId").asOpt[String] mustBe Some("A000000")
+        (contentAsJson(result) \ "psaId").asOpt[String] mustBe Some(testPsaId)
         (contentAsJson(result) \ "pspId").asOpt[String] mustBe None
         (contentAsJson(result) \ "userId").asOpt[String] mustBe Some("internalId")
         (contentAsJson(result) \ "externalId").asOpt[String] mustBe Some("externalId")
@@ -187,7 +187,7 @@ class IdentifierActionSpec extends SpecBase with StubPlayBodyParsersFactory {
 
         status(result) mustBe OK
         (contentAsJson(result) \ "psaId").asOpt[String] mustBe None
-        (contentAsJson(result) \ "pspId").asOpt[String] mustBe Some("A000001")
+        (contentAsJson(result) \ "pspId").asOpt[String] mustBe Some(testPspId)
         (contentAsJson(result) \ "userId").asOpt[String] mustBe Some("internalId")
         (contentAsJson(result) \ "externalId").asOpt[String] mustBe Some("externalId")
       }
@@ -199,7 +199,7 @@ class IdentifierActionSpec extends SpecBase with StubPlayBodyParsersFactory {
         val result = handler.run(FakeRequest())
 
         status(result) mustBe OK
-        (contentAsJson(result) \ "psaId").asOpt[String] mustBe Some("A000000")
+        (contentAsJson(result) \ "psaId").asOpt[String] mustBe Some(testPsaId)
         (contentAsJson(result) \ "pspId").asOpt[String] mustBe None
         (contentAsJson(result) \ "userId").asOpt[String] mustBe Some("internalId")
         (contentAsJson(result) \ "externalId").asOpt[String] mustBe Some("externalId")
@@ -213,7 +213,7 @@ class IdentifierActionSpec extends SpecBase with StubPlayBodyParsersFactory {
 
         status(result) mustBe OK
         (contentAsJson(result) \ "psaId").asOpt[String] mustBe None
-        (contentAsJson(result) \ "pspId").asOpt[String] mustBe Some("A000001")
+        (contentAsJson(result) \ "pspId").asOpt[String] mustBe Some(testPspId)
         (contentAsJson(result) \ "userId").asOpt[String] mustBe Some("internalId")
         (contentAsJson(result) \ "externalId").asOpt[String] mustBe Some("externalId")
       }
