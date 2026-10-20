@@ -129,7 +129,7 @@ class BeneficiaryTypeControllerSpec extends SpecBase {
 
         status(result) mustEqual SEE_OTHER
         redirectLocation(result).value mustEqual controllers.beneficiary.routes.BeneficiaryNameController
-          .onPageLoad(srn, NormalMode, testIndex)
+          .onPageLoad(srn, NormalMode, testIndex, JourneyRole.BeneficiaryIndividual)
           .url
 
         verify(mockInheritanceTaxOnPensionsConnector, times(1))
@@ -187,7 +187,7 @@ class BeneficiaryTypeControllerSpec extends SpecBase {
 
         status(result) mustEqual SEE_OTHER
         redirectLocation(result).value mustEqual controllers.beneficiary.routes.BeneficiaryNameController
-          .onPageLoad(srn, CheckMode, testIndex)
+          .onPageLoad(srn, CheckMode, testIndex, JourneyRole.BeneficiaryIndividual)
           .url
 
         verify(mockInheritanceTaxOnPensionsConnector, times(1))

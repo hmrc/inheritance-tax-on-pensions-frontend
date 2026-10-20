@@ -95,7 +95,8 @@ class AreBeneficiariesKnownControllerSpec extends SpecBase with MockitoSugar {
         "an individual name is missing",
         individualWithoutName,
         true,
-        () => controllers.beneficiary.routes.BeneficiaryNameController.onPageLoad(srn, NormalMode, 0)
+        () =>
+          controllers.beneficiary.routes.BeneficiaryNameController.onPageLoad(srn, NormalMode, 0, BeneficiaryIndividual)
       ),
       (
         "Yes is unchanged with a complete individual",

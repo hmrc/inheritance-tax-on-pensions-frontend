@@ -16,6 +16,7 @@
 
 package viewmodels.CheckAnswers.beneficiary
 
+import models.JourneyRole.BeneficiaryIndividual
 import viewmodels.implicits._
 import play.twirl.api.HtmlFormat
 import uk.gov.hmrc.govukfrontend.views.viewmodels.content.HtmlContent
@@ -38,7 +39,7 @@ object BeneficiaryIndividualNameSummary {
           ActionItemViewModel(
             "site.change",
             routes.BeneficiaryNameController
-              .onPageLoad(srn, CheckMode, index)
+              .onPageLoad(srn, CheckMode, index, BeneficiaryIndividual)
               .url
           ).withVisuallyHiddenText(messages("beneficiaryIndividualName.checkYourAnswersLabel.hidden"))
         )

@@ -82,7 +82,12 @@ object CheckYourAnswersHelper {
               rows = Seq(
                 BeneficiaryTypeSummary.row(srn, index, userAnswers),
                 BeneficiaryIndividualNameSummary.row(srn, index, userAnswers),
-                viewmodels.CheckAnswers.beneficiary.BeneficiaryTrustNameSummary.row(
+                BeneficiaryTrustNameSummary.row(
+                  srn,
+                  index,
+                  userAnswers
+                ),
+                BeneficiaryTrustContactNameSummary.row(
                   srn,
                   index,
                   userAnswers
@@ -222,7 +227,7 @@ object CheckYourAnswersHelper {
         answers =>
           answers.get(pages.beneficiary.BeneficiaryTypePage(i)).contains(BeneficiaryType.Individual) &&
             answers.get(pages.beneficiary.BeneficiaryNamePage(i, BeneficiaryIndividual)).isEmpty,
-        controllers.beneficiary.routes.BeneficiaryNameController.onPageLoad(srn, NormalMode, i)
+        controllers.beneficiary.routes.BeneficiaryNameController.onPageLoad(srn, NormalMode, i, BeneficiaryIndividual)
       ),
       ContinuationPage(
         answers =>

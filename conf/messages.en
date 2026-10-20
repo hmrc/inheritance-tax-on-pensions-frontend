@@ -372,6 +372,21 @@ beneficiaryIndividualName.error.surname.pattern = Enter a valid last name
 beneficiaryIndividualName.checkYourAnswersLabel = Full name of beneficiary
 beneficiaryIndividualName.checkYourAnswersLabel.hidden = the name of the beneficiary
 
+beneficiaryTrustContactName.title = Enter the full name of a representative at the organisation
+beneficiaryTrustContactName.heading = Enter the full name of a representative at {0}
+beneficiaryTrustContactName.error.title.length = Title must be 4 characters or less
+beneficiaryTrustContactName.error.title.pattern = Enter a valid title
+beneficiaryTrustContactName.error.firstForename.required = Enter the first name
+beneficiaryTrustContactName.error.firstForename.length = First name must be 35 characters or less
+beneficiaryTrustContactName.error.firstForename.pattern = Enter a valid first name
+beneficiaryTrustContactName.error.secondForename.length = Middle names must be 35 characters or less
+beneficiaryTrustContactName.error.secondForename.pattern = Enter a valid middle name
+beneficiaryTrustContactName.error.surname.required = Enter the last name
+beneficiaryTrustContactName.error.surname.length = Last name must be 35 characters or less
+beneficiaryTrustContactName.error.surname.pattern = Enter a valid last name
+beneficiaryTrustContactName.checkYourAnswersLabel = Full name of the representative at the organisation
+beneficiaryTrustContactName.checkYourAnswersLabel.hidden = the name of the representative at the organisation
+
 beneficiaryTrustName.heading = Enter the name of the trust
 beneficiaryTrustName.error.required = Enter the name of the trust
 beneficiaryTrustName.error.length = The name of the trust should be 160 characters or less
