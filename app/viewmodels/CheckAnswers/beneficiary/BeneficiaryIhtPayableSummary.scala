@@ -21,9 +21,8 @@ import viewmodels.implicits._
 import pages.{AreBeneficiariesKnownPage, DidPrSubmitPage}
 import models.SchemeId.Srn
 import uk.gov.hmrc.govukfrontend.views.viewmodels.summarylist.SummaryListRow
-import models.beneficiary.BeneficiaryType
 import models.{CheckMode, UserAnswers}
-import pages.beneficiary.{BeneficiaryIhtPayablePage, BeneficiaryTypePage}
+import pages.beneficiary.BeneficiaryIhtPayablePage
 import play.api.i18n.Messages
 import viewmodels.govuk.summarylist._
 
@@ -33,9 +32,8 @@ import java.text.NumberFormat
 object BeneficiaryIhtPayableSummary {
   def row(srn: Srn, index: Int, answers: UserAnswers)(implicit messages: Messages): Option[SummaryListRow] =
     for {
-      beneficiaryType <- answers.get(BeneficiaryTypePage(index)) if beneficiaryType == BeneficiaryType.Individual
-      if answers.get(AreBeneficiariesKnownPage).getOrElse(answers.get(DidPrSubmitPage).contains(false))
       name <- BeneficiaryNameHelper.fromUserAnswers(answers, index)
+      if answers.get(AreBeneficiariesKnownPage).getOrElse(answers.get(DidPrSubmitPage).contains(false))
       amount <- answers.get(BeneficiaryIhtPayablePage(index))
     } yield SummaryListRowViewModel(
       key = "beneficiaryIhtPayable.checkYourAnswersLabel",

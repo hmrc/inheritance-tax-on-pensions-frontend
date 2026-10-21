@@ -153,7 +153,8 @@ class BeneficiaryNameController @Inject() (
       case JourneyRole.BeneficiaryTrust =>
         mode match {
           case NormalMode =>
-            controllers.beneficiary.routes.BeneficiaryListController.onPageLoad(srn)
+            controllers.beneficiary.routes.BeneficiaryIhtPayableController
+              .onPageLoad(srn, index, NormalMode) // TODO add navigation to ALF here
           case CheckMode => routes.CheckYourAnswersController.onPageLoad(srn)
         }
       case _ => routes.JourneyRecoveryController.onPageLoad()
