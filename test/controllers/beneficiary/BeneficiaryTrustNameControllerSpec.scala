@@ -21,15 +21,15 @@ import play.api.inject.bind
 import views.html.beneficiary.BeneficiaryTrustNameView
 import base.SpecBase
 import forms.beneficiary.BeneficiaryTrustNameFormProvider
-import models.*
+import play.api.libs.json.{JsArray, Json}
+import models._
 import pages.beneficiary.BeneficiaryTrustNamePage
 import org.mockito.ArgumentCaptor
 import org.mockito.ArgumentMatchers.any
 import models.JourneyRole.BeneficiaryTrust
 import play.api.test.FakeRequest
-import play.api.test.Helpers.*
+import play.api.test.Helpers._
 import org.mockito.Mockito.{times, verify, when}
-import play.api.libs.json.{JsArray, Json}
 
 import scala.concurrent.Future
 
@@ -141,7 +141,7 @@ class BeneficiaryTrustNameControllerSpec extends SpecBase {
         val request = FakeRequest(
           POST,
           routes.BeneficiaryTrustNameController.onSubmit(srn, testIndex, CheckMode).url
-        ).withFormUrlEncodedBody(validFormData *)
+        ).withFormUrlEncodedBody(validFormData*)
         val result = route(application, request).value
         val expectedUrl = routes.BeneficiaryNameController.onPageLoad(srn, CheckMode, testIndex, BeneficiaryTrust).url
 

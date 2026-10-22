@@ -16,11 +16,11 @@
 
 package pages.beneficiary
 
+import models.JourneyRole.BeneficiaryTrust
 import base.SpecBase
 import play.api.libs.json.JsPath
 import models.beneficiary.BeneficiaryType
 import models.JourneyRole
-import models.JourneyRole.BeneficiaryTrust
 
 class BeneficiaryTypePageSpec extends SpecBase {
 

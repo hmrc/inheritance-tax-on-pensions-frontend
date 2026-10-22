@@ -56,7 +56,7 @@ class BeneficiaryNameControllerSpec extends BeneficiarySpecBase {
     ),
     JourneyRoleTestCase(
       JourneyRole.BeneficiaryTrust,
-      controllers.beneficiary.routes.BeneficiaryListController.onPageLoad(srn).url
+      controllers.beneficiary.routes.BeneficiaryIhtPayableController.onPageLoad(srn, testIndex, NormalMode).url
     )
   )
 
@@ -243,8 +243,8 @@ class BeneficiaryNameControllerSpec extends BeneficiarySpecBase {
         val result = route(application, request).value
 
         status(result) mustEqual SEE_OTHER
-        redirectLocation(result).value mustEqual controllers.beneficiary.routes.BeneficiaryListController
-          .onPageLoad(srn)
+        redirectLocation(result).value mustEqual controllers.beneficiary.routes.BeneficiaryIhtPayableController
+          .onPageLoad(srn, testIndex, NormalMode)
           .url
       }
     }
