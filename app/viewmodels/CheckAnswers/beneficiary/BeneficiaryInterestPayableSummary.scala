@@ -16,9 +16,12 @@
 
 package viewmodels.CheckAnswers.beneficiary
 
+import utils.BeneficiaryNameHelper
 import viewmodels.implicits._
+import pages.{AreBeneficiariesKnownPage, DidPrSubmitPage}
+import models.SchemeId.Srn
 import uk.gov.hmrc.govukfrontend.views.viewmodels.summarylist.SummaryListRow
-import models.UserAnswers
+import models.{CheckMode, UserAnswers}
 import pages.beneficiary.BeneficiaryInterestPayablePage
 import play.api.i18n.Messages
 import viewmodels.govuk.summarylist._
@@ -27,12 +30,21 @@ import java.util.Locale
 import java.text.NumberFormat
 
 object BeneficiaryInterestPayableSummary {
-  def row(index: Int, answers: UserAnswers)(implicit messages: Messages): Option[SummaryListRow] =
-    answers.get(BeneficiaryInterestPayablePage(index)).map { amount =>
-      SummaryListRowViewModel(
-        key = "beneficiaryInterestPayable.checkYourAnswersLabel",
-        value = ValueViewModel(NumberFormat.getCurrencyInstance(Locale.UK).format(amount.bigDecimal)),
-        actions = Seq()
+  def row(srn: Srn, index: Int, answers: UserAnswers)(implicit messages: Messages): Option[SummaryListRow] =
+    for {
+      name <- BeneficiaryNameHelper.fromUserAnswers(answers, index)
+      if answers.get(AreBeneficiariesKnownPage).getOrElse(answers.get(DidPrSubmitPage).contains(false))
+      amount <- answers.get(BeneficiaryInterestPayablePage(index))
+    } yield SummaryListRowViewModel(
+      key = "beneficiaryInterestPayable.checkYourAnswersLabel",
+      value = ValueViewModel(NumberFormat.getCurrencyInstance(Locale.UK).format(amount.bigDecimal)),
+      actions = Seq(
+        ActionItemViewModel(
+          "site.change",
+          controllers.beneficiary.routes.BeneficiaryInterestPayableController
+            .onPageLoad(srn, index, CheckMode)
+            .url
+        ).withVisuallyHiddenText(messages("beneficiaryInterestPayable.change.hidden", name))
       )
-    }
+    )
 }

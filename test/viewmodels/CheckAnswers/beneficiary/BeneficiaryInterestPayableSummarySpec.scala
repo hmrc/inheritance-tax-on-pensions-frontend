@@ -16,8 +16,10 @@
 
 package viewmodels.CheckAnswers.beneficiary
 
-import play.api.test.Helpers.stubMessages
+import play.api.test.Helpers.running
+import pages.AreBeneficiariesKnownPage
 import uk.gov.hmrc.govukfrontend.views.viewmodels.summarylist.Value
+import models.CheckMode
 import pages.beneficiary.BeneficiaryInterestPayablePage
 import play.api.i18n.Messages
 import uk.gov.hmrc.govukfrontend.views.Aliases.Text
@@ -27,22 +29,35 @@ class BeneficiaryInterestPayableSummarySpec extends SpecBase {
   private val answers = individualBeneficiaryUserAnswers
 
   "BeneficiaryInterestPayableSummary" - {
-    implicit val messages: Messages = stubMessages()
-
-    "must format amounts in pounds and pence with no Change link" in {
-      Seq("0" -> "£0.00", "1234.5" -> "£1,234.50", "999999999.99" -> "£999,999,999.99")
-        .foreach { case (amount, expected) =>
-          val data = answers.set(BeneficiaryInterestPayablePage(0), BigDecimal(amount)).success.value
-          val row = BeneficiaryInterestPayableSummary.row(0, data).value
-          row.value mustBe Value(Text(expected))
-          row.actions.map(_.items).getOrElse(Nil) mustBe empty
-        }
+    "must format amounts in pounds and pence with an indexed Change link" in {
+      val app = applicationBuilder().build()
+      running(app) {
+        given Messages = messages(app)
+        Seq("0" -> "£0.00", "1234.5" -> "£1,234.50", "999999999.99" -> "£999,999,999.99")
+          .foreach { case (amount, expected) =>
+            val data = answers.set(BeneficiaryInterestPayablePage(0), BigDecimal(amount)).success.value
+            val row = BeneficiaryInterestPayableSummary.row(srn, 0, data).value
+            row.value mustBe Value(Text(expected))
+            row.actions.value.items.head.href mustBe controllers.beneficiary.routes.BeneficiaryInterestPayableController
+              .onPageLoad(srn, 0, CheckMode)
+              .url
+          }
+      }
     }
 
-    "must return None when data is not present" in {
-      BeneficiaryInterestPayableSummary.row(0, answers) mustBe None
-      val data = answers.set(BeneficiaryInterestPayablePage(0), BigDecimal("12.34")).success.value
-      BeneficiaryInterestPayableSummary.row(1, data) mustBe None
+    "must omit absent and inapplicable amounts" in {
+      val app = applicationBuilder().build()
+      running(app) {
+        given Messages = messages(app)
+        val data = answers.set(BeneficiaryInterestPayablePage(0), BigDecimal("12.34")).success.value
+        BeneficiaryInterestPayableSummary.row(srn, 0, answers) mustBe None
+        BeneficiaryInterestPayableSummary.row(srn, 1, data) mustBe None
+        BeneficiaryInterestPayableSummary.row(
+          srn,
+          0,
+          data.set(AreBeneficiariesKnownPage, false).success.value
+        ) mustBe None
+      }
     }
   }
 }
