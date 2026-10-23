@@ -18,10 +18,10 @@ package controllers
 
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
-import pages.{IHTPaymentReferencePage, PaymentNoticeDatePage}
 import views.html.ConfirmationView
 import base.SpecBase
-import models.{SchemeId, UserAnswers}
+import config.Constants._
+import models.SchemeId
 
 import java.time.format.DateTimeFormatter
 
@@ -29,72 +29,57 @@ class ConfirmationControllerSpec extends SpecBase {
 
   val testSrn: SchemeId.Srn = srn
   val url: String = "http://localhost:8204/manage-pension-schemes/pension-scheme-summary/" + testSrn.value
-  val userAnswersWithDueDate: UserAnswers = emptyUserAnswers
-    .set(PaymentNoticeDatePage, testPaymentNoticeDate)
-    .success
-    .value
-    .set(IHTPaymentReferencePage, paymentReference)
-    .success
-    .value
   val formattedDate: String = testPaymentNoticeDate.plusDays(35).format(DateTimeFormatter.ofPattern("d MMM yyyy"))
+  val needToPay: String = "10,000.00"
 
   "Confirmation Controller" - {
 
     "must return OK and the correct view for a GET" in {
 
-      val application = applicationBuilder(userAnswers = Some(userAnswersWithDueDate), usesSession = true).build()
+      val application = applicationBuilder(userAnswers = Some(emptyUserAnswers), usesSession = true).build()
 
       running(application) {
         val request = FakeRequest(GET, routes.ConfirmationController.onPageLoad(testSrn).url)
+          .withSession(PAYMENT_REFERENCE -> paymentReference)
+          .withSession(FORM_BUNDLE_NO -> testFormBundleNumber)
+          .withSession(DUE_DATE -> formattedDate)
+          .withSession(NEED_TO_PAY -> needToPay)
 
         val result = route(application, request).value
 
         val view = application.injector.instanceOf[ConfirmationView]
 
         status(result) mustEqual OK
-        contentAsString(result) mustEqual view(paymentReference, email, testSrn, url, formattedDate, schemeName)(using
+        contentAsString(result) mustEqual view(
+          paymentReference,
+          email,
+          testSrn,
+          url,
+          formattedDate,
+          schemeName,
+          needToPay
+        )(using
           request,
           messages(application)
         ).toString
       }
     }
 
-    "must return OK and the correct view for a GET when payment reference is present in user answers" in {
-      val userAnswersWithPaymentRef =
-        userAnswersWithDueDate.set(IHTPaymentReferencePage, paymentReference).success.value
-
-      val application = applicationBuilder(userAnswers = Some(userAnswersWithPaymentRef), usesSession = true).build()
+    "must redirect to journey recovery if one of the session variables is missing" in {
+      val application = applicationBuilder(userAnswers = Some(emptyUserAnswers), usesSession = true).build()
 
       running(application) {
         val request = FakeRequest(GET, routes.ConfirmationController.onPageLoad(testSrn).url)
+          .withSession(FORM_BUNDLE_NO -> testFormBundleNumber)
+          .withSession(DUE_DATE -> formattedDate)
+          .withSession(NEED_TO_PAY -> formattedDate)
 
         val result = route(application, request).value
 
         val view = application.injector.instanceOf[ConfirmationView]
 
-        status(result) mustEqual OK
-        contentAsString(result) mustEqual view(paymentReference, email, testSrn, url, formattedDate, schemeName)(using
-          request,
-          messages(application)
-        ).toString
-      }
-    }
-
-    "must return OK and the correct view for a GET when payment reference is not present in user answers (fallback)" in {
-      val application = applicationBuilder(userAnswers = Some(userAnswersWithDueDate), usesSession = true).build()
-
-      running(application) {
-        val request = FakeRequest(GET, routes.ConfirmationController.onPageLoad(testSrn).url)
-
-        val result = route(application, request).value
-
-        val view = application.injector.instanceOf[ConfirmationView]
-
-        status(result) mustEqual OK
-        contentAsString(result) mustEqual view(paymentReference, email, testSrn, url, formattedDate, schemeName)(using
-          request,
-          messages(application)
-        ).toString
+        status(result) mustEqual SEE_OTHER
+        redirectLocation(result).value mustEqual routes.JourneyRecoveryController.onPageLoad().url
       }
     }
   }

@@ -27,7 +27,7 @@
         bulletList: BulletList
 )
 
-@(paymentReference: String, email: String, srn: Srn, schemeDashboardUrl: String, dueDateFormatted: String, schemeName: String)(implicit request: Request[?], messages: Messages)
+@(paymentReference: String, email: String, srn: Srn, schemeDashboardUrl: String, dueDateFormatted: String, schemeName: String, needToPay: String)(implicit request: Request[?], messages: Messages)
 @panelContent = {
     @paragraph(
         content = HtmlContent(HtmlFormat.fill(Seq(
@@ -54,7 +54,7 @@
             Html(messages("confirmation.what.happens.next.p1.pretext")),
                 linkWithVisitedState(
                     id = "find-payment-link",
-                    text = messages("confirmation.what.happens.next.p1.link.text"),
+                    text = messages("confirmation.what.happens.next.p1.link.text", needToPay),
                     href = messages("confirmation.what.happens.next.p1.link.url"),
                     newTab = true
             ),
