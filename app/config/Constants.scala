@@ -40,6 +40,12 @@ object Constants {
   val SCHEME_NAME_HEADER = "schemeName"
   val ROLE_HEADER = "requestRole"
 
+  val PAYMENT_REFERENCE = "PAYMENT_REFERENCE"
+  val FORM_BUNDLE_NO = "FORM_BUNDLE_NO"
+  val DUE_DATE = "DUE_DATE"
+  val NEED_TO_PAY = "NEED_TO_PAY"
+  val SUBMITTED_PAGE_SESSION_VARIABLES: Seq[String] = Seq(PAYMENT_REFERENCE, FORM_BUNDLE_NO, DUE_DATE, NEED_TO_PAY)
+
   object Css {
 
     val bodyCssClass = "govuk-body"

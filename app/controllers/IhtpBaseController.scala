@@ -18,8 +18,12 @@ package controllers
 
 import play.api.mvc.Result
 import play.api.Logging
+import models.UserAnswers
 import play.api.i18n.I18nSupport
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
+
+import java.time.LocalDate
+import java.time.format.DateTimeFormatter
 
 abstract class IhtpBaseController extends FrontendBaseController with I18nSupport with Logging {
 
@@ -27,4 +31,11 @@ abstract class IhtpBaseController extends FrontendBaseController with I18nSuppor
     logger.warn(logMessage)
     Redirect(controllers.routes.JourneyRecoveryController.onPageLoad())
   }
+
+  def calculateDueDateDefaultToNow(date: Option[LocalDate]): String =
+    date.getOrElse(LocalDate.now).plusDays(35).format(DateTimeFormatter.ofPattern("d MMM yyyy"))
+
+  def calculateNeedToPay(userAnswers: UserAnswers): String =
+    "1,000.000.000.21" // TODO calculate from totals after IHTP-665
+
 }

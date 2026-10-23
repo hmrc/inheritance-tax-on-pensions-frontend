@@ -19,7 +19,7 @@ package controllers
 import services.{ReportRetrievalService, SubmissionListService}
 import utils.SubmissionListUtil
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
-import config.FrontendAppConfig
+import config.{Constants, FrontendAppConfig}
 import controllers.actions.{AllowAccessActionProvider, IdentifierAction}
 import views.html.SubmissionListView
 import models.SchemeId.Srn
@@ -56,7 +56,7 @@ class SubmissionListController @Inject() (
                 pagination,
                 appConfig.schemeDashboardUrl(srn, request.pensionSchemeId)
               )
-            )
+            ).removingFromSession(Constants.SUBMITTED_PAGE_SESSION_VARIABLES*)
           case Left(_) => Redirect(routes.JourneyRecoveryController.onPageLoad())
         }
       }
@@ -73,6 +73,7 @@ class SubmissionListController @Inject() (
 
         Redirect(controllers.routes.CheckYourAnswersController.onPageLoad(srn))
           .withSession(updatedSession)
+          .removingFromSession(Constants.SUBMITTED_PAGE_SESSION_VARIABLES*)
       }
 
   def onChange(srn: Srn, ihtPaymentReference: String, ihtVersion: String): Action[AnyContent] =
@@ -90,6 +91,7 @@ class SubmissionListController @Inject() (
 
             Redirect(controllers.routes.CheckYourAnswersController.onPageLoad(srn))
               .withSession(updatedSession)
+              .removingFromSession(Constants.SUBMITTED_PAGE_SESSION_VARIABLES*)
           case Left(_) => Redirect(routes.JourneyRecoveryController.onPageLoad())
         }
     }

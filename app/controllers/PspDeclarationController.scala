@@ -18,6 +18,8 @@ package controllers
 
 import services.ReportSubmissionService
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
+import pages.PaymentNoticeDatePage
+import config.Constants._
 import controllers.actions._
 import play.api.i18n.MessagesApi
 import uk.gov.hmrc.play.http.HeaderCarrierConverter
@@ -66,7 +68,14 @@ class PspDeclarationController @Inject() (
             Future.successful(BadRequest(view(formWithErrors, srn, request.request.schemeDetails.schemeName))),
           _ =>
             reportSubmissionService.submitReport(request.userAnswers)(using hc, request.request).map {
-              case Right(_) => Redirect(routes.ConfirmationController.onPageLoad(srn))
+              case Right(submissionResponse) =>
+                Redirect(routes.ConfirmationController.onPageLoad(srn))
+                  .addingToSession(PAYMENT_REFERENCE -> submissionResponse.success.ihtResponse.ihtPaymentReference)
+                  .addingToSession(FORM_BUNDLE_NO -> submissionResponse.success.ihtResponse.formBundleNo)
+                  .addingToSession(
+                    DUE_DATE -> calculateDueDateDefaultToNow(request.userAnswers.get(PaymentNoticeDatePage))
+                  )
+                  .addingToSession(NEED_TO_PAY -> calculateNeedToPay(request.userAnswers))
               case Left(_) => logAndJourneyRecovery("unable to submit the IHTP report")
             }
         )

@@ -17,16 +17,13 @@
 package controllers
 
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
-import pages.{IHTPaymentReferencePage, PaymentNoticeDatePage}
 import config.FrontendAppConfig
+import config.Constants._
 import controllers.actions._
+import play.api.i18n.MessagesApi
 import views.html.ConfirmationView
 import models.SchemeId.Srn
-import play.api.i18n.{I18nSupport, MessagesApi}
-import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
 
-import java.time.LocalDate
-import java.time.format.DateTimeFormatter
 import javax.inject.Inject
 
 class ConfirmationController @Inject() (
@@ -37,30 +34,34 @@ class ConfirmationController @Inject() (
   val controllerComponents: MessagesControllerComponents,
   appConfig: FrontendAppConfig,
   view: ConfirmationView
-) extends FrontendBaseController
-    with I18nSupport {
+) extends IhtpBaseController {
 
   def onPageLoad(srn: Srn): Action[AnyContent] = identify
     .andThen(allowAccess(srn))
     .andThen(getData) { implicit request =>
-      val paymentReference = request.userAnswers
-        .flatMap(_.get(IHTPaymentReferencePage))
-        .getOrElse("")
-      val dueDateFormatted = request.userAnswers
-        .flatMap(_.get(PaymentNoticeDatePage))
-        .getOrElse(LocalDate.now)
-        .plusDays(35)
-        .format(DateTimeFormatter.ofPattern("d MMM yyyy"))
       val schemeName = request.request.schemeDetails.schemeName
-      Ok(
-        view(
-          paymentReference,
-          request.request.minimalDetails.email.decryptedValue,
-          srn,
-          appConfig.schemeDashboardUrl(srn, request.request.pensionSchemeId),
-          dueDateFormatted,
-          schemeName
-        )
-      )
+      (
+        request.session.get(PAYMENT_REFERENCE),
+        request.session.get(DUE_DATE),
+        request.session.get(FORM_BUNDLE_NO),
+        request.session.get(NEED_TO_PAY)
+      ) match {
+        case (Some(paymentReference), Some(dueDate), Some(formBundleNo), Some(needToPay)) =>
+          // TODO remove this log message when form bundle no is used, after IHTP-661
+          logger.warn(s"Form bundle number $formBundleNo will be used to print the report")
+          Ok(
+            view(
+              paymentReference,
+              request.request.minimalDetails.email.decryptedValue,
+              srn,
+              appConfig.schemeDashboardUrl(srn, request.request.pensionSchemeId),
+              dueDate,
+              schemeName,
+              needToPay
+            )
+          )
+        case _ =>
+          logAndJourneyRecovery("Unable to show submission confirmation page, session values are missing")
+      }
     }
 }

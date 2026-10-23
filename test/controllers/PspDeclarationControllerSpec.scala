@@ -18,6 +18,7 @@ package controllers
 
 import play.api.test.FakeRequest
 import services.ReportSubmissionService
+import pages.PaymentNoticeDatePage
 import play.api.inject.bind
 import views.html.PspDeclarationView
 import base.SpecBase
@@ -64,7 +65,14 @@ class PspDeclarationControllerSpec extends SpecBase with MockitoSugar {
       when(mockReportSubmissionService.submitReport(any())(using any(), any()))
         .thenReturn(Future.successful(Right(response)))
 
-      val application = applicationBuilder(userAnswers = Some(emptyUserAnswers))
+      val application = applicationBuilder(userAnswers =
+        Some(
+          emptyUserAnswers
+            .set(PaymentNoticeDatePage, testPaymentNoticeDate)
+            .success
+            .value
+        )
+      )
         .overrides(bind[ReportSubmissionService].toInstance(mockReportSubmissionService))
         .build()
 
