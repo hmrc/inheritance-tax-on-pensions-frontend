@@ -444,7 +444,7 @@ ihtPayable.error.invalid = Enter a valid amount of Inheritance Tax payable
 ihtPayable.checkYourAnswersLabel = Amount of IHT payable
 ihtPayable.change.hidden = the amount of IHT payable
 
-beneficiaryIhtPayable.title = Enter the amount of Inheritance Tax payable for {0}
+beneficiaryIhtPayable.title = Enter the amount of Inheritance Tax payable for the beneficiary
 beneficiaryIhtPayable.heading = Enter the amount of Inheritance Tax payable for {0}
 beneficiaryIhtPayable.hint = Add the amount in pounds and pence
 beneficiaryIhtPayable.error.required = Enter the amount of Inheritance Tax payable
@@ -455,7 +455,14 @@ beneficiaryIhtPayable.change.hidden = the amount of IHT payable for {0}
 
 beneficiaryAddress.checkYourAnswersLabel = Address of beneficiary
 
+beneficiaryInterestPayable.title = Enter the amount of interest payable for the beneficiary
+beneficiaryInterestPayable.heading = Enter the amount of interest payable for {0}
+beneficiaryInterestPayable.hint = Add the amount in pounds and pence
+beneficiaryInterestPayable.error.required = Enter the Interest payable amount
+beneficiaryInterestPayable.error.invalid = Enter a valid Interest payable amount
+beneficiaryInterestPayable.error.tooHigh = The amount of interest payable is too high
 beneficiaryInterestPayable.checkYourAnswersLabel = Amount of interest payable
+beneficiaryInterestPayable.change.hidden = the amount of interest payable for {0}
 
 beneficiaryNino.title = Enter the National Insurance number for the beneficiary
 beneficiaryNino.heading = Enter the National Insurance number for {0}

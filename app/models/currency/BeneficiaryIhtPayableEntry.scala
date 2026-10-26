@@ -37,7 +37,7 @@ case class BeneficiaryIhtPayableEntry(index: Int) extends CurrencyEntry {
     routes.BeneficiaryIhtPayableController.onSubmit(srn, index, mode)
   override def nextPage(srn: Srn, mode: Mode, answers: UserAnswers): Call =
     mode match {
-      case NormalMode => routes.BeneficiaryListController.onPageLoad(srn)
+      case NormalMode => routes.BeneficiaryInterestPayableController.onPageLoad(srn, index, NormalMode)
       case CheckMode => controllers.routes.CheckYourAnswersController.onPageLoad(srn)
     }
 }
