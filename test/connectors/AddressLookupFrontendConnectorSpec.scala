@@ -72,6 +72,17 @@ class AddressLookupFrontendConnectorSpec extends SpecBase {
 
   "initJourney" - {
 
+    "use the beneficiary journey's configured callback when ALF omits Location" in new SetUp {
+      when(mockConfig.addressLookupFrontendBaseUrl).thenReturn("http://address-lookup-frontend")
+      when(mockHttpClient.post(any())(using any())).thenReturn(mockRequestBuilder)
+      when(mockRequestBuilder.withBody(eqTo(Json.toJson(journeyConfig)))(using any(), any(), any()))
+        .thenReturn(mockRequestBuilder)
+      when(mockRequestBuilder.execute[HttpResponse](using any(), any()))
+        .thenReturn(Future.successful(HttpResponse(202, "")))
+
+      connector.initJourney(journeyConfig).futureValue mustBe journeyConfig.options.continueUrl
+    }
+
     journeyRoleTestCases.foreach { journeyRole =>
 
       s"must return the Location header from ALF for ${journeyRole.name} journey" in new SetUp {

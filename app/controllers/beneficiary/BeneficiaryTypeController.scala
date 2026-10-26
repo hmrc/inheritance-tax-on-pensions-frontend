@@ -82,7 +82,10 @@ class BeneficiaryTypeController @Inject() (
               ),
             beneficiaryType =>
               for {
-                updatedAnswers <- Future.fromTry(request.userAnswers.set(BeneficiaryTypePage(index), beneficiaryType))
+                updatedAnswers <-
+                  if (request.userAnswers.get(BeneficiaryTypePage(index)).contains(beneficiaryType)) {
+                    Future.successful(request.userAnswers)
+                  } else Future.fromTry(request.userAnswers.set(BeneficiaryTypePage(index), beneficiaryType))
                 _ <- userAnswersService.set(updatedAnswers)(using hc, request.request)
               } yield Redirect(nextPage(srn, index, mode, beneficiaryType, updatedAnswers))
           )

@@ -252,6 +252,14 @@ changePrAddress.error.postCode.length = Postcode should be 35 characters or less
 addressLookup.countryPicker.title = Select the country or territory
 addressLookup.countryPicker.prIndividualName.heading = Select the country or territory where {0} resides
 addressLookup.countryPicker.prOrganisationName.heading = Select the country or territory of {0}
+addressLookup.countryPicker.beneficiaryIndividualName.heading = Select the country or territory where {0} resides
+addressLookup.countryPicker.beneficiaryTrustContactName.heading = Select the country or territory of {0}
+addressLookup.lookup.beneficiaryIndividualName.title = Look up the address of the beneficiary
+addressLookup.lookup.beneficiaryTrustContactName.title = Look up the address of the trust
+addressLookup.edit.beneficiaryIndividualName.title = Enter the address of the beneficiary
+addressLookup.edit.beneficiaryTrustContactName.title = Enter the address of the trust
+addressLookup.international.edit.beneficiaryIndividualName.title = Enter the address of the beneficiary
+addressLookup.international.edit.beneficiaryTrustContactName.title = Enter the address of the trust
 addressLookup.countryPicker.countryLabel = Select country or territory, for example, United Kingdom
 addressLookup.phaseBannerHtml = This is a new service. Help us improve it and <a href="$link" class="govuk-link" target="_blank" rel="noopener noreferrer">give your feedback (opens in new tab)</a>.
 addressLookup.lookup.prIndividualName.title = Look up the address of the PR
@@ -453,7 +461,11 @@ beneficiaryIhtPayable.error.tooHigh = The amount of Inheritance Tax payable is t
 beneficiaryIhtPayable.checkYourAnswersLabel = Amount of IHT payable
 beneficiaryIhtPayable.change.hidden = the amount of IHT payable for {0}
 
+beneficiaryCountry.checkYourAnswersLabel = Country of beneficiary
+beneficiaryCountry.change.hidden = country for {0}
+
 beneficiaryAddress.checkYourAnswersLabel = Address of beneficiary
+beneficiaryAddress.change.hidden = address for {0}
 
 beneficiaryInterestPayable.title = Enter the amount of interest payable for the beneficiary
 beneficiaryInterestPayable.heading = Enter the amount of interest payable for {0}

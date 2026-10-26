@@ -95,7 +95,8 @@ object CheckYourAnswersHelper {
                 BeneficiaryHasNinoSummary.row(srn, index, userAnswers),
                 BeneficiaryNinoSummary.row(srn, index, userAnswers),
                 BeneficiaryNoNinoReasonSummary.row(srn, index, userAnswers),
-                BeneficiaryAddressSummary.row(index, userAnswers, countryName),
+                BeneficiaryCountrySummary.row(srn, index, userAnswers, countryName),
+                BeneficiaryAddressSummary.row(srn, index, userAnswers),
                 BeneficiaryIhtPayableSummary.row(srn, index, userAnswers),
                 BeneficiaryInterestPayableSummary.row(srn, index, userAnswers)
               ).flatten
@@ -237,6 +238,12 @@ object CheckYourAnswersHelper {
       ),
       ContinuationPage(
         answers =>
+          answers.get(pages.beneficiary.BeneficiaryTypePage(i)).contains(BeneficiaryType.Trust) &&
+            answers.get(pages.beneficiary.BeneficiaryNamePage(i, BeneficiaryTrust)).isEmpty,
+        controllers.beneficiary.routes.BeneficiaryNameController.onPageLoad(srn, NormalMode, i, BeneficiaryTrust)
+      ),
+      ContinuationPage(
+        answers =>
           answers.get(pages.beneficiary.BeneficiaryTypePage(i)).contains(BeneficiaryType.Individual) &&
             answers.get(pages.beneficiary.BeneficiaryHasNinoPage(i)).isEmpty,
         controllers.beneficiary.routes.BeneficiaryHasNinoController.onPageLoad(srn, i, NormalMode)
@@ -254,6 +261,12 @@ object CheckYourAnswersHelper {
             answers.get(pages.beneficiary.BeneficiaryHasNinoPage(i)).contains(false) &&
             answers.get(pages.beneficiary.BeneficiaryNoNinoReasonPage(i)).isEmpty,
         controllers.beneficiary.routes.BeneficiaryNoNinoReasonController.onPageLoad(srn, i, NormalMode)
+      ),
+      ContinuationPage(
+        answers =>
+          answers.get(pages.beneficiary.BeneficiaryTypePage(i)).isDefined &&
+            answers.get(pages.beneficiary.BeneficiaryAddressPage(i)).isEmpty,
+        controllers.beneficiary.routes.BeneficiaryAddressController.start(srn, i, NormalMode)
       ),
       ContinuationPage(
         answers =>

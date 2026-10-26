@@ -25,7 +25,7 @@ import controllers.actions._
 import forms.beneficiary.BeneficiaryNameFormProvider
 import play.api.libs.json._
 import models._
-import pages.beneficiary.{BeneficiaryHasNinoPage, BeneficiaryNamePage, BeneficiaryTrustNamePage}
+import pages.beneficiary._
 import play.api.i18n.MessagesApi
 
 import scala.concurrent.{ExecutionContext, Future}
@@ -153,8 +153,9 @@ class BeneficiaryNameController @Inject() (
       case JourneyRole.BeneficiaryTrust =>
         mode match {
           case NormalMode =>
-            controllers.beneficiary.routes.BeneficiaryIhtPayableController
-              .onPageLoad(srn, index, NormalMode) // TODO add navigation to ALF here
+            controllers.beneficiary.routes.BeneficiaryAddressController.start(srn, index, NormalMode)
+          case CheckMode if userAnswers.get(BeneficiaryAddressPage(index)).isEmpty =>
+            controllers.beneficiary.routes.BeneficiaryAddressController.start(srn, index, CheckMode)
           case CheckMode => routes.CheckYourAnswersController.onPageLoad(srn)
         }
       case _ => routes.JourneyRecoveryController.onPageLoad()

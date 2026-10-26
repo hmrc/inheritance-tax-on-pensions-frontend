@@ -20,6 +20,7 @@ import utils.BeneficiaryNameHelper
 import play.api.mvc.Call
 import pages.{AreBeneficiariesKnownPage, DidPrSubmitPage}
 import models.SchemeId.Srn
+import models.beneficiary.BeneficiaryType
 import controllers.beneficiary.routes
 import models._
 import pages.beneficiary._
@@ -30,7 +31,18 @@ case class BeneficiaryIhtPayableEntry(index: Int) extends CurrencyEntry {
   override def isAllowed(answers: UserAnswers): Boolean =
     index >= 0 && index < 30 &&
       answers.get(AreBeneficiariesKnownPage).getOrElse(answers.get(DidPrSubmitPage).contains(false)) &&
-      BeneficiaryNameHelper.fromUserAnswers(answers, index).isDefined
+      BeneficiaryNameHelper.fromUserAnswers(answers, index).isDefined &&
+      answers.get(BeneficiaryAddressPage(index)).isDefined &&
+      (answers.get(BeneficiaryTypePage(index)) match {
+        case Some(BeneficiaryType.Individual) =>
+          answers.get(BeneficiaryHasNinoPage(index)).exists {
+            case true => answers.get(BeneficiaryNinoPage(index)).isDefined
+            case false => answers.get(BeneficiaryNoNinoReasonPage(index)).isDefined
+          }
+        case Some(BeneficiaryType.Trust) =>
+          answers.get(BeneficiaryNamePage(index, JourneyRole.BeneficiaryTrust)).isDefined
+        case _ => false
+      })
   override def messageArgs(answers: UserAnswers): Seq[String] =
     BeneficiaryNameHelper.fromUserAnswers(answers, index).toSeq
   override def submitAction(srn: Srn, mode: Mode): Call =
