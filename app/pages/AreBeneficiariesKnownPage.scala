@@ -30,6 +30,6 @@ case object AreBeneficiariesKnownPage extends QuestionPage[Boolean] {
   override def cleanup(value: Option[Boolean], userAnswers: UserAnswers): Try[UserAnswers] =
     value match {
       case Some(false) => Success(userAnswers.copy(data = userAnswers.data - "beneficiaries"))
-      case _ => userAnswers.remove(IhtPayablePage)
+      case _ => userAnswers.remove(IhtPayablePage).get.remove(InterestPayablePage)
     }
 }

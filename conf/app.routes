@@ -107,6 +107,11 @@ POST        /:srn/enter-iht-payable                      controllers.IhtPayableC
 GET         /:srn/change-iht-payable                     controllers.IhtPayableController.onPageLoad(srn: Srn, mode: Mode = CheckMode)
 POST        /:srn/change-iht-payable                     controllers.IhtPayableController.onSubmit(srn: Srn, mode: Mode = CheckMode)
 
+GET         /:srn/enter-amount-interest-no-beneficiary         controllers.InterestPayableController.onPageLoad(srn: Srn, mode: Mode = NormalMode)
+POST        /:srn/enter-amount-interest-no-beneficiary         controllers.InterestPayableController.onSubmit(srn: Srn, mode: Mode = NormalMode)
+GET         /:srn/change-amount-interest-no-beneficiary        controllers.InterestPayableController.onPageLoad(srn: Srn, mode: Mode = CheckMode)
+POST        /:srn/change-amount-interest-no-beneficiary        controllers.InterestPayableController.onSubmit(srn: Srn, mode: Mode = CheckMode)
+
 GET         /:srn/select-beneficiary-type/$index<[1-2]?[0-9]>  controllers.beneficiary.BeneficiaryTypeController.onPageLoad(srn: Srn, index: Int, mode: Mode = NormalMode)
 POST        /:srn/select-beneficiary-type/$index<[1-2]?[0-9]>  controllers.beneficiary.BeneficiaryTypeController.onSubmit(srn: Srn, index: Int, mode: Mode = NormalMode)
 GET         /:srn/change-beneficiary-type/$index<[1-2]?[0-9]>  controllers.beneficiary.BeneficiaryTypeController.onPageLoad(srn: Srn, index: Int, mode: Mode = CheckMode)

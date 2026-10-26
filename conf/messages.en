@@ -480,3 +480,11 @@ beneficiaryNoNinoReason.error.length = The reason must be 160 characters or less
 beneficiaryNoNinoReason.error.invalid = The reason must not include special characters or line breaks
 beneficiaryNoNinoReason.change.hidden = reason the beneficiary does not have a National Insurance number
 beneficiaryNoNinoReason.checkYourAnswersLabel = Reason for no National Insurance number
+
+interestPayable.title = Enter the amount of interest payable
+interestPayable.heading = Enter the amount of interest payable
+interestPayable.hint = Add the amount in pounds and pence
+interestPayable.error.required = Enter the amount of interest payable
+interestPayable.error.invalid = Enter a valid amount of interest payable
+interestPayable.checkYourAnswersLabel = Amount of interest payable
+interestPayable.change.hidden = the amount of interest payable

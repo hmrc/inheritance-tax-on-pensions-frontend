@@ -17,10 +17,10 @@
 package models.currency
 
 import play.api.mvc.Call
-import pages.{AreBeneficiariesKnownPage, IhtPayablePage}
+import pages.{AreBeneficiariesKnownPage, IhtPayablePage, InterestPayablePage}
 import controllers.routes
 import models.SchemeId.Srn
-import models.{CurrencyEntry, Mode, UserAnswers}
+import models._
 
 case object IhtPayableEntry extends CurrencyEntry {
   override val page = IhtPayablePage
@@ -29,5 +29,10 @@ case object IhtPayableEntry extends CurrencyEntry {
   override def isAllowed(answers: UserAnswers): Boolean = answers.get(AreBeneficiariesKnownPage).contains(false)
   override def submitAction(srn: Srn, mode: Mode): Call = routes.IhtPayableController.onSubmit(srn, mode)
   override def nextPage(srn: Srn, mode: Mode, answers: UserAnswers): Call =
-    routes.CheckYourAnswersController.onPageLoad(srn)
+    mode match {
+      case NormalMode => routes.InterestPayableController.onPageLoad(srn, NormalMode)
+      case CheckMode if answers.get(InterestPayablePage).isEmpty =>
+        routes.InterestPayableController.onPageLoad(srn, CheckMode)
+      case CheckMode => routes.CheckYourAnswersController.onPageLoad(srn)
+    }
 }

@@ -70,6 +70,7 @@ object CheckYourAnswersHelper {
         PaymentNoticeDateSummary.row(srn, userAnswers),
         AreBeneficiariesKnownSummary.row(srn, userAnswers),
         IhtPayableSummary.row(srn, userAnswers),
+        InterestPayableSummary.row(srn, userAnswers),
         NumberOfBeneficiariesSummary.row(srn, userAnswers)
       ).flatten
     )
