@@ -25,7 +25,7 @@ import views.html.beneficiary.BeneficiaryNoNinoReasonView
 import controllers.actions._
 import forms.beneficiary.BeneficiaryNoNinoReasonFormProvider
 import models._
-import pages.beneficiary.{BeneficiaryIhtPayablePage, BeneficiaryNoNinoReasonPage}
+import pages.beneficiary.{BeneficiaryAddressPage, BeneficiaryIhtPayablePage, BeneficiaryNoNinoReasonPage}
 import play.api.i18n.{I18nSupport, MessagesApi}
 
 import scala.concurrent.{ExecutionContext, Future}
@@ -93,7 +93,9 @@ class BeneficiaryNoNinoReasonController @Inject() (
 
   private def nextPage(srn: Srn, index: Int, mode: Mode, answers: UserAnswers) =
     mode match {
-      case NormalMode => routes.BeneficiaryIhtPayableController.onPageLoad(srn, index, NormalMode)
+      case NormalMode => routes.BeneficiaryAddressController.start(srn, index, NormalMode)
+      case CheckMode if answers.get(BeneficiaryAddressPage(index)).isEmpty =>
+        routes.BeneficiaryAddressController.start(srn, index, CheckMode)
       case CheckMode if answers.get(BeneficiaryIhtPayablePage(index)).isEmpty =>
         routes.BeneficiaryIhtPayableController.onPageLoad(srn, index, CheckMode)
       case CheckMode => controllers.routes.CheckYourAnswersController.onPageLoad(srn)

@@ -100,6 +100,8 @@ class CheckYourAnswersControllerSpec extends SpecBase {
         .get
         .set(pages.beneficiary.BeneficiaryIhtPayablePage(0), BigDecimal("12.34"))
         .get
+        .set(pages.beneficiary.BeneficiaryAddressPage(0), testPrAddress)
+        .get
 
       val application = applicationBuilder(userAnswers = Some(userAnswers)).build()
 

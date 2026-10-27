@@ -26,16 +26,19 @@ import base.SpecBase
 
 class BeneficiaryAddressSummarySpec extends SpecBase {
   private val answers = individualBeneficiaryUserAnswers
-  private val countryName: String => String = Map("GB" -> "United Kingdom", "FR" -> "France")
 
   "BeneficiaryAddressSummary" - {
     implicit val messages: Messages = stubMessages()
 
     "must return None when data is not present" in {
-      BeneficiaryAddressSummary.row(0, answers, countryName) mustBe None
+      BeneficiaryAddressSummary.row(
+        srn,
+        0,
+        answers.remove(BeneficiaryAddressPage(0)).success.value
+      ) mustBe None
     }
 
-    "must render the address lines, postcode and resolved country with no Change link" in {
+    "must render the address without its country and an indexed Change link" in {
       val address = PrAddress(
         addressLine1 = "21 RB Road",
         addressLine2 = Some("RBtown"),
@@ -46,13 +49,15 @@ class BeneficiaryAddressSummarySpec extends SpecBase {
       )
       val data = answers.set(BeneficiaryAddressPage(0), address).success.value
 
-      val row = BeneficiaryAddressSummary.row(0, data, countryName).value
+      val row = BeneficiaryAddressSummary.row(srn, 0, data).value
       row.key.content mustBe Text(messages("beneficiaryAddress.checkYourAnswersLabel"))
-      row.value.content mustBe HtmlContent("21 RB Road<br>RBtown<br>LL1 4LL<br>United Kingdom")
-      row.actions.map(_.items).getOrElse(Nil) mustBe empty
+      row.value.content mustBe HtmlContent("21 RB Road<br>RBtown<br>LL1 4LL")
+      row.actions.value.items.head.href mustBe controllers.beneficiary.routes.BeneficiaryAddressController
+        .start(srn, 0, models.CheckMode)
+        .url
     }
 
-    "must skip absent optional lines and resolve the country code" in {
+    "must skip absent optional lines without appending the country" in {
       val address = PrAddress(
         addressLine1 = "33 AB Street",
         addressLine2 = None,
@@ -63,8 +68,8 @@ class BeneficiaryAddressSummarySpec extends SpecBase {
       )
       val data = answers.set(BeneficiaryAddressPage(0), address).success.value
 
-      val row = BeneficiaryAddressSummary.row(0, data, countryName).value
-      row.value.content mustBe HtmlContent("33 AB Street<br>France")
+      val row = BeneficiaryAddressSummary.row(srn, 0, data).value
+      row.value.content mustBe HtmlContent("33 AB Street")
     }
   }
 }

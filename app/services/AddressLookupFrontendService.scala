@@ -40,17 +40,30 @@ class AddressLookupFrontendService @Inject() (
     hc: HeaderCarrier,
     request: RequestHeader
   ): Future[String] =
-    connector.initJourney(srn, mode, journeyConfig(srn, mode, name, journeyRole), journeyRole)
+    connector.initJourney(
+      srn,
+      mode,
+      journeyConfig(name, journeyRole, config.addressLookupContinueUrl(srn, mode, journeyRole)),
+      journeyRole
+    )
+
+  def initBeneficiaryJourney(srn: Srn, index: Int, mode: Mode, name: String, journeyRole: JourneyRole)(implicit
+    hc: HeaderCarrier,
+    request: RequestHeader
+  ): Future[String] =
+    connector.initJourney(
+      journeyConfig(name, journeyRole, config.beneficiaryAddressLookupContinueUrl(srn, index, mode))
+    )
 
   def getAddress(addressId: String)(implicit hc: HeaderCarrier): Future[AlfAddressData] =
     connector.getAddress(addressId)
 
-  private def journeyConfig(srn: Srn, mode: Mode, name: String, journeyRole: JourneyRole)(implicit
+  private def journeyConfig(name: String, journeyRole: JourneyRole, continueUrl: String)(implicit
     request: RequestHeader
   ): AlfJourneyConfig =
     AlfJourneyConfig(
       options = AlfOptions(
-        continueUrl = config.addressLookupContinueUrl(srn, mode, journeyRole),
+        continueUrl = continueUrl,
         signOutHref = config.signOutSurveyUrl,
         deskProServiceName = config.appName,
         phaseFeedbackLink = config.feedbackUrl,

@@ -38,11 +38,19 @@ class AddressLookupFrontendConnector @Inject() (
   def initJourney(srn: Srn, mode: Mode, journeyConfig: AlfJourneyConfig, journeyRole: JourneyRole)(implicit
     hc: HeaderCarrier
   ): Future[String] =
+    initJourney(journeyConfig, config.addressLookupContinueUrl(srn, mode, journeyRole))
+
+  def initJourney(journeyConfig: AlfJourneyConfig)(implicit hc: HeaderCarrier): Future[String] =
+    initJourney(journeyConfig, journeyConfig.options.continueUrl)
+
+  private def initJourney(journeyConfig: AlfJourneyConfig, continueUrl: String)(implicit
+    hc: HeaderCarrier
+  ): Future[String] =
     httpClient
       .post(url"${config.addressLookupFrontendBaseUrl}/api/init")
       .withBody(Json.toJson(journeyConfig))
       .execute[HttpResponse]
-      .map(_.header("Location").getOrElse(config.addressLookupContinueUrl(srn, mode, journeyRole)))
+      .map(_.header("Location").getOrElse(continueUrl))
 
   def getAddress(addressId: String)(implicit hc: HeaderCarrier): Future[AlfAddressData] =
     httpClient

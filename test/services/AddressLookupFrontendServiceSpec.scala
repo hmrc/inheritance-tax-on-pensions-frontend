@@ -89,8 +89,46 @@ class AddressLookupFrontendServiceSpec extends SpecBase {
     }
   }
 
-  "getAddress" - {
+  "initBeneficiaryJourney" - {
 
+    Seq(JourneyRole.BeneficiaryIndividual, JourneyRole.BeneficiaryTrust).foreach { role =>
+      s"reuse ALF options with an indexed callback and resolved labels for $role" in {
+        val app = applicationBuilder().build()
+        running(app) {
+          val config = app.injector.instanceOf[FrontendAppConfig]
+          val connector = mock[AddressLookupFrontendConnector]
+          val countryService = app.injector.instanceOf[CountryService]
+          val messagesApi = app.injector.instanceOf[MessagesApi]
+          val service = new AddressLookupFrontendService(config, connector, messagesApi, countryService)
+          val name = if (role == JourneyRole.BeneficiaryTrust) trustName else individualNameFormatted
+          when(connector.initJourney(any[AlfJourneyConfig]())(using any()))
+            .thenReturn(Future.successful("/lookup-address"))
+
+          service.initBeneficiaryJourney(srn, 1, models.CheckMode, name, role).futureValue mustBe "/lookup-address"
+          val captured = ArgumentCaptor.forClass(classOf[AlfJourneyConfig])
+          verify(connector).initJourney(captured.capture())(using any())
+          captured.getValue.options.continueUrl mustBe config.beneficiaryAddressLookupContinueUrl(
+            srn,
+            1,
+            models.CheckMode
+          )
+          captured.getValue.options.manualAddressEntryConfig mustBe AlfManualAddressEntryConfig(AlfMandatoryFields())
+          captured.getValue.options.allowedCountryCodes mustBe Some(countryService.countries.map(_.code))
+          captured.getValue.labels.en.countryPickerLabels.heading mustBe messages(app)(
+            s"addressLookup.countryPicker.${role.key}.heading",
+            name
+          )
+          captured.getValue.labels.en.lookupPageLabels.title mustBe messages(app)(
+            s"addressLookup.lookup.${role.key}.title",
+            name
+          )
+        }
+      }
+    }
+
+  }
+
+  "getAddress" - {
     "must return the address from the connector" in {
 
       val mockConfig = mock[FrontendAppConfig]

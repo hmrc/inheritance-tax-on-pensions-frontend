@@ -83,6 +83,9 @@ class AreBeneficiariesKnownControllerSpec extends SpecBase with MockitoSugar {
       .set(BeneficiaryIhtPayablePage(0), BigDecimal("12.34"))
       .success
       .value
+      .set(pages.beneficiary.BeneficiaryAddressPage(0), testPrAddress)
+      .success
+      .value
 
     Seq(
       (
