@@ -115,6 +115,9 @@ class FrontendAppConfig @Inject() (configuration: Configuration) {
   def addressLookupContinueUrl(srn: Srn, mode: Mode, journeyRole: JourneyRole): String =
     s"$host${routes.AddressLookupContinueController.continue(srn, mode, journeyRole).url}"
 
+  def beneficiaryAddressLookupContinueUrl(srn: Srn, index: Int, mode: Mode): String =
+    s"$host${controllers.beneficiary.routes.BeneficiaryAddressController.continue(srn, index, mode).url}"
+
   val signOutSurveyUrl: String =
     s"$host$servicePath${controllers.auth.routes.AuthController.signOut().url}"
 

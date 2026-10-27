@@ -44,14 +44,16 @@ class BeneficiaryIhtPayableControllerSpec extends SpecBase {
     namedSecond <- second.set(BeneficiaryNamePage(1, JourneyRole.BeneficiaryIndividual), secondBeneficiaryName)
     withoutNino <- namedSecond.set(BeneficiaryHasNinoPage(1), false)
     withReason <- withoutNino.set(BeneficiaryNoNinoReasonPage(1), testReasonNoNino)
-  } yield withReason).success.value
+    withAddress <- withReason.set(BeneficiaryAddressPage(1), testPrAddress)
+  } yield withAddress).success.value
 
   private val answersTrust = (for {
     firstWithAmount <- individualBeneficiaryUserAnswers.set(BeneficiaryIhtPayablePage(0), BigDecimal("10.00"))
     second <- firstWithAmount.set(BeneficiaryTypePage(1), BeneficiaryType.Trust)
     namedSecond <- second.set(BeneficiaryNamePage(1, JourneyRole.BeneficiaryTrust), secondBeneficiaryName)
     trustname <- namedSecond.set(BeneficiaryTrustNamePage(1), trustName)
-  } yield trustname).success.value
+    withAddress <- trustname.set(BeneficiaryAddressPage(1), testPrAddress)
+  } yield withAddress).success.value
 
   Seq((answersIndividuls, "individual"), (answersTrust, "trust")).foreach { (answers, testName) =>
     s"BeneficiaryIhtPayableController ${testName}" - {
@@ -119,8 +121,9 @@ class BeneficiaryIhtPayableControllerSpec extends SpecBase {
         }
       }
 
-      "must block missing name and unknown-beneficiary journeys on GET and POST" in {
+      "must block incomplete and unknown-beneficiary journeys on GET and POST" in {
         val invalidAnswers = Seq(
+          answers.remove(BeneficiaryAddressPage(1)).success.value,
           answers
             .remove(
               testName match {
@@ -131,7 +134,15 @@ class BeneficiaryIhtPayableControllerSpec extends SpecBase {
             .success
             .value,
           answers.set(AreBeneficiariesKnownPage, false).success.value
-        )
+        ) ++ (testName match {
+          case "individual" =>
+            Seq(
+              answers.remove(BeneficiaryHasNinoPage(1)).success.value,
+              answers.remove(BeneficiaryNoNinoReasonPage(1)).success.value,
+              answers.set(BeneficiaryHasNinoPage(1), true).success.value
+            )
+          case _ => Seq(answers.remove(BeneficiaryTrustNamePage(1)).success.value)
+        })
         invalidAnswers.foreach { data =>
           val service = mock[UserAnswersService]
           val app = applicationBuilder(Some(data), usesSession = true)

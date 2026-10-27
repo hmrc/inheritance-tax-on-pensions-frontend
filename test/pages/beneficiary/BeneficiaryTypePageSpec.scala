@@ -48,6 +48,9 @@ class BeneficiaryTypePageSpec extends SpecBase {
         .set(BeneficiaryIhtPayablePage(testIndex), BigDecimal("12.34"))
         .success
         .value
+        .set(BeneficiaryAddressPage(testIndex), testPrAddress)
+        .success
+        .value
 
       val updatedAnswers = userAnswers.set(BeneficiaryTypePage(testIndex), BeneficiaryType.Trust).success.value
 
@@ -55,6 +58,7 @@ class BeneficiaryTypePageSpec extends SpecBase {
       updatedAnswers.get(BeneficiaryHasNinoPage(testIndex)) mustBe None
       updatedAnswers.get(BeneficiaryNinoPage(testIndex)) mustBe None
       updatedAnswers.get(BeneficiaryIhtPayablePage(testIndex)) mustBe None
+      updatedAnswers.get(BeneficiaryAddressPage(testIndex)) mustBe None
     }
 
     "must remove trust beneficiary details when Individual is selected" in {
@@ -65,11 +69,15 @@ class BeneficiaryTypePageSpec extends SpecBase {
         .set(BeneficiaryNamePage(testIndex, BeneficiaryTrust), individualName)
         .success
         .value
+        .set(BeneficiaryAddressPage(testIndex), testPrAddress)
+        .success
+        .value
 
       val updatedAnswers = userAnswers.set(BeneficiaryTypePage(testIndex), BeneficiaryType.Individual).success.value
 
       updatedAnswers.get(BeneficiaryTrustNamePage(testIndex)) mustBe None
       updatedAnswers.get(BeneficiaryTrustDetailsPage(testIndex)) mustBe None
+      updatedAnswers.get(BeneficiaryAddressPage(testIndex)) mustBe None
     }
 
   }

@@ -56,7 +56,7 @@ class BeneficiaryNameControllerSpec extends BeneficiarySpecBase {
     ),
     JourneyRoleTestCase(
       JourneyRole.BeneficiaryTrust,
-      controllers.beneficiary.routes.BeneficiaryIhtPayableController.onPageLoad(srn, testIndex, NormalMode).url
+      controllers.beneficiary.routes.BeneficiaryAddressController.start(srn, testIndex, NormalMode).url
     )
   )
 
@@ -220,7 +220,7 @@ class BeneficiaryNameControllerSpec extends BeneficiarySpecBase {
       }
     }
 
-    "must redirect to the BeneficiaryList page when valid beneficiary trust data is submitted in NormalMode" in {
+    "must redirect to address lookup when valid beneficiary trust data is submitted in NormalMode" in {
 
       val mockConnector = mock[InheritanceTaxOnPensionsConnector]
       when(mockConnector.setUserAnswers(any(), any(), any(), any(), any())(using any()))
@@ -243,13 +243,13 @@ class BeneficiaryNameControllerSpec extends BeneficiarySpecBase {
         val result = route(application, request).value
 
         status(result) mustEqual SEE_OTHER
-        redirectLocation(result).value mustEqual controllers.beneficiary.routes.BeneficiaryIhtPayableController
-          .onPageLoad(srn, testIndex, NormalMode)
+        redirectLocation(result).value mustEqual controllers.beneficiary.routes.BeneficiaryAddressController
+          .start(srn, testIndex, NormalMode)
           .url
       }
     }
 
-    "must redirect to the CYA page when valid beneficiary trust data is submitted in CheckMode" in {
+    "must collect a missing address when valid beneficiary trust data is submitted in CheckMode" in {
 
       val mockConnector = mock[InheritanceTaxOnPensionsConnector]
       when(mockConnector.setUserAnswers(any(), any(), any(), any(), any())(using any()))
@@ -272,8 +272,8 @@ class BeneficiaryNameControllerSpec extends BeneficiarySpecBase {
         val result = route(application, request).value
 
         status(result) mustEqual SEE_OTHER
-        redirectLocation(result).value mustEqual routes.CheckYourAnswersController
-          .onPageLoad(srn)
+        redirectLocation(result).value mustEqual controllers.beneficiary.routes.BeneficiaryAddressController
+          .start(srn, testIndex, CheckMode)
           .url
       }
     }

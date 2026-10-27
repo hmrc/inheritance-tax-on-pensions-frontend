@@ -43,6 +43,36 @@ class BeneficiaryTypeControllerSpec extends SpecBase {
 
   "BeneficiaryTypeController Controller" - {
 
+    "preserve a saved address when the beneficiary type is unchanged" in {
+      val data = emptyUserAnswers
+        .set(BeneficiaryTypePage(testIndex), BeneficiaryType.Trust)
+        .success
+        .value
+        .set(BeneficiaryTrustNamePage(testIndex), trustName)
+        .success
+        .value
+        .set(pages.beneficiary.BeneficiaryAddressPage(testIndex), testPrAddress)
+        .success
+        .value
+      val connector = mock[InheritanceTaxOnPensionsConnector]
+      when(connector.setUserAnswers(any(), any(), any(), any(), any())(using any()))
+        .thenReturn(Future.successful(Right(data)))
+      val app = applicationBuilder(Some(data), usesSession = true)
+        .overrides(bind[InheritanceTaxOnPensionsConnector].toInstance(connector))
+        .build()
+      running(app) {
+        val result = route(
+          app,
+          FakeRequest(POST, routes.BeneficiaryTypeController.onSubmit(srn, testIndex, CheckMode).url)
+            .withFormUrlEncodedBody("value" -> BeneficiaryType.Trust.toString)
+        ).value
+        status(result) mustBe SEE_OTHER
+        val captured = org.mockito.ArgumentCaptor.forClass(classOf[UserAnswers])
+        verify(connector).setUserAnswers(captured.capture(), any(), any(), any(), any())(using any())
+        captured.getValue mustBe data
+      }
+    }
+
     "must return OK and the correct view for a GET" in {
 
       val userAnswers = emptyUserAnswers.set(AreBeneficiariesKnownPage, true).success.value

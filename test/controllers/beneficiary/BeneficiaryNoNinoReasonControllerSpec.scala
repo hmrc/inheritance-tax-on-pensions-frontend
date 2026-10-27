@@ -24,7 +24,7 @@ import forms.beneficiary.BeneficiaryNoNinoReasonFormProvider
 import play.api.inject
 import controllers.beneficiary.routes
 import models._
-import pages.beneficiary.{BeneficiaryIhtPayablePage, BeneficiaryNamePage, BeneficiaryNoNinoReasonPage}
+import pages.beneficiary._
 import org.scalatestplus.mockito.MockitoSugar
 import org.mockito.ArgumentMatchers.{any, eq => eqTo}
 import play.api.test.Helpers._
@@ -99,13 +99,19 @@ class BeneficiaryNoNinoReasonControllerSpec extends SpecBase with MockitoSugar {
     }
 
     Seq(
-      (NormalMode, None, routes.BeneficiaryIhtPayableController.onPageLoad(srn, testIndex, NormalMode)),
-      (CheckMode, None, routes.BeneficiaryIhtPayableController.onPageLoad(srn, testIndex, CheckMode)),
+      (NormalMode, None, routes.BeneficiaryAddressController.start(srn, testIndex, NormalMode)),
+      (CheckMode, None, routes.BeneficiaryAddressController.start(srn, testIndex, CheckMode)),
       (CheckMode, Some(BigDecimal("12.34")), controllers.routes.CheckYourAnswersController.onPageLoad(srn))
     ).foreach { case (mode, savedAmount, nextPage) =>
       s"must save and follow the next page in $mode with amountAlreadyEntered=${savedAmount.isDefined}" in {
         val answers = savedAmount.fold(userAnswersWithBeneficiaryName) { amount =>
-          userAnswersWithBeneficiaryName.set(BeneficiaryIhtPayablePage(testIndex), amount).success.value
+          userAnswersWithBeneficiaryName
+            .set(BeneficiaryIhtPayablePage(testIndex), amount)
+            .success
+            .value
+            .set(BeneficiaryAddressPage(testIndex), testPrAddress)
+            .success
+            .value
         }
         val mockConnector = mock[InheritanceTaxOnPensionsConnector]
         when(mockConnector.setUserAnswers(any(), any(), any(), any(), any())(using any()))

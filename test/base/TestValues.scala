@@ -92,7 +92,8 @@ trait TestValues extends Generators {
       named <- individual.set(BeneficiaryNamePage(0, JourneyRole.BeneficiaryIndividual), individualName)
       hasNino <- named.set(BeneficiaryHasNinoPage(0), true)
       withNino <- hasNino.set(BeneficiaryNinoPage(0), testNino)
-    } yield withNino).get
+      withAddress <- withNino.set(BeneficiaryAddressPage(0), testPrAddress)
+    } yield withAddress).get
 
   def deceasedPrUserAnswers: UserAnswers =
     UserAnswers(userAnswersId, srnGen.sample.get.value.toString, testUuid)

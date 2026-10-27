@@ -42,12 +42,14 @@ case class BeneficiaryTypePage(index: Int) extends QuestionPage[BeneficiaryType]
             .get
             .remove(BeneficiaryNoNinoReasonPage(index))
           withoutIndividualAmount <- withoutIndividualDetails.remove(BeneficiaryIhtPayablePage(index))
-        } yield withoutIndividualAmount
+          withoutAddress <- withoutIndividualAmount.remove(BeneficiaryAddressPage(index))
+        } yield withoutAddress
       case Some(BeneficiaryType.Individual) =>
         userAnswers
           .remove(BeneficiaryTrustDetailsPage(index))
           .get
           .remove(BeneficiaryNamePage(index, BeneficiaryTrust))
+          .flatMap(_.remove(BeneficiaryAddressPage(index)))
       case _ => super.cleanup(value, userAnswers)
     }
 }

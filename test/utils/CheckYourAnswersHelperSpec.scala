@@ -27,7 +27,53 @@ import org.scalatest.freespec.AnyFreeSpec
 
 class CheckYourAnswersHelperSpec extends AnyFreeSpec with SpecBase {
 
+  "buildSummaryLists must place beneficiary country before address with both links restarting ALF" in {
+    runningApplication { app =>
+      given play.api.i18n.Messages = messages(app)
+      val lists = CheckYourAnswersHelper.buildSummaryLists(
+        individualBeneficiaryUserAnswers,
+        srn,
+        app.injector.instanceOf[services.CountryService].nameForCode,
+        app.injector.instanceOf[play.api.i18n.MessagesApi]
+      )
+      val rows = lists.beneficiaryList.head.rows
+      val countryIndex = rows.indexWhere(
+        _.key.content == uk.gov.hmrc.govukfrontend.views.Aliases
+          .Text(messages(app)("beneficiaryCountry.checkYourAnswersLabel"))
+      )
+      countryIndex must be >= 0
+      val addressRow = rows(countryIndex + 1)
+      addressRow.key.content mustBe uk.gov.hmrc.govukfrontend.views.Aliases.Text(
+        messages(app)("beneficiaryAddress.checkYourAnswersLabel")
+      )
+      val startUrl = controllers.beneficiary.routes.BeneficiaryAddressController.start(srn, 0, CheckMode).url
+      rows(countryIndex).actions.value.items.head.href mustBe startUrl
+      addressRow.actions.value.items.head.href mustBe startUrl
+    }
+  }
+
   "findPageToContinue" - {
+
+    Seq(BeneficiaryType.Individual, BeneficiaryType.Trust).foreach { beneficiaryType =>
+      s"resume address lookup for a $beneficiaryType with no saved address" in {
+        val role = if (beneficiaryType == BeneficiaryType.Individual) BeneficiaryIndividual else BeneficiaryTrust
+        val answers = (for {
+          typed <- prIndividualUserAnswers.set(pages.beneficiary.BeneficiaryTypePage(0), beneficiaryType)
+          contact <- typed.set(pages.beneficiary.BeneficiaryNamePage(0, role), individualName)
+          completed <-
+            if (beneficiaryType == BeneficiaryType.Trust) {
+              contact.set(pages.beneficiary.BeneficiaryTrustNamePage(0), trustName)
+            } else {
+              contact
+                .set(pages.beneficiary.BeneficiaryHasNinoPage(0), true)
+                .flatMap(_.set(pages.beneficiary.BeneficiaryNinoPage(0), testNino))
+            }
+        } yield completed).success.value
+
+        CheckYourAnswersHelper.findPageToContinue(answers, srn).value mustBe
+          controllers.beneficiary.routes.BeneficiaryAddressController.start(srn, 0, NormalMode)
+      }
+    }
 
     "must return the IndividualName(Deceased) page if a value is missing" in {
       val userAnswers = deceasedPrUserAnswers
@@ -196,6 +242,8 @@ class CheckYourAnswersHelperSpec extends AnyFreeSpec with SpecBase {
         .get
         .set(pages.beneficiary.BeneficiaryIhtPayablePage(0), BigDecimal("12.34"))
         .get
+        .set(pages.beneficiary.BeneficiaryAddressPage(0), testPrAddress)
+        .get
 
       CheckYourAnswersHelper.findPageToContinue(userAnswers, srn) mustBe None
     }
@@ -217,6 +265,9 @@ class CheckYourAnswersHelperSpec extends AnyFreeSpec with SpecBase {
         .set(pages.beneficiary.BeneficiaryIhtPayablePage(0), BigDecimal("1234.56"))
         .success
         .value
+        .set(pages.beneficiary.BeneficiaryAddressPage(0), testPrAddress)
+        .success
+        .value
       val missingNino = completeFirst
         .set(pages.beneficiary.BeneficiaryTypePage(1), BeneficiaryType.Individual)
         .success
@@ -225,6 +276,9 @@ class CheckYourAnswersHelperSpec extends AnyFreeSpec with SpecBase {
         .success
         .value
         .set(pages.beneficiary.BeneficiaryHasNinoPage(1), true)
+        .success
+        .value
+        .set(pages.beneficiary.BeneficiaryAddressPage(1), testPrAddress)
         .success
         .value
       CheckYourAnswersHelper.findPageToContinue(missingNino, srn).value mustBe
