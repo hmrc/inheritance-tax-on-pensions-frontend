@@ -47,7 +47,7 @@
 
         @pageHeading(
             viewModel.heading,
-            classes = s"${Css.headingLCssClass} ${Css.marginBottom3CssClass}"
+            classes = if(viewModel.hint.isDefined) s"${Css.headingLCssClass} ${Css.marginBottom3CssClass}" else Css.headingLCssClass
         )
 
         @viewModel.hint.map { hint =>
