@@ -271,9 +271,15 @@ object CheckYourAnswersHelper {
       ),
       ContinuationPage(
         answers =>
-          answers.get(pages.beneficiary.BeneficiaryTypePage(i)).contains(BeneficiaryType.Individual) &&
+          BeneficiaryNameHelper.fromUserAnswers(answers, i).isDefined &&
             answers.get(pages.beneficiary.BeneficiaryIhtPayablePage(i)).isEmpty,
         controllers.beneficiary.routes.BeneficiaryIhtPayableController.onPageLoad(srn, i, NormalMode)
+      ),
+      ContinuationPage(
+        answers =>
+          answers.get(pages.beneficiary.BeneficiaryIhtPayablePage(i)).isDefined &&
+            answers.get(pages.beneficiary.BeneficiaryInterestPayablePage(i)).isEmpty,
+        controllers.beneficiary.routes.BeneficiaryInterestPayableController.onPageLoad(srn, i, NormalMode)
       )
     )
 

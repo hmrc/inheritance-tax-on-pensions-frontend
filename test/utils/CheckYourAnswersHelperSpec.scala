@@ -242,6 +242,8 @@ class CheckYourAnswersHelperSpec extends AnyFreeSpec with SpecBase {
         .get
         .set(pages.beneficiary.BeneficiaryIhtPayablePage(0), BigDecimal("12.34"))
         .get
+        .set(pages.beneficiary.BeneficiaryInterestPayablePage(0), BigDecimal("1.23"))
+        .get
         .set(pages.beneficiary.BeneficiaryAddressPage(0), testPrAddress)
         .get
 
@@ -263,6 +265,9 @@ class CheckYourAnswersHelperSpec extends AnyFreeSpec with SpecBase {
         .success
         .value
         .set(pages.beneficiary.BeneficiaryIhtPayablePage(0), BigDecimal("1234.56"))
+        .success
+        .value
+        .set(pages.beneficiary.BeneficiaryInterestPayablePage(0), BigDecimal("56.78"))
         .success
         .value
         .set(pages.beneficiary.BeneficiaryAddressPage(0), testPrAddress)
@@ -301,8 +306,10 @@ class CheckYourAnswersHelperSpec extends AnyFreeSpec with SpecBase {
           identity,
           app.injector.instanceOf[play.api.i18n.MessagesApi]
         )
-        lists.beneficiaryList.head.rows.last.value.content mustBe uk.gov.hmrc.govukfrontend.views.Aliases
-          .Text("\u00a31,234.56")
+        lists.beneficiaryList.head.rows.takeRight(2).map(_.value.content) mustBe Seq(
+          uk.gov.hmrc.govukfrontend.views.Aliases.Text("\u00a31,234.56"),
+          uk.gov.hmrc.govukfrontend.views.Aliases.Text("\u00a356.78")
+        )
       }
     }
   }

@@ -93,7 +93,7 @@ class BeneficiaryIhtPayableControllerSpec extends SpecBase {
             status(result) mustBe SEE_OTHER
             val expectedPage = mode match {
               case NormalMode => routes.BeneficiaryInterestPayableController.onPageLoad(srn, 1, NormalMode)
-              case CheckMode => controllers.routes.CheckYourAnswersController.onPageLoad(srn)
+              case CheckMode => routes.BeneficiaryInterestPayableController.onPageLoad(srn, 1, CheckMode)
             }
             redirectLocation(result).value mustBe expectedPage.url
             val captured = ArgumentCaptor.forClass(classOf[UserAnswers])
