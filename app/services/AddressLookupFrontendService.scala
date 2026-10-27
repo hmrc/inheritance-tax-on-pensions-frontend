@@ -41,10 +41,7 @@ class AddressLookupFrontendService @Inject() (
     request: RequestHeader
   ): Future[String] =
     connector.initJourney(
-      srn,
-      mode,
-      journeyConfig(name, journeyRole, config.addressLookupContinueUrl(srn, mode, journeyRole)),
-      journeyRole
+      journeyConfig(name, journeyRole, config.addressLookupContinueUrl(srn, mode, journeyRole))
     )
 
   def initBeneficiaryJourney(srn: Srn, index: Int, mode: Mode, name: String, journeyRole: JourneyRole)(implicit
