@@ -15,7 +15,6 @@
  *@
 
 @import components.PageHeading
-@import config.Constants.Css
 @import models.SchemeId.Srn
 
 @this(
@@ -40,10 +39,7 @@
             )))
         }
 
-        @pageHeading(
-            messages("birthDeathDates.heading", deceasedName),
-            classes = s"${Css.headingLCssClass} ${Css.marginBottom3CssClass}"
-        )
+        @pageHeading(messages("birthDeathDates.heading", deceasedName))
 
         @govukDateInput(
             DateViewModel(

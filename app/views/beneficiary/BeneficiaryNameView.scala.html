@@ -15,7 +15,6 @@
  *@
 
 @import components.{PageHeading, Paragraph}
-@import config.Constants.Css
 @import uk.gov.hmrc.govukfrontend.views.html.components.{FormWithCSRF, GovukButton, GovukErrorSummary, GovukInput}
 @import viewmodels.govuk.all._
 @import views.ViewUtils.title
@@ -45,10 +44,7 @@
             @govukErrorSummary(ErrorSummaryViewModel(form))
         }
 
-        @pageHeading(
-            viewModel.heading,
-            classes = s"${Css.headingLCssClass} ${Css.marginBottom3CssClass}"
-        )
+        @pageHeading(viewModel.heading)
 
         @viewModel.hint.map { hint =>
             @paragraph(
