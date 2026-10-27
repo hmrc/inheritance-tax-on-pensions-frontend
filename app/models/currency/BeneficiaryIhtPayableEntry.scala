@@ -50,6 +50,8 @@ case class BeneficiaryIhtPayableEntry(index: Int) extends CurrencyEntry {
   override def nextPage(srn: Srn, mode: Mode, answers: UserAnswers): Call =
     mode match {
       case NormalMode => routes.BeneficiaryInterestPayableController.onPageLoad(srn, index, NormalMode)
+      case CheckMode if answers.get(BeneficiaryInterestPayablePage(index)).isEmpty =>
+        routes.BeneficiaryInterestPayableController.onPageLoad(srn, index, CheckMode)
       case CheckMode => controllers.routes.CheckYourAnswersController.onPageLoad(srn)
     }
 }

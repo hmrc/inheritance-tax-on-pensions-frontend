@@ -48,6 +48,9 @@ class BeneficiaryTypePageSpec extends SpecBase {
         .set(BeneficiaryIhtPayablePage(testIndex), BigDecimal("12.34"))
         .success
         .value
+        .set(BeneficiaryInterestPayablePage(testIndex), BigDecimal("5.67"))
+        .success
+        .value
         .set(BeneficiaryAddressPage(testIndex), testPrAddress)
         .success
         .value
@@ -58,6 +61,7 @@ class BeneficiaryTypePageSpec extends SpecBase {
       updatedAnswers.get(BeneficiaryHasNinoPage(testIndex)) mustBe None
       updatedAnswers.get(BeneficiaryNinoPage(testIndex)) mustBe None
       updatedAnswers.get(BeneficiaryIhtPayablePage(testIndex)) mustBe None
+      updatedAnswers.get(BeneficiaryInterestPayablePage(testIndex)) mustBe None
       updatedAnswers.get(BeneficiaryAddressPage(testIndex)) mustBe None
     }
 
@@ -72,12 +76,20 @@ class BeneficiaryTypePageSpec extends SpecBase {
         .set(BeneficiaryAddressPage(testIndex), testPrAddress)
         .success
         .value
+        .set(BeneficiaryIhtPayablePage(testIndex), BigDecimal("12.34"))
+        .success
+        .value
+        .set(BeneficiaryInterestPayablePage(testIndex), BigDecimal("5.67"))
+        .success
+        .value
 
       val updatedAnswers = userAnswers.set(BeneficiaryTypePage(testIndex), BeneficiaryType.Individual).success.value
 
       updatedAnswers.get(BeneficiaryTrustNamePage(testIndex)) mustBe None
       updatedAnswers.get(BeneficiaryTrustDetailsPage(testIndex)) mustBe None
       updatedAnswers.get(BeneficiaryAddressPage(testIndex)) mustBe None
+      updatedAnswers.get(BeneficiaryIhtPayablePage(testIndex)) mustBe None
+      updatedAnswers.get(BeneficiaryInterestPayablePage(testIndex)) mustBe None
     }
 
   }
