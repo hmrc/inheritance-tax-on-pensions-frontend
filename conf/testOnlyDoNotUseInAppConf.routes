@@ -13,3 +13,4 @@
 ->         /                          prod.Routes
 
 GET        /inheritance-tax-on-pensions/test-only/:srn/seed-pr-address     controllers.testonly.PrAddressController.seed(srn: Srn)
+GET        /inheritance-tax-on-pensions/test-only/:srn/$index<[1-2]?[0-9]>/seed-beneficiary-address     controllers.testonly.BeneficiaryAddressController.seed(srn: Srn, index: Int)
