@@ -22,7 +22,6 @@ import models.addresslookup._
 import base.SpecBase
 import play.api.libs.json.Json
 import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse, StringContextOps}
-import models.{JourneyRole, NormalMode}
 import uk.gov.hmrc.http.client.{HttpClientV2, RequestBuilder}
 import org.mockito.ArgumentMatchers.{any, eq => eqTo}
 
@@ -65,14 +64,9 @@ class AddressLookupFrontendConnectorSpec extends SpecBase {
     )
   )
 
-  private lazy val journeyRoleTestCases = Seq(
-    JourneyRole.PrIndividual,
-    JourneyRole.PrOrganisation
-  )
-
   "initJourney" - {
 
-    "use the beneficiary journey's configured callback when ALF omits Location" in new SetUp {
+    "must return the configured callback when ALF omits Location" in new SetUp {
       when(mockConfig.addressLookupFrontendBaseUrl).thenReturn("http://address-lookup-frontend")
       when(mockHttpClient.post(any())(using any())).thenReturn(mockRequestBuilder)
       when(mockRequestBuilder.withBody(eqTo(Json.toJson(journeyConfig)))(using any(), any(), any()))
@@ -83,42 +77,20 @@ class AddressLookupFrontendConnectorSpec extends SpecBase {
       connector.initJourney(journeyConfig).futureValue mustBe journeyConfig.options.continueUrl
     }
 
-    journeyRoleTestCases.foreach { journeyRole =>
+    "must return the Location header from ALF" in new SetUp {
+      val responseWithLocation = mock[HttpResponse]
+      when(responseWithLocation.header("Location")).thenReturn(Some("/lookup-address"))
 
-      s"must return the Location header from ALF for ${journeyRole.name} journey" in new SetUp {
+      when(mockConfig.addressLookupFrontendBaseUrl).thenReturn("http://address-lookup-frontend")
+      when(mockHttpClient.post(any())(using any())).thenReturn(mockRequestBuilder)
+      when(mockRequestBuilder.withBody(eqTo(Json.toJson(journeyConfig)))(using any(), any(), any()))
+        .thenReturn(mockRequestBuilder)
+      when(mockRequestBuilder.execute[HttpResponse](using any(), any()))
+        .thenReturn(Future.successful(responseWithLocation))
 
-        val responseWithLocation = mock[HttpResponse]
-        when(responseWithLocation.header("Location")).thenReturn(Some("/lookup-address"))
+      connector.initJourney(journeyConfig).futureValue mustBe "/lookup-address"
 
-        when(mockConfig.addressLookupFrontendBaseUrl).thenReturn("http://address-lookup-frontend")
-        when(mockHttpClient.post(any())(using any())).thenReturn(mockRequestBuilder)
-        when(mockRequestBuilder.withBody(eqTo(Json.toJson(journeyConfig)))(using any(), any(), any()))
-          .thenReturn(mockRequestBuilder)
-        when(mockRequestBuilder.execute[HttpResponse](using any(), any()))
-          .thenReturn(Future.successful(responseWithLocation))
-
-        connector
-          .initJourney(srn, NormalMode, journeyConfig, journeyRole)
-          .futureValue mustBe "/lookup-address"
-
-        verify(mockHttpClient).post(eqTo(url"http://address-lookup-frontend/api/init"))(using any())
-      }
-
-      s"must return the local continue URL when ALF does not return a Location header for ${journeyRole.name} journey" in new SetUp {
-
-        when(mockConfig.addressLookupFrontendBaseUrl).thenReturn("http://address-lookup-frontend")
-        when(mockConfig.addressLookupContinueUrl(eqTo(srn), eqTo(NormalMode), eqTo(journeyRole)))
-          .thenReturn("/local-continue")
-        when(mockHttpClient.post(any())(using any())).thenReturn(mockRequestBuilder)
-        when(mockRequestBuilder.withBody(eqTo(Json.toJson(journeyConfig)))(using any(), any(), any()))
-          .thenReturn(mockRequestBuilder)
-        when(mockRequestBuilder.execute[HttpResponse](using any(), any()))
-          .thenReturn(Future.successful(HttpResponse(202, "")))
-
-        connector
-          .initJourney(srn, NormalMode, journeyConfig, journeyRole)
-          .futureValue mustBe "/local-continue"
-      }
+      verify(mockHttpClient).post(eqTo(url"http://address-lookup-frontend/api/init"))(using any())
     }
   }
 

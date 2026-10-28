@@ -18,7 +18,6 @@ package services
 
 import play.api.test.FakeRequest
 import connectors.AddressLookupFrontendConnector
-import controllers.routes
 import config.FrontendAppConfig
 import models.addresslookup._
 import base.SpecBase
@@ -58,7 +57,7 @@ class AddressLookupFrontendServiceSpec extends SpecBase {
           val countryService = application.injector.instanceOf[CountryService]
           val service = new AddressLookupFrontendService(config, mockConnector, messagesApi, countryService)
 
-          when(mockConnector.initJourney(eqTo(srn), eqTo(NormalMode), any(), any())(using any()))
+          when(mockConnector.initJourney(any[AlfJourneyConfig]())(using any()))
             .thenReturn(Future.successful("/lookup-address"))
 
           val result = service.initJourney(srn, NormalMode, "Firstname Surname", journeyRole).futureValue
@@ -66,12 +65,10 @@ class AddressLookupFrontendServiceSpec extends SpecBase {
           result mustBe "/lookup-address"
 
           val configCaptor: ArgumentCaptor[AlfJourneyConfig] = ArgumentCaptor.forClass(classOf[AlfJourneyConfig])
-          verify(mockConnector).initJourney(eqTo(srn), eqTo(NormalMode), configCaptor.capture(), any())(using any())
+          verify(mockConnector).initJourney(configCaptor.capture())(using any())
 
           val journeyConfig = configCaptor.getValue
-          journeyConfig.options.continueUrl must include(
-            routes.AddressLookupContinueController.continue(srn, NormalMode, journeyRole).url
-          )
+          journeyConfig.options.continueUrl mustBe config.addressLookupContinueUrl(srn, NormalMode, journeyRole)
           journeyConfig.options.signOutHref mustBe config.signOutSurveyUrl
           journeyConfig.options.phaseFeedbackLink mustBe config.feedbackUrl
           journeyConfig.options.allowedCountryCodes mustBe Some(countryService.countries.map(_.code))
