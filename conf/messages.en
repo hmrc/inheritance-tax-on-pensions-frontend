@@ -329,6 +329,7 @@ confirmation.title = Report submitted
 confirmation.heading = Report submitted
 confirmation.panel.body.reference = Your payment reference
 confirmation.email = We have sent a confirmation email to {0}.
+confirmation.save.or.print = Save or print this report.
 confirmation.what.happens.next = How to pay
 confirmation.what.happens.next.p1.pretext = You need to
 confirmation.what.happens.next.p1.link.text = pay HMRC £{0} (opens new in tab).
