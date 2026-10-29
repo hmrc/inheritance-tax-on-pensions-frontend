@@ -90,7 +90,8 @@ POST        /:srn/psa-declaration                        controllers.PsaDeclarat
 GET         /:srn/pspDeclaration                         controllers.PspDeclarationController.onPageLoad(srn: Srn)
 POST        /:srn/pspDeclaration                         controllers.PspDeclarationController.onSubmit(srn: Srn)
 
-GET         /:srn/ihtp-report-submitted                  controllers.ConfirmationController.onPageLoad(srn: Srn)
+GET         /:srn/ihtp-report-submitted                     controllers.ConfirmationController.onPageLoad(srn: Srn)
+GET         /:srn/ihtp-report-submitted/change/:fbNumber    controllers.ConfirmationController.onChange(srn: Srn, fbNumber: String)
 
 GET         /:srn/pr-submit-payment-notice               controllers.DidPrSubmitController.onPageLoad(srn: Srn, mode: Mode = NormalMode)
 POST        /:srn/pr-submit-payment-notice               controllers.DidPrSubmitController.onSubmit(srn: Srn, mode: Mode = NormalMode)

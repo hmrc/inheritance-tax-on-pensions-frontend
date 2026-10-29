@@ -27,7 +27,7 @@
         bulletList: BulletList
 )
 
-@(paymentReference: String, email: String, srn: Srn, schemeDashboardUrl: String, dueDateFormatted: String, schemeName: String, needToPay: String)(implicit request: Request[?], messages: Messages)
+@(paymentReference: String, email: String, srn: Srn, schemeDashboardUrl: String, dueDateFormatted: String, schemeName: String, needToPay: String, fbNumber: String)(implicit request: Request[?], messages: Messages)
 @panelContent = {
     @paragraph(
         content = HtmlContent(HtmlFormat.fill(Seq(
@@ -46,6 +46,16 @@
     ))
 
     @paragraph(messages("confirmation.email", email))
+
+    @paragraph(
+        content = HtmlContent(HtmlFormat.fill(Seq(
+            linkWithVisitedState(
+                id = "feedback-link",
+                text = messages("confirmation.save.or.print"),
+                href = s"${controllers.routes.ConfirmationController.onChange(srn, fbNumber).url}"
+            ),
+        )))
+    )
 
     @subHeading(messages("confirmation.what.happens.next"))
 

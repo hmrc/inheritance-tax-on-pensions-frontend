@@ -16,13 +16,16 @@
 
 package controllers
 
+import services.ReportRetrievalService
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
-import config.FrontendAppConfig
+import config.{Constants, FrontendAppConfig}
 import config.Constants._
 import controllers.actions._
 import play.api.i18n.MessagesApi
 import views.html.ConfirmationView
 import models.SchemeId.Srn
+
+import scala.concurrent.ExecutionContext
 
 import javax.inject.Inject
 
@@ -33,8 +36,10 @@ class ConfirmationController @Inject() (
   getData: DataRetrievalAction,
   val controllerComponents: MessagesControllerComponents,
   appConfig: FrontendAppConfig,
-  view: ConfirmationView
-) extends IhtpBaseController {
+  view: ConfirmationView,
+  reportRetrievalService: ReportRetrievalService
+)(implicit ec: ExecutionContext)
+    extends IhtpBaseController {
 
   def onPageLoad(srn: Srn): Action[AnyContent] = identify
     .andThen(allowAccess(srn))
@@ -47,8 +52,6 @@ class ConfirmationController @Inject() (
         request.session.get(NEED_TO_PAY)
       ) match {
         case (Some(paymentReference), Some(dueDate), Some(formBundleNo), Some(needToPay)) =>
-          // TODO remove this log message when form bundle no is used, after IHTP-661
-          logger.warn(s"Form bundle number $formBundleNo will be used to print the report")
           Ok(
             view(
               paymentReference,
@@ -57,11 +60,32 @@ class ConfirmationController @Inject() (
               appConfig.schemeDashboardUrl(srn, request.request.pensionSchemeId),
               dueDate,
               schemeName,
-              needToPay
+              needToPay,
+              formBundleNo
             )
           )
         case _ =>
           logAndJourneyRecovery("Unable to show submission confirmation page, session values are missing")
       }
+    }
+
+  def onChange(srn: Srn, formBundleNo: String): Action[AnyContent] =
+    identify.andThen(allowAccess(srn)).async { implicit request =>
+      reportRetrievalService
+        .getReportByFbNumber(formBundleNo)
+        .map {
+          case Right(response) =>
+            val uuid = response.header("uuid").get
+            val updatedSession = if (request.session.get("uuid").contains(uuid)) {
+              request.session
+            } else {
+              request.session + ("uuid" -> uuid)
+            }
+
+            Redirect(controllers.routes.CheckYourAnswersController.onPageLoad(srn))
+              .withSession(updatedSession)
+              .removingFromSession(Constants.SUBMITTED_PAGE_SESSION_VARIABLES*)
+          case Left(_) => Redirect(routes.JourneyRecoveryController.onPageLoad())
+        }
     }
 }

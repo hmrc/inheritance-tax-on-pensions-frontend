@@ -17,11 +17,18 @@
 package controllers
 
 import play.api.test.FakeRequest
-import play.api.test.Helpers._
+import connectors.InheritanceTaxOnPensionsConnector
+import play.api.inject.bind
 import views.html.ConfirmationView
 import base.SpecBase
 import config.Constants._
+import uk.gov.hmrc.http.HttpResponse
 import models.SchemeId
+import org.mockito.ArgumentMatchers.any
+import play.api.test.Helpers._
+import org.mockito.Mockito.when
+
+import scala.concurrent.Future
 
 import java.time.format.DateTimeFormatter
 
@@ -57,11 +64,36 @@ class ConfirmationControllerSpec extends SpecBase {
           url,
           formattedDate,
           schemeName,
-          needToPay
+          needToPay,
+          testFormBundleNumber
         )(using
           request,
           messages(application)
         ).toString
+      }
+    }
+
+    "must redirect to CYA onChange" in {
+      val mockInheritanceTaxOnPensionsConnector = mock[InheritanceTaxOnPensionsConnector]
+      when(
+        mockInheritanceTaxOnPensionsConnector.getReportByFbNumber(any(), any(), any(), any(), any(), any())(using any())
+      )
+        .thenReturn(Future.successful(Right(HttpResponse(OK, headers = Map("uuid" -> Seq(testUuid))))))
+
+      val application = applicationBuilder(userAnswers = Some(emptyUserAnswers), usesSession = true)
+        .overrides(
+          bind[InheritanceTaxOnPensionsConnector].toInstance(mockInheritanceTaxOnPensionsConnector)
+        )
+        .build()
+
+      running(application) {
+        val request = FakeRequest(GET, routes.ConfirmationController.onChange(testSrn, testFormBundleNumber).url)
+          .withFormUrlEncodedBody()
+
+        val result = route(application, request).value
+
+        status(result) mustEqual SEE_OTHER
+        redirectLocation(result).value mustEqual routes.CheckYourAnswersController.onPageLoad(testSrn).url
       }
     }
 
