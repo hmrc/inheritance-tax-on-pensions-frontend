@@ -17,75 +17,45 @@
 package controllers
 
 import play.api.test.FakeRequest
-import play.api.test.Helpers._
-import views.html.{JourneyRecoveryContinueView, JourneyRecoveryStartAgainView}
+import org.jsoup.Jsoup
+import play.api.inject.bind
 import base.SpecBase
-import uk.gov.hmrc.play.bootstrap.binders.RedirectUrl
+import repositories.SessionSchemeDetailsRepository
+import models.SessionSchemeDetails
+import org.mockito.ArgumentMatchers.any
+import play.api.test.Helpers._
+import org.mockito.Mockito.when
+
+import scala.concurrent.Future
+
+import java.time.{Clock, Instant, ZoneOffset}
 
 class JourneyRecoveryControllerSpec extends SpecBase {
 
   "JourneyRecovery Controller" - {
 
-    "when a relative continue Url is supplied" - {
+    "must show the error timestamp and continue to the current scheme's IHTP overview" in {
+      val repository = mock[SessionSchemeDetailsRepository]
+      when(repository.get(any())).thenReturn(
+        Future.successful(Some(SessionSchemeDetails(userAnswersId, srn.value, defaultSchemeDetails)))
+      )
+      val clock = Clock.fixed(Instant.parse("2026-09-17T14:55:09Z"), ZoneOffset.UTC)
+      val application = applicationBuilder()
+        .overrides(bind[SessionSchemeDetailsRepository].toInstance(repository), bind[Clock].toInstance(clock))
+        .build()
 
-      "must return OK and the continue view" in {
+      running(application) {
+        val request = FakeRequest(GET, routes.JourneyRecoveryController.onPageLoad().url)
+        val result = route(application, request).value
+        val document = Jsoup.parse(contentAsString(result))
 
-        val application = applicationBuilder(userAnswers = None).build()
-
-        running(application) {
-          val continueUrl = RedirectUrl("/foo")
-          val request = FakeRequest(GET, routes.JourneyRecoveryController.onPageLoad(Some(continueUrl)).url)
-
-          val result = route(application, request).value
-
-          val continueView = application.injector.instanceOf[JourneyRecoveryContinueView]
-
-          status(result) mustEqual OK
-          contentAsString(result) mustEqual continueView(continueUrl.unsafeValue)(using
-            request,
-            messages(application)
-          ).toString
-        }
+        status(result) mustEqual OK
+        document.text() must include(
+          messages(application)("journeyRecovery.startAgain.occurred", "3:55:09pm", "17 September 2026")
+        )
+        document.select(".govuk-button").attr("href") mustEqual routes.SubmissionListController.onPageLoad(srn).url
       }
     }
 
-    "when an absolute continue Url is supplied" - {
-
-      "must return OK and the start again view" in {
-
-        val application = applicationBuilder(userAnswers = None).build()
-
-        running(application) {
-          val continueUrl = RedirectUrl("https://foo.com")
-          val request = FakeRequest(GET, routes.JourneyRecoveryController.onPageLoad(Some(continueUrl)).url)
-
-          val result = route(application, request).value
-
-          val startAgainView = application.injector.instanceOf[JourneyRecoveryStartAgainView]
-
-          status(result) mustEqual OK
-          contentAsString(result) mustEqual startAgainView()(using request, messages(application)).toString
-        }
-      }
-    }
-
-    "when no continue Url is supplied" - {
-
-      "must return OK and the start again view" in {
-
-        val application = applicationBuilder(userAnswers = None).build()
-
-        running(application) {
-          val request = FakeRequest(GET, routes.JourneyRecoveryController.onPageLoad().url)
-
-          val result = route(application, request).value
-
-          val startAgainView = application.injector.instanceOf[JourneyRecoveryStartAgainView]
-
-          status(result) mustEqual OK
-          contentAsString(result) mustEqual startAgainView()(using request, messages(application)).toString
-        }
-      }
-    }
   }
 }
