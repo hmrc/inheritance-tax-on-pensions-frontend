@@ -34,13 +34,12 @@ class IhtpOverviewResponseSpec extends SpecBase {
     paymentDueDate = Some(paymentDueDate),
     ihtVersion = "001",
     inheritanceTaxReference = inheritanceTaxReference,
-    paymentReference = Some(paymentReference),
-    title = Some("Dr"),
+    ihtPaymentReference = Some(paymentReference),
     firstForename = Some("Firstname"),
-    secondForename = Some("M"),
     surname = Some("Surname"),
     nino = Some(validNino),
-    ihtpStatus = "Not reconciled"
+    ihtStatus = "Not reconciled",
+    allocatedDate = None
   )
 
   private val success = IhtpOverviewSuccess(
@@ -61,13 +60,11 @@ class IhtpOverviewResponseSpec extends SpecBase {
               "paymentDueDate" -> "2026-02-02",
               "ihtVersion" -> "001",
               "inheritanceTaxReference" -> inheritanceTaxReference,
-              "paymentReference" -> paymentReference,
-              "title" -> "Dr",
+              "ihtPaymentReference" -> paymentReference,
               "firstForename" -> "Firstname",
-              "secondForename" -> "M",
               "surname" -> "Surname",
               "nino" -> validNino,
-              "ihtpStatus" -> "Not reconciled"
+              "ihtStatus" -> "Not reconciled"
             )
           )
         )
@@ -84,13 +81,11 @@ class IhtpOverviewResponseSpec extends SpecBase {
       (json \ "success" \ "ihtpOverview" \ 0 \ "paymentDueDate").as[String] mustBe "2026-02-02"
       (json \ "success" \ "ihtpOverview" \ 0 \ "ihtVersion").as[String] mustBe "001"
       (json \ "success" \ "ihtpOverview" \ 0 \ "inheritanceTaxReference").as[String] mustBe inheritanceTaxReference
-      (json \ "success" \ "ihtpOverview" \ 0 \ "paymentReference").as[String] mustBe paymentReference
-      (json \ "success" \ "ihtpOverview" \ 0 \ "title").as[String] mustBe "Dr"
+      (json \ "success" \ "ihtpOverview" \ 0 \ "ihtPaymentReference").as[String] mustBe paymentReference
       (json \ "success" \ "ihtpOverview" \ 0 \ "firstForename").as[String] mustBe "Firstname"
-      (json \ "success" \ "ihtpOverview" \ 0 \ "secondForename").as[String] mustBe "M"
       (json \ "success" \ "ihtpOverview" \ 0 \ "surname").as[String] mustBe "Surname"
       (json \ "success" \ "ihtpOverview" \ 0 \ "nino").as[String] mustBe validNino
-      (json \ "success" \ "ihtpOverview" \ 0 \ "ihtpStatus").as[String] mustBe "Not reconciled"
+      (json \ "success" \ "ihtpOverview" \ 0 \ "ihtStatus").as[String] mustBe "Not reconciled"
     }
 
     "must fail to read when success is missing" in {
@@ -154,13 +149,11 @@ class IhtpOverviewResponseSpec extends SpecBase {
         "paymentDueDate" -> "2026-02-02",
         "ihtVersion" -> "001",
         "inheritanceTaxReference" -> inheritanceTaxReference,
-        "paymentReference" -> paymentReference,
-        "title" -> "Dr",
+        "ihtPaymentReference" -> paymentReference,
         "firstForename" -> "Firstname",
-        "secondForename" -> "M",
         "surname" -> "Surname",
         "nino" -> validNino,
-        "ihtpStatus" -> "Not reconciled"
+        "ihtStatus" -> "Not reconciled"
       )
 
       json.validate[IhtpOverviewReport] mustBe JsSuccess(report)
@@ -176,7 +169,7 @@ class IhtpOverviewResponseSpec extends SpecBase {
       val json = Json.obj(
         "ihtVersion" -> "000",
         "inheritanceTaxReference" -> secondInheritanceTaxReference,
-        "ihtpStatus" -> "In progress"
+        "ihtStatus" -> "In progress"
       )
 
       json.validate[IhtpOverviewReport] mustBe JsSuccess(
@@ -187,23 +180,21 @@ class IhtpOverviewResponseSpec extends SpecBase {
           paymentDueDate = None,
           ihtVersion = "000",
           inheritanceTaxReference = secondInheritanceTaxReference,
-          paymentReference = None,
-          title = None,
+          ihtPaymentReference = None,
           firstForename = None,
-          secondForename = None,
           surname = None,
           nino = None,
-          ihtpStatus = "In progress"
+          ihtStatus = "In progress",
+          allocatedDate = None
         )
       )
     }
 
     "must write optional fields as null when they are not present" in {
       val report = this.report.copy(
-        paymentReference = None,
-        title = None,
-        secondForename = None,
-        nino = None
+        ihtPaymentReference = None,
+        nino = None,
+        allocatedDate = None
       )
 
       val json = Json.toJson(report)
@@ -212,6 +203,7 @@ class IhtpOverviewResponseSpec extends SpecBase {
       (json \ "title").asOpt[String] mustBe None
       (json \ "secondForename").asOpt[String] mustBe None
       (json \ "nino").asOpt[String] mustBe None
+      (json \ "allocatedDate").asOpt[String] mustBe None
     }
 
     "must fail to read when required fields are missing" in {
@@ -222,7 +214,7 @@ class IhtpOverviewResponseSpec extends SpecBase {
           "inheritanceTaxReference" -> inheritanceTaxReference,
           "firstForename" -> "Firstname",
           "surname" -> "Surname",
-          "ihtpStatus" -> "Not reconciled"
+          "ihtStatus" -> "Not reconciled"
         )
         .validate[IhtpOverviewReport] mustBe a[JsError]
     }
@@ -237,7 +229,7 @@ class IhtpOverviewResponseSpec extends SpecBase {
           "inheritanceTaxReference" -> inheritanceTaxReference,
           "firstForename" -> "Firstname",
           "surname" -> "Surname",
-          "ihtpStatus" -> "Not reconciled"
+          "ihtStatus" -> "Not reconciled"
         )
         .validate[IhtpOverviewReport] mustBe a[JsError]
     }
@@ -248,28 +240,26 @@ class IhtpOverviewResponseSpec extends SpecBase {
       report.paymentDueDate mustBe Some(paymentDueDate)
       report.ihtVersion mustBe "001"
       report.inheritanceTaxReference mustBe inheritanceTaxReference
-      report.paymentReference mustBe Some(paymentReference)
-      report.title mustBe Some("Dr")
+      report.ihtPaymentReference mustBe Some(paymentReference)
       report.firstForename mustBe Some("Firstname")
-      report.secondForename mustBe Some("M")
       report.surname mustBe Some("Surname")
       report.nino mustBe Some(validNino)
-      report.ihtpStatus mustBe "Not reconciled"
+      report.ihtStatus mustBe "Not reconciled"
+      report.allocatedDate mustBe None
       report.copy(
         fbNumber = report.fbNumber,
         submissionDate = report.submissionDate,
         paymentDueDate = report.paymentDueDate,
         ihtVersion = report.ihtVersion,
         inheritanceTaxReference = report.inheritanceTaxReference,
-        paymentReference = report.paymentReference,
-        title = report.title,
+        ihtPaymentReference = report.ihtPaymentReference,
         firstForename = report.firstForename,
-        secondForename = report.secondForename,
         surname = report.surname,
         nino = report.nino,
-        ihtpStatus = report.ihtpStatus
+        ihtStatus = report.ihtStatus,
+        allocatedDate = report.allocatedDate
       ) mustBe report
-      report.productArity mustBe 13
+      report.productArity mustBe 12
       report.productPrefix mustBe "IhtpOverviewReport"
       (report.productIterator.toSeq must contain).allOf(
         Some(testFormBundleNumber),
@@ -280,24 +270,8 @@ class IhtpOverviewResponseSpec extends SpecBase {
       report.toString must include("IhtpOverviewReport")
     }
 
-    "must format deceasedName with title and second forename" in {
-      report.deceasedName mustBe "Dr Firstname M Surname"
-    }
-
-    "must format deceasedName without title" in {
-      report.copy(title = None).deceasedName mustBe "Firstname M Surname"
-    }
-
-    "must format deceasedName without second forename" in {
-      report.copy(secondForename = None).deceasedName mustBe "Dr Firstname Surname"
-    }
-
-    "must format deceasedName with only required name fields" in {
-      report.copy(title = None, secondForename = None).deceasedName mustBe "Firstname Surname"
-    }
-
-    "must not add extra spaces when optional name fields are empty strings" in {
-      report.copy(title = Some(""), secondForename = Some("")).deceasedName mustBe "Firstname Surname"
+    "must format deceasedName" in {
+      report.deceasedName mustBe "Firstname Surname"
     }
   }
 }
