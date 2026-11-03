@@ -49,16 +49,16 @@
     HtmlContent(linkWithHiddenText(
         id                    = s"deceased-name-${report.fbNumber}",
         text                  = report.deceasedName,
-        href                  = if(paid) viewPaidPageUrl(report.fbNumber) else if(report.ihtpStatus == "Not reconciled") changePageUrl(report.paymentReference, report.ihtVersion) else amendPageUrl(report.uuid),
+        href                  = if(paid) viewPaidPageUrl(report.fbNumber) else if(report.ihtStatus == "Not reconciled") changePageUrl(report.ihtPaymentReference, report.ihtVersion) else amendPageUrl(report.uuid),
         visuallyHiddenContent = s" ${messages("submissionList.table.deceasedName.hidden")}"
     ).toString)
 }
 
 @paymentReferenceContent(report: IhtpOverviewReport) = @{
-    report.paymentReference match {
-        case Some(paymentReference) => HtmlContent(linkWithHiddenText(
+    report.ihtPaymentReference match {
+        case Some(ihtPaymentReference) => HtmlContent(linkWithHiddenText(
             id                    = s"payment-reference-${report.fbNumber}",
-            text                  = paymentReference,
+            text                  = ihtPaymentReference,
             href                  = if(paid) viewPaidPageUrl(report.fbNumber) else "#",
             visuallyHiddenContent = s" ${messages("submissionList.table.paymentReference.hidden")}"
         ).toString)
@@ -82,7 +82,7 @@
                 @reports.map { report =>
                     <tr class="govuk-table__row">
                         <th scope="row" class="govuk-table__header govuk-!-font-weight-regular">@reportLink(report).asHtml</th>
-                        <td class="govuk-table__cell">@if(report.ihtpStatus == "Paid") { @messages("submissionList.table.status.paid") } else { @report.ihtpStatus }</td>
+                        <td class="govuk-table__cell">@if(report.ihtStatus == "Paid") { @messages("submissionList.table.status.paid") } else { @report.ihtStatus }</td>
                         <td class="govuk-table__cell">@report.paymentDueDate.map(_.format(DateTimeFormats.dateTimeFormat()(using messages.lang))).getOrElse("")</td>
                         <td class="govuk-table__cell">@paymentReferenceContent(report).asHtml</td>
                     </tr>

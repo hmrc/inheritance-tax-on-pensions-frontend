@@ -39,16 +39,15 @@ class PaidReportsControllerSpec extends SpecBase {
     paymentDueDate = Some(LocalDate.of(2026, 2, 2)),
     ihtVersion = "001",
     inheritanceTaxReference = inheritanceTaxReference,
-    paymentReference = Some(paymentReference),
-    title = Some("Dr"),
+    ihtPaymentReference = Some(paymentReference),
     firstForename = Some("Firstname"),
-    secondForename = Some("M"),
     surname = Some("Surname"),
     nino = None,
-    ihtpStatus = "Not reconciled"
+    ihtStatus = "Not reconciled",
+    allocatedDate = None
   )
 
-  private val paidReport = overviewReport.copy(ihtpStatus = "Paid", uuid = Some(testUuid))
+  private val paidReport = overviewReport.copy(ihtStatus = "Paid", uuid = Some(testUuid))
 
   private def builder(result: Either[UpstreamErrorResponse, IhtpOverviewResponse], isPsa: Boolean = true) = {
     val service = mock[SubmissionListService]
@@ -140,7 +139,8 @@ class PaidReportsControllerSpec extends SpecBase {
     }
 
     "must render reports with no due date or payment reference" in {
-      val application = builder(response(Seq(paidReport.copy(paymentDueDate = None, paymentReference = None)))).build()
+      val application =
+        builder(response(Seq(paidReport.copy(paymentDueDate = None, ihtPaymentReference = None)))).build()
       running(application) {
         status(route(application, FakeRequest(GET, routes.PaidReportsController.onPageLoad(srn).url)).value) mustBe OK
       }

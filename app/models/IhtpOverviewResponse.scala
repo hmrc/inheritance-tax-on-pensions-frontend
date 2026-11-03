@@ -39,17 +39,16 @@ case class IhtpOverviewReport(
   paymentDueDate: Option[LocalDate],
   ihtVersion: String,
   inheritanceTaxReference: String,
-  paymentReference: Option[String],
-  title: Option[String],
+  ihtPaymentReference: Option[String],
   firstForename: Option[String],
-  secondForename: Option[String],
   surname: Option[String],
   nino: Option[String],
-  ihtpStatus: String
+  ihtStatus: String,
+  allocatedDate: Option[LocalDate]
 ) {
 
   val deceasedName: String =
-    Seq(title, firstForename, secondForename, surname).flatten.filter(_.nonEmpty).mkString(" ")
+    Seq(firstForename, surname).flatten.filter(_.nonEmpty).mkString(" ")
 }
 
 object IhtpOverviewReport {

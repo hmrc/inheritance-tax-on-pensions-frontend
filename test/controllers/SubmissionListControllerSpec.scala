@@ -45,13 +45,12 @@ class SubmissionListControllerSpec extends SpecBase {
     paymentDueDate = Some(LocalDate.of(2026, 2, 2)),
     ihtVersion = "001",
     inheritanceTaxReference = inheritanceTaxReference,
-    paymentReference = Some(paymentReference),
-    title = Some("Dr"),
+    ihtPaymentReference = Some(paymentReference),
     firstForename = Some("Firstname"),
-    secondForename = Some("M"),
     surname = Some("Surname"),
     nino = None,
-    ihtpStatus = "Not reconciled"
+    ihtStatus = "Not reconciled",
+    allocatedDate = None
   )
 
   private val overviewResponse =
@@ -68,7 +67,7 @@ class SubmissionListControllerSpec extends SpecBase {
     Seq(false, true).foreach { onlyPaid =>
       s"must exclude paid reports and link to the paid list (onlyPaid=$onlyPaid)" in {
         val service = mock[SubmissionListService]
-        val paid = overviewReport.copy(ihtpStatus = "Paid", firstForename = Some("PaidPerson"))
+        val paid = overviewReport.copy(ihtStatus = "Paid", firstForename = Some("PaidPerson"))
         val reports = if (onlyPaid) Seq(paid) else Seq(paid, overviewReport)
         when(service.getSubmissionList()(using any(), any()))
           .thenReturn(Future.successful(Right(IhtpOverviewResponse(IhtpOverviewSuccess(reports)))))
@@ -219,8 +218,7 @@ class SubmissionListControllerSpec extends SpecBase {
         overviewReport.copy(
           fbNumber = Some(f"1190000043$index%02d"),
           firstForename = Some(if (index % 2 == 0) "Firstnametwo" else "Firstname"),
-          secondForename = Some(s"Middle$index"),
-          paymentReference = Some(f"PR$index%09d")
+          ihtPaymentReference = Some(f"PR$index%09d")
         )
       }
       when(mockSubmissionListService.getSubmissionList()(using any(), any()))

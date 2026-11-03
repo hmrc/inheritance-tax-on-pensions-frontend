@@ -75,7 +75,7 @@ class SubmissionListUtil @Inject() (appConfig: FrontendAppConfig) {
     }
     reports.map { allReports =>
       val filtered = allReports.filter { report =>
-        val isPaid = report.ihtpStatus == "Paid"
+        val isPaid = report.ihtStatus == "Paid"
         if (paid) isPaid else !isPaid
       }
       val pageSize = appConfig.submissionListPageSize

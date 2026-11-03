@@ -36,20 +36,19 @@ class SubmissionListUtilSpec extends SpecBase with org.scalatest.EitherValues {
     paymentDueDate = Some(LocalDate.of(2026, 2, 2)),
     ihtVersion = "001",
     inheritanceTaxReference = inheritanceTaxReference,
-    paymentReference = Some(paymentReference),
-    title = Some("Dr"),
+    ihtPaymentReference = Some(paymentReference),
     firstForename = Some("Firstname"),
-    secondForename = Some("M"),
     surname = Some("Surname"),
     nino = None,
-    ihtpStatus = "Not reconciled"
+    ihtStatus = "Not reconciled",
+    allocatedDate = None
   )
 
   private val config = mock[FrontendAppConfig]
   when(config.submissionListPageSize).thenReturn(2)
   private val util = new SubmissionListUtil(config)
   private val active = overviewReport
-  private val paid = overviewReport.copy(ihtpStatus = "Paid")
+  private val paid = overviewReport.copy(ihtStatus = "Paid")
   private def response(reports: Seq[IhtpOverviewReport]) = Right(IhtpOverviewResponse(IhtpOverviewSuccess(reports)))
 
   "buildPagination" - {
@@ -101,7 +100,7 @@ class SubmissionListUtilSpec extends SpecBase with org.scalatest.EitherValues {
 
   "prepare" - {
     "must partition paid and active reports including drafts" in {
-      val draft = active.copy(ihtpStatus = "In progress")
+      val draft = active.copy(ihtStatus = "In progress")
       val data = response(Seq(paid, active, draft))
       util.prepare(data, paid = true, None).value._1 mustBe Seq(paid)
       util.prepare(data, paid = false, None).value._1 mustBe Seq(active, draft)
