@@ -16,21 +16,32 @@
 
 @this(
     layout: templates.Layout,
-    govukButton: GovukButton
+    govukButton: GovukButton,
+    appConfig: config.FrontendAppConfig
 )
 
-@()(implicit request: Request[?], messages: Messages)
+@(continueUrl: String, time: String, date: String)(implicit request: Request[?], messages: Messages)
 
-@layout(pageTitle = titleNoForm(messages("journeyRecovery.startAgain.title"))) {
+@layout(
+    pageTitle = titleNoForm(messages("journeyRecovery.startAgain.title")),
+    showBackLink = false,
+    showReportTechnicalIssue = false
+) {
+    <h1 class="govuk-heading-l">@messages("journeyRecovery.startAgain.heading")</h1>
 
-    <h1 class="govuk-heading-xl">@messages("journeyRecovery.startAgain.heading")</h1>
+    <p class="govuk-body">@messages("journeyRecovery.startAgain.occurred", time, date)</p>
 
     <p class="govuk-body">@messages("journeyRecovery.startAgain.guidance")</p>
 
+    <p class="govuk-body">@messages("journeyRecovery.startAgain.answersSaved")</p>
+
     <p class="govuk-body">
-        @govukButton(
-            ButtonViewModel(messages("site.startAgain"))
-                .asLink(routes.IndexController.onPageLoad().url)
-        )
+        @messages("journeyRecovery.startAgain.reportProblem.prefix")
+        <a class="govuk-link" href="@appConfig.reportAProblemUrl">@messages("journeyRecovery.startAgain.reportProblem.link")</a>@messages("site.stop")
     </p>
+
+    @govukButton(
+        ButtonViewModel(messages("site.continue"))
+            .asLink(continueUrl)
+    )
 }

@@ -78,12 +78,13 @@ viewPaidSubmissionReport.inset.contact.link = contact HMRC
 submissionList.returnToScheme.link = Return to {0}
 submissionList.table.status.paid = Tax paid
 
-journeyRecovery.continue.title = Sorry, there is a problem with the service
-journeyRecovery.continue.heading = Sorry, there is a problem with the service
-journeyRecovery.continue.guidance = Try again in a few minutes.
 journeyRecovery.startAgain.title = Sorry, there is a problem with the service
 journeyRecovery.startAgain.heading = Sorry, there is a problem with the service
-journeyRecovery.startAgain.guidance = Try again in a few minutes.
+journeyRecovery.startAgain.occurred = This occurred at {0} on {1}.
+journeyRecovery.startAgain.guidance = Try using the service again in a few minutes.
+journeyRecovery.startAgain.answersSaved = Your answers are saved and will be available for 30 days.
+journeyRecovery.startAgain.reportProblem.prefix = You can also
+journeyRecovery.startAgain.reportProblem.link = report an ongoing problem with this service
 
 signedOut.title = For your security, we signed you out
 signedOut.heading = For your security, we signed you out

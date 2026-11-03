@@ -17,39 +17,42 @@
 package controllers
 
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
-import uk.gov.hmrc.play.bootstrap.binders.RedirectUrl._
-import views.html.{JourneyRecoveryContinueView, JourneyRecoveryStartAgainView}
-import uk.gov.hmrc.play.bootstrap.binders._
 import controllers.actions.IdentifierAction
-import play.api.Logging
+import repositories.SessionSchemeDetailsRepository
+import views.html.JourneyRecoveryStartAgainView
+import models.SchemeId.Srn
 import play.api.i18n.I18nSupport
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
 
+import scala.concurrent.ExecutionContext
+
+import java.time.{Clock, ZoneId, ZonedDateTime}
+import java.util.Locale
+import java.time.format.DateTimeFormatter
 import javax.inject.Inject
 
 class JourneyRecoveryController @Inject() (
   val controllerComponents: MessagesControllerComponents,
   identify: IdentifierAction,
-  continueView: JourneyRecoveryContinueView,
-  startAgainView: JourneyRecoveryStartAgainView
-) extends FrontendBaseController
-    with I18nSupport
-    with Logging {
+  view: JourneyRecoveryStartAgainView,
+  schemeDetailsRepository: SessionSchemeDetailsRepository,
+  clock: Clock
+)(implicit ec: ExecutionContext)
+    extends FrontendBaseController
+    with I18nSupport {
 
-  def onPageLoad(continueUrl: Option[RedirectUrl] = None): Action[AnyContent] = identify { implicit request =>
+  private val timeFormatter = DateTimeFormatter.ofPattern("h:mm:ssa", Locale.UK)
+  private val dateFormatter = DateTimeFormatter.ofPattern("d MMMM yyyy", Locale.UK)
 
-    val safeUrl: Option[String] = continueUrl.flatMap { unsafeUrl =>
-      unsafeUrl.getEither(OnlyRelative) match {
-        case Right(safeUrl) =>
-          Some(safeUrl.url)
-        case Left(message) =>
-          logger.info(message)
-          None
-      }
+  def onPageLoad(): Action[AnyContent] = identify.async { implicit request =>
+    schemeDetailsRepository.get(request.getUserId).map { schemeDetails =>
+      val continueUrl = schemeDetails
+        .flatMap(details => Srn(details.srn))
+        .map(srn => routes.SubmissionListController.onPageLoad(srn).url)
+        .getOrElse(throw new IllegalStateException("A valid cached scheme reference is required for journey recovery"))
+      val now = ZonedDateTime.now(clock).withZoneSameInstant(ZoneId.of("Europe/London"))
+
+      Ok(view(continueUrl, now.format(timeFormatter).toLowerCase(Locale.UK), now.format(dateFormatter)))
     }
-
-    safeUrl
-      .map(url => Ok(continueView(url)))
-      .getOrElse(Ok(startAgainView()))
   }
 }

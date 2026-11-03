@@ -29,7 +29,7 @@
     hmrcStandardPage: HmrcStandardPage
 )
 
-@(pageTitle: String, showBackLink: Boolean = true, timeout: Boolean = true, showSignOut: Boolean = true, showHmrcBanner: Boolean = false, fullWidth: Boolean = false)(contentBlock: Html)(implicit rh: RequestHeader, messages: Messages)
+@(pageTitle: String, showBackLink: Boolean = true, timeout: Boolean = true, showSignOut: Boolean = true, showHmrcBanner: Boolean = false, fullWidth: Boolean = false, showReportTechnicalIssue: Boolean = true)(contentBlock: Html)(implicit rh: RequestHeader, messages: Messages)
 
 @head = {
     <link href="@routes.Assets.versioned("stylesheets/application.css")" media="screen" rel="stylesheet" type="text/css">
@@ -50,7 +50,9 @@
 
 @content = {
     @contentBlock
-    @hmrcReportTechnicalIssueHelper()
+    @if(showReportTechnicalIssue) {
+        @hmrcReportTechnicalIssueHelper()
+    }
 }
 
 @hmrcStandardPage(HmrcStandardPageParams(
