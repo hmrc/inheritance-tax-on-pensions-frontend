@@ -84,8 +84,6 @@ class FrontendAppConfig @Inject() (configuration: Configuration) {
 
   val sessionTtl: Long = configuration.get[Int]("mongodb.sessionTtl")
   val submissionListPageSize: Int = configuration.get[Int]("submission-list.page-size")
-  val submissionListDateFrom: String = configuration.get[String]("submission-list.date-from")
-  val submissionListDateTo: String = configuration.get[String]("submission-list.date-to")
   val earliestDateOfDeath: LocalDate =
     LocalDate.parse(configuration.get[String]("birth-death-dates.earliest-date-of-death"))
 

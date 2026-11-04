@@ -20,7 +20,6 @@ import play.api.test.FakeRequest
 import org.mockito.Mockito._
 import play.api.mvc.AnyContentAsEmpty
 import connectors.InheritanceTaxOnPensionsConnector
-import config.FrontendAppConfig
 import base.SpecBase
 import uk.gov.hmrc.http.{HeaderCarrier, UpstreamErrorResponse}
 import models.{IhtpOverviewResponse, IhtpOverviewSuccess}
@@ -35,6 +34,9 @@ class SubmissionListServiceSpec extends SpecBase {
   implicit val allowedAccessRequest: AllowedAccessRequest[AnyContentAsEmpty.type] =
     allowedAccessRequestNoEstablishersGen(FakeRequest()).sample.value
 
+  private val dateFrom = "1900-01-01"
+  private val dateTo = "9999-12-31"
+
   "getSubmissionList" - {
 
     "must return success if connector returns success" in new Setup {
@@ -43,14 +45,14 @@ class SubmissionListServiceSpec extends SpecBase {
       when(mockConnector.getSubmissionList(any(), any(), any(), any(), any(), any(), any())(using any()))
         .thenReturn(Future.successful(Right(response)))
 
-      whenReady(testService.getSubmissionList()) {
+      whenReady(testService.getSubmissionList(dateFrom, dateTo)) {
         _ mustBe Right(response)
       }
 
       verify(mockConnector).getSubmissionList(
         eqTo(allowedAccessRequest.schemeDetails.pstr),
-        eqTo("1900-01-01"),
-        eqTo("9999-12-31"),
+        eqTo(dateFrom),
+        eqTo(dateTo),
         any(),
         any(),
         any(),
@@ -64,7 +66,7 @@ class SubmissionListServiceSpec extends SpecBase {
       when(mockConnector.getSubmissionList(any(), any(), any(), any(), any(), any(), any())(using any()))
         .thenReturn(Future.successful(Left(errorResponse)))
 
-      whenReady(testService.getSubmissionList()) {
+      whenReady(testService.getSubmissionList(dateFrom, dateTo)) {
         _ mustBe Left(errorResponse)
       }
     }
@@ -72,11 +74,7 @@ class SubmissionListServiceSpec extends SpecBase {
 
   class Setup {
     val mockConnector: InheritanceTaxOnPensionsConnector = mock[InheritanceTaxOnPensionsConnector]
-    val mockAppConfig: FrontendAppConfig = mock[FrontendAppConfig]
 
-    when(mockAppConfig.submissionListDateFrom).thenReturn("1900-01-01")
-    when(mockAppConfig.submissionListDateTo).thenReturn("9999-12-31")
-
-    val testService: SubmissionListService = new SubmissionListService(mockConnector, mockAppConfig)
+    val testService: SubmissionListService = new SubmissionListService(mockConnector)
   }
 }

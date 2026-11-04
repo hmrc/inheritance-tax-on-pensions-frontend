@@ -51,7 +51,7 @@ class PaidReportsControllerSpec extends SpecBase {
 
   private def builder(result: Either[UpstreamErrorResponse, IhtpOverviewResponse], isPsa: Boolean = true) = {
     val service = mock[SubmissionListService]
-    when(service.getSubmissionList()(using any(), any())).thenReturn(Future.successful(result))
+    when(service.getSubmissionList(any(), any())(using any(), any())).thenReturn(Future.successful(result))
     applicationBuilder(userAnswers = None, isPsa = isPsa, usesSession = true)
       .overrides(bind[SubmissionListService].toInstance(service))
   }
