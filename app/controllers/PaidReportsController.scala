@@ -27,6 +27,8 @@ import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
 
 import scala.concurrent.ExecutionContext
 
+import java.time.LocalDate
+import java.time.format.DateTimeFormatter
 import javax.inject.Inject
 
 class PaidReportsController @Inject() (
@@ -42,12 +44,17 @@ class PaidReportsController @Inject() (
 
   def onPageLoad(srn: Srn): Action[AnyContent] =
     identify.andThen(allowAccess(srn)).async { implicit request =>
-      submissionListService.getSubmissionList().map { response =>
-        submissionListUtil.prepare(response, paid = true, request.getQueryString("page")) match {
-          case Right((reports, pagination)) =>
-            Ok(view(srn, request.schemeDetails.schemeName, reports, pagination))
-          case Left(_) => Redirect(routes.JourneyRecoveryController.onPageLoad())
+      submissionListService
+        .getSubmissionList(
+          dateFrom = LocalDate.now().minusMonths(2).format(DateTimeFormatter.ISO_LOCAL_DATE),
+          dateTo = LocalDate.now().format(DateTimeFormatter.ISO_LOCAL_DATE)
+        )
+        .map { response =>
+          submissionListUtil.prepare(response, paid = true, request.getQueryString("page")) match {
+            case Right((reports, pagination)) =>
+              Ok(view(srn, request.schemeDetails.schemeName, reports, pagination))
+            case Left(_) => Redirect(routes.JourneyRecoveryController.onPageLoad())
+          }
         }
-      }
     }
 }

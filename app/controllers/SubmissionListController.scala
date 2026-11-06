@@ -28,6 +28,8 @@ import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
 
 import scala.concurrent.ExecutionContext
 
+import java.time.LocalDate
+import java.time.format.DateTimeFormatter
 import javax.inject.Inject
 
 class SubmissionListController @Inject() (
@@ -45,21 +47,26 @@ class SubmissionListController @Inject() (
 
   def onPageLoad(srn: Srn): Action[AnyContent] =
     identify.andThen(allowAccess(srn)).async { implicit request =>
-      submissionListService.getSubmissionList().map { response =>
-        submissionListUtil.prepare(response, paid = false, request.getQueryString("page")) match {
-          case Right((reports, pagination)) =>
-            Ok(
-              view(
-                srn,
-                request.schemeDetails.schemeName,
-                reports,
-                pagination,
-                appConfig.schemeDashboardUrl(srn, request.pensionSchemeId)
-              )
-            ).removingFromSession(Constants.SUBMITTED_PAGE_SESSION_VARIABLES*)
-          case Left(_) => Redirect(routes.JourneyRecoveryController.onPageLoad())
+      submissionListService
+        .getSubmissionList(
+          dateFrom = LocalDate.now().minusMonths(2).format(DateTimeFormatter.ISO_LOCAL_DATE),
+          dateTo = LocalDate.now().format(DateTimeFormatter.ISO_LOCAL_DATE)
+        )
+        .map { response =>
+          submissionListUtil.prepare(response, paid = false, request.getQueryString("page")) match {
+            case Right((reports, pagination)) =>
+              Ok(
+                view(
+                  srn,
+                  request.schemeDetails.schemeName,
+                  reports,
+                  pagination,
+                  appConfig.schemeDashboardUrl(srn, request.pensionSchemeId)
+                )
+              ).removingFromSession(Constants.SUBMITTED_PAGE_SESSION_VARIABLES*)
+            case Left(_) => Redirect(routes.JourneyRecoveryController.onPageLoad())
+          }
         }
-      }
     }
 
   def onAmend(srn: Srn, uuid: String): Action[AnyContent] =

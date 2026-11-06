@@ -17,7 +17,6 @@
 package services
 
 import connectors.InheritanceTaxOnPensionsConnector
-import config.FrontendAppConfig
 import uk.gov.hmrc.http.{HeaderCarrier, UpstreamErrorResponse}
 import models.IhtpOverviewResponse
 import models.requests.AllowedAccessRequest
@@ -27,18 +26,17 @@ import scala.concurrent.Future
 import javax.inject.Inject
 
 class SubmissionListService @Inject() (
-  inheritanceTaxOnPensionsConnector: InheritanceTaxOnPensionsConnector,
-  appConfig: FrontendAppConfig
+  inheritanceTaxOnPensionsConnector: InheritanceTaxOnPensionsConnector
 ) extends BaseService {
 
-  def getSubmissionList()(implicit
+  def getSubmissionList(dateFrom: String, dateTo: String)(implicit
     hc: HeaderCarrier,
     request: AllowedAccessRequest[?]
   ): Future[Either[UpstreamErrorResponse, IhtpOverviewResponse]] =
     inheritanceTaxOnPensionsConnector.getSubmissionList(
       request.schemeDetails.pstr,
-      appConfig.submissionListDateFrom,
-      appConfig.submissionListDateTo,
+      dateFrom,
+      dateTo,
       schemeAdministratorOrPractitionerName,
       schemeName,
       srnVal,

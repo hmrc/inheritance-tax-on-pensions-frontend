@@ -69,7 +69,7 @@ class SubmissionListControllerSpec extends SpecBase {
         val service = mock[SubmissionListService]
         val paid = overviewReport.copy(ihtStatus = "Paid", firstForename = Some("PaidPerson"))
         val reports = if (onlyPaid) Seq(paid) else Seq(paid, overviewReport)
-        when(service.getSubmissionList()(using any(), any()))
+        when(service.getSubmissionList(any(), any())(using any(), any()))
           .thenReturn(Future.successful(Right(IhtpOverviewResponse(IhtpOverviewSuccess(reports)))))
         val application = applicationBuilder(userAnswers = None)
           .overrides(bind[SubmissionListService].toInstance(service))
@@ -97,7 +97,7 @@ class SubmissionListControllerSpec extends SpecBase {
 
     "must return OK and the correct view for a GET" in {
       val mockSubmissionListService = mock[SubmissionListService]
-      when(mockSubmissionListService.getSubmissionList()(using any(), any()))
+      when(mockSubmissionListService.getSubmissionList(any(), any())(using any(), any()))
         .thenReturn(Future.successful(Right(overviewResponse)))
 
       val application = applicationBuilder(userAnswers = None)
@@ -128,7 +128,7 @@ class SubmissionListControllerSpec extends SpecBase {
 
     "must return OK when accessed as PSP" in {
       val mockSubmissionListService = mock[SubmissionListService]
-      when(mockSubmissionListService.getSubmissionList()(using any(), any()))
+      when(mockSubmissionListService.getSubmissionList(any(), any())(using any(), any()))
         .thenReturn(Future.successful(Right(overviewResponse)))
 
       val application = applicationBuilder(userAnswers = None, isPsa = false)
@@ -159,7 +159,7 @@ class SubmissionListControllerSpec extends SpecBase {
 
     "must redirect to journey recovery when the submission list cannot be retrieved" in {
       val mockSubmissionListService = mock[SubmissionListService]
-      when(mockSubmissionListService.getSubmissionList()(using any(), any()))
+      when(mockSubmissionListService.getSubmissionList(any(), any())(using any(), any()))
         .thenReturn(Future.successful(Left(UpstreamErrorResponse("failed", INTERNAL_SERVER_ERROR))))
 
       val application = applicationBuilder(userAnswers = None)
@@ -178,7 +178,7 @@ class SubmissionListControllerSpec extends SpecBase {
 
     "must return OK with no reports when no submission list records are returned" in {
       val mockSubmissionListService = mock[SubmissionListService]
-      when(mockSubmissionListService.getSubmissionList()(using any(), any()))
+      when(mockSubmissionListService.getSubmissionList(any(), any())(using any(), any()))
         .thenReturn(Future.successful(Left(UpstreamErrorResponse("No records", UNPROCESSABLE_ENTITY))))
 
       val application = applicationBuilder(userAnswers = None)
@@ -221,7 +221,7 @@ class SubmissionListControllerSpec extends SpecBase {
           ihtPaymentReference = Some(f"PR$index%09d")
         )
       }
-      when(mockSubmissionListService.getSubmissionList()(using any(), any()))
+      when(mockSubmissionListService.getSubmissionList(any(), any())(using any(), any()))
         .thenReturn(
           Future.successful(Right(IhtpOverviewResponse(IhtpOverviewSuccess(reports))))
         )
