@@ -16,7 +16,7 @@
 
 package controllers
 
-import services.{ReportRetrievalService, SubmissionListService}
+import services.{LockService, ReportRetrievalService, SubmissionListService}
 import utils.SubmissionListUtil
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import config.{Constants, FrontendAppConfig}
@@ -26,7 +26,7 @@ import models.SchemeId.Srn
 import play.api.i18n.I18nSupport
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
 
-import scala.concurrent.ExecutionContext
+import scala.concurrent.{ExecutionContext, Future}
 
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
@@ -40,13 +40,17 @@ class SubmissionListController @Inject() (
   reportRetrievalService: ReportRetrievalService,
   appConfig: FrontendAppConfig,
   submissionListUtil: SubmissionListUtil,
-  view: SubmissionListView
+  view: SubmissionListView,
+  lockService: LockService
 )(implicit ec: ExecutionContext)
     extends FrontendBaseController
     with I18nSupport {
 
   def onPageLoad(srn: Srn): Action[AnyContent] =
     identify.andThen(allowAccess(srn)).async { implicit request =>
+      request.session.get("uuid").foreach { uuid =>
+        lockService.releaseLock(s"${srn.value}-$uuid", request.getUserId).failed.foreach(_ => ())
+      }
       submissionListService
         .getSubmissionList(
           dateFrom = LocalDate.now().minusMonths(2).format(DateTimeFormatter.ISO_LOCAL_DATE),
@@ -64,42 +68,51 @@ class SubmissionListController @Inject() (
                   appConfig.schemeDashboardUrl(srn, request.pensionSchemeId)
                 )
               ).removingFromSession(Constants.SUBMITTED_PAGE_SESSION_VARIABLES*)
+                .removingFromSession("uuid")
             case Left(_) => Redirect(routes.JourneyRecoveryController.onPageLoad())
           }
         }
     }
 
   def onAmend(srn: Srn, uuid: String): Action[AnyContent] =
-    identify
-      .andThen(allowAccess(srn)) { implicit request =>
-        val updatedSession = if (request.session.get("uuid").contains(uuid)) {
-          request.session
-        } else {
-          request.session + ("uuid" -> uuid)
-        }
-
-        Redirect(controllers.routes.CheckYourAnswersController.onPageLoad(srn))
-          .withSession(updatedSession)
-          .removingFromSession(Constants.SUBMITTED_PAGE_SESSION_VARIABLES*)
+    identify.andThen(allowAccess(srn)).async { implicit request =>
+      lockService.acquireOrRenew(s"${srn.value}-$uuid", request.getUserId).map {
+        case true =>
+          val updatedSession = if (request.session.get("uuid").contains(uuid)) {
+            request.session
+          } else {
+            request.session + ("uuid" -> uuid)
+          }
+          Redirect(controllers.routes.CheckYourAnswersController.onPageLoad(srn))
+            .withSession(updatedSession)
+            .removingFromSession(Constants.SUBMITTED_PAGE_SESSION_VARIABLES*)
+        case false =>
+          Redirect(controllers.routes.LockedController.onPageLoad())
       }
+    }
 
   def onChange(srn: Srn, ihtPaymentReference: String, ihtVersion: String): Action[AnyContent] =
     identify.andThen(allowAccess(srn)).async { implicit request =>
       reportRetrievalService
         .getReport(ihtPaymentReference, ihtVersion)
-        .map {
+        .flatMap {
           case Right(response) =>
             val uuid = response.header("uuid").get
-            val updatedSession = if (request.session.get("uuid").contains(uuid)) {
-              request.session
-            } else {
-              request.session + ("uuid" -> uuid)
+            lockService.acquireOrRenew(s"${srn.value}-$uuid", request.getUserId).map {
+              case true =>
+                val updatedSession = if (request.session.get("uuid").contains(uuid)) {
+                  request.session
+                } else {
+                  request.session + ("uuid" -> uuid)
+                }
+                Redirect(controllers.routes.CheckYourAnswersController.onPageLoad(srn))
+                  .withSession(updatedSession)
+                  .removingFromSession(Constants.SUBMITTED_PAGE_SESSION_VARIABLES*)
+              case false =>
+                Redirect(controllers.routes.LockedController.onPageLoad())
             }
-
-            Redirect(controllers.routes.CheckYourAnswersController.onPageLoad(srn))
-              .withSession(updatedSession)
-              .removingFromSession(Constants.SUBMITTED_PAGE_SESSION_VARIABLES*)
-          case Left(_) => Redirect(routes.JourneyRecoveryController.onPageLoad())
+          case Left(_) =>
+            Future.successful(Redirect(routes.JourneyRecoveryController.onPageLoad()))
         }
     }
 }

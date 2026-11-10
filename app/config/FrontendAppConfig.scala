@@ -83,6 +83,7 @@ class FrontendAppConfig @Inject() (configuration: Configuration) {
   val countdown: Int = configuration.get[Int]("timeout-dialog.countdown")
 
   val sessionTtl: Long = configuration.get[Int]("mongodb.sessionTtl")
+  val lockTtl: Long = configuration.get[Int]("mongodb.lockTtl")
   val submissionListPageSize: Int = configuration.get[Int]("submission-list.page-size")
   val earliestDateOfDeath: LocalDate =
     LocalDate.parse(configuration.get[String]("birth-death-dates.earliest-date-of-death"))

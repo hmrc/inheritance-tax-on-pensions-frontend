@@ -17,14 +17,14 @@
 package controllers.actions
 
 import play.api.test.FakeRequest
-import services.UserAnswersService
+import services.{LockService, UserAnswersService}
 import org.mockito.Mockito._
 import play.api.mvc.AnyContentAsEmpty
 import base.SpecBase
 import models.UserAnswers
 import models.requests.{AllowedAccessRequest, OptionalDataRequest}
 import org.scalatestplus.mockito.MockitoSugar
-import org.mockito.ArgumentMatchers.any
+import org.mockito.ArgumentMatchers.{any, eq => eqTo}
 import play.api.http.Status.{INTERNAL_SERVER_ERROR, NOT_FOUND}
 import uk.gov.hmrc.http.UpstreamErrorResponse
 
@@ -36,7 +36,11 @@ class DataRetrievalActionSpec extends SpecBase with MockitoSugar {
     FakeRequest().withSession("uuid" -> testUuid)
   ).sample.value
 
-  class Harness(userAnswersService: UserAnswersService) extends DataRetrievalActionImpl(userAnswersService) {
+  val lockService: LockService = mock[LockService]
+  when(lockService.renewLock(any(), any())).thenReturn(Future.successful(true))
+
+  class Harness(userAnswersService: UserAnswersService, ls: LockService = lockService)
+      extends DataRetrievalActionImpl(userAnswersService, ls) {
     def callTransform[A](request: AllowedAccessRequest[A]): Future[OptionalDataRequest[A]] = transform(request)
   }
 
@@ -65,6 +69,55 @@ class DataRetrievalActionSpec extends SpecBase with MockitoSugar {
       val action = new Harness(userAnswersService)
 
       "must build a userAnswers object and add it to the request" in {
+        val result = action.callTransform(request).futureValue
+
+        result.userAnswers mustBe defined
+      }
+    }
+
+    "when a uuid is in session" - {
+
+      val userAnswersService: UserAnswersService = mock[UserAnswersService]
+      when(userAnswersService.fetch(any())(using any(), any()))
+        .thenReturn(Future(Right(UserAnswers("id", srnGen.sample.value.toString, testUuid))))
+      val ls = mock[LockService]
+      when(ls.renewLock(any(), any())).thenReturn(Future.successful(true))
+      val action = new Harness(userAnswersService, ls)
+
+      "must renew the report lock" in {
+        action.callTransform(request).futureValue
+
+        verify(ls).renewLock(eqTo(s"${request.srn.value}-$testUuid"), eqTo(request.getUserId))
+      }
+    }
+
+    "when there is no uuid in session" - {
+
+      val userAnswersService: UserAnswersService = mock[UserAnswersService]
+      when(userAnswersService.fetch(any())(using any(), any()))
+        .thenReturn(Future(Right(UserAnswers("id", srnGen.sample.value.toString, testUuid))))
+      val ls = mock[LockService]
+      val action = new Harness(userAnswersService, ls)
+      val requestWithoutUuid: AllowedAccessRequest[AnyContentAsEmpty.type] =
+        allowedAccessRequestGen(FakeRequest()).sample.value
+
+      "must not renew a lock" in {
+        action.callTransform(requestWithoutUuid).futureValue
+
+        verify(ls, never()).renewLock(any(), any())
+      }
+    }
+
+    "when the lock renewal fails" - {
+
+      val userAnswersService: UserAnswersService = mock[UserAnswersService]
+      when(userAnswersService.fetch(any())(using any(), any()))
+        .thenReturn(Future(Right(UserAnswers("id", srnGen.sample.value.toString, testUuid))))
+      val ls = mock[LockService]
+      when(ls.renewLock(any(), any())).thenReturn(Future.failed(new RuntimeException("mongo down")))
+      val action = new Harness(userAnswersService, ls)
+
+      "must still build the request" in {
         val result = action.callTransform(request).futureValue
 
         result.userAnswers mustBe defined

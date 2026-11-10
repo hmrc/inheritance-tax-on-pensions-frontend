@@ -17,6 +17,7 @@
 package base
 
 import play.api.test.FakeRequest
+import services.LockService
 import org.scalatest.concurrent.{IntegrationPatience, ScalaFutures}
 import org.scalatest.matchers.must.Matchers
 import org.apache.pekko.stream.Materializer
@@ -27,14 +28,16 @@ import org.apache.pekko.actor.ActorSystem
 import models.{MinimalDetails, SchemeDetails, UserAnswers}
 import play.api.i18n.{Messages, MessagesApi}
 import org.scalatestplus.mockito.MockitoSugar
+import org.mockito.ArgumentMatchers.any
 import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.test.Helpers.running
 import org.scalatest.freespec.AnyFreeSpec
+import org.mockito.Mockito.when
 import org.scalatest._
 import play.api.Application
 
 import scala.reflect.ClassTag
-import scala.concurrent.ExecutionContext
+import scala.concurrent.{ExecutionContext, Future}
 
 import java.net.URLEncoder
 
@@ -63,7 +66,8 @@ trait SpecBase
     isPsa: Boolean = true,
     schemeDetails: SchemeDetails = defaultSchemeDetails,
     minimalDetails: MinimalDetails = defaultMinimalDetails,
-    usesSession: Boolean = false
+    usesSession: Boolean = false,
+    lockService: LockService = stubbedLockService
   ): GuiceApplicationBuilder = {
     val identifierActionBind = if (isPsa) {
       bind[IdentifierAction].to[FakePsaIdentifierAction]
@@ -84,12 +88,23 @@ trait SpecBase
         bind[DataRequiredAction].to[DataRequiredActionImpl],
         identifierActionBind,
         bind[DataRetrievalAction].toInstance(new FakeDataRetrievalAction(userAnswers)),
+        bind[LockService].toInstance(lockService),
         allowAccessBind
       )
       .configure(
         "auditing.enabled" -> false,
         "metric.enabled" -> false
       )
+  }
+
+  protected def stubbedLockService: LockService = {
+    val service = mock[LockService]
+    when(service.takeLock(any(), any())).thenReturn(Future.successful(true))
+    when(service.acquireOrRenew(any(), any())).thenReturn(Future.successful(true))
+    when(service.renewLock(any(), any())).thenReturn(Future.successful(true))
+    when(service.isLocked(any(), any())).thenReturn(Future.successful(false))
+    when(service.releaseLock(any(), any())).thenReturn(Future.successful(()))
+    service
   }
 
   protected def injected[A: ClassTag](implicit app: Application): A = app.injector.instanceOf[A]

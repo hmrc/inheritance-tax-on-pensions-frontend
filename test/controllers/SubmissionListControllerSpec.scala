@@ -17,7 +17,7 @@
 package controllers
 
 import play.api.test.FakeRequest
-import services.SubmissionListService
+import services.{LockService, SubmissionListService}
 import connectors.InheritanceTaxOnPensionsConnector
 import play.api.inject.bind
 import views.html.SubmissionListView
@@ -25,9 +25,9 @@ import base.SpecBase
 import uk.gov.hmrc.http.{HttpResponse, UpstreamErrorResponse}
 import models._
 import viewmodels.SubmissionListPagination
-import org.mockito.ArgumentMatchers.any
+import org.mockito.ArgumentMatchers.{any, eq => eqTo}
 import play.api.test.Helpers._
-import org.mockito.Mockito.when
+import org.mockito.Mockito.{never, verify, when}
 
 import scala.concurrent.Future
 
@@ -251,6 +251,48 @@ class SubmissionListControllerSpec extends SpecBase {
         ).toString
       }
     }
+
+    "must release the lock and remove uuid from session when a uuid is present" in {
+      val mockSubmissionListService = mock[SubmissionListService]
+      when(mockSubmissionListService.getSubmissionList(any(), any())(using any(), any()))
+        .thenReturn(Future.successful(Right(overviewResponse)))
+      val lockService = mock[LockService]
+      when(lockService.releaseLock(any(), any())).thenReturn(Future.successful(()))
+
+      val application = applicationBuilder(userAnswers = None, lockService = lockService)
+        .overrides(bind[SubmissionListService].toInstance(mockSubmissionListService))
+        .build()
+
+      running(application) {
+        val request = FakeRequest(GET, onPageLoadUrl).withSession("uuid" -> testUuid)
+
+        val result = route(application, request).value
+
+        status(result) mustEqual OK
+        verify(lockService).releaseLock(eqTo(s"${srn.value}-$testUuid"), eqTo("id"))
+        session(result).get("uuid") mustBe None
+      }
+    }
+
+    "must not release a lock when no uuid is in session" in {
+      val mockSubmissionListService = mock[SubmissionListService]
+      when(mockSubmissionListService.getSubmissionList(any(), any())(using any(), any()))
+        .thenReturn(Future.successful(Right(overviewResponse)))
+      val lockService = mock[LockService]
+
+      val application = applicationBuilder(userAnswers = None, lockService = lockService)
+        .overrides(bind[SubmissionListService].toInstance(mockSubmissionListService))
+        .build()
+
+      running(application) {
+        val request = FakeRequest(GET, onPageLoadUrl)
+
+        val result = route(application, request).value
+
+        status(result) mustEqual OK
+        verify(lockService, never()).releaseLock(any(), any())
+      }
+    }
   }
 
   "onAmend" - {
@@ -275,6 +317,20 @@ class SubmissionListControllerSpec extends SpecBase {
         redirectLocation(result).value mustEqual controllers.routes.CheckYourAnswersController
           .onPageLoad(srn)
           .url
+      }
+    }
+
+    "must redirect to locked screen when the lock is held by another user" in {
+      val lockService = mock[LockService]
+      when(lockService.acquireOrRenew(any(), any())).thenReturn(Future.successful(false))
+
+      val application = applicationBuilder(userAnswers = Some(emptyUserAnswers), lockService = lockService).build()
+
+      running(application) {
+        val result = route(application, FakeRequest(GET, onAmendUrl)).value
+
+        status(result) mustEqual SEE_OTHER
+        redirectLocation(result).value mustEqual controllers.routes.LockedController.onPageLoad().url
       }
     }
   }
@@ -303,6 +359,29 @@ class SubmissionListControllerSpec extends SpecBase {
         redirectLocation(result).value mustEqual controllers.routes.CheckYourAnswersController
           .onPageLoad(srn)
           .url
+      }
+    }
+
+    "must redirect to locked screen when the lock is held by another user" in {
+      val mockInheritanceTaxOnPensionsConnector = mock[InheritanceTaxOnPensionsConnector]
+      when(
+        mockInheritanceTaxOnPensionsConnector.getReport(any(), any(), any(), any(), any(), any(), any())(using any())
+      )
+        .thenReturn(Future.successful(Right(HttpResponse(OK, headers = Map("uuid" -> Seq(testUuid))))))
+      val lockService = mock[LockService]
+      when(lockService.acquireOrRenew(any(), any())).thenReturn(Future.successful(false))
+
+      val application = applicationBuilder(userAnswers = Some(emptyUserAnswers), lockService = lockService)
+        .overrides(
+          bind[InheritanceTaxOnPensionsConnector].toInstance(mockInheritanceTaxOnPensionsConnector)
+        )
+        .build()
+
+      running(application) {
+        val result = route(application, FakeRequest(GET, onChangeUrl)).value
+
+        status(result) mustEqual SEE_OTHER
+        redirectLocation(result).value mustEqual controllers.routes.LockedController.onPageLoad().url
       }
     }
   }

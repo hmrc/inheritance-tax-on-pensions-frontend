@@ -17,8 +17,10 @@
 package controllers.auth
 
 import play.api.test.FakeRequest
+import services.LockService
 import base.SpecBase
 import repositories.{SessionMinimalDetailsRepository, SessionSchemeDetailsRepository}
+import models.SessionSchemeDetails
 import org.scalatestplus.mockito.MockitoSugar
 import org.mockito.ArgumentMatchers.{any, eq => eqTo}
 import play.api.test.Helpers._
@@ -39,11 +41,15 @@ class AuthControllerSpec extends SpecBase with MockitoSugar {
       val mockSessionSchemeDetailsRepository = mock[SessionSchemeDetailsRepository]
       val mockSessionMinimalDetailsRepository: SessionMinimalDetailsRepository = mock[SessionMinimalDetailsRepository]
 
+      when(mockSessionSchemeDetailsRepository.get(any()))
+        .thenReturn(Future.successful(Some(SessionSchemeDetails(userAnswersId, srn.value, defaultSchemeDetails))))
       when(mockSessionSchemeDetailsRepository.clear(any())).thenReturn(Future.successful(true))
       when(mockSessionMinimalDetailsRepository.clear(any())).thenReturn(Future.successful(true))
+      val lockService = mock[LockService]
+      when(lockService.releaseLock(any(), any())).thenReturn(Future.successful(()))
 
       val application =
-        applicationBuilder(None)
+        applicationBuilder(None, lockService = lockService)
           .overrides(
             bind[SessionSchemeDetailsRepository].toInstance(mockSessionSchemeDetailsRepository),
             bind[SessionMinimalDetailsRepository].toInstance(mockSessionMinimalDetailsRepository)
@@ -53,7 +59,7 @@ class AuthControllerSpec extends SpecBase with MockitoSugar {
       running(application) {
 
         val appConfig = application.injector.instanceOf[FrontendAppConfig]
-        val request = FakeRequest(GET, routes.AuthController.signOut().url)
+        val request = FakeRequest(GET, routes.AuthController.signOut().url).withSession("uuid" -> testUuid)
 
         val result = route(application, request).value
 
@@ -64,6 +70,7 @@ class AuthControllerSpec extends SpecBase with MockitoSugar {
         redirectLocation(result).value mustEqual expectedRedirectUrl
         verify(mockSessionSchemeDetailsRepository, times(1)).clear(eqTo(userAnswersId))
         verify(mockSessionMinimalDetailsRepository, times(1)).clear(eqTo(userAnswersId))
+        verify(lockService).releaseLock(eqTo(s"${srn.value}-$testUuid"), eqTo("id"))
       }
     }
   }
@@ -75,11 +82,15 @@ class AuthControllerSpec extends SpecBase with MockitoSugar {
       val mockSessionSchemeDetailsRepository = mock[SessionSchemeDetailsRepository]
       val mockSessionMinimalDetailsRepository: SessionMinimalDetailsRepository = mock[SessionMinimalDetailsRepository]
 
+      when(mockSessionSchemeDetailsRepository.get(any()))
+        .thenReturn(Future.successful(Some(SessionSchemeDetails(userAnswersId, srn.value, defaultSchemeDetails))))
       when(mockSessionSchemeDetailsRepository.clear(any())).thenReturn(Future.successful(true))
       when(mockSessionMinimalDetailsRepository.clear(any())).thenReturn(Future.successful(true))
+      val lockService = mock[LockService]
+      when(lockService.releaseLock(any(), any())).thenReturn(Future.successful(()))
 
       val application =
-        applicationBuilder(None, isPsa = false)
+        applicationBuilder(None, isPsa = false, lockService = lockService)
           .overrides(
             bind[SessionSchemeDetailsRepository].toInstance(mockSessionSchemeDetailsRepository),
             bind[SessionMinimalDetailsRepository].toInstance(mockSessionMinimalDetailsRepository)
@@ -89,7 +100,7 @@ class AuthControllerSpec extends SpecBase with MockitoSugar {
       running(application) {
 
         val appConfig = application.injector.instanceOf[FrontendAppConfig]
-        val request = FakeRequest(GET, routes.AuthController.signOutNoSurvey().url)
+        val request = FakeRequest(GET, routes.AuthController.signOutNoSurvey().url).withSession("uuid" -> testUuid)
 
         val result = route(application, request).value
 
@@ -100,6 +111,7 @@ class AuthControllerSpec extends SpecBase with MockitoSugar {
         redirectLocation(result).value mustEqual expectedRedirectUrl
         verify(mockSessionSchemeDetailsRepository, times(1)).clear(eqTo(userAnswersId))
         verify(mockSessionMinimalDetailsRepository, times(1)).clear(eqTo(userAnswersId))
+        verify(lockService).releaseLock(eqTo(s"${srn.value}-$testUuid"), eqTo("id"))
       }
     }
   }
