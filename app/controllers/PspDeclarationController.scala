@@ -16,9 +16,9 @@
 
 package controllers
 
-import services.{LockService, ReportSubmissionService}
+import services.{ReportSubmissionService, UserAnswersService}
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
-import pages.PaymentNoticeDatePage
+import pages.{PaymentNoticeDatePage, PspDeclarationPsaIdPage}
 import config.Constants._
 import controllers.actions._
 import play.api.i18n.MessagesApi
@@ -26,7 +26,7 @@ import uk.gov.hmrc.play.http.HeaderCarrierConverter
 import views.html.PspDeclarationView
 import models.SchemeId.Srn
 import forms.PspDeclarationFormProvider
-import uk.gov.hmrc.http.HeaderCarrier
+import uk.gov.hmrc.http.{HeaderCarrier, UpstreamErrorResponse}
 
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -40,9 +40,9 @@ class PspDeclarationController @Inject() (
   requireData: DataRequiredAction,
   formProvider: PspDeclarationFormProvider,
   reportSubmissionService: ReportSubmissionService,
+  userAnswersService: UserAnswersService,
   val controllerComponents: MessagesControllerComponents,
-  view: PspDeclarationView,
-  lockService: LockService
+  view: PspDeclarationView
 )(implicit ec: ExecutionContext)
     extends IhtpBaseController {
 
@@ -67,13 +67,19 @@ class PspDeclarationController @Inject() (
         .fold(
           formWithErrors =>
             Future.successful(BadRequest(view(formWithErrors, srn, request.request.schemeDetails.schemeName))),
-          _ =>
-            reportSubmissionService.submitReport(request.userAnswers)(using hc, request.request).map {
+          value =>
+            val submissionResult = for {
+              updatedAnswers <- Future.fromTry(request.userAnswers.set(PspDeclarationPsaIdPage, value))
+              setResult <- userAnswersService.set(updatedAnswers)(using hc, request.request)
+              submitResult <-
+                if (setResult.isRight) {
+                  reportSubmissionService.submitReport(updatedAnswers)(using hc, request.request)
+                } else {
+                  Future.successful(Left(UpstreamErrorResponse("", 500)))
+                }
+            } yield submitResult
+            submissionResult.map {
               case Right(submissionResponse) =>
-                lockService
-                  .releaseLock(s"${srn.value}-${request.userAnswers.uuid}", request.request.getUserId)
-                  .failed
-                  .foreach(_ => ())
                 Redirect(routes.ConfirmationController.onPageLoad(srn))
                   .addingToSession(PAYMENT_REFERENCE -> submissionResponse.success.ihtResponse.ihtPaymentReference)
                   .addingToSession(FORM_BUNDLE_NO -> submissionResponse.success.ihtResponse.formBundleNo)
@@ -81,7 +87,8 @@ class PspDeclarationController @Inject() (
                     DUE_DATE -> calculateDueDateDefaultToNow(request.userAnswers.get(PaymentNoticeDatePage))
                   )
                   .addingToSession(NEED_TO_PAY -> calculateNeedToPay(request.userAnswers))
-              case Left(_) => logAndJourneyRecovery("unable to submit the IHTP report")
+              case Left(_) =>
+                logAndJourneyRecovery("unable to submit the IHTP report")
             }
         )
     }

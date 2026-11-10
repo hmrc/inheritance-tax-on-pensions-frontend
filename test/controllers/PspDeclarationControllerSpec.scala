@@ -17,15 +17,15 @@
 package controllers
 
 import play.api.test.FakeRequest
-import services.{LockService, ReportSubmissionService}
-import pages.PaymentNoticeDatePage
+import services.{ReportSubmissionService, UserAnswersService}
+import pages.{PaymentNoticeDatePage, PspDeclarationPsaIdPage}
 import play.api.inject.bind
 import views.html.PspDeclarationView
 import base.SpecBase
 import models.{IhtResponse, IhtpReportSubmissionResponse, SuccessResponse}
 import play.api.data.Form
 import org.scalatestplus.mockito.MockitoSugar
-import org.mockito.ArgumentMatchers.{any, eq => eqTo}
+import org.mockito.ArgumentMatchers.any
 import play.api.test.Helpers._
 import org.mockito.Mockito._
 import forms.PspDeclarationFormProvider
@@ -64,19 +64,23 @@ class PspDeclarationControllerSpec extends SpecBase with MockitoSugar {
       )
       when(mockReportSubmissionService.submitReport(any())(using any(), any()))
         .thenReturn(Future.successful(Right(response)))
-      val lockService = mock[LockService]
-      when(lockService.releaseLock(any(), any())).thenReturn(Future.successful(()))
 
-      val application = applicationBuilder(
-        userAnswers = Some(
-          emptyUserAnswers
+      val mockUserAnswersService = mock[UserAnswersService]
+      val answers = emptyUserAnswers.set(PspDeclarationPsaIdPage, testPsaId).success.value
+      when(mockUserAnswersService.set(any())(using any(), any())).thenReturn(Future.successful(Right(answers)))
+
+      val application = applicationBuilder(userAnswers =
+        Some(
+          answers
             .set(PaymentNoticeDatePage, testPaymentNoticeDate)
             .success
             .value
-        ),
-        lockService = lockService
+        )
       )
-        .overrides(bind[ReportSubmissionService].toInstance(mockReportSubmissionService))
+        .overrides(
+          bind[ReportSubmissionService].toInstance(mockReportSubmissionService),
+          bind[UserAnswersService].toInstance(mockUserAnswersService)
+        )
         .build()
 
       running(application) {
@@ -88,7 +92,48 @@ class PspDeclarationControllerSpec extends SpecBase with MockitoSugar {
 
         status(result) mustEqual SEE_OTHER
         redirectLocation(result).value mustEqual routes.ConfirmationController.onPageLoad(srn).url
-        verify(lockService).releaseLock(eqTo(s"${srn.value}-$testUuid"), eqTo("id"))
+        verify(mockUserAnswersService).set(any())(using any(), any())
+      }
+    }
+
+    "must redirect to JourneyRecoveryController when saving authorising psaId fails" in {
+      val mockReportSubmissionService = mock[ReportSubmissionService]
+      val response = IhtpReportSubmissionResponse(
+        SuccessResponse(IhtResponse("formBundle", "paymentRef", testProcessingDate))
+      )
+      when(mockReportSubmissionService.submitReport(any())(using any(), any()))
+        .thenReturn(Future.successful(Right(response)))
+
+      val mockUserAnswersService = mock[UserAnswersService]
+      val answers = emptyUserAnswers.set(PspDeclarationPsaIdPage, testPsaId).success.value
+      when(mockUserAnswersService.set(any())(using any(), any()))
+        .thenReturn(Future.successful(Left(UpstreamErrorResponse("failed", 500))))
+
+      val application = applicationBuilder(userAnswers =
+        Some(
+          answers
+            .set(PaymentNoticeDatePage, testPaymentNoticeDate)
+            .success
+            .value
+        )
+      )
+        .overrides(
+          bind[ReportSubmissionService].toInstance(mockReportSubmissionService),
+          bind[UserAnswersService].toInstance(mockUserAnswersService)
+        )
+        .build()
+
+      running(application) {
+        val request =
+          FakeRequest(POST, pspDeclarationRoute)
+            .withFormUrlEncodedBody(("value", testPsaId))
+
+        val result = route(application, request).value
+
+        status(result) mustEqual SEE_OTHER
+        redirectLocation(result).value mustEqual routes.JourneyRecoveryController.onPageLoad().url
+        verify(mockUserAnswersService).set(any())(using any(), any())
+        verifyNoInteractions(mockReportSubmissionService)
       }
     }
 
@@ -98,8 +143,15 @@ class PspDeclarationControllerSpec extends SpecBase with MockitoSugar {
       when(mockReportSubmissionService.submitReport(any())(using any(), any()))
         .thenReturn(Future.successful(Left(errorResponse)))
 
+      val mockUserAnswersService = mock[UserAnswersService]
+      val answers = emptyUserAnswers.set(PspDeclarationPsaIdPage, testPsaId).success.value
+      when(mockUserAnswersService.set(any())(using any(), any())).thenReturn(Future.successful(Right(answers)))
+
       val application = applicationBuilder(userAnswers = Some(emptyUserAnswers))
-        .overrides(bind[ReportSubmissionService].toInstance(mockReportSubmissionService))
+        .overrides(
+          bind[ReportSubmissionService].toInstance(mockReportSubmissionService),
+          bind[UserAnswersService].toInstance(mockUserAnswersService)
+        )
         .build()
 
       running(application) {
