@@ -17,6 +17,7 @@
 package services
 
 import config.FrontendAppConfig
+import play.api.Logging
 import repositories.UserAnswersLockRepository
 
 import scala.concurrent.{ExecutionContext, Future}
@@ -27,10 +28,13 @@ import javax.inject.Inject
 class LockService @Inject() (
   userAnswersLockRepository: UserAnswersLockRepository,
   appConfig: FrontendAppConfig
-)(implicit ec: ExecutionContext) {
+)(implicit ec: ExecutionContext)
+    extends Logging {
 
-  def takeLock(id: String, owner: String): Future[Boolean] =
+  def takeLock(id: String, owner: String): Future[Boolean] = {
+    logger.info(s"[LockService] - takeLock id=$id")
     userAnswersLockRepository.takeLock(id, owner, appConfig.lockTtl.seconds).map(_.isDefined)
+  }
 
   def acquireOrRenew(id: String, owner: String): Future[Boolean] =
     takeLock(id, owner).flatMap {
@@ -44,6 +48,8 @@ class LockService @Inject() (
   def isLocked(id: String, owner: String): Future[Boolean] =
     userAnswersLockRepository.isLocked(id, owner)
 
-  def releaseLock(id: String, owner: String): Future[Unit] =
+  def releaseLock(id: String, owner: String): Future[Unit] = {
+    logger.info(s"[LockService] - releaseLock id=$id")
     userAnswersLockRepository.releaseLock(id, owner)
+  }
 }

@@ -17,7 +17,7 @@
 package controllers
 
 import services.{LockService, UserAnswersService}
-import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
+import play.api.mvc._
 import pages.InheritanceTaxReferencePage
 import controllers.actions._
 import forms.InheritanceTaxReferenceFormProvider
@@ -84,14 +84,7 @@ class InheritanceTaxReferenceController @Inject() (
                         } else {
                           request.session + ("uuid" -> newUuid)
                         }
-                        mode match {
-                          case CheckMode =>
-                            Redirect(routes.CheckYourAnswersController.onPageLoad(srn))
-                              .withSession(updatedSession)
-                          case NormalMode =>
-                            Redirect(routes.IndividualNameController.onPageLoad(srn, NormalMode, JourneyRole.Deceased))
-                              .withSession(updatedSession)
-                        }
+                        getSubmitRedirect(srn, mode, updatedSession)
                       case false =>
                         Redirect(controllers.routes.LockedController.onPageLoad())
                     }
@@ -101,4 +94,13 @@ class InheritanceTaxReferenceController @Inject() (
               } yield result
           )
       }
+
+  private def getSubmitRedirect(srn: Srn, mode: Mode, session: Session): Result =
+    mode match {
+      case CheckMode =>
+        Redirect(routes.CheckYourAnswersController.onPageLoad(srn)).withSession(session)
+      case NormalMode =>
+        Redirect(routes.IndividualNameController.onPageLoad(srn, NormalMode, JourneyRole.Deceased))
+          .withSession(session)
+    }
 }

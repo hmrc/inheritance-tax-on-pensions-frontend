@@ -256,10 +256,10 @@ class SubmissionListControllerSpec extends SpecBase {
       val mockSubmissionListService = mock[SubmissionListService]
       when(mockSubmissionListService.getSubmissionList(any(), any())(using any(), any()))
         .thenReturn(Future.successful(Right(overviewResponse)))
-      val lockService = mock[LockService]
-      when(lockService.releaseLock(any(), any())).thenReturn(Future.successful(()))
+      val mockLockService = mock[LockService]
+      when(mockLockService.releaseLock(any(), any())).thenReturn(Future.successful(()))
 
-      val application = applicationBuilder(userAnswers = None, lockService = lockService)
+      val application = applicationBuilder(userAnswers = None, lockService = mockLockService)
         .overrides(bind[SubmissionListService].toInstance(mockSubmissionListService))
         .build()
 
@@ -269,7 +269,7 @@ class SubmissionListControllerSpec extends SpecBase {
         val result = route(application, request).value
 
         status(result) mustEqual OK
-        verify(lockService).releaseLock(eqTo(s"${srn.value}-$testUuid"), eqTo("id"))
+        verify(mockLockService).releaseLock(eqTo(s"${srn.value}-$testUuid"), eqTo("id"))
         session(result).get("uuid") mustBe None
       }
     }
@@ -278,9 +278,9 @@ class SubmissionListControllerSpec extends SpecBase {
       val mockSubmissionListService = mock[SubmissionListService]
       when(mockSubmissionListService.getSubmissionList(any(), any())(using any(), any()))
         .thenReturn(Future.successful(Right(overviewResponse)))
-      val lockService = mock[LockService]
+      val mockLockService = mock[LockService]
 
-      val application = applicationBuilder(userAnswers = None, lockService = lockService)
+      val application = applicationBuilder(userAnswers = None, lockService = mockLockService)
         .overrides(bind[SubmissionListService].toInstance(mockSubmissionListService))
         .build()
 
@@ -290,7 +290,7 @@ class SubmissionListControllerSpec extends SpecBase {
         val result = route(application, request).value
 
         status(result) mustEqual OK
-        verify(lockService, never()).releaseLock(any(), any())
+        verify(mockLockService, never()).releaseLock(any(), any())
       }
     }
   }
@@ -321,10 +321,10 @@ class SubmissionListControllerSpec extends SpecBase {
     }
 
     "must redirect to locked screen when the lock is held by another user" in {
-      val lockService = mock[LockService]
-      when(lockService.acquireOrRenew(any(), any())).thenReturn(Future.successful(false))
+      val mockLockService = mock[LockService]
+      when(mockLockService.acquireOrRenew(any(), any())).thenReturn(Future.successful(false))
 
-      val application = applicationBuilder(userAnswers = Some(emptyUserAnswers), lockService = lockService).build()
+      val application = applicationBuilder(userAnswers = Some(emptyUserAnswers), lockService = mockLockService).build()
 
       running(application) {
         val result = route(application, FakeRequest(GET, onAmendUrl)).value
@@ -368,10 +368,10 @@ class SubmissionListControllerSpec extends SpecBase {
         mockInheritanceTaxOnPensionsConnector.getReport(any(), any(), any(), any(), any(), any(), any())(using any())
       )
         .thenReturn(Future.successful(Right(HttpResponse(OK, headers = Map("uuid" -> Seq(testUuid))))))
-      val lockService = mock[LockService]
-      when(lockService.acquireOrRenew(any(), any())).thenReturn(Future.successful(false))
+      val mockLockService = mock[LockService]
+      when(mockLockService.acquireOrRenew(any(), any())).thenReturn(Future.successful(false))
 
-      val application = applicationBuilder(userAnswers = Some(emptyUserAnswers), lockService = lockService)
+      val application = applicationBuilder(userAnswers = Some(emptyUserAnswers), lockService = mockLockService)
         .overrides(
           bind[InheritanceTaxOnPensionsConnector].toInstance(mockInheritanceTaxOnPensionsConnector)
         )

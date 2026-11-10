@@ -36,10 +36,10 @@ class DataRetrievalActionSpec extends SpecBase with MockitoSugar {
     FakeRequest().withSession("uuid" -> testUuid)
   ).sample.value
 
-  val lockService: LockService = mock[LockService]
-  when(lockService.renewLock(any(), any())).thenReturn(Future.successful(true))
+  val mockLockService: LockService = mock[LockService]
+  when(mockLockService.renewLock(any(), any())).thenReturn(Future.successful(true))
 
-  class Harness(userAnswersService: UserAnswersService, ls: LockService = lockService)
+  class Harness(userAnswersService: UserAnswersService, ls: LockService = mockLockService)
       extends DataRetrievalActionImpl(userAnswersService, ls) {
     def callTransform[A](request: AllowedAccessRequest[A]): Future[OptionalDataRequest[A]] = transform(request)
   }

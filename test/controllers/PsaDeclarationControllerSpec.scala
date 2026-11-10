@@ -64,8 +64,8 @@ class PsaDeclarationControllerSpec extends SpecBase with MockitoSugar {
       )
       when(mockReportSubmissionService.submitReport(any())(using any(), any()))
         .thenReturn(Future.successful(Right(response)))
-      val lockService = mock[LockService]
-      when(lockService.releaseLock(any(), any())).thenReturn(Future.successful(()))
+      val mockLockService = mock[LockService]
+      when(mockLockService.releaseLock(any(), any())).thenReturn(Future.successful(()))
 
       val application = applicationBuilder(
         userAnswers = Some(
@@ -74,7 +74,7 @@ class PsaDeclarationControllerSpec extends SpecBase with MockitoSugar {
             .success
             .value
         ),
-        lockService = lockService
+        lockService = mockLockService
       )
         .overrides(bind[ReportSubmissionService].toInstance(mockReportSubmissionService))
         .build()
@@ -86,7 +86,7 @@ class PsaDeclarationControllerSpec extends SpecBase with MockitoSugar {
 
         status(result) mustEqual SEE_OTHER
         redirectLocation(result).value mustEqual routes.ConfirmationController.onPageLoad(srn).url
-        verify(lockService).releaseLock(eqTo(s"${srn.value}-$testUuid"), eqTo("id"))
+        verify(mockLockService).releaseLock(eqTo(s"${srn.value}-$testUuid"), eqTo("id"))
       }
     }
 

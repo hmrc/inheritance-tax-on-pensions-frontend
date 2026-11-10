@@ -21,6 +21,7 @@ import com.github.tomakehurst.wiremock.client.WireMock.{badRequest, notFound, ok
 import com.github.tomakehurst.wiremock.stubbing.StubMapping
 import models.PensionSchemeUser.{Administrator, Practitioner}
 import models.{MinimalDetails, PensionSchemeUser, SchemeDetails, SessionData, UserAnswers}
+import services.LockService
 import play.api.Application
 import play.api.inject.guice.GuiceApplicationBuilder
 import uk.gov.hmrc.http.HeaderCarrier
@@ -33,9 +34,11 @@ class SessionDataCacheConnectorSpec extends BaseConnectorSpec {
   override protected def applicationBuilder(userAnswers: Option[UserAnswers] = None, isPsa: Boolean = true,
                                             schemeDetails: SchemeDetails = defaultSchemeDetails,
                                             minimalDetails: MinimalDetails = defaultMinimalDetails,
-                                            usesSession: Boolean = false
+                                            usesSession: Boolean = false,
+                                            lockService: LockService = stubbedLockService
                                            ): GuiceApplicationBuilder =
-    super.applicationBuilder(userAnswers).configure("microservice.services.pensionAdministrator.port" -> wireMockPort)
+    super.applicationBuilder(userAnswers, lockService = lockService)
+      .configure("microservice.services.pensionAdministrator.port" -> wireMockPort)
 
   def stubGet(response: ResponseDefinitionBuilder): StubMapping =
     stubGet(url, response)

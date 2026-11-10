@@ -22,6 +22,7 @@ import com.github.tomakehurst.wiremock.stubbing.StubMapping
 import config.Constants
 import connectors.MinimalDetailsError.{DelimitedAdmin, DetailsNotFound}
 import models.{MinimalDetails, SchemeDetails, UserAnswers}
+import services.LockService
 import play.api.Application
 import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.libs.json.Json
@@ -34,9 +35,11 @@ class MinimalDetailsConnectorSpec extends BaseConnectorSpec {
   override protected def applicationBuilder(userAnswers: Option[UserAnswers] = None, isPsa: Boolean = true,
                                             schemeDetails: SchemeDetails = defaultSchemeDetails,
                                             minimalDetails: MinimalDetails = defaultMinimalDetails,
-                                            userSession: Boolean = false
+                                            usesSession: Boolean = false,
+                                            lockService: LockService = stubbedLockService
                                            ): GuiceApplicationBuilder =
-    super.applicationBuilder(userAnswers).configure("microservice.services.pensionAdministrator.port" -> wireMockPort)
+    super.applicationBuilder(userAnswers, lockService = lockService)
+      .configure("microservice.services.pensionAdministrator.port" -> wireMockPort)
 
   val url = "/pension-administrator/get-minimal-details-self"
 

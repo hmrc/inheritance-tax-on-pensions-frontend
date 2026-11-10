@@ -16,7 +16,7 @@
 
 package controllers
 
-import services.ReportRetrievalService
+import services.{LockService, ReportRetrievalService}
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import config.{Constants, FrontendAppConfig}
 import config.Constants._
@@ -25,7 +25,7 @@ import play.api.i18n.MessagesApi
 import views.html.ConfirmationView
 import models.SchemeId.Srn
 
-import scala.concurrent.ExecutionContext
+import scala.concurrent.{ExecutionContext, Future}
 
 import javax.inject.Inject
 
@@ -37,7 +37,8 @@ class ConfirmationController @Inject() (
   val controllerComponents: MessagesControllerComponents,
   appConfig: FrontendAppConfig,
   view: ConfirmationView,
-  reportRetrievalService: ReportRetrievalService
+  reportRetrievalService: ReportRetrievalService,
+  lockService: LockService
 )(implicit ec: ExecutionContext)
     extends IhtpBaseController {
 
@@ -73,19 +74,25 @@ class ConfirmationController @Inject() (
     identify.andThen(allowAccess(srn)).async { implicit request =>
       reportRetrievalService
         .getReportByFbNumber(formBundleNo)
-        .map {
+        .flatMap {
           case Right(response) =>
             val uuid = response.header("uuid").get
-            val updatedSession = if (request.session.get("uuid").contains(uuid)) {
-              request.session
-            } else {
-              request.session + ("uuid" -> uuid)
+            lockService.acquireOrRenew(s"${srn.value}-$uuid", request.getUserId).map {
+              case true =>
+                val updatedSession = if (request.session.get("uuid").contains(uuid)) {
+                  request.session
+                } else {
+                  request.session + ("uuid" -> uuid)
+                }
+                Redirect(controllers.routes.CheckYourAnswersController.onPageLoad(srn))
+                  .withSession(updatedSession)
+                  .removingFromSession(Constants.SUBMITTED_PAGE_SESSION_VARIABLES*)
+              case false =>
+                Redirect(controllers.routes.LockedController.onPageLoad())
+                  .removingFromSession(Constants.SUBMITTED_PAGE_SESSION_VARIABLES*)
             }
-
-            Redirect(controllers.routes.CheckYourAnswersController.onPageLoad(srn))
-              .withSession(updatedSession)
-              .removingFromSession(Constants.SUBMITTED_PAGE_SESSION_VARIABLES*)
-          case Left(_) => Redirect(routes.JourneyRecoveryController.onPageLoad())
+          case Left(_) =>
+            Future.successful(Redirect(routes.JourneyRecoveryController.onPageLoad()))
         }
     }
 }

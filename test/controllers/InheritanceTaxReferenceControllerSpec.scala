@@ -141,13 +141,13 @@ class InheritanceTaxReferenceControllerSpec extends SpecBase {
       val mockInheritanceTaxOnPensionsConnector = mock[InheritanceTaxOnPensionsConnector]
       when(mockInheritanceTaxOnPensionsConnector.setUserAnswers(any(), any(), any(), any(), any())(using any()))
         .thenReturn(Future.successful(Right(emptyUserAnswers)))
-      val lockService = mock[LockService]
-      when(lockService.acquireOrRenew(any(), any())).thenReturn(Future.successful(false))
+      val mockLockService = mock[LockService]
+      when(mockLockService.acquireOrRenew(any(), any())).thenReturn(Future.successful(false))
 
       val application = applicationBuilder(
         userAnswers = Some(emptyUserAnswers),
         usesSession = true,
-        lockService = lockService
+        lockService = mockLockService
       )
         .overrides(
           bind[InheritanceTaxOnPensionsConnector].toInstance(mockInheritanceTaxOnPensionsConnector)

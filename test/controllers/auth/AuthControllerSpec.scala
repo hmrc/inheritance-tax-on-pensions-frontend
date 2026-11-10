@@ -45,11 +45,11 @@ class AuthControllerSpec extends SpecBase with MockitoSugar {
         .thenReturn(Future.successful(Some(SessionSchemeDetails(userAnswersId, srn.value, defaultSchemeDetails))))
       when(mockSessionSchemeDetailsRepository.clear(any())).thenReturn(Future.successful(true))
       when(mockSessionMinimalDetailsRepository.clear(any())).thenReturn(Future.successful(true))
-      val lockService = mock[LockService]
-      when(lockService.releaseLock(any(), any())).thenReturn(Future.successful(()))
+      val mockLockService = mock[LockService]
+      when(mockLockService.releaseLock(any(), any())).thenReturn(Future.successful(()))
 
       val application =
-        applicationBuilder(None, lockService = lockService)
+        applicationBuilder(None, lockService = mockLockService)
           .overrides(
             bind[SessionSchemeDetailsRepository].toInstance(mockSessionSchemeDetailsRepository),
             bind[SessionMinimalDetailsRepository].toInstance(mockSessionMinimalDetailsRepository)
@@ -70,7 +70,7 @@ class AuthControllerSpec extends SpecBase with MockitoSugar {
         redirectLocation(result).value mustEqual expectedRedirectUrl
         verify(mockSessionSchemeDetailsRepository, times(1)).clear(eqTo(userAnswersId))
         verify(mockSessionMinimalDetailsRepository, times(1)).clear(eqTo(userAnswersId))
-        verify(lockService).releaseLock(eqTo(s"${srn.value}-$testUuid"), eqTo("id"))
+        verify(mockLockService).releaseLock(eqTo(s"${srn.value}-$testUuid"), eqTo("id"))
       }
     }
   }
@@ -86,11 +86,11 @@ class AuthControllerSpec extends SpecBase with MockitoSugar {
         .thenReturn(Future.successful(Some(SessionSchemeDetails(userAnswersId, srn.value, defaultSchemeDetails))))
       when(mockSessionSchemeDetailsRepository.clear(any())).thenReturn(Future.successful(true))
       when(mockSessionMinimalDetailsRepository.clear(any())).thenReturn(Future.successful(true))
-      val lockService = mock[LockService]
-      when(lockService.releaseLock(any(), any())).thenReturn(Future.successful(()))
+      val mockLockService = mock[LockService]
+      when(mockLockService.releaseLock(any(), any())).thenReturn(Future.successful(()))
 
       val application =
-        applicationBuilder(None, isPsa = false, lockService = lockService)
+        applicationBuilder(None, isPsa = false, lockService = mockLockService)
           .overrides(
             bind[SessionSchemeDetailsRepository].toInstance(mockSessionSchemeDetailsRepository),
             bind[SessionMinimalDetailsRepository].toInstance(mockSessionMinimalDetailsRepository)
@@ -111,7 +111,7 @@ class AuthControllerSpec extends SpecBase with MockitoSugar {
         redirectLocation(result).value mustEqual expectedRedirectUrl
         verify(mockSessionSchemeDetailsRepository, times(1)).clear(eqTo(userAnswersId))
         verify(mockSessionMinimalDetailsRepository, times(1)).clear(eqTo(userAnswersId))
-        verify(lockService).releaseLock(eqTo(s"${srn.value}-$testUuid"), eqTo("id"))
+        verify(mockLockService).releaseLock(eqTo(s"${srn.value}-$testUuid"), eqTo("id"))
       }
     }
   }

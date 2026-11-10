@@ -88,6 +88,7 @@ class SubmissionListController @Inject() (
             .removingFromSession(Constants.SUBMITTED_PAGE_SESSION_VARIABLES*)
         case false =>
           Redirect(controllers.routes.LockedController.onPageLoad())
+            .removingFromSession(Constants.SUBMITTED_PAGE_SESSION_VARIABLES*)
       }
     }
 
@@ -110,6 +111,7 @@ class SubmissionListController @Inject() (
                   .removingFromSession(Constants.SUBMITTED_PAGE_SESSION_VARIABLES*)
               case false =>
                 Redirect(controllers.routes.LockedController.onPageLoad())
+                  .removingFromSession(Constants.SUBMITTED_PAGE_SESSION_VARIABLES*)
             }
           case Left(_) =>
             Future.successful(Redirect(routes.JourneyRecoveryController.onPageLoad()))
