@@ -1,4 +1,3 @@
-
 # Inheritance Tax on Pensions Frontend
 
 Frontend microservice for Inheritance Tax on Pensions (IHTP) which is a feature on manage your pension (MPS) service. Pension Scheme Administrators (PSA) and/or Pension Scheme Practitioners use this service for reporting IHT due on unused pension funds and retrieving payment reference. 
@@ -30,7 +29,6 @@ You can also execute the [runtests.sh](runtests.sh) file to run both unit and in
 ```bash
 /bin/bash ./runtests.sh
 ```
-
 ### Test identifiers
 
 Test fixtures generate tax identifiers at runtime. NINOs use HMRC's `NinoGenerator`; shared generators provide
