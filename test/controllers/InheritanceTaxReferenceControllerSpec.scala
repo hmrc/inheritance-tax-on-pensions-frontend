@@ -17,6 +17,7 @@
 package controllers
 
 import play.api.test.FakeRequest
+import services.LockService
 import connectors.InheritanceTaxOnPensionsConnector
 import play.api.inject.bind
 import views.html.InheritanceTaxReferenceView
@@ -132,6 +133,36 @@ class InheritanceTaxReferenceControllerSpec extends SpecBase {
         val result = route(application, request).value
 
         status(result) mustEqual BAD_REQUEST
+      }
+    }
+
+    "must redirect to the locked screen when the report is locked by another user" in {
+
+      val mockInheritanceTaxOnPensionsConnector = mock[InheritanceTaxOnPensionsConnector]
+      when(mockInheritanceTaxOnPensionsConnector.setUserAnswers(any(), any(), any(), any(), any())(using any()))
+        .thenReturn(Future.successful(Right(emptyUserAnswers)))
+      val mockLockService = mock[LockService]
+      when(mockLockService.acquireOrRenew(any(), any())).thenReturn(Future.successful(false))
+
+      val application = applicationBuilder(
+        userAnswers = Some(emptyUserAnswers),
+        usesSession = true,
+        lockService = mockLockService
+      )
+        .overrides(
+          bind[InheritanceTaxOnPensionsConnector].toInstance(mockInheritanceTaxOnPensionsConnector)
+        )
+        .build()
+
+      running(application) {
+        val request =
+          FakeRequest(POST, inheritanceTaxReferenceRoute)
+            .withFormUrlEncodedBody(("value", inheritanceTaxReference))
+
+        val result = route(application, request).value
+
+        status(result) mustEqual SEE_OTHER
+        redirectLocation(result).value mustEqual routes.LockedController.onPageLoad().url
       }
     }
 

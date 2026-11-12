@@ -17,7 +17,7 @@
 package controllers
 
 import play.api.test.FakeRequest
-import services.{ReportSubmissionService, UserAnswersService}
+import services.{LockService, ReportSubmissionService, UserAnswersService}
 import pages.{PaymentNoticeDatePage, PspDeclarationPsaIdPage}
 import play.api.inject.bind
 import views.html.PspDeclarationView
@@ -25,7 +25,7 @@ import base.SpecBase
 import models.{IhtResponse, IhtpReportSubmissionResponse, SuccessResponse}
 import play.api.data.Form
 import org.scalatestplus.mockito.MockitoSugar
-import org.mockito.ArgumentMatchers.any
+import org.mockito.ArgumentMatchers.{any, eq => eqTo}
 import play.api.test.Helpers._
 import org.mockito.Mockito._
 import forms.PspDeclarationFormProvider
@@ -69,13 +69,17 @@ class PspDeclarationControllerSpec extends SpecBase with MockitoSugar {
       val answers = emptyUserAnswers.set(PspDeclarationPsaIdPage, testPsaId).success.value
       when(mockUserAnswersService.set(any())(using any(), any())).thenReturn(Future.successful(Right(answers)))
 
-      val application = applicationBuilder(userAnswers =
-        Some(
+      val mockLockService = mock[LockService]
+      when(mockLockService.releaseLock(any(), any())).thenReturn(Future.successful(()))
+
+      val application = applicationBuilder(
+        userAnswers = Some(
           answers
             .set(PaymentNoticeDatePage, testPaymentNoticeDate)
             .success
             .value
-        )
+        ),
+        lockService = mockLockService
       )
         .overrides(
           bind[ReportSubmissionService].toInstance(mockReportSubmissionService),
@@ -93,6 +97,7 @@ class PspDeclarationControllerSpec extends SpecBase with MockitoSugar {
         status(result) mustEqual SEE_OTHER
         redirectLocation(result).value mustEqual routes.ConfirmationController.onPageLoad(srn).url
         verify(mockUserAnswersService).set(any())(using any(), any())
+        verify(mockLockService).releaseLock(eqTo(s"${srn.value}-$testUuid"), eqTo("id"))
       }
     }
 

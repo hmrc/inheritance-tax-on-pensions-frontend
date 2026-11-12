@@ -9,6 +9,7 @@ GET         /assets/*file                                controllers.Assets.vers
 GET         /refresh-session                             controllers.KeepAliveController.keepAlive()
 
 GET         /there-is-a-problem                          controllers.JourneyRecoveryController.onPageLoad()
+GET         /report-locked                                     controllers.LockedController.onPageLoad()
 
 GET         /account/sign-out-survey                     controllers.auth.AuthController.signOut()
 GET         /account/sign-out                            controllers.auth.AuthController.signOutNoSurvey()

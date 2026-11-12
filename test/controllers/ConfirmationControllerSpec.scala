@@ -17,6 +17,7 @@
 package controllers
 
 import play.api.test.FakeRequest
+import services.LockService
 import connectors.InheritanceTaxOnPensionsConnector
 import play.api.inject.bind
 import views.html.ConfirmationView
@@ -94,6 +95,36 @@ class ConfirmationControllerSpec extends SpecBase {
 
         status(result) mustEqual SEE_OTHER
         redirectLocation(result).value mustEqual routes.CheckYourAnswersController.onPageLoad(testSrn).url
+      }
+    }
+
+    "must redirect to locked screen onChange when the lock is held by another user" in {
+      val mockInheritanceTaxOnPensionsConnector = mock[InheritanceTaxOnPensionsConnector]
+      when(
+        mockInheritanceTaxOnPensionsConnector.getReportByFbNumber(any(), any(), any(), any(), any(), any())(using any())
+      )
+        .thenReturn(Future.successful(Right(HttpResponse(OK, headers = Map("uuid" -> Seq(testUuid))))))
+      val mockLockService = mock[LockService]
+      when(mockLockService.acquireOrRenew(any(), any())).thenReturn(Future.successful(false))
+
+      val application = applicationBuilder(
+        userAnswers = Some(emptyUserAnswers),
+        usesSession = true,
+        lockService = mockLockService
+      )
+        .overrides(
+          bind[InheritanceTaxOnPensionsConnector].toInstance(mockInheritanceTaxOnPensionsConnector)
+        )
+        .build()
+
+      running(application) {
+        val request = FakeRequest(GET, routes.ConfirmationController.onChange(testSrn, testFormBundleNumber).url)
+          .withFormUrlEncodedBody()
+
+        val result = route(application, request).value
+
+        status(result) mustEqual SEE_OTHER
+        redirectLocation(result).value mustEqual controllers.routes.LockedController.onPageLoad().url
       }
     }
 

@@ -27,6 +27,7 @@ import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.libs.json.Json
 import uk.gov.hmrc.http.{HeaderCarrier, UpstreamErrorResponse}
 import config.NoOpCrypto
+import services.LockService
 
 import scala.concurrent.Await
 
@@ -37,9 +38,11 @@ class SchemeDetailsConnectorSpec extends BaseConnectorSpec {
   override protected def applicationBuilder(userAnswers: Option[UserAnswers] = None, isPsa: Boolean = true,
                                             schemeDetails: SchemeDetails = defaultSchemeDetails,
                                             minimalDetails: MinimalDetails = defaultMinimalDetails,
-                                            usesSession: Boolean = false
+                                            usesSession: Boolean = false,
+                                            lockService: LockService = stubbedLockService
                                            ): GuiceApplicationBuilder =
-    super.applicationBuilder(userAnswers).configure("microservice.services.pensionsScheme.port" -> wireMockPort)
+    super.applicationBuilder(userAnswers, lockService = lockService)
+      .configure("microservice.services.pensionsScheme.port" -> wireMockPort)
 
   private def assertSchemeDetailsEqual(actual: SchemeDetails, expected: SchemeDetails): Unit = {
     actual.schemeName mustBe expected.schemeName

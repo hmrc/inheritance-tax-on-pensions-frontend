@@ -16,7 +16,7 @@
 
 package controllers
 
-import services.{ReportSubmissionService, UserAnswersService}
+import services.{LockService, ReportSubmissionService, UserAnswersService}
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import pages.{PaymentNoticeDatePage, PspDeclarationPsaIdPage}
 import config.Constants._
@@ -42,7 +42,8 @@ class PspDeclarationController @Inject() (
   reportSubmissionService: ReportSubmissionService,
   userAnswersService: UserAnswersService,
   val controllerComponents: MessagesControllerComponents,
-  view: PspDeclarationView
+  view: PspDeclarationView,
+  lockService: LockService
 )(implicit ec: ExecutionContext)
     extends IhtpBaseController {
 
@@ -80,6 +81,10 @@ class PspDeclarationController @Inject() (
             } yield submitResult
             submissionResult.map {
               case Right(submissionResponse) =>
+                lockService
+                  .releaseLock(s"${srn.value}-${request.userAnswers.uuid}", request.request.getUserId)
+                  .failed
+                  .foreach(_ => ())
                 Redirect(routes.ConfirmationController.onPageLoad(srn))
                   .addingToSession(PAYMENT_REFERENCE -> submissionResponse.success.ihtResponse.ihtPaymentReference)
                   .addingToSession(FORM_BUNDLE_NO -> submissionResponse.success.ihtResponse.formBundleNo)

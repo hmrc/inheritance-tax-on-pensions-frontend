@@ -16,7 +16,7 @@
 
 package controllers.actions
 
-import services.UserAnswersService
+import services.{LockService, UserAnswersService}
 import play.api.mvc.ActionTransformer
 import play.api.Logging
 import models.UserAnswers
@@ -30,7 +30,8 @@ import scala.concurrent.{ExecutionContext, Future}
 import javax.inject.Inject
 
 class DataRetrievalActionImpl @Inject() (
-  val userAnswersService: UserAnswersService
+  val userAnswersService: UserAnswersService,
+  lockService: LockService
 )(implicit val executionContext: ExecutionContext)
     extends DataRetrievalAction
     with Logging {
@@ -43,6 +44,10 @@ class DataRetrievalActionImpl @Inject() (
 
     val srn = request.srn.value
     val cacheKey = s"$srn-$uuid"
+
+    if (uuid.nonEmpty) {
+      lockService.renewLock(cacheKey, request.getUserId).failed.foreach(_ => ())
+    }
 
     userAnswersService
       .fetch(cacheKey)(using headerCarrier, request)

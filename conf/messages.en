@@ -26,6 +26,10 @@ timeout.message = For security reasons, you will be signed out of this service i
 timeout.keepAlive = Stay signed in
 timeout.signOut = Sign out
 
+locked.title = This report is currently being edited please try again later
+locked.heading = This report is currently being edited please try again later
+locked.p1 = Another user is working on this report. Please try again later.
+
 error.title.prefix = Error:
 error.prefix = Error
 error.summary.title = There is a problem

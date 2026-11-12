@@ -16,8 +16,8 @@
 
 package controllers
 
-import services.UserAnswersService
-import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
+import services.{LockService, UserAnswersService}
+import play.api.mvc._
 import pages.InheritanceTaxReferencePage
 import controllers.actions._
 import forms.InheritanceTaxReferenceFormProvider
@@ -41,7 +41,8 @@ class InheritanceTaxReferenceController @Inject() (
   formProvider: InheritanceTaxReferenceFormProvider,
   val controllerComponents: MessagesControllerComponents,
   userAnswersService: UserAnswersService,
-  view: InheritanceTaxReferenceView
+  view: InheritanceTaxReferenceView,
+  lockService: LockService
 )(implicit ec: ExecutionContext)
     extends FrontendBaseController
     with I18nSupport {
@@ -72,26 +73,34 @@ class InheritanceTaxReferenceController @Inject() (
             value =>
               for {
                 updatedAnswers <- Future.fromTry(request.userAnswers.set(InheritanceTaxReferencePage, value))
-                result <- userAnswersService.set(updatedAnswers)(using hc, request.request)
-              } yield result match {
-                case Right(returnedUserAnswers) =>
-                  val newUuid = returnedUserAnswers.uuid
-                  val updatedSession = if (request.session.get("uuid").contains(newUuid)) {
-                    request.session
-                  } else {
-                    request.session + ("uuid" -> newUuid)
-                  }
-                  mode match {
-                    case CheckMode =>
-                      Redirect(routes.CheckYourAnswersController.onPageLoad(srn))
-                        .withSession(updatedSession)
-                    case NormalMode =>
-                      Redirect(routes.IndividualNameController.onPageLoad(srn, NormalMode, JourneyRole.Deceased))
-                        .withSession(updatedSession)
-                  }
-                case Left(_) =>
-                  BadRequest(view(form.fill(value), srn, mode))
-              }
+                saved <- userAnswersService.set(updatedAnswers)(using hc, request.request)
+                result <- saved match {
+                  case Right(returnedUserAnswers) =>
+                    val newUuid = returnedUserAnswers.uuid
+                    lockService.acquireOrRenew(s"${srn.value}-$newUuid", request.request.getUserId).map {
+                      case true =>
+                        val updatedSession = if (request.session.get("uuid").contains(newUuid)) {
+                          request.session
+                        } else {
+                          request.session + ("uuid" -> newUuid)
+                        }
+                        getSubmitRedirect(srn, mode, updatedSession)
+                      case false =>
+                        Redirect(controllers.routes.LockedController.onPageLoad())
+                    }
+                  case Left(_) =>
+                    Future.successful(BadRequest(view(form.fill(value), srn, mode)))
+                }
+              } yield result
           )
       }
+
+  private def getSubmitRedirect(srn: Srn, mode: Mode, session: Session): Result =
+    mode match {
+      case CheckMode =>
+        Redirect(routes.CheckYourAnswersController.onPageLoad(srn)).withSession(session)
+      case NormalMode =>
+        Redirect(routes.IndividualNameController.onPageLoad(srn, NormalMode, JourneyRole.Deceased))
+          .withSession(session)
+    }
 }

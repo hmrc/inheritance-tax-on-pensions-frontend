@@ -17,7 +17,7 @@
 package controllers
 
 import play.api.test.FakeRequest
-import services.ReportSubmissionService
+import services.{LockService, ReportSubmissionService}
 import pages.PaymentNoticeDatePage
 import play.api.inject.bind
 import views.html.PsaDeclarationView
@@ -25,7 +25,7 @@ import base.SpecBase
 import uk.gov.hmrc.http.UpstreamErrorResponse
 import models.{IhtResponse, IhtpReportSubmissionResponse, SuccessResponse}
 import org.scalatestplus.mockito.MockitoSugar
-import org.mockito.ArgumentMatchers.any
+import org.mockito.ArgumentMatchers.{any, eq => eqTo}
 import play.api.test.Helpers._
 import org.mockito.Mockito._
 
@@ -64,14 +64,17 @@ class PsaDeclarationControllerSpec extends SpecBase with MockitoSugar {
       )
       when(mockReportSubmissionService.submitReport(any())(using any(), any()))
         .thenReturn(Future.successful(Right(response)))
+      val mockLockService = mock[LockService]
+      when(mockLockService.releaseLock(any(), any())).thenReturn(Future.successful(()))
 
-      val application = applicationBuilder(userAnswers =
-        Some(
+      val application = applicationBuilder(
+        userAnswers = Some(
           emptyUserAnswers
             .set(PaymentNoticeDatePage, testPaymentNoticeDate)
             .success
             .value
-        )
+        ),
+        lockService = mockLockService
       )
         .overrides(bind[ReportSubmissionService].toInstance(mockReportSubmissionService))
         .build()
@@ -83,6 +86,7 @@ class PsaDeclarationControllerSpec extends SpecBase with MockitoSugar {
 
         status(result) mustEqual SEE_OTHER
         redirectLocation(result).value mustEqual routes.ConfirmationController.onPageLoad(srn).url
+        verify(mockLockService).releaseLock(eqTo(s"${srn.value}-$testUuid"), eqTo("id"))
       }
     }
 

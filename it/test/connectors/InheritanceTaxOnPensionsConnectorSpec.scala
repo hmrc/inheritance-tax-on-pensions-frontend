@@ -18,6 +18,7 @@ package connectors
 
 import com.github.tomakehurst.wiremock.client.WireMock.*
 import models.{IhtResponse, IhtpReportSubmissionResponse, MinimalDetails, SchemeDetails, SuccessResponse, UserAnswers}
+import services.LockService
 import play.api.Application
 import play.api.http.Status.*
 import play.api.inject.guice.GuiceApplicationBuilder
@@ -33,9 +34,11 @@ class InheritanceTaxOnPensionsConnectorSpec extends BaseConnectorSpec {
   override protected def applicationBuilder(userAnswers: Option[UserAnswers] = None, isPsa: Boolean = true,
                                             schemeDetails: SchemeDetails = defaultSchemeDetails,
                                             minimalDetails: MinimalDetails = defaultMinimalDetails,
-                                            usesSession: Boolean = false
+                                            usesSession: Boolean = false,
+                                            lockService: LockService = stubbedLockService
                                            ): GuiceApplicationBuilder = {
-    super.applicationBuilder(userAnswers).configure("microservice.services.inheritanceTaxOnPensions.port" -> wireMockPort)
+    super.applicationBuilder(userAnswers, lockService = lockService)
+      .configure("microservice.services.inheritanceTaxOnPensions.port" -> wireMockPort)
   }
 
   val id = "some_id"
