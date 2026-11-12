@@ -16,6 +16,7 @@
 
 package controllers
 
+import services.LockService
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import controllers.actions.IdentifierAction
 import repositories.{SessionMinimalDetailsRepository, SessionSchemeDetailsRepository}
@@ -29,15 +30,24 @@ class KeepAliveController @Inject() (
   val controllerComponents: MessagesControllerComponents,
   identify: IdentifierAction,
   sessionSchemeDetailsRepository: SessionSchemeDetailsRepository,
-  sessionMinimalDetailsRepository: SessionMinimalDetailsRepository
+  sessionMinimalDetailsRepository: SessionMinimalDetailsRepository,
+  lockService: LockService
 )(implicit ec: ExecutionContext)
     extends FrontendBaseController {
 
   def keepAlive(): Action[AnyContent] =
     identify.async { implicit request =>
       for {
-        _ <- sessionSchemeDetailsRepository.keepAlive(request.getUserId)
+        schemeDetails <- sessionSchemeDetailsRepository.get(request.getUserId)
         _ <- sessionMinimalDetailsRepository.keepAlive(request.getUserId)
+        _ = (schemeDetails, request.session.get("uuid")) match {
+          case (Some(details), Some(uuid)) =>
+            lockService
+              .acquireOrRenew(s"${details.srn}-$uuid", request.getUserId)
+              .failed
+              .foreach(_ => ())
+          case _ => ()
+        }
       } yield Ok
     }
 }
