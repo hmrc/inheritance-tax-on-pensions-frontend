@@ -24,7 +24,7 @@ import models.JourneyRole
 import play.api.i18n.Messages
 import play.api.data.Form
 import viewmodels.InputWidth._
-import uk.gov.hmrc.govukfrontend.views.viewmodels.content.Content
+import uk.gov.hmrc.govukfrontend.views.viewmodels.content.{Content, HtmlContent}
 
 case class BeneficiaryNamePageViewModel(
   title: String,
@@ -50,8 +50,7 @@ object BeneficiaryNamePageViewModel {
       inputs = Seq(
         InputViewModel(
           field = form("title"),
-          label = LabelViewModel(Text(messages("common.nameInput.title")))
-            .withCssClass("govuk-label--s")
+          label = LabelViewModel(HtmlContent(messages("common.nameInput.title")))
         )
           .withHint(HintViewModel(Text(messages("common.nameInput.titleHint"))))
           .withWidth(Fixed5),
@@ -63,8 +62,7 @@ object BeneficiaryNamePageViewModel {
           .withWidth(ThreeQuarters),
         InputViewModel(
           field = form("secondForename"),
-          label = LabelViewModel(Text(messages("common.nameInput.middleName")))
-            .withCssClass("govuk-label--s")
+          label = LabelViewModel(HtmlContent(messages("common.nameInput.middleName")))
         )
           .withWidth(ThreeQuarters),
         InputViewModel(

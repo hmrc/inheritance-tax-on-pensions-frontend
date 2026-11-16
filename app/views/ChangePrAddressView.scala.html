@@ -61,8 +61,7 @@
         @govukInput(
             InputViewModel(
                 field = form("addressLine2"),
-                label = LabelViewModel(messages("changePrAddress.addressLine2"))
-                    .withCssClass("govuk-label--s")
+                label = LabelViewModel(HtmlContent(messages("changePrAddress.addressLine2")))
             )
             .withWidth(Fixed20)
             .withAutocomplete("address-line2")
@@ -72,8 +71,7 @@
         @govukInput(
             InputViewModel(
                 field = form("addressLine3"),
-                label = LabelViewModel(messages("changePrAddress.addressLine3"))
-                    .withCssClass("govuk-label--s")
+                label = LabelViewModel(HtmlContent(messages("changePrAddress.addressLine3")))
             )
             .withWidth(Fixed20)
             .withAutocomplete("address-line3")
@@ -83,8 +81,7 @@
         @govukInput(
             InputViewModel(
                 field = form("addressLine4"),
-                label = LabelViewModel(messages("changePrAddress.addressLine4"))
-                    .withCssClass("govuk-label--s")
+                label = LabelViewModel(HtmlContent(messages("changePrAddress.addressLine4")))
             )
             .withWidth(Fixed20)
             .withAutocomplete("address-level2")
@@ -96,8 +93,8 @@
                 InputViewModel(
                     field = form("postCode"),
                     label = LabelViewModel(
-                        messages("changePrAddress.postcode")
-                    ).withCssClass("govuk-label--s")
+                        HtmlContent(messages("changePrAddress.postcode"))
+                    )
                 )
                 .withWidth(Fixed10)
                 .withAutocomplete("postal-code")
@@ -109,8 +106,7 @@
             @govukInput(
                 InputViewModel(
                     field = form("addressLine5"),
-                    label = LabelViewModel(messages("changePrAddress.postalCode"))
-                        .withCssClass("govuk-label--s")
+                    label = LabelViewModel(HtmlContent(messages("changePrAddress.postalCode")))
                 )
                 .withWidth(Fixed10)
                 .withAutocomplete("address-line5")
