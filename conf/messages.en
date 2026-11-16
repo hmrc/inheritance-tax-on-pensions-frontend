@@ -42,10 +42,6 @@ common.nameInput.lastName = Last name
 
 section.visuallyHidden = This section is:
 
-index.title = inheritance-tax-on-pensions-frontend
-index.heading = inheritance-tax-on-pensions-frontend
-index.guidance = Welcome to your new frontend. Please see the README file for a guide to getting started.
-
 submissionList.title = Report Inheritance Tax on a pension
 submissionList.heading = Report Inheritance Tax on a pension
 submissionList.start.heading = Start a new report
