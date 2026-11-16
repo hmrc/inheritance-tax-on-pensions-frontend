@@ -52,8 +52,8 @@ class BeneficiaryAddressSummarySpec extends SpecBase {
       val row = BeneficiaryAddressSummary.row(srn, 0, data).value
       row.key.content mustBe Text(messages("beneficiaryAddress.checkYourAnswersLabel"))
       row.value.content mustBe HtmlContent("21 RB Road<br>RBtown<br>LL1 4LL")
-      row.actions.value.items.head.href mustBe controllers.beneficiary.routes.BeneficiaryAddressController
-        .start(srn, 0, models.CheckMode)
+      row.actions.value.items.head.href mustBe controllers.beneficiary.routes.ChangeBeneficiaryAddressController
+        .onPageLoad(srn, 0)
         .url
     }
 
