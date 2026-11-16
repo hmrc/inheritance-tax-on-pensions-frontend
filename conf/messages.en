@@ -177,7 +177,7 @@ prType.organisation = Organisation
 prType.organisation.hint = For example, a firm of solicitors
 prType.error.required = Select individual or organisation
 prType.checkYourAnswersLabel = PR is an
-prType.change.hidden = the personal representative type
+prType.change.hidden = if the representative is an individual or an organisation
 
 prIndividualName.title = Enter the full name of the person managing the estate
 prIndividualName.heading = Enter the full name of the person managing the estate
@@ -193,7 +193,7 @@ prIndividualName.error.secondForename.pattern = Enter a valid middle name
 prIndividualName.error.surname.required = Enter the personal representative''s last name
 prIndividualName.error.surname.length = Last name must be 35 characters or less
 prIndividualName.error.surname.pattern = Enter a valid last name
-prIndividualName.checkYourAnswersLabel.hidden = the name of the PR
+prIndividualName.checkYourAnswersLabel.hidden = the name of the representative
 
 prOrganisationName.title = Enter the full name of the PR at {0}
 prOrganisationName.heading = Enter the full name of the PR at {0}
@@ -208,7 +208,7 @@ prOrganisationName.error.secondForename.pattern = Enter a valid middle name
 prOrganisationName.error.surname.required = Enter the last name
 prOrganisationName.error.surname.length = Last name must be 35 characters or less
 prOrganisationName.error.surname.pattern = Enter a valid last name
-prOrganisationName.checkYourAnswersLabel.hidden = the name of the PR at the organisation
+prOrganisationName.checkYourAnswersLabel.hidden = the name of the representative at the organisation
 
 organisationName.title = Enter the name of the organisation
 organisationName.heading = Enter the name of the organisation
@@ -219,9 +219,9 @@ organisationName.error.invalid = Enter a valid organisation name
 organisationName.change.hidden = the name of the organisation
 
 prIndividualAddress.checkYourAnswersLabel = Address of PR
-prIndividualAddress.checkYourAnswersLabel.hidden = the address of the personal representative
+prIndividualAddress.checkYourAnswersLabel.hidden = the address of the representative
 prIndividualCountry.checkYourAnswersLabel = Country of PR
-prIndividualCountry.checkYourAnswersLabel.hidden = the country of the PR
+prIndividualCountry.checkYourAnswersLabel.hidden = the country of the representative
 
 prOrganisationAddress.checkYourAnswersLabel = Address of organisation
 prOrganisationAddress.checkYourAnswersLabel.hidden = the address of the organisation
