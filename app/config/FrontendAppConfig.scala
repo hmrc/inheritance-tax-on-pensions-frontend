@@ -51,6 +51,8 @@ class FrontendAppConfig @Inject() (configuration: Configuration) {
 
     object managePensionsSchemes {
       val baseUrl: String = configuration.get[String]("urls.manage-pension-schemes.baseUrl")
+      val overviewUrl: String =
+        baseUrl + configuration.get[String]("urls.manage-pension-schemes.overview")
       val registerUrl: String = baseUrl + configuration.get[String]("urls.manage-pension-schemes.register")
       val adminOrPractitionerUrl: String =
         baseUrl + configuration.get[String]("urls.manage-pension-schemes.adminOrPractitioner")
