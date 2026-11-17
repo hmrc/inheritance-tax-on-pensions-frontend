@@ -47,8 +47,9 @@ class CheckYourAnswersHelperSpec extends AnyFreeSpec with SpecBase {
         messages(app)("beneficiaryAddress.checkYourAnswersLabel")
       )
       val startUrl = controllers.beneficiary.routes.BeneficiaryAddressController.start(srn, 0, CheckMode).url
+      val onPageLoadUrl = controllers.beneficiary.routes.ChangeBeneficiaryAddressController.onPageLoad(srn, 0).url
       rows(countryIndex).actions.value.items.head.href mustBe startUrl
-      addressRow.actions.value.items.head.href mustBe startUrl
+      addressRow.actions.value.items.head.href mustBe onPageLoadUrl
     }
   }
 
