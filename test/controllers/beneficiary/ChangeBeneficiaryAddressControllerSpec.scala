@@ -160,7 +160,7 @@ class ChangeBeneficiaryAddressControllerSpec extends SpecBase {
         val result = route(application, request).value
 
         status(result) mustBe OK
-        contentAsString(result) must include("Postal code (optional)")
+        contentAsString(result) must include("<b>Postal code</b> (optional)")
         (contentAsString(result) must not).include("Postcode (optional)")
       }
     }
