@@ -17,27 +17,52 @@
 @import config.Constants.Css
 @import uk.gov.hmrc.govukfrontend.views.html.components.GovukButton
 @import viewmodels.govuk.all._
+@import viewmodels.InputWidth._
 
-@this(subHeading: SubHeading, govukButton: GovukButton)
+@this(
+    subHeading: SubHeading,
+    govukButton: GovukButton
+)
 
-@()(implicit messages: Messages)
+@(form: Form[?], clearUrl: String)(implicit messages: Messages)
 
 <fieldset class="govuk-fieldset">
-    @subHeading(
-        messages("submissionList.find.heading"),
-        classes = s"${Css.headingMCssClass} govuk-!-margin-bottom-1 govuk-!-margin-top-4"
-    )
+    <legend class="govuk-fieldset__legend  govuk-fieldset__legend--m">
 
-    <span class="govuk-hint">@messages("submissionList.find.hint")</span>
+        @subHeading(
+            messages("submissionList.find.heading"),
+            classes = s"${Css.headingMCssClass} govuk-!-margin-bottom-1 govuk-!-margin-top-4 govuk-fieldset__heading"
+        )
 
-    <div class="govuk-form-group govuk-!-margin-top-3 govuk-!-margin-bottom-3">
-        <label class="@Css.visuallyHiddenCssClass" for="find-report">
+    </legend>
+
+    <span id="search-hint" class="govuk-hint">@messages("submissionList.find.hint")</span>
+
+    @errorFormGroupClass =@{
+        if (form.hasErrors || form.hasGlobalErrors) "govuk-form-group--error" else ""
+    }
+
+    <div class="govuk-form-group govuk-!-margin-top-3 govuk-!-margin-bottom-3 @errorFormGroupClass">
+        <label class="@Css.visuallyHiddenCssClass" for="value">
             @messages("submissionList.find.input.label")
         </label>
-        <input class="govuk-input govuk-!-width-three-quarters" id="find-report" name="findReport" type="text">
+
+        @if(form.hasErrors || form.hasGlobalErrors){
+            <p id="value-error" class="govuk-error-message">
+                <span class="govuk-visually-hidden">Error:</span>
+                @{messages(form.errors.head.message)}
+            </p>
+            <input class="govuk-input govuk-!-width-three-quarters govuk-input--error" id="value" name="value" type="text" value="@{form.value}" aria-describedby="value-error search-hint">
+        } else {
+            <input class="govuk-input govuk-!-width-three-quarters" id="value" name="value" type="text" value="@{form.value}" aria-describedby="search-hint">
+        }
+
+
         @govukButton(
             ButtonViewModel(messages("submissionList.find.button"))
-                .asInput("button")
         )
+        @if(!form.value.isEmpty){
+            <a href="@clearUrl" class="govuk-link govuk-!-margin-left-2">@messages("reportSearch.clear")<span class="govuk-visually-hidden">@messages("reportSearch.clear.hidden")</span></a>
+        }
     </div>
 </fieldset>

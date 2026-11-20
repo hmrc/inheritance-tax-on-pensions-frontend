@@ -140,7 +140,8 @@ class SubmissionListUtilSpec extends SpecBase with org.scalatest.EitherValues {
     }
 
     "must retain existing no-records handling and propagate other failures" in {
-      util.prepare(Left(UpstreamErrorResponse("none", UNPROCESSABLE_ENTITY)), paid = true, None).value._1 mustBe empty
+      val failure422 = UpstreamErrorResponse("none", UNPROCESSABLE_ENTITY)
+      util.prepare(Left(failure422), paid = true, None) mustBe Left(failure422)
       val failure = UpstreamErrorResponse("failed", INTERNAL_SERVER_ERROR)
       util.prepare(Left(failure), paid = true, None) mustBe Left(failure)
     }

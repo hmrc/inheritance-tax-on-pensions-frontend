@@ -16,7 +16,9 @@
 
 package services
 
+import forms.mappings.Regex
 import connectors.InheritanceTaxOnPensionsConnector
+import uk.gov.hmrc.domain.Nino
 import uk.gov.hmrc.http.{HeaderCarrier, UpstreamErrorResponse}
 import models.IhtpOverviewResponse
 import models.requests.AllowedAccessRequest
@@ -27,9 +29,14 @@ import javax.inject.Inject
 
 class SubmissionListService @Inject() (
   inheritanceTaxOnPensionsConnector: InheritanceTaxOnPensionsConnector
-) extends BaseService {
+) extends BaseService
+    with Regex {
 
-  def getSubmissionList(dateFrom: String, dateTo: String)(implicit
+  def getSubmissionList(
+    dateFrom: String,
+    dateTo: String,
+    searchFieldValue: Option[String] = None
+  )(implicit
     hc: HeaderCarrier,
     request: AllowedAccessRequest[?]
   ): Future[Either[UpstreamErrorResponse, IhtpOverviewResponse]] =
@@ -40,6 +47,9 @@ class SubmissionListService @Inject() (
       schemeAdministratorOrPractitionerName,
       schemeName,
       srnVal,
-      role
+      role,
+      ihtPaymentReference = searchFieldValue.filter(_.matches(ihtPaymentReferenceRegex)),
+      ihtReference = searchFieldValue.filter(_.matches(ihtReferenceNumberRegex)),
+      nino = searchFieldValue.filter(Nino.isValid)
     )
 }

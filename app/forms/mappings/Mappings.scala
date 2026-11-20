@@ -106,4 +106,22 @@ trait Mappings extends Formatters with Constraints with Regex {
     args: Seq[String] = Seq.empty
   ): FieldMapping[BigDecimal] =
     of(using currencyFormatter(requiredKey, invalidNumeric, nonNumericKey, args))
+
+  protected def searchField(
+    requiredKey: String = "error.required",
+    invalidKey: String = "error.invalid",
+    args: Seq[String] = Seq.empty
+  ): Mapping[String] =
+    text(requiredKey, args)
+      .transform[String](_.trim, identity)
+      .transform[String](_.replaceAll(" ", ""), identity)
+      .transform[String](_.toUpperCase, _.toUpperCase)
+      .verifying(
+        anyValid(
+          invalidKey,
+          regexp(ihtReferenceNumberRegex, invalidKey),
+          regexp(ihtPaymentReferenceRegex, invalidKey),
+          ninoValid(invalidKey)
+        )
+      )
 }
