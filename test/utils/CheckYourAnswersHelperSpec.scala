@@ -140,6 +140,16 @@ class CheckYourAnswersHelperSpec extends AnyFreeSpec with SpecBase {
       )
     }
 
+    "must return the WhoRepresentsEstate page if a value is missing" in {
+      val userAnswers = deceasedPrUserAnswers
+        .remove(WhoRepresentsEstatePage)
+        .get
+
+      CheckYourAnswersHelper.findPageToContinue(userAnswers, srn).value.url must endWith(
+        routes.WhoRepresentsEstateController.onPageLoad(srn, NormalMode).url
+      )
+    }
+
     "must return the individualName page if a value is missing" in {
       val userAnswers = prIndividualUserAnswers
         .remove(IndividualNamePage(JourneyRole.PrIndividual))

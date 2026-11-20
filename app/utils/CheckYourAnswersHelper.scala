@@ -181,6 +181,10 @@ object CheckYourAnswersHelper {
   private def getPrPages(srn: Srn) =
     Seq(
       ContinuationPage(
+        answers => answers.get(WhoRepresentsEstatePage).isEmpty,
+        routes.WhoRepresentsEstateController.onPageLoad(srn, NormalMode)
+      ),
+      ContinuationPage(
         answers => answers.get(PrTypePage).isEmpty,
         routes.PrTypeController.onPageLoad(srn, NormalMode)
       ),

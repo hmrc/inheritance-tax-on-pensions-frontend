@@ -147,7 +147,7 @@ class BirthDeathDatesControllerSpec extends SpecBase with MockitoSugar {
       }
     }
 
-    "must redirect to PR type when valid data is submitted" in {
+    "must redirect to who represents estate when valid data is submitted" in {
 
       val mockInheritanceTaxOnPensionsConnector = mock[InheritanceTaxOnPensionsConnector]
 
@@ -165,7 +165,7 @@ class BirthDeathDatesControllerSpec extends SpecBase with MockitoSugar {
         val result = route(application, postRequest()).value
 
         status(result) mustEqual SEE_OTHER
-        redirectLocation(result).value mustEqual routes.PrTypeController.onPageLoad(srn, NormalMode).url
+        redirectLocation(result).value mustEqual routes.WhoRepresentsEstateController.onPageLoad(srn, NormalMode).url
       }
     }
 

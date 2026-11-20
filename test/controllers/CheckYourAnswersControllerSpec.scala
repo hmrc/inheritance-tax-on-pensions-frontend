@@ -219,6 +219,8 @@ class CheckYourAnswersControllerSpec extends SpecBase {
           .get
           .set(BirthDeathDatesPage, BirthDeathDates(testDateOfBirth, testDateOfDeath))
           .get
+          .set(WhoRepresentsEstatePage, RepresentativeType.PR)
+          .get
           .set(PrTypePage, PrType.Individual)
           .get
           .set(
@@ -302,6 +304,8 @@ class CheckYourAnswersControllerSpec extends SpecBase {
           .set(NoNinoReasonPage, testReasonNoNino)
           .get
           .set(BirthDeathDatesPage, BirthDeathDates(testDateOfBirth, testDateOfDeath))
+          .get
+          .set(WhoRepresentsEstatePage, RepresentativeType.PR)
           .get
           .set(PrTypePage, PrType.Individual)
           .get
