@@ -214,12 +214,12 @@ object CheckYourAnswersHelper {
         routes.DidPrSubmitController.onPageLoad(srn, NormalMode)
       ),
       ContinuationPage(
-        answers => answers.get(DidPrSubmitPage).get && answers.get(AreBeneficiariesKnownPage).isEmpty,
-        routes.AreBeneficiariesKnownController.onPageLoad(srn, NormalMode)
-      ),
-      ContinuationPage(
         answers => answers.get(PaymentNoticeDatePage).isEmpty,
         routes.PaymentNoticeDateController.onPageLoad(srn, NormalMode)
+      ),
+      ContinuationPage(
+        answers => answers.get(DidPrSubmitPage).get && answers.get(AreBeneficiariesKnownPage).isEmpty,
+        routes.AreBeneficiariesKnownController.onPageLoad(srn, NormalMode)
       )
     )
 
@@ -284,16 +284,28 @@ object CheckYourAnswersHelper {
     )
 
   private def getBeneficiariesPages(answers: UserAnswers, srn: Srn) = {
+    val areBeneficiariesKnown = answers.get(AreBeneficiariesKnownPage).getOrElse(true)
     val numberOfBeneficiaries =
       answers.get(pages.beneficiary.BeneficiariesPage()).map(_.beneficiaries.size).getOrElse(0)
 
-    Seq(
-      ContinuationPage(
-        userAnswers =>
-          userAnswers.get(AreBeneficiariesKnownPage).contains(true) &&
-            userAnswers.get(pages.beneficiary.BeneficiaryTypePage(0)).isEmpty,
-        controllers.beneficiary.routes.BeneficiaryTypeController.onPageLoad(srn, 0, NormalMode)
+    if (areBeneficiariesKnown) {
+      Seq(
+        ContinuationPage(
+          userAnswers => userAnswers.get(pages.beneficiary.BeneficiaryTypePage(0)).isEmpty,
+          controllers.beneficiary.routes.BeneficiaryTypeController.onPageLoad(srn, 0, NormalMode)
+        )
+      ) ++ (0 until numberOfBeneficiaries).flatMap(i => getBeneficiaryPages(srn, i))
+    } else {
+      Seq(
+        ContinuationPage(
+          userAnswers => userAnswers.get(IhtPayablePage).isEmpty,
+          routes.IhtPayableController.onPageLoad(srn, NormalMode)
+        ),
+        ContinuationPage(
+          userAnswers => userAnswers.get(InterestPayablePage).isEmpty,
+          routes.InterestPayableController.onPageLoad(srn, NormalMode)
+        )
       )
-    ) ++ (0 until numberOfBeneficiaries).flatMap(i => getBeneficiaryPages(srn, i))
+    }
   }
 }
