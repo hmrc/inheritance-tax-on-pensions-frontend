@@ -21,6 +21,8 @@ import utils.SubmissionListUtil
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import config.{Constants, FrontendAppConfig}
 import controllers.actions.{AllowAccessActionProvider, IdentifierAction}
+import forms.SearchFormProvider
+import play.api.data.Form
 import views.html.SubmissionListView
 import models.SchemeId.Srn
 import play.api.i18n.I18nSupport
@@ -36,6 +38,7 @@ class SubmissionListController @Inject() (
   val controllerComponents: MessagesControllerComponents,
   identify: IdentifierAction,
   allowAccess: AllowAccessActionProvider, // Invalidate the authorisation cache and re-authenticate
+  formProvider: SearchFormProvider,
   submissionListService: SubmissionListService,
   reportRetrievalService: ReportRetrievalService,
   appConfig: FrontendAppConfig,
@@ -45,6 +48,8 @@ class SubmissionListController @Inject() (
 )(implicit ec: ExecutionContext)
     extends FrontendBaseController
     with I18nSupport {
+
+  val form: Form[String] = formProvider()
 
   def onPageLoad(srn: Srn): Action[AnyContent] =
     identify.andThen(allowAccess(srn)).async { implicit request =>
@@ -61,6 +66,7 @@ class SubmissionListController @Inject() (
             case Right((reports, pagination)) =>
               Ok(
                 view(
+                  form, // TODO check if preparedForm is needed here
                   srn,
                   request.schemeDetails.schemeName,
                   reports,
@@ -117,4 +123,60 @@ class SubmissionListController @Inject() (
             Future.successful(Redirect(routes.JourneyRecoveryController.onPageLoad()))
         }
     }
+
+  def onSubmit(srn: Srn): Action[AnyContent] =
+    identify
+      .andThen(allowAccess(srn))
+      .async { implicit request =>
+        form
+          .bindFromRequest()
+          .fold(
+            formWithErrors =>
+              submissionListService
+                .getSubmissionList(
+                  dateFrom = LocalDate.now().minusMonths(2).format(DateTimeFormatter.ISO_LOCAL_DATE),
+                  dateTo = LocalDate.now().format(DateTimeFormatter.ISO_LOCAL_DATE)
+                )
+                .map { response =>
+                  submissionListUtil.prepare(response, paid = false, request.getQueryString("page")) match {
+                    case Right((reports, pagination)) =>
+                      BadRequest(
+                        view(
+                          formWithErrors,
+                          srn,
+                          request.schemeDetails.schemeName,
+                          reports,
+                          pagination,
+                          appConfig.schemeDashboardUrl(srn, request.pensionSchemeId)
+                        )
+                      ).removingFromSession(Constants.SUBMITTED_PAGE_SESSION_VARIABLES*)
+                        .removingFromSession("uuid")
+                    case Left(_) => Redirect(routes.JourneyRecoveryController.onPageLoad())
+                  }
+                },
+            value =>
+              submissionListService
+                .getSubmissionList(
+                  dateFrom = LocalDate.now().minusMonths(2).format(DateTimeFormatter.ISO_LOCAL_DATE),
+                  dateTo = LocalDate.now().format(DateTimeFormatter.ISO_LOCAL_DATE)
+                )
+                .map { response =>
+                  submissionListUtil.prepare(response, paid = false, request.getQueryString("page")) match {
+                    case Right((reports, pagination)) =>
+                      Ok(
+                        view(
+                          form,
+                          srn,
+                          request.schemeDetails.schemeName,
+                          reports,
+                          pagination,
+                          appConfig.schemeDashboardUrl(srn, request.pensionSchemeId)
+                        )
+                      ).removingFromSession(Constants.SUBMITTED_PAGE_SESSION_VARIABLES*)
+                        .removingFromSession("uuid")
+                    case Left(_) => Redirect(routes.JourneyRecoveryController.onPageLoad())
+                  }
+                }
+          )
+      }
 }
