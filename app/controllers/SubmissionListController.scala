@@ -23,8 +23,12 @@ import config.{Constants, FrontendAppConfig}
 import controllers.actions.{AllowAccessActionProvider, IdentifierAction}
 import views.html.SubmissionListView
 import models.SchemeId.Srn
+import forms.SearchFormProvider
+import uk.gov.hmrc.http.HeaderCarrier
 import play.api.i18n.I18nSupport
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
+import models.requests.AllowedAccessRequest
+import play.api.data.Form
 
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -36,6 +40,7 @@ class SubmissionListController @Inject() (
   val controllerComponents: MessagesControllerComponents,
   identify: IdentifierAction,
   allowAccess: AllowAccessActionProvider, // Invalidate the authorisation cache and re-authenticate
+  formProvider: SearchFormProvider,
   submissionListService: SubmissionListService,
   reportRetrievalService: ReportRetrievalService,
   appConfig: FrontendAppConfig,
@@ -46,32 +51,14 @@ class SubmissionListController @Inject() (
     extends FrontendBaseController
     with I18nSupport {
 
+  val form: Form[String] = formProvider()
+
   def onPageLoad(srn: Srn): Action[AnyContent] =
     identify.andThen(allowAccess(srn)).async { implicit request =>
       request.session.get("uuid").foreach { uuid =>
         lockService.releaseLock(s"${srn.value}-$uuid", request.getUserId).failed.foreach(_ => ())
       }
-      submissionListService
-        .getSubmissionList(
-          dateFrom = LocalDate.now().minusMonths(2).format(DateTimeFormatter.ISO_LOCAL_DATE),
-          dateTo = LocalDate.now().format(DateTimeFormatter.ISO_LOCAL_DATE)
-        )
-        .map { response =>
-          submissionListUtil.prepare(response, paid = false, request.getQueryString("page")) match {
-            case Right((reports, pagination)) =>
-              Ok(
-                view(
-                  srn,
-                  request.schemeDetails.schemeName,
-                  reports,
-                  pagination,
-                  appConfig.schemeDashboardUrl(srn, request.pensionSchemeId)
-                )
-              ).removingFromSession(Constants.SUBMITTED_PAGE_SESSION_VARIABLES*)
-                .removingFromSession("uuid")
-            case Left(_) => Redirect(routes.JourneyRecoveryController.onPageLoad())
-          }
-        }
+      buildSubmissionList(srn, Ok, form, None)
     }
 
   def onAmend(srn: Srn, uuid: String): Action[AnyContent] =
@@ -117,4 +104,44 @@ class SubmissionListController @Inject() (
             Future.successful(Redirect(routes.JourneyRecoveryController.onPageLoad()))
         }
     }
+
+  def onSubmit(srn: Srn): Action[AnyContent] =
+    identify
+      .andThen(allowAccess(srn))
+      .async { implicit request =>
+        form
+          .bindFromRequest()
+          .fold(
+            formWithErrors => buildSubmissionList(srn, Ok, formWithErrors, None),
+            value => buildSubmissionList(srn, Ok, form, Some(value))
+          )
+      }
+
+  private def buildSubmissionList(srn: Srn, status: Status, form: Form[String], maybeSearchFieldValue: Option[String])(
+    implicit
+    request: AllowedAccessRequest[?],
+    hc: HeaderCarrier
+  ) =
+    submissionListService
+      .getSubmissionList(
+        dateFrom = LocalDate.now().minusMonths(2).format(DateTimeFormatter.ISO_LOCAL_DATE),
+        dateTo = LocalDate.now().format(DateTimeFormatter.ISO_LOCAL_DATE)
+      )(using hc, request)
+      .map { response =>
+        submissionListUtil.prepare(response, paid = false, request.getQueryString("page")) match {
+          case Right((reports, pagination)) =>
+            status(
+              view(
+                form,
+                srn,
+                request.schemeDetails.schemeName,
+                reports,
+                pagination,
+                appConfig.schemeDashboardUrl(srn, request.pensionSchemeId)
+              )
+            ).removingFromSession(Constants.SUBMITTED_PAGE_SESSION_VARIABLES*)
+              .removingFromSession("uuid")
+          case Left(_) => Redirect(routes.JourneyRecoveryController.onPageLoad())
+        }
+      }
 }

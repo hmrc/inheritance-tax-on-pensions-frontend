@@ -22,12 +22,13 @@ import connectors.InheritanceTaxOnPensionsConnector
 import play.api.inject.bind
 import views.html.SubmissionListView
 import base.SpecBase
-import uk.gov.hmrc.http.{HttpResponse, UpstreamErrorResponse}
 import models._
 import viewmodels.SubmissionListPagination
 import org.mockito.ArgumentMatchers.{any, eq => eqTo}
 import play.api.test.Helpers._
 import org.mockito.Mockito.{never, verify, when}
+import forms.SearchFormProvider
+import uk.gov.hmrc.http.{HttpResponse, UpstreamErrorResponse}
 
 import scala.concurrent.Future
 
@@ -62,6 +63,9 @@ class SubmissionListControllerSpec extends SpecBase {
   private val pspSchemeDashboardUrl =
     s"http://localhost:8204/manage-pension-schemes/${srn.value}/dashboard/pension-scheme-details"
 
+  private val formProvider = new SearchFormProvider()
+  private val form = formProvider()
+
   "onPageLoad" - {
 
     Seq(false, true).foreach { onlyPaid =>
@@ -79,8 +83,8 @@ class SubmissionListControllerSpec extends SpecBase {
           status(result) mustBe OK
           val document = org.jsoup.Jsoup.parse(contentAsString(result))
           document.select("#find-report").size() mustBe 1
-          document.select("fieldset button[type=button]").text() mustBe "Search"
-          document.select("#find-report").first().closest("form") mustBe null
+          document.select("fieldset button").text() mustBe "Search"
+          document.select("#find-report").first().closest("form") must not be null
           (document.select("tbody").text() must not).include("PaidPerson")
           document.select("tbody tr").size() mustBe (if (onlyPaid) 0 else 1)
           document.select("#view-reconciled-reports").attr("href") mustBe routes.PaidReportsController
@@ -114,6 +118,7 @@ class SubmissionListControllerSpec extends SpecBase {
         status(result) mustEqual OK
 
         contentAsString(result) mustEqual view(
+          form,
           srn,
           schemeName,
           Seq(overviewReport),
@@ -145,6 +150,7 @@ class SubmissionListControllerSpec extends SpecBase {
         status(result) mustEqual OK
 
         contentAsString(result) mustEqual view(
+          form,
           srn,
           schemeName,
           Seq(overviewReport),
@@ -200,6 +206,7 @@ class SubmissionListControllerSpec extends SpecBase {
         document.select("table.govuk-table").size() mustBe 0
 
         contentAsString(result) mustEqual view(
+          form,
           srn,
           schemeName,
           Seq.empty,
@@ -240,6 +247,7 @@ class SubmissionListControllerSpec extends SpecBase {
         status(result) mustEqual OK
 
         contentAsString(result) mustEqual view(
+          form,
           srn,
           schemeName,
           Seq(reports(15)),

@@ -89,7 +89,7 @@ class PaidReportsControllerSpec extends SpecBase {
           document.select("label[for=find-report]").text() mustBe messages(application)(
             "submissionList.find.input.label"
           )
-          document.select("fieldset button[type=button]").text() mustBe "Search"
+          document.select("fieldset button").text() mustBe "Search"
           document.select("#find-report").first().closest("form") mustBe null
           document.select("#return-to-active-reports").attr("href") mustBe routes.SubmissionListController
             .onPageLoad(srn)
@@ -114,7 +114,7 @@ class PaidReportsControllerSpec extends SpecBase {
           document.select("h1").hasClass("govuk-heading-l") mustBe true
           document.select("h1").hasClass("govuk-heading-xl") mustBe false
           document.select("#find-report").size() mustBe 1
-          document.select("fieldset button[type=button]").text() mustBe "Search"
+          document.select("fieldset button").text() mustBe "Search"
           document.select("table").isEmpty mustBe true
           document.select(".govuk-pagination").isEmpty mustBe true
           document.select("#return-to-active-reports").size() mustBe 1

@@ -22,6 +22,8 @@ GET         /:srn/view-paid-submission-report/:fbNumber controllers.ViewPaidSubm
 GET         /:srn/report-inheritance-tax-on-pension/:uuid controllers.SubmissionListController.onAmend(srn: Srn, uuid: String)
 GET         /:srn/report-inheritance-tax-on-pension/change/:ihtPaymentReference/:ihtVersion controllers.SubmissionListController.onChange(srn: Srn, ihtPaymentReference: String, ihtVersion: String)
 
+GET         /:srn/search-active                           controllers.SubmissionListController.onSubmit(srn: Srn)
+
 GET         /:srn/start-report-you-will-need             controllers.WhatYouWillNeedController.onPageLoad(srn: Srn)
 POST        /:srn/start-report-you-will-need             controllers.WhatYouWillNeedController.onSubmit(srn: Srn)
 

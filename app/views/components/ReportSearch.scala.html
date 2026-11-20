@@ -34,10 +34,9 @@
         <label class="@Css.visuallyHiddenCssClass" for="find-report">
             @messages("submissionList.find.input.label")
         </label>
-        <input class="govuk-input govuk-!-width-three-quarters" id="find-report" name="findReport" type="text">
+        <input class="govuk-input govuk-!-width-three-quarters" id="find-report" name="value" type="text">
         @govukButton(
             ButtonViewModel(messages("submissionList.find.button"))
-                .asInput("button")
         )
     </div>
 </fieldset>

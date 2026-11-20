@@ -24,6 +24,8 @@
 
 @this(
     layout: templates.Layout,
+    formHelper: FormWithCSRF,
+    govukErrorSummary: GovukErrorSummary,
     caption: Caption,
     pageHeading: PageHeading,
     subHeading: SubHeading,
@@ -33,7 +35,7 @@
     reportList: components.ReportList
 )
 
-@(srn: Srn, schemeName: String, reports: Seq[IhtpOverviewReport], pagination: SubmissionListPagination, schemeDashboardUrl: String)(implicit request: Request[?], messages: Messages)
+@(form: Form[?], srn: Srn, schemeName: String, reports: Seq[IhtpOverviewReport], pagination: SubmissionListPagination, schemeDashboardUrl: String)(implicit request: Request[?], messages: Messages)
 
 @submissionLink = @{
     link(
@@ -44,10 +46,17 @@
 }
 
 @layout(
-    pageTitle    = titleNoForm(messages("submissionList.title")),
+    pageTitle    = title(form, messages("submissionList.title")),
     showBackLink = true,
     fullWidth    = true
 ) {
+
+    @formHelper(action = routes.SubmissionListController.onSubmit(srn)) {
+
+    @if(form.errors.nonEmpty) {
+        @govukErrorSummary(ErrorSummaryViewModel(form))
+    }
+
 
     <div class="govuk-grid-row">
         <div class="govuk-grid-column-two-thirds">
@@ -80,4 +89,6 @@
             )))))
         </div>
     </div>
+
+    }
 }
