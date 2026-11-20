@@ -21,12 +21,14 @@ import utils.SubmissionListUtil
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import config.{Constants, FrontendAppConfig}
 import controllers.actions.{AllowAccessActionProvider, IdentifierAction}
-import forms.SearchFormProvider
-import play.api.data.Form
 import views.html.SubmissionListView
 import models.SchemeId.Srn
+import forms.SearchFormProvider
+import uk.gov.hmrc.http.HeaderCarrier
 import play.api.i18n.I18nSupport
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
+import models.requests.AllowedAccessRequest
+import play.api.data.Form
 
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -56,28 +58,7 @@ class SubmissionListController @Inject() (
       request.session.get("uuid").foreach { uuid =>
         lockService.releaseLock(s"${srn.value}-$uuid", request.getUserId).failed.foreach(_ => ())
       }
-      submissionListService
-        .getSubmissionList(
-          dateFrom = LocalDate.now().minusMonths(2).format(DateTimeFormatter.ISO_LOCAL_DATE),
-          dateTo = LocalDate.now().format(DateTimeFormatter.ISO_LOCAL_DATE)
-        )
-        .map { response =>
-          submissionListUtil.prepare(response, paid = false, request.getQueryString("page")) match {
-            case Right((reports, pagination)) =>
-              Ok(
-                view(
-                  form, // TODO check if preparedForm is needed here
-                  srn,
-                  request.schemeDetails.schemeName,
-                  reports,
-                  pagination,
-                  appConfig.schemeDashboardUrl(srn, request.pensionSchemeId)
-                )
-              ).removingFromSession(Constants.SUBMITTED_PAGE_SESSION_VARIABLES*)
-                .removingFromSession("uuid")
-            case Left(_) => Redirect(routes.JourneyRecoveryController.onPageLoad())
-          }
-        }
+      buildSubmissionList(srn, Ok, form, None)
     }
 
   def onAmend(srn: Srn, uuid: String): Action[AnyContent] =
@@ -131,52 +112,36 @@ class SubmissionListController @Inject() (
         form
           .bindFromRequest()
           .fold(
-            formWithErrors =>
-              submissionListService
-                .getSubmissionList(
-                  dateFrom = LocalDate.now().minusMonths(2).format(DateTimeFormatter.ISO_LOCAL_DATE),
-                  dateTo = LocalDate.now().format(DateTimeFormatter.ISO_LOCAL_DATE)
-                )
-                .map { response =>
-                  submissionListUtil.prepare(response, paid = false, request.getQueryString("page")) match {
-                    case Right((reports, pagination)) =>
-                      BadRequest(
-                        view(
-                          formWithErrors,
-                          srn,
-                          request.schemeDetails.schemeName,
-                          reports,
-                          pagination,
-                          appConfig.schemeDashboardUrl(srn, request.pensionSchemeId)
-                        )
-                      ).removingFromSession(Constants.SUBMITTED_PAGE_SESSION_VARIABLES*)
-                        .removingFromSession("uuid")
-                    case Left(_) => Redirect(routes.JourneyRecoveryController.onPageLoad())
-                  }
-                },
-            value =>
-              submissionListService
-                .getSubmissionList(
-                  dateFrom = LocalDate.now().minusMonths(2).format(DateTimeFormatter.ISO_LOCAL_DATE),
-                  dateTo = LocalDate.now().format(DateTimeFormatter.ISO_LOCAL_DATE)
-                )
-                .map { response =>
-                  submissionListUtil.prepare(response, paid = false, request.getQueryString("page")) match {
-                    case Right((reports, pagination)) =>
-                      Ok(
-                        view(
-                          form,
-                          srn,
-                          request.schemeDetails.schemeName,
-                          reports,
-                          pagination,
-                          appConfig.schemeDashboardUrl(srn, request.pensionSchemeId)
-                        )
-                      ).removingFromSession(Constants.SUBMITTED_PAGE_SESSION_VARIABLES*)
-                        .removingFromSession("uuid")
-                    case Left(_) => Redirect(routes.JourneyRecoveryController.onPageLoad())
-                  }
-                }
+            formWithErrors => buildSubmissionList(srn, Ok, formWithErrors, None),
+            value => buildSubmissionList(srn, Ok, form, Some(value))
           )
+      }
+
+  private def buildSubmissionList(srn: Srn, status: Status, form: Form[String], maybeSearchFieldValue: Option[String])(
+    implicit
+    request: AllowedAccessRequest[?],
+    hc: HeaderCarrier
+  ) =
+    submissionListService
+      .getSubmissionList(
+        dateFrom = LocalDate.now().minusMonths(2).format(DateTimeFormatter.ISO_LOCAL_DATE),
+        dateTo = LocalDate.now().format(DateTimeFormatter.ISO_LOCAL_DATE)
+      )(using hc, request)
+      .map { response =>
+        submissionListUtil.prepare(response, paid = false, request.getQueryString("page")) match {
+          case Right((reports, pagination)) =>
+            status(
+              view(
+                form,
+                srn,
+                request.schemeDetails.schemeName,
+                reports,
+                pagination,
+                appConfig.schemeDashboardUrl(srn, request.pensionSchemeId)
+              )
+            ).removingFromSession(Constants.SUBMITTED_PAGE_SESSION_VARIABLES*)
+              .removingFromSession("uuid")
+          case Left(_) => Redirect(routes.JourneyRecoveryController.onPageLoad())
+        }
       }
 }
