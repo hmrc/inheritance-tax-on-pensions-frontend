@@ -39,7 +39,7 @@ class ChangePrAddressControllerSpec extends SpecBase {
     addressLine1 = "Line 1",
     addressLine2 = Some("Line 2"),
     addressLine3 = Some("City"),
-    addressLine4 = Some("County"),
+    addressLine4 = "County",
     postCode = None,
     country = "GB"
   )
@@ -137,7 +137,7 @@ class ChangePrAddressControllerSpec extends SpecBase {
             addressLine1 = "1 Line",
             addressLine2 = None,
             addressLine3 = None,
-            addressLine4 = Some("City"),
+            addressLine4 = "City",
             postCode = Some("NE2 2AA"),
             country = "GB"
           )

@@ -115,7 +115,7 @@ class ChangeBeneficiaryAddressControllerSpec extends SpecBase {
               addressLine1 = "1 Line",
               addressLine2 = None,
               addressLine3 = None,
-              addressLine4 = Some("City"),
+              addressLine4 = "City",
               postCode = Some("NE2 2AA"),
               country = "GB"
             )

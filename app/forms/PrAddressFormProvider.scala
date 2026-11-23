@@ -57,10 +57,15 @@ class PrAddressFormProvider @Inject() extends Mappings with Regex {
           "changePrAddress.error.addressLine3.invalid",
           "changePrAddress.error.addressLine3.length"
         ),
-        "addressLine4" -> optionalAddressField(
-          "changePrAddress.error.addressLine4.invalid",
-          "changePrAddress.error.addressLine4.length"
-        ),
+        "addressLine4" -> text("changePrAddress.error.addressLine4.required")
+          .transform[String](_.trim, identity)
+          .verifying(
+            firstError(
+              nonBlank("changePrAddress.error.addressLine4.required"),
+              regexp(addressLineRegex, "changePrAddress.error.addressLine4.invalid"),
+              maxLength(addressLineMaxLength, "changePrAddress.error.addressLine4.length")
+            )
+          ),
         "postCode" -> optionalUkPostcode(
           "changePrAddress.error.postCode.invalid",
           "changePrAddress.error.postCode.length"

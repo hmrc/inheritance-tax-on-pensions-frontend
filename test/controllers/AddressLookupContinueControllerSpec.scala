@@ -94,7 +94,7 @@ class AddressLookupContinueControllerSpec extends SpecBase {
                 addressLine1 = "33 AB Street",
                 addressLine2 = Some("AB Area"),
                 addressLine3 = None,
-                addressLine4 = Some("ABville"),
+                addressLine4 = "ABville",
                 addressLine5 = None,
                 postCode = Some("ZZ1 1ZZ"),
                 country = "GB"
@@ -259,6 +259,7 @@ class AddressLookupContinueControllerSpec extends SpecBase {
           "surname" -> "Surname",
           "addressLine1" -> "11 A Boulevard",
           "addressLine2" -> "ABville",
+          "addressLine4" -> "ABville",
           "postCode" -> "ZZ1 1ZZ",
           "country" -> "GB"
         )
@@ -329,6 +330,7 @@ class AddressLookupContinueControllerSpec extends SpecBase {
           "organisationName" -> "AB Org",
           "addressLine1" -> "11 A Boulevard",
           "addressLine2" -> "ABville",
+          "addressLine4" -> "ABville",
           "postCode" -> "ZZ1 1ZZ",
           "country" -> "GB"
         )

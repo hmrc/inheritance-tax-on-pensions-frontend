@@ -41,9 +41,9 @@ class BeneficiaryAddressSummarySpec extends SpecBase {
     "must render the address without its country and an indexed Change link" in {
       val address = PrAddress(
         addressLine1 = "21 RB Road",
-        addressLine2 = Some("RBtown"),
+        addressLine2 = Some("Random"),
         addressLine3 = None,
-        addressLine4 = None,
+        addressLine4 = "ABville",
         postCode = Some("LL1 4LL"),
         country = "GB"
       )
@@ -51,7 +51,7 @@ class BeneficiaryAddressSummarySpec extends SpecBase {
 
       val row = BeneficiaryAddressSummary.row(srn, 0, data).value
       row.key.content mustBe Text(messages("beneficiaryAddress.checkYourAnswersLabel"))
-      row.value.content mustBe HtmlContent("21 RB Road<br>RBtown<br>LL1 4LL")
+      row.value.content mustBe HtmlContent("21 RB Road<br>Random<br>ABville<br>LL1 4LL")
       row.actions.value.items.head.href mustBe controllers.beneficiary.routes.ChangeBeneficiaryAddressController
         .onPageLoad(srn, 0)
         .url
@@ -62,14 +62,14 @@ class BeneficiaryAddressSummarySpec extends SpecBase {
         addressLine1 = "33 AB Street",
         addressLine2 = None,
         addressLine3 = None,
-        addressLine4 = None,
+        addressLine4 = "ABville",
         postCode = None,
         country = "FR"
       )
       val data = answers.set(BeneficiaryAddressPage(0), address).success.value
 
       val row = BeneficiaryAddressSummary.row(srn, 0, data).value
-      row.value.content mustBe HtmlContent("33 AB Street")
+      row.value.content mustBe HtmlContent("33 AB Street<br>ABville")
     }
   }
 }
