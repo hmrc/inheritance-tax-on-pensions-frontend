@@ -39,7 +39,7 @@ class PrAddressController @Inject() (
 )(implicit ec: ExecutionContext)
     extends IhtpBaseController {
 
-  private val address = PrAddress("1 ABCDE Street", None, None, Some("FGHIJ Town"), Some("AA1 1AA"), "GB")
+  private val address = PrAddress("1 ABCDE Street", None, None, "FGHIJ Town", Some("AA1 1AA"), "GB")
   private val addressFields =
     Seq("addressLine1", "addressLine2", "addressLine3", "addressLine4", "postCode", "country")
 

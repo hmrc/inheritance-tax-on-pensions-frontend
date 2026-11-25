@@ -23,7 +23,7 @@ final case class PrAddress(
   addressLine1: String,
   addressLine2: Option[String],
   addressLine3: Option[String],
-  addressLine4: Option[String],
+  addressLine4: String,
   postCode: Option[String],
   country: String,
   addressLine5: Option[String] = None
@@ -36,15 +36,17 @@ object PrAddress {
     addressLines(addressData).headOption.exists(_.trim.nonEmpty)
 
   def fromAlfAddressData(addressData: AlfAddressData): PrAddress = {
-    val lines = addressLines(addressData)
-    val addressLine2 = lines.lift(1).orElse(addressData.address.town)
-    val addressLine4 = lines.lift(3).orElse(addressData.address.town.filterNot(addressLine2.contains))
+    val rawLines = addressLines(addressData)
+    val (town, lines) = addressData.address.town.map(_.trim).filter(_.nonEmpty) match {
+      case Some(t) => (t, rawLines)
+      case None => (rawLines.lastOption.map(_.trim).filter(_.nonEmpty).getOrElse(""), rawLines.dropRight(1))
+    }
 
     PrAddress(
       addressLine1 = lines.headOption.map(_.trim).getOrElse(""),
-      addressLine2 = addressLine2,
+      addressLine2 = lines.lift(1),
       addressLine3 = lines.lift(2),
-      addressLine4 = addressLine4,
+      addressLine4 = town,
       addressLine5 = addressData.address.country.code match {
         case "GB" => None
         case _ => addressData.address.postcode
@@ -58,19 +60,13 @@ object PrAddress {
   }
 
   private def addressLines(addressData: AlfAddressData): Seq[String] = {
-    val lines = removeTrailingTown(addressData.address.lines.map(_.trim).filter(_.nonEmpty), addressData.address.town)
+    val lines = addressData.address.lines.map(_.trim).filter(_.nonEmpty)
 
     addressData.address.poBox.map(formatPoBox).filterNot(poBox => lines.exists(line => samePoBox(line, poBox))) match {
       case Some(poBox) => poBox +: lines
       case None => lines
     }
   }
-
-  private def removeTrailingTown(lines: Seq[String], town: Option[String]): Seq[String] =
-    (lines, town.map(_.trim).filter(_.nonEmpty)) match {
-      case (init :+ last, Some(town)) if sameAddressLine(last, town) => init
-      case _ => lines
-    }
 
   private def formatPoBox(poBox: String): String = {
     val formattedPoBox = poBox.trim

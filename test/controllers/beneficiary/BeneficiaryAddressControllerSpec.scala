@@ -52,7 +52,7 @@ class BeneficiaryAddressControllerSpec extends SpecBase {
 
   private val internationalAddress = AlfAddressData(
     Some("address-id"),
-    AlfAddress(None, Seq("2 ABCDE Street"), None, Some("75001"), AlfCountry("FR", "France"))
+    AlfAddress(None, Seq("2 ABCDE Street"), Some("ABville"), Some("75001"), AlfCountry("FR", "France"))
   )
 
   Seq(JourneyRole.BeneficiaryIndividual, JourneyRole.BeneficiaryTrust).foreach { role =>

@@ -37,7 +37,7 @@ object PrIndividualAddressSummary {
         Some(answer.addressLine1),
         answer.addressLine2,
         answer.addressLine3,
-        answer.addressLine4,
+        Some(answer.addressLine4),
         answer.addressLine5,
         answer.postCode
       ).flatten.map(line => HtmlFormat.escape(line).toString).mkString("<br>")

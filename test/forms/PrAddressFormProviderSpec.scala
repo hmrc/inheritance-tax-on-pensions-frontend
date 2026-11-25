@@ -31,8 +31,8 @@ class PrAddressFormProviderSpec extends AnyFreeSpec with Matchers with Regex {
   private val validData = Map(
     "addressLine1" -> "Line 1",
     "addressLine2" -> "Line 2",
-    "addressLine3" -> "City",
-    "addressLine4" -> "",
+    "addressLine3" -> "Line 3",
+    "addressLine4" -> "Town",
     "addressLine5" -> "Line 5",
     "postCode" -> ""
   )
@@ -40,15 +40,15 @@ class PrAddressFormProviderSpec extends AnyFreeSpec with Matchers with Regex {
 
     "must bind valid data, trim the fields and retain the existing country" in {
       val result = form.bind(
-        validData.updated("addressLine1", "  Line 1  ").updated("addressLine4", "   ")
+        validData.updated("addressLine1", "  Line 1  ").updated("addressLine4", "  Town  ")
       )
 
       result.errors mustBe empty
       result.value.get mustBe PrAddress(
         addressLine1 = "Line 1",
         addressLine2 = Some("Line 2"),
-        addressLine3 = Some("City"),
-        addressLine4 = None,
+        addressLine3 = Some("Line 3"),
+        addressLine4 = "Town",
         addressLine5 = Some("Line 5"),
         postCode = None,
         country = country
@@ -56,15 +56,15 @@ class PrAddressFormProviderSpec extends AnyFreeSpec with Matchers with Regex {
     }
     "must bind valid data, trim the fields and retain the existing Non-GB country" in {
       val result = formNonGb.bind(
-        validData.updated("addressLine1", "  Line 1  ").updated("addressLine4", "   ")
+        validData.updated("addressLine1", "  Line 1  ").updated("addressLine4", "  Town  ")
       )
 
       result.errors mustBe empty
       result.value.get mustBe PrAddress(
         addressLine1 = "Line 1",
         addressLine2 = Some("Line 2"),
-        addressLine3 = Some("City"),
-        addressLine4 = None,
+        addressLine3 = Some("Line 3"),
+        addressLine4 = "Town",
         addressLine5 = Some("Line 5"),
         postCode = None,
         country = nonGbCountry
@@ -76,6 +76,14 @@ class PrAddressFormProviderSpec extends AnyFreeSpec with Matchers with Regex {
 
       result.errors must contain(
         FormError("addressLine1", "changePrAddress.error.addressLine1.required")
+      )
+    }
+
+    "must require town or city" in {
+      val result = form.bind(validData.updated("addressLine4", "   "))
+
+      result.errors must contain(
+        FormError("addressLine4", "changePrAddress.error.addressLine4.required")
       )
     }
 

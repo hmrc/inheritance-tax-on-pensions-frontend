@@ -40,7 +40,7 @@ class PrIndividualAddressSummarySpec extends SpecBase {
         addressLine1 = "33 AB Street",
         addressLine2 = Some("AB Area"),
         addressLine3 = Some("AB County"),
-        addressLine4 = Some("ABville"),
+        addressLine4 = "ABville",
         postCode = Some("AA1 1AA"),
         country = "GB"
       )
@@ -70,7 +70,7 @@ class PrIndividualAddressSummarySpec extends SpecBase {
         addressLine1 = "33 AB Street",
         addressLine2 = Some("AB Area"),
         addressLine3 = Some("AB County"),
-        addressLine4 = Some("ABville"),
+        addressLine4 = "ABville",
         addressLine5 = Some("123-456"),
         postCode = None,
         country = "BF"
@@ -101,7 +101,7 @@ class PrIndividualAddressSummarySpec extends SpecBase {
         addressLine1 = "33 AB Street",
         addressLine2 = None,
         addressLine3 = None,
-        addressLine4 = None,
+        addressLine4 = "ABville",
         postCode = None,
         country = "GB"
       )
@@ -117,7 +117,7 @@ class PrIndividualAddressSummarySpec extends SpecBase {
       val result = PrIndividualAddressSummary.row(srn, userAnswers)
 
       result mustBe defined
-      result.value.value.content mustBe HtmlContent("33 AB Street")
+      result.value.value.content mustBe HtmlContent("33 AB Street<br>ABville")
     }
 
   }

@@ -40,7 +40,7 @@ class PrAddressSpec extends SpecBase {
         addressLine1 = "33 AB Street",
         addressLine2 = Some("AB Area"),
         addressLine3 = Some("AB County"),
-        addressLine4 = Some("ABville"),
+        addressLine4 = "ABville",
         addressLine5 = None,
         postCode = Some("ZZ1 1ZZ"),
         country = "GB"
@@ -64,14 +64,14 @@ class PrAddressSpec extends SpecBase {
         addressLine1 = "33 AB Street",
         addressLine2 = Some("AB Area"),
         addressLine3 = Some("AB County"),
-        addressLine4 = Some("ABville"),
+        addressLine4 = "ABville",
         addressLine5 = Some("123456"),
         postCode = None,
         country = "BF"
       )
     }
 
-    "must map ALF town to address line 2 when address line 2 is missing" in {
+    "must not populate address line 2 when it is missing" in {
 
       val addressData = AlfAddressData(
         id = Some("GB123"),
@@ -86,9 +86,9 @@ class PrAddressSpec extends SpecBase {
 
       PrAddress.fromAlfAddressData(addressData) mustBe PrAddress(
         addressLine1 = "33 AB Street",
-        addressLine2 = Some("ABville"),
+        addressLine2 = None,
         addressLine3 = None,
-        addressLine4 = None,
+        addressLine4 = "ABville",
         postCode = Some("ZZ1 1ZZ"),
         country = "GB"
       )
@@ -112,7 +112,7 @@ class PrAddressSpec extends SpecBase {
         addressLine1 = "PO Box 999",
         addressLine2 = Some("33 AB Street"),
         addressLine3 = Some("AB Area"),
-        addressLine4 = Some("ABville"),
+        addressLine4 = "ABville",
         postCode = Some("ZZ1 1ZZ"),
         country = "GB"
       )
@@ -136,7 +136,30 @@ class PrAddressSpec extends SpecBase {
         addressLine1 = "PO Box 999",
         addressLine2 = Some("AB Area"),
         addressLine3 = None,
-        addressLine4 = Some("ABville"),
+        addressLine4 = "ABville",
+        postCode = Some("ZZ1 1ZZ"),
+        country = "GB"
+      )
+    }
+
+    "must derive the town from the last address line when the town field is absent" in {
+
+      val addressData = AlfAddressData(
+        id = Some("GB123"),
+        address = AlfAddress(
+          organisation = None,
+          lines = Seq("6 Other Place", "Some District", "Anytown"),
+          town = None,
+          postcode = Some("ZZ1 1ZZ"),
+          country = AlfCountry("GB", "United Kingdom")
+        )
+      )
+
+      PrAddress.fromAlfAddressData(addressData) mustBe PrAddress(
+        addressLine1 = "6 Other Place",
+        addressLine2 = Some("Some District"),
+        addressLine3 = None,
+        addressLine4 = "Anytown",
         postCode = Some("ZZ1 1ZZ"),
         country = "GB"
       )
@@ -158,15 +181,15 @@ class PrAddressSpec extends SpecBase {
 
       PrAddress.fromAlfAddressData(addressData) mustBe PrAddress(
         addressLine1 = "PO Box 999",
-        addressLine2 = Some("ABville"),
+        addressLine2 = None,
         addressLine3 = None,
-        addressLine4 = None,
+        addressLine4 = "ABville",
         postCode = Some("ZZ1 1ZZ"),
         country = "GB"
       )
     }
 
-    "must not duplicate ALF town when it is used to populate address line 2" in {
+    "must not duplicate ALF town onto address line 2" in {
 
       val addressData = AlfAddressData(
         id = Some("GB123"),
@@ -181,9 +204,9 @@ class PrAddressSpec extends SpecBase {
 
       PrAddress.fromAlfAddressData(addressData) mustBe PrAddress(
         addressLine1 = "PO Box 999",
-        addressLine2 = Some("ABville"),
+        addressLine2 = None,
         addressLine3 = None,
-        addressLine4 = None,
+        addressLine4 = "ABville",
         postCode = Some("ZZ1 1ZZ"),
         country = "GB"
       )
@@ -206,7 +229,7 @@ class PrAddressSpec extends SpecBase {
         addressLine1 = "33 AB Street",
         addressLine2 = Some("ABville"),
         addressLine3 = None,
-        addressLine4 = None,
+        addressLine4 = "ABville",
         postCode = Some("ZZ1 1ZZ"),
         country = "GB"
       )

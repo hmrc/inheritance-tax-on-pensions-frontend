@@ -82,7 +82,7 @@ trait TestValues extends Generators {
   val organisationName = "Testdata Company Ltd"
   val trustName = "Testdata Trust"
   val testPrAddress: PrAddress =
-    PrAddress("1 ABCDE Street", None, None, Some("FGHIJ Town"), Some("AA1 1AA"), "GB")
+    PrAddress("1 ABCDE Street", None, None, "FGHIJ Town", Some("AA1 1AA"), "GB")
   val individualNameFormatted: String = s"${individualName.firstForename} ${individualName.surname}"
 
   def individualBeneficiaryUserAnswers: UserAnswers =
