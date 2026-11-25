@@ -110,7 +110,7 @@ trait TestValues extends Generators {
             "dateOfBirth" -> "1920-01-01",
             "dateOfDeath" -> "2026-01-01"
           ),
-          "estateRepresentative" -> "pr",
+          "estateRepresentative" -> "02",
           "didPrSubmit" -> true,
           "ihtTaxInformation" -> Json.obj(
             "dateThePensionSchemeReceivedNoticeToPay" -> "2026-01-01"

@@ -44,7 +44,12 @@ class RepresentativeTypeSpec extends AnyFreeSpec with Matchers with ScalaCheckPr
 
   "RepresentativeType" - {
 
-    "must read pr and ppr from JSON into RepresentativeType values" in {
+    "must use the correct codes for PR and PPR" in {
+      RepresentativeType.PR.toString mustEqual "02"
+      RepresentativeType.PPR.toString mustEqual "01"
+    }
+
+    "must read 01 and 02 from JSON into RepresentativeType values" in {
 
       val gen = Gen.oneOf(RepresentativeType.values.toSeq)
 
@@ -53,7 +58,7 @@ class RepresentativeTypeSpec extends AnyFreeSpec with Matchers with ScalaCheckPr
       }
     }
 
-    "must reject JSON strings other than pr and ppr" in {
+    "must reject JSON strings other than 01 and 02" in {
 
       val gen = arbitrary[String].suchThat(!RepresentativeType.values.map(_.toString).contains(_))
 
@@ -62,7 +67,7 @@ class RepresentativeTypeSpec extends AnyFreeSpec with Matchers with ScalaCheckPr
       }
     }
 
-    "must write RepresentativeType values to JSON strings pr and ppr" in {
+    "must write RepresentativeType values to JSON strings 01 and 02" in {
 
       val gen = Gen.oneOf(RepresentativeType.values.toSeq)
 

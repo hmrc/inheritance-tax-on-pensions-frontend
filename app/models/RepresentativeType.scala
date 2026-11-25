@@ -24,8 +24,8 @@ sealed trait RepresentativeType
 
 object RepresentativeType extends Enumerable.Implicits {
 
-  case object PR extends WithName("pr") with RepresentativeType
-  case object PPR extends WithName("ppr") with RepresentativeType
+  case object PR extends WithName("02") with RepresentativeType
+  case object PPR extends WithName("01") with RepresentativeType
 
   val values: Seq[RepresentativeType] = Seq(
     PR,

@@ -515,6 +515,6 @@ interestPayable.change.hidden = the amount of interest payable
 
 whoRepresentsEstate.title = Who is representing the estate of {0}?
 whoRepresentsEstate.heading = Who is representing the estate of {0}?
-whoRepresentsEstate.pr = a personal representative (PR)
-whoRepresentsEstate.ppr = a prospective personal representative (PPR)
+whoRepresentsEstate.02 = a personal representative (PR)
+whoRepresentsEstate.01 = a prospective personal representative (PPR)
 whoRepresentsEstate.error.required = Select the representative type
