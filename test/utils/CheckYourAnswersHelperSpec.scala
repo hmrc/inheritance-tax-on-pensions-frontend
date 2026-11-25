@@ -208,6 +208,28 @@ class CheckYourAnswersHelperSpec extends AnyFreeSpec with SpecBase {
       )
     }
 
+    "must return the ihtPayable page if no beneficiaries and value is missing" in {
+      val userAnswers = prIndividualUserAnswers
+        .set(AreBeneficiariesKnownPage, false)
+        .get
+
+      CheckYourAnswersHelper.findPageToContinue(userAnswers, srn).value.url must endWith(
+        routes.IhtPayableController.onPageLoad(srn, NormalMode).url
+      )
+    }
+
+    "must return the interestPayable page if no beneficiaries and value is missing" in {
+      val userAnswers = prIndividualUserAnswers
+        .set(AreBeneficiariesKnownPage, false)
+        .get
+        .set(IhtPayablePage, BigDecimal("12.34"))
+        .get
+
+      CheckYourAnswersHelper.findPageToContinue(userAnswers, srn).value.url must endWith(
+        routes.InterestPayableController.onPageLoad(srn, NormalMode).url
+      )
+    }
+
     "must return the first beneficiary type page if are beneficiaries are know is yes and type of first is missing" in {
       val userAnswers = prIndividualUserAnswers
 

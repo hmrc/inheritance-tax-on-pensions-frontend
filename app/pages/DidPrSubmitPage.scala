@@ -17,10 +17,16 @@
 package pages
 
 import play.api.libs.json.JsPath
+import models.UserAnswers
+
+import scala.util.Try
 
 case object DidPrSubmitPage extends QuestionPage[Boolean] {
 
   override def path: JsPath = JsPath \ toString
 
   override def toString: String = "didPrSubmit"
+
+  override def cleanup(value: Option[Boolean], userAnswers: UserAnswers): Try[UserAnswers] =
+    userAnswers.remove(AreBeneficiariesKnownPage)
 }
