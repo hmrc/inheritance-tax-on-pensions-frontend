@@ -67,8 +67,12 @@ class PaidReportsController @Inject() (
           )
       }
 
-  private def buildSubmissionList(srn: Srn, status: Status, form: Form[String], maybeSearchFieldValue: Option[String])(
-    implicit
+  private def buildSubmissionList(
+    srn: Srn,
+    status: Status,
+    form: Form[String],
+    optionalSearchFieldValue: Option[String]
+  )(implicit
     request: AllowedAccessRequest[?],
     hc: HeaderCarrier
   ) =
@@ -76,14 +80,14 @@ class PaidReportsController @Inject() (
       .getSubmissionList(
         dateFrom = LocalDate.now().minusMonths(2).format(DateTimeFormatter.ISO_LOCAL_DATE),
         dateTo = LocalDate.now().format(DateTimeFormatter.ISO_LOCAL_DATE),
-        searchFieldValue = maybeSearchFieldValue
+        searchFieldValue = optionalSearchFieldValue
       )(using hc, request)
       .map { response =>
         submissionListUtil.prepare(response, paid = true, request.getQueryString("page")) match {
           case Right((reports, pagination)) =>
             status(
               view(
-                maybeSearchFieldValue match {
+                optionalSearchFieldValue match {
                   case Some(value) => form.fill(value)
                   case None => form
                 },
