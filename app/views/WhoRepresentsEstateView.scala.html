@@ -28,7 +28,7 @@
 
 @(form: Form[?], srn: Srn, mode: Mode, deceasedName: Option[String])(implicit request: Request[?], messages: Messages)
 
-@layout(pageTitle = title(form, messages("whoRepresentsEstate.title", deceasedName.getOrElse("the deceased")))) {
+@layout(pageTitle = title(form, messages("whoRepresentsEstate.title", deceasedName.getOrElse(messages("whoRepresentsEstate.deceased"))))) {
 
     @formHelper(action = routes.WhoRepresentsEstateController.onSubmit(srn, mode), Symbol("autoComplete") -> "off") {
 
@@ -39,7 +39,7 @@
         @govukRadios(
             RadiosViewModel(
                 field  = form("value"),
-                legend = LegendViewModel(messages("whoRepresentsEstate.heading", deceasedName.getOrElse("the deceased")))
+                legend = LegendViewModel(messages("whoRepresentsEstate.heading", deceasedName.getOrElse(messages("whoRepresentsEstate.deceased"))))
                     .asPageHeading(LegendSize.Large),
                 items  = RepresentativeType.options
             )

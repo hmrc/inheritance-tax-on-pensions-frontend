@@ -175,15 +175,15 @@ object CheckYourAnswersHelper {
       ContinuationPage(
         answers => answers.get(BirthDeathDatesPage).isEmpty,
         routes.BirthDeathDatesController.onPageLoad(srn, NormalMode)
+      ),
+      ContinuationPage(
+        answers => answers.get(WhoRepresentsEstatePage).isEmpty,
+        routes.WhoRepresentsEstateController.onPageLoad(srn, NormalMode)
       )
     )
 
   private def getPrPages(srn: Srn) =
     Seq(
-      ContinuationPage(
-        answers => answers.get(WhoRepresentsEstatePage).isEmpty,
-        routes.WhoRepresentsEstateController.onPageLoad(srn, NormalMode)
-      ),
       ContinuationPage(
         answers => answers.get(PrTypePage).isEmpty,
         routes.PrTypeController.onPageLoad(srn, NormalMode)
