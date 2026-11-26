@@ -17,6 +17,7 @@
 package models.beneficiary
 
 import base.beneficiary.BeneficiarySpecBase
+import play.api.libs.json.{JsError, JsString, Json}
 import helpers.FormatHelper
 import pages.beneficiary.BeneficiariesPage
 
@@ -25,4 +26,38 @@ class BeneficiariesSpec extends BeneficiarySpecBase with FormatHelper {
   private val allBeneficiaries = userAnswersWithBeneficiaries.get(BeneficiariesPage())
 
   testFormat(allBeneficiaries.get)
+
+  "must fail to read invalid beneficiary elements" in {
+    Seq(
+      JsString("text"),
+      Json.obj("beneficiaryType" -> "organisation"),
+      Json.obj("beneficiaryType" -> "individual", "beneficiaryDetails" -> "text"),
+      Json.obj("beneficiaryType" -> "organisation", "beneficiaryDetails" -> "text")
+    ).foreach { json =>
+      json.validate[BeneficiaryElement] mustBe a[JsError]
+    }
+  }
+
+  "must fail to read invalid beneficiary details" in {
+    Seq(
+      Json.obj("beneficiaryType" -> "individual", "beneficiaryDetails" -> Json.obj("individual" -> "text")),
+      Json.obj("beneficiaryType" -> "individual", "beneficiaryDetails" -> Json.obj("trust" -> "text")),
+      Json.obj(
+        "beneficiaryType" -> "individual",
+        "beneficiaryDetails" -> Json.obj("individual" -> "text", "trust" -> "text")
+      )
+    ).foreach { json =>
+      json.validate[BeneficiaryElement] mustBe a[JsError]
+    }
+  }
+
+  "must fail to read invalid beneficiaries" in {
+    Seq(
+      JsString("text"),
+      Json.obj(),
+      Json.obj("beneficiaries" -> "text")
+    ).foreach { json =>
+      json.validate[Beneficiaries] mustBe a[JsError]
+    }
+  }
 }

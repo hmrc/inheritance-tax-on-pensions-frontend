@@ -17,7 +17,7 @@
 package models.addresslookup
 
 import base.SpecBase
-import play.api.libs.json.Json
+import play.api.libs.json.{JsError, JsString, Json}
 
 class AlfAddressDataSpec extends SpecBase {
 
@@ -48,6 +48,32 @@ class AlfAddressDataSpec extends SpecBase {
       (json \ "address" \ "country" \ "name").as[String] mustBe "United Kingdom"
       (json \ "address" \ "poBox").as[String] mustBe "16651"
       json.as[AlfAddressData] mustBe addressData
+    }
+
+    "must fail to read invalid json" in {
+      Seq(
+        JsString("text"),
+        Json.obj(),
+        Json.obj("address" -> "text"),
+        Json.obj("address" -> Json.obj()),
+        Json.obj("address" -> Json.obj("lines" -> "text")),
+        Json.obj("address" -> Json.obj("lines" -> Json.arr("a"), "country" -> "text")),
+        Json.obj("address" -> Json.obj("lines" -> "text", "country" -> "text"))
+      ).foreach { json =>
+        json.validate[AlfAddressData] mustBe a[JsError]
+      }
+    }
+
+    "must fail to read invalid countries" in {
+      Seq(
+        JsString("text"),
+        Json.obj(),
+        Json.obj("code" -> 1),
+        Json.obj("code" -> "GB", "name" -> 1),
+        Json.obj("code" -> 1, "name" -> 1)
+      ).foreach { json =>
+        json.validate[AlfCountry] mustBe a[JsError]
+      }
     }
   }
 }

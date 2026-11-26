@@ -23,7 +23,7 @@ import play.api.inject.bind
 import views.html.ConfirmationView
 import base.SpecBase
 import config.Constants._
-import uk.gov.hmrc.http.HttpResponse
+import uk.gov.hmrc.http.{HttpResponse, UpstreamErrorResponse}
 import models.SchemeId
 import org.mockito.ArgumentMatchers.any
 import play.api.test.Helpers._
@@ -95,6 +95,53 @@ class ConfirmationControllerSpec extends SpecBase {
 
         status(result) mustEqual SEE_OTHER
         redirectLocation(result).value mustEqual routes.CheckYourAnswersController.onPageLoad(testSrn).url
+      }
+    }
+
+    "must redirect to CYA onChange when the session already holds the same uuid" in {
+      val mockInheritanceTaxOnPensionsConnector = mock[InheritanceTaxOnPensionsConnector]
+      when(
+        mockInheritanceTaxOnPensionsConnector.getReportByFbNumber(any(), any(), any(), any(), any(), any())(using any())
+      )
+        .thenReturn(Future.successful(Right(HttpResponse(OK, headers = Map("uuid" -> Seq(testUuid))))))
+
+      val application = applicationBuilder(userAnswers = Some(emptyUserAnswers), usesSession = true)
+        .overrides(
+          bind[InheritanceTaxOnPensionsConnector].toInstance(mockInheritanceTaxOnPensionsConnector)
+        )
+        .build()
+
+      running(application) {
+        val request = FakeRequest(GET, routes.ConfirmationController.onChange(testSrn, testFormBundleNumber).url)
+          .withSession("uuid" -> testUuid)
+
+        val result = route(application, request).value
+
+        status(result) mustEqual SEE_OTHER
+        redirectLocation(result).value mustEqual routes.CheckYourAnswersController.onPageLoad(testSrn).url
+      }
+    }
+
+    "must redirect to journey recovery onChange when the report lookup fails" in {
+      val mockInheritanceTaxOnPensionsConnector = mock[InheritanceTaxOnPensionsConnector]
+      when(
+        mockInheritanceTaxOnPensionsConnector.getReportByFbNumber(any(), any(), any(), any(), any(), any())(using any())
+      )
+        .thenReturn(Future.successful(Left(UpstreamErrorResponse("failed", INTERNAL_SERVER_ERROR))))
+
+      val application = applicationBuilder(userAnswers = Some(emptyUserAnswers), usesSession = true)
+        .overrides(
+          bind[InheritanceTaxOnPensionsConnector].toInstance(mockInheritanceTaxOnPensionsConnector)
+        )
+        .build()
+
+      running(application) {
+        val request = FakeRequest(GET, routes.ConfirmationController.onChange(testSrn, testFormBundleNumber).url)
+
+        val result = route(application, request).value
+
+        status(result) mustEqual SEE_OTHER
+        redirectLocation(result).value mustEqual routes.JourneyRecoveryController.onPageLoad().url
       }
     }
 

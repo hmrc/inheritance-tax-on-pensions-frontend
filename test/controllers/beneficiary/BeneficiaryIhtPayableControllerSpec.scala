@@ -18,7 +18,7 @@ package controllers.beneficiary
 
 import play.api.test.FakeRequest
 import services.UserAnswersService
-import pages.AreBeneficiariesKnownPage
+import pages.{AreBeneficiariesKnownPage, DidPrSubmitPage}
 import play.api.inject.bind
 import views.html.CurrencyEntryView
 import models._
@@ -56,7 +56,7 @@ class BeneficiaryIhtPayableControllerSpec extends SpecBase {
   } yield withAddress).success.value
 
   Seq((answersIndividuls, "individual"), (answersTrust, "trust")).foreach { (answers, testName) =>
-    s"BeneficiaryIhtPayableController ${testName}" - {
+    s"BeneficiaryIhtPayableController $testName" - {
       Seq(NormalMode, CheckMode).foreach { mode =>
         s"must populate the shared view with the selected beneficiary's saved amount in $mode" in {
           val savedAnswers = (for {
@@ -103,6 +103,30 @@ class BeneficiaryIhtPayableControllerSpec extends SpecBase {
         }
       }
 
+      "must redirect CheckMode submissions to check your answers when the interest amount is answered" in {
+        val savedAnswers = answers
+          .set(BeneficiaryIhtPayablePage(1), BigDecimal("999999999.99"))
+          .success
+          .value
+          .set(BeneficiaryInterestPayablePage(1), BigDecimal("1.23"))
+          .success
+          .value
+        val service = mock[UserAnswersService]
+        when(service.set(any())(using any(), any())).thenReturn(Future.successful(Right(savedAnswers)))
+        val app = applicationBuilder(Some(answers), usesSession = true)
+          .overrides(bind[UserAnswersService].toInstance(service))
+          .build()
+        running(app) {
+          val result = route(
+            app,
+            FakeRequest(POST, routes.BeneficiaryIhtPayableController.onSubmit(srn, 1, CheckMode).url)
+              .withFormUrlEncodedBody("value" -> "999,999,999.99")
+          ).value
+          status(result) mustBe SEE_OTHER
+          redirectLocation(result).value mustBe controllers.routes.CheckYourAnswersController.onPageLoad(srn).url
+        }
+      }
+
       "must reject missing, invalid and over-limit amounts without saving" in {
         val service = mock[UserAnswersService]
         val app = applicationBuilder(Some(answers), usesSession = true)
@@ -133,7 +157,9 @@ class BeneficiaryIhtPayableControllerSpec extends SpecBase {
             )
             .success
             .value,
-          answers.set(AreBeneficiariesKnownPage, false).success.value
+          answers.set(AreBeneficiariesKnownPage, false).success.value,
+          answers.remove(BeneficiaryTypePage(1)).success.value,
+          answers.set(DidPrSubmitPage, true).success.value
         ) ++ (testName match {
           case "individual" =>
             Seq(

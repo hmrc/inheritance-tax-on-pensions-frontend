@@ -17,7 +17,7 @@
 package models
 
 import base.SpecBase
-import play.api.libs.json.Json
+import play.api.libs.json.{JsError, JsString, Json}
 
 class IhtpReportSubmissionResponseSpec extends SpecBase {
 
@@ -55,6 +55,18 @@ class IhtpReportSubmissionResponseSpec extends SpecBase {
       (json \ "success" \ "ihtResponse" \ "formBundleNo").as[String] mustBe "bundle-1"
       (json \ "success" \ "ihtResponse" \ "ihtPaymentReference").as[String] mustBe "payment-1"
       (json \ "success" \ "ihtResponse" \ "processingDate").as[String] mustBe testProcessingDate.toString
+    }
+
+    "must fail to read invalid json" in {
+      Seq(
+        JsString("text"),
+        Json.obj(),
+        Json.obj("success" -> "text"),
+        Json.obj("success" -> Json.obj()),
+        Json.obj("success" -> Json.obj("ihtResponse" -> "text"))
+      ).foreach { json =>
+        json.validate[IhtpReportSubmissionResponse] mustBe a[JsError]
+      }
     }
   }
 }

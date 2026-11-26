@@ -17,8 +17,9 @@
 package models
 
 import uk.gov.hmrc.crypto.SymmetricCryptoFactory
+import config.NoOpCrypto
 import base.SpecBase
-import play.api.libs.json.{JsString, Json}
+import play.api.libs.json.{JsError, JsString, Json}
 
 class SensitiveDetailsSpec extends SpecBase {
 
@@ -94,6 +95,51 @@ class SensitiveDetailsSpec extends SpecBase {
       result.firstName.decryptedValue mustBe "Firstname"
       result.middleName.map(_.decryptedValue) mustBe Some("Middlename")
       result.lastName.decryptedValue mustBe "Surname"
+    }
+
+    "must fail to read invalid json with plain reads" in {
+      Seq(
+        JsString("text"),
+        Json.obj(),
+        Json.obj("firstName" -> 1),
+        Json.obj("firstName" -> "Firstname", "middleName" -> 1, "lastName" -> "Surname"),
+        Json.obj("firstName" -> 1, "lastName" -> 1)
+      ).foreach { json =>
+        json.validate[SensitiveIndividualDetails](using SensitiveDetails.sensitiveIndividualDetailsReads) mustBe
+          a[JsError]
+      }
+    }
+
+    "must serialize and deserialize with NoOpCrypto format" in {
+      implicit val crypto: uk.gov.hmrc.crypto.Encrypter & uk.gov.hmrc.crypto.Decrypter = NoOpCrypto
+      val details = SensitiveIndividualDetails(
+        firstName = SensitiveString("Firstname"),
+        middleName = Some(SensitiveString("Middlename")),
+        lastName = SensitiveString("Surname")
+      )
+
+      val json = Json.toJson(details)(using SensitiveDetails.sensitiveIndividualDetailsFormat)
+      val result = json.as[SensitiveIndividualDetails](using SensitiveDetails.sensitiveIndividualDetailsFormat)
+
+      result.firstName.decryptedValue mustBe "Firstname"
+      result.middleName.map(_.decryptedValue) mustBe Some("Middlename")
+      result.lastName.decryptedValue mustBe "Surname"
+      (json \ "firstName").as[String] mustBe "Firstname"
+    }
+
+    "must fail to read invalid json with encrypted format" in {
+      implicit val crypto: uk.gov.hmrc.crypto.Encrypter & uk.gov.hmrc.crypto.Decrypter =
+        SymmetricCryptoFactory.aesGcmCrypto(testKey)
+      Seq(
+        JsString("text"),
+        Json.obj(),
+        Json.obj("firstName" -> 1),
+        Json.obj("firstName" -> 1, "middleName" -> 1, "lastName" -> 1),
+        Json.obj("firstName" -> 1, "lastName" -> 1)
+      ).foreach { json =>
+        json.validate[SensitiveIndividualDetails](using SensitiveDetails.sensitiveIndividualDetailsFormat) mustBe
+          a[JsError]
+      }
     }
 
     "must serialize and deserialize with encrypted format" in {
