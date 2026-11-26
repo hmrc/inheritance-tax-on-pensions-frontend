@@ -42,7 +42,11 @@ class SubmissionListServiceSpec extends SpecBase {
     "must return success if connector returns success" in new Setup {
       val response = IhtpOverviewResponse(IhtpOverviewSuccess(Seq.empty))
 
-      when(mockConnector.getSubmissionList(any(), any(), any(), any(), any(), any(), any())(using any()))
+      when(
+        mockConnector.getSubmissionList(any(), any(), any(), any(), any(), any(), any(), any(), any(), any())(using
+          any()
+        )
+      )
         .thenReturn(Future.successful(Right(response)))
 
       whenReady(testService.getSubmissionList(dateFrom, dateTo)) {
@@ -56,6 +60,9 @@ class SubmissionListServiceSpec extends SpecBase {
         any(),
         any(),
         any(),
+        any(),
+        any(),
+        any(),
         any()
       )(using any())
     }
@@ -63,7 +70,11 @@ class SubmissionListServiceSpec extends SpecBase {
     "must return error if connector returns error" in new Setup {
       val errorResponse = UpstreamErrorResponse("Retrieval failed", 500)
 
-      when(mockConnector.getSubmissionList(any(), any(), any(), any(), any(), any(), any())(using any()))
+      when(
+        mockConnector.getSubmissionList(any(), any(), any(), any(), any(), any(), any(), any(), any(), any())(using
+          any()
+        )
+      )
         .thenReturn(Future.successful(Left(errorResponse)))
 
       whenReady(testService.getSubmissionList(dateFrom, dateTo)) {

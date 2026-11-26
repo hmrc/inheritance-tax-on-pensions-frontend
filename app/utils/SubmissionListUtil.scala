@@ -19,9 +19,8 @@ package utils
 import config.FrontendAppConfig
 import models.SchemeId.Srn
 import uk.gov.hmrc.govukfrontend.views.Aliases.{Pagination, PaginationItem, PaginationLink}
-import models.{IhtpOverviewReport, IhtpOverviewResponse}
-import play.api.http.Status.UNPROCESSABLE_ENTITY
 import uk.gov.hmrc.http.UpstreamErrorResponse
+import models.{IhtpOverviewReport, IhtpOverviewResponse}
 import play.api.i18n.Messages
 import viewmodels.SubmissionListPagination
 
@@ -70,7 +69,6 @@ class SubmissionListUtil @Inject() (appConfig: FrontendAppConfig) {
   ): Either[UpstreamErrorResponse, (Seq[IhtpOverviewReport], SubmissionListPagination)] = {
     val reports = response match {
       case Right(value) => Right(value.success.ihtpOverview)
-      case Left(error) if error.statusCode == UNPROCESSABLE_ENTITY => Right(Seq.empty[IhtpOverviewReport])
       case Left(error) => Left(error)
     }
     reports.map { allReports =>

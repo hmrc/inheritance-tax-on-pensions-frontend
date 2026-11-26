@@ -51,6 +51,24 @@ class ConstraintsSpec extends AnyFreeSpec with Matchers with ScalaCheckPropertyC
     }
   }
 
+  "anyValid" - {
+
+    "must return Valid when one of the constraints pass" in {
+      val result = anyValid("error.invalid", maxLength(2, "error.length"), regexp("""^\w+$""", "error.regexp"))("foo")
+      result mustEqual Valid
+    }
+
+    "must return Invalid when the all constraint pass" in {
+      val result = anyValid("error.invalid", maxLength(10, "error.length"), regexp("""^\w+$""", "error.regexp"))("foo")
+      result mustEqual Valid
+    }
+
+    "must return Invalid when the non of the constraints pass" in {
+      val result = anyValid("error.invalid", maxLength(2, "error.length"), regexp("""^\d+$""", "error.regexp"))("foo")
+      result mustEqual Invalid("error.invalid")
+    }
+  }
+
   "minimumValue" - {
 
     "must return Valid for a number greater than the threshold" in {

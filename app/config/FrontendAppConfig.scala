@@ -105,6 +105,21 @@ class FrontendAppConfig @Inject() (configuration: Configuration) {
   def getSubmissionListUrl(pstr: String, dateFrom: String, dateTo: String): String =
     s"$inheritanceTaxOnPensionsHost/inheritance-tax-on-pensions/$pstr/submission-list?dateFrom=$dateFrom&dateTo=$dateTo"
 
+  def getSubmissionListUrl(
+    pstr: String,
+    dateFrom: String,
+    dateTo: String,
+    ihtPaymentReference: Option[String],
+    ihtReference: Option[String],
+    nino: Option[String]
+  ): String =
+    (ihtPaymentReference, ihtReference, nino) match {
+      case (Some(value), None, None) => s"${getSubmissionListUrl(pstr, dateFrom, dateTo)}&ihtPaymentReference=$value"
+      case (None, Some(value), None) => s"${getSubmissionListUrl(pstr, dateFrom, dateTo)}&ihtReference=$value"
+      case (None, None, Some(value)) => s"${getSubmissionListUrl(pstr, dateFrom, dateTo)}&nino=$value"
+      case _ => s"${getSubmissionListUrl(pstr, dateFrom, dateTo)}"
+    }
+
   def schemeDashboardUrl(srn: Srn, pensionSchemeId: PensionSchemeId): String =
     if (pensionSchemeId.isPSP) {
       urls.managePensionsSchemes.baseUrl + urls.managePensionsSchemes.schemeSummaryPspDashboard.format(srn.value)

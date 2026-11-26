@@ -16,11 +16,14 @@ GET         /account/signed-out                          controllers.auth.Signed
 GET         /unauthorised                                controllers.UnauthorisedController.onPageLoad()
 
 GET         /:srn/report-inheritance-tax-on-pension       controllers.SubmissionListController.onPageLoad(srn: Srn)
+POST        /:srn/report-inheritance-tax-on-pension       controllers.SubmissionListController.onSubmitSearch(srn: Srn)
 GET         /:srn/paid-reports                            controllers.PaidReportsController.onPageLoad(srn: Srn)
+POST        /:srn/paid-reports                            controllers.PaidReportsController.onSubmitSearch(srn: Srn)
 GET         /:srn/view-paid-submission-report             controllers.ViewPaidSubmissionReportController.onPageLoad(srn: Srn)
 GET         /:srn/view-paid-submission-report/:fbNumber controllers.ViewPaidSubmissionReportController.onViewPaid(srn: Srn, fbNumber: String)
 GET         /:srn/report-inheritance-tax-on-pension/:uuid controllers.SubmissionListController.onAmend(srn: Srn, uuid: String)
 GET         /:srn/report-inheritance-tax-on-pension/change/:ihtPaymentReference/:ihtVersion controllers.SubmissionListController.onChange(srn: Srn, ihtPaymentReference: String, ihtVersion: String)
+
 
 GET         /:srn/start-report-you-will-need             controllers.WhatYouWillNeedController.onPageLoad(srn: Srn)
 POST        /:srn/start-report-you-will-need             controllers.WhatYouWillNeedController.onSubmit(srn: Srn)

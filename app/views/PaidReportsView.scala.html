@@ -20,20 +20,28 @@
 @import models.SchemeId.Srn
 @import viewmodels.SubmissionListPagination
 
-@this(layout: templates.Layout, caption: Caption, pageHeading: PageHeading, link: Link, reportList: ReportList, reportSearch: ReportSearch)
+@this(layout: templates.Layout,     formHelper: FormWithCSRF, govukErrorSummary: GovukErrorSummary, caption: Caption, pageHeading: PageHeading, link: Link, reportList: ReportList, reportSearch: ReportSearch)
 
-@(srn: Srn, schemeName: String, reports: Seq[IhtpOverviewReport], pagination: SubmissionListPagination)(implicit request: Request[?], messages: Messages)
+@(form: Form[?], srn: Srn, schemeName: String, reports: Seq[IhtpOverviewReport], pagination: SubmissionListPagination)(implicit request: Request[?], messages: Messages)
 
-@layout(pageTitle = titleNoForm(messages("paidReports.title")), showBackLink = true, fullWidth = true) {
+@layout(pageTitle = title(form, messages("paidReports.title")), showBackLink = true, fullWidth = true) {
     @caption("scheme-name-caption", schemeName, classes = Css.captionLCssClass)
     @pageHeading(messages("paidReports.title"), classes = Css.headingLCssClass)
 
-    @reportSearch()
+    @formHelper(action = routes.PaidReportsController.onSubmitSearch(srn)) {
 
-    @reportList(srn, reports, pagination, paid = true)
+        @if(form.errors.nonEmpty) {
+            @govukErrorSummary(ErrorSummaryViewModel(form))
+        }
 
-    <p class="govuk-body">
-        @link(id = "return-to-active-reports", text = messages("paidReports.returnToActive"),
-            href = controllers.routes.SubmissionListController.onPageLoad(srn).url)
-    </p>
+
+        @reportSearch(form, routes.PaidReportsController.onPageLoad(srn).url)
+
+        @reportList(srn, reports, pagination, paid = true, form.value.isEmpty)
+
+        <p class="govuk-body">
+            @link(id = "return-to-active-reports", text = messages("paidReports.returnToActive"),
+                href = controllers.routes.SubmissionListController.onPageLoad(srn).url)
+        </p>
+    }
 }

@@ -35,6 +35,8 @@ trait Regex {
 
   val ihtReferenceNumberRegex: String = "^[AF]\\d{6}/\\d{2}[A-Z]$"
 
+  val ihtPaymentReferenceRegex: String = "^[AF]\\d{6}/\\d{2}[A-Z]\\d{6}$"
+
   val schemeAdminIdRegex: matching.Regex = "^(A[0-9]{7})$".r
 
   val orgAndTrustNameRegex: String = s"^[${westEuropeanCharacterRange}0-9 \\-,.'\\/@_\\[\\]\\(\\)\\&]+$$"
