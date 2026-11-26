@@ -18,6 +18,7 @@ package forms.mappings
 
 import config.CurrencyFormatter
 import play.api.data.validation.{Constraint, Invalid, Valid}
+import uk.gov.hmrc.domain.Nino
 
 import java.time.LocalDate
 
@@ -29,6 +30,14 @@ trait Constraints {
         .map(_.apply(input))
         .find(_ != Valid)
         .getOrElse(Valid)
+    }
+
+  protected def anyValid[A](errorKey: String, constraints: Constraint[A]*): Constraint[A] =
+    Constraint { input =>
+      constraints
+        .map(_.apply(input))
+        .find(_ == Valid)
+        .getOrElse(Invalid(errorKey))
     }
 
   protected def minimumValue[A](minimum: A, errorKey: String)(implicit ev: Ordering[A]): Constraint[A] =
@@ -136,4 +145,11 @@ trait Constraints {
       case value if value.nonEmpty => Valid
       case _ => Invalid(errorKey)
     }
+
+  protected def ninoValid(errorKey: String): Constraint[String] =
+    Constraint {
+      case value if Nino.isValid(value) => Valid
+      case _ => Invalid(errorKey)
+    }
+
 }

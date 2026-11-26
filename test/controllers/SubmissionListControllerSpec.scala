@@ -22,12 +22,13 @@ import connectors.InheritanceTaxOnPensionsConnector
 import play.api.inject.bind
 import views.html.SubmissionListView
 import base.SpecBase
-import uk.gov.hmrc.http.{HttpResponse, UpstreamErrorResponse}
 import models._
 import viewmodels.SubmissionListPagination
 import org.mockito.ArgumentMatchers.{any, eq => eqTo}
 import play.api.test.Helpers._
 import org.mockito.Mockito.{never, verify, when}
+import forms.SearchFormProvider
+import uk.gov.hmrc.http.{HttpResponse, UpstreamErrorResponse}
 
 import scala.concurrent.Future
 
@@ -37,6 +38,7 @@ class SubmissionListControllerSpec extends SpecBase {
   lazy val onPageLoadUrl: String = routes.SubmissionListController.onPageLoad(srn).url
   lazy val onAmendUrl: String = routes.SubmissionListController.onAmend(srn, testUuid).url
   lazy val onChangeUrl: String = routes.SubmissionListController.onChange(srn, "ihtPaymentReference", "ihtVersion").url
+  lazy val onSubmitSearch: String = routes.SubmissionListController.onSubmitSearch(srn).url
 
   private val overviewReport = IhtpOverviewReport(
     uuid = None,
@@ -62,6 +64,9 @@ class SubmissionListControllerSpec extends SpecBase {
   private val pspSchemeDashboardUrl =
     s"http://localhost:8204/manage-pension-schemes/${srn.value}/dashboard/pension-scheme-details"
 
+  private val formProvider = new SearchFormProvider()
+  private val form = formProvider()
+
   "onPageLoad" - {
 
     Seq(false, true).foreach { onlyPaid =>
@@ -69,7 +74,7 @@ class SubmissionListControllerSpec extends SpecBase {
         val service = mock[SubmissionListService]
         val paid = overviewReport.copy(ihtStatus = "Paid", firstForename = Some("PaidPerson"))
         val reports = if (onlyPaid) Seq(paid) else Seq(paid, overviewReport)
-        when(service.getSubmissionList(any(), any())(using any(), any()))
+        when(service.getSubmissionList(any(), any(), any())(using any(), any()))
           .thenReturn(Future.successful(Right(IhtpOverviewResponse(IhtpOverviewSuccess(reports)))))
         val application = applicationBuilder(userAnswers = None)
           .overrides(bind[SubmissionListService].toInstance(service))
@@ -78,9 +83,9 @@ class SubmissionListControllerSpec extends SpecBase {
           val result = route(application, FakeRequest(GET, onPageLoadUrl)).value
           status(result) mustBe OK
           val document = org.jsoup.Jsoup.parse(contentAsString(result))
-          document.select("#find-report").size() mustBe 1
-          document.select("fieldset button[type=button]").text() mustBe "Search"
-          document.select("#find-report").first().closest("form") mustBe null
+          document.select("#value").size() mustBe 1
+          document.select("fieldset button").text() mustBe "Search"
+          document.select("#value").first().closest("form") must not be null
           (document.select("tbody").text() must not).include("PaidPerson")
           document.select("tbody tr").size() mustBe (if (onlyPaid) 0 else 1)
           document.select("#view-reconciled-reports").attr("href") mustBe routes.PaidReportsController
@@ -97,7 +102,7 @@ class SubmissionListControllerSpec extends SpecBase {
 
     "must return OK and the correct view for a GET" in {
       val mockSubmissionListService = mock[SubmissionListService]
-      when(mockSubmissionListService.getSubmissionList(any(), any())(using any(), any()))
+      when(mockSubmissionListService.getSubmissionList(any(), any(), any())(using any(), any()))
         .thenReturn(Future.successful(Right(overviewResponse)))
 
       val application = applicationBuilder(userAnswers = None)
@@ -114,6 +119,7 @@ class SubmissionListControllerSpec extends SpecBase {
         status(result) mustEqual OK
 
         contentAsString(result) mustEqual view(
+          form,
           srn,
           schemeName,
           Seq(overviewReport),
@@ -128,7 +134,7 @@ class SubmissionListControllerSpec extends SpecBase {
 
     "must return OK when accessed as PSP" in {
       val mockSubmissionListService = mock[SubmissionListService]
-      when(mockSubmissionListService.getSubmissionList(any(), any())(using any(), any()))
+      when(mockSubmissionListService.getSubmissionList(any(), any(), any())(using any(), any()))
         .thenReturn(Future.successful(Right(overviewResponse)))
 
       val application = applicationBuilder(userAnswers = None, isPsa = false)
@@ -145,6 +151,7 @@ class SubmissionListControllerSpec extends SpecBase {
         status(result) mustEqual OK
 
         contentAsString(result) mustEqual view(
+          form,
           srn,
           schemeName,
           Seq(overviewReport),
@@ -159,7 +166,7 @@ class SubmissionListControllerSpec extends SpecBase {
 
     "must redirect to journey recovery when the submission list cannot be retrieved" in {
       val mockSubmissionListService = mock[SubmissionListService]
-      when(mockSubmissionListService.getSubmissionList(any(), any())(using any(), any()))
+      when(mockSubmissionListService.getSubmissionList(any(), any(), any())(using any(), any()))
         .thenReturn(Future.successful(Left(UpstreamErrorResponse("failed", INTERNAL_SERVER_ERROR))))
 
       val application = applicationBuilder(userAnswers = None)
@@ -178,8 +185,8 @@ class SubmissionListControllerSpec extends SpecBase {
 
     "must return OK with no reports when no submission list records are returned" in {
       val mockSubmissionListService = mock[SubmissionListService]
-      when(mockSubmissionListService.getSubmissionList(any(), any())(using any(), any()))
-        .thenReturn(Future.successful(Left(UpstreamErrorResponse("No records", UNPROCESSABLE_ENTITY))))
+      when(mockSubmissionListService.getSubmissionList(any(), any(), any())(using any(), any()))
+        .thenReturn(Future.successful(Right(IhtpOverviewResponse(IhtpOverviewSuccess(Seq.empty)))))
 
       val application = applicationBuilder(userAnswers = None)
         .overrides(bind[SubmissionListService].toInstance(mockSubmissionListService))
@@ -200,6 +207,7 @@ class SubmissionListControllerSpec extends SpecBase {
         document.select("table.govuk-table").size() mustBe 0
 
         contentAsString(result) mustEqual view(
+          form,
           srn,
           schemeName,
           Seq.empty,
@@ -221,7 +229,7 @@ class SubmissionListControllerSpec extends SpecBase {
           ihtPaymentReference = Some(f"PR$index%09d")
         )
       }
-      when(mockSubmissionListService.getSubmissionList(any(), any())(using any(), any()))
+      when(mockSubmissionListService.getSubmissionList(any(), any(), any())(using any(), any()))
         .thenReturn(
           Future.successful(Right(IhtpOverviewResponse(IhtpOverviewSuccess(reports))))
         )
@@ -240,6 +248,7 @@ class SubmissionListControllerSpec extends SpecBase {
         status(result) mustEqual OK
 
         contentAsString(result) mustEqual view(
+          form,
           srn,
           schemeName,
           Seq(reports(15)),
@@ -254,7 +263,7 @@ class SubmissionListControllerSpec extends SpecBase {
 
     "must release the lock and remove uuid from session when a uuid is present" in {
       val mockSubmissionListService = mock[SubmissionListService]
-      when(mockSubmissionListService.getSubmissionList(any(), any())(using any(), any()))
+      when(mockSubmissionListService.getSubmissionList(any(), any(), any())(using any(), any()))
         .thenReturn(Future.successful(Right(overviewResponse)))
       val mockLockService = mock[LockService]
       when(mockLockService.releaseLock(any(), any())).thenReturn(Future.successful(()))
@@ -276,7 +285,7 @@ class SubmissionListControllerSpec extends SpecBase {
 
     "must not release a lock when no uuid is in session" in {
       val mockSubmissionListService = mock[SubmissionListService]
-      when(mockSubmissionListService.getSubmissionList(any(), any())(using any(), any()))
+      when(mockSubmissionListService.getSubmissionList(any(), any(), any())(using any(), any()))
         .thenReturn(Future.successful(Right(overviewResponse)))
       val mockLockService = mock[LockService]
 
@@ -382,6 +391,48 @@ class SubmissionListControllerSpec extends SpecBase {
 
         status(result) mustEqual SEE_OTHER
         redirectLocation(result).value mustEqual controllers.routes.LockedController.onPageLoad().url
+      }
+    }
+  }
+
+  "onSubmitSearch" - {
+    "must render the page ok" in {
+      val service = mock[SubmissionListService]
+      val reports = Seq(overviewReport)
+      when(service.getSubmissionList(any(), any(), any())(using any(), any()))
+        .thenReturn(Future.successful(Right(IhtpOverviewResponse(IhtpOverviewSuccess(reports)))))
+
+      val application = applicationBuilder(userAnswers = Some(emptyUserAnswers))
+        .overrides(bind[SubmissionListService].toInstance(service))
+        .build()
+
+      running(application) {
+        val postRequest = FakeRequest(POST, onSubmitSearch)
+          .withFormUrlEncodedBody(("value", testNino))
+
+        val result = route(application, postRequest).value
+
+        status(result) mustBe OK
+      }
+    }
+
+    "must return a Bad Request and errors when invalid data is submitted" in {
+      val service = mock[SubmissionListService]
+      val reports = Seq(overviewReport)
+      when(service.getSubmissionList(any(), any(), any())(using any(), any()))
+        .thenReturn(Future.successful(Right(IhtpOverviewResponse(IhtpOverviewSuccess(reports)))))
+
+      val application = applicationBuilder(userAnswers = Some(emptyUserAnswers))
+        .overrides(bind[SubmissionListService].toInstance(service))
+        .build()
+
+      running(application) {
+        val postRequest = FakeRequest(POST, onSubmitSearch)
+          .withFormUrlEncodedBody(("value", ""))
+
+        val result = route(application, postRequest).value
+
+        status(result) mustBe BAD_REQUEST
       }
     }
   }

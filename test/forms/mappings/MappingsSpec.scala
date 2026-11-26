@@ -18,11 +18,12 @@ package forms.mappings
 
 import org.scalatest.freespec.AnyFreeSpec
 import org.scalatest.matchers.must.Matchers
+import base.TestValues
 import org.scalatest.OptionValues
 import models.Enumerable
 import play.api.data.{Form, FormError}
 
-object MappingsSpec {
+object MappingsSpec extends TestValues {
 
   sealed trait Foo
   case object Bar extends Foo
@@ -228,6 +229,55 @@ class MappingsSpec extends AnyFreeSpec with Matchers with OptionValues with Mapp
     "must unbind a valid value" in {
       val result = testForm.fill(1)
       result.apply("value").value.value mustEqual "1"
+    }
+  }
+
+  "searchField" - {
+
+    val testForm: Form[String] =
+      Form(
+        "value" -> searchField()
+      )
+
+    "must bind a valid Nino number" in {
+      val result = testForm.bind(Map("value" -> testNino.toLowerCase().patch(2, " ", 0)))
+      result.get mustEqual testNino.toUpperCase()
+    }
+
+    "must bind a valid ihtReference number" in {
+      val result = testForm.bind(Map("value" -> inheritanceTaxReference.toLowerCase()))
+      result.get mustEqual inheritanceTaxReference.toUpperCase()
+    }
+
+    "must bind a valid payment reference number" in {
+      val result = testForm.bind(Map("value" -> paymentReference.toLowerCase()))
+      result.get mustEqual paymentReference.toUpperCase()
+    }
+
+    "must not bind an empty string" in {
+      val result = testForm.bind(Map("value" -> ""))
+      result.errors must contain(FormError("value", "error.required"))
+    }
+
+    "must not bind a string of whitespace only" in {
+      val result = testForm.bind(Map("value" -> " \t"))
+      result.errors must contain(FormError("value", "error.required"))
+    }
+
+    "must not bind an empty map" in {
+      val result = testForm.bind(Map.empty[String, String])
+      result.errors must contain(FormError("value", "error.required"))
+    }
+
+    "must return a custom error message" in {
+      val form = Form("value" -> text("custom.error"))
+      val result = form.bind(Map("value" -> ""))
+      result.errors must contain(FormError("value", "custom.error"))
+    }
+
+    "must unbind a valid value" in {
+      val result = testForm.fill("foobar")
+      result.apply("value").value.value mustEqual "foobar".toUpperCase()
     }
   }
 }

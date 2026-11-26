@@ -103,10 +103,13 @@ class InheritanceTaxOnPensionsConnector @Inject() (
     schemeAdministratorOrPractitionerName: String,
     schemeName: String,
     srnVal: String,
-    role: String
+    role: String,
+    ihtPaymentReference: Option[String] = None,
+    ihtReference: Option[String] = None,
+    nino: Option[String] = None
   )(implicit hc: HeaderCarrier): Future[Either[UpstreamErrorResponse, IhtpOverviewResponse]] =
     httpClient
-      .get(url"${config.getSubmissionListUrl(pstr, dateFrom, dateTo)}")
+      .get(url"${config.getSubmissionListUrl(pstr, dateFrom, dateTo, ihtPaymentReference, ihtReference, nino)}")
       .transform(
         _.addHttpHeaders(
           SRN_HEADER -> srnVal,

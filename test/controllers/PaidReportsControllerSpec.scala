@@ -49,9 +49,11 @@ class PaidReportsControllerSpec extends SpecBase {
 
   private val paidReport = overviewReport.copy(ihtStatus = "Paid", uuid = Some(testUuid))
 
+  lazy val onSubmitSearch: String = routes.PaidReportsController.onSubmitSearch(srn).url
+
   private def builder(result: Either[UpstreamErrorResponse, IhtpOverviewResponse], isPsa: Boolean = true) = {
     val service = mock[SubmissionListService]
-    when(service.getSubmissionList(any(), any())(using any(), any())).thenReturn(Future.successful(result))
+    when(service.getSubmissionList(any(), any(), any())(using any(), any())).thenReturn(Future.successful(result))
     applicationBuilder(userAnswers = None, isPsa = isPsa, usesSession = true)
       .overrides(bind[SubmissionListService].toInstance(service))
   }
@@ -60,98 +62,143 @@ class PaidReportsControllerSpec extends SpecBase {
     Right(IhtpOverviewResponse(IhtpOverviewSuccess(reports)))
 
   "Paid reports" - {
-    Seq(true, false).foreach { isPsa =>
-      s"must show only paid reports for isPsa=$isPsa with a dummy search bar and change navigation" in {
-        val application = builder(response(Seq(overviewReport, paidReport)), isPsa).build()
+    "onPageLoad" - {
+      Seq(true, false).foreach { isPsa =>
+        s"must show only paid reports for isPsa=$isPsa with a dummy search bar and change navigation" in {
+          val application = builder(response(Seq(overviewReport, paidReport)), isPsa).build()
+          running(application) {
+            val result = route(application, FakeRequest(GET, routes.PaidReportsController.onPageLoad(srn).url)).value
+            status(result) mustBe OK
+            val document = Jsoup.parse(contentAsString(result))
+            document.select("h1").text() mustBe "Paid Inheritance Tax on a pension reports"
+            document.select("h1").hasClass("govuk-heading-l") mustBe true
+            document.select("h1").hasClass("govuk-heading-xl") mustBe false
+            document.select("#scheme-name-caption").first().ownText() mustBe schemeName
+            document.select("#scheme-name-caption").hasClass("govuk-caption-l") mustBe true
+            document.select("tbody tr").size() mustBe 1
+            document.select("tbody td").first().text() mustBe "Tax paid"
+            document.select("tbody th a").text() must include(paidReport.deceasedName)
+            document
+              .select("tbody th a")
+              .attr("href") mustBe routes.ViewPaidSubmissionReportController
+              .onViewPaid(srn, paidReport.fbNumber.value)
+              .url
+            document
+              .select("tbody td a")
+              .attr("href") mustBe routes.ViewPaidSubmissionReportController
+              .onViewPaid(srn, paidReport.fbNumber.value)
+              .url
+            document.select("#value").size() mustBe 1
+            document.select("label[for=value]").text() mustBe messages(application)(
+              "submissionList.find.input.label"
+            )
+            document.select("fieldset button").text() mustBe "Search"
+            document.select("#value").first().closest("form") must not be null
+            document.select("#return-to-active-reports").attr("href") mustBe routes.SubmissionListController
+              .onPageLoad(srn)
+              .url
+            document.text() must include("Showing 1 - 1 of 1 reports")
+          }
+        }
+      }
+
+      Seq(
+        response(Seq.empty),
+        response(Seq(overviewReport))
+      ).zipWithIndex.foreach { (data, index) =>
+        s"must show the empty state without a table or pagination ($index)" in {
+          val application = builder(data).build()
+          running(application) {
+            val result = route(application, FakeRequest(GET, routes.PaidReportsController.onPageLoad(srn).url)).value
+            status(result) mustBe OK
+            val document = Jsoup.parse(contentAsString(result))
+            document.text() must include("This scheme does not currently have any paid reports.")
+            document.select("h1").hasClass("govuk-heading-l") mustBe true
+            document.select("h1").hasClass("govuk-heading-xl") mustBe false
+            document.select("#value").size() mustBe 1
+            document.select("fieldset button").text() mustBe "Search"
+            document.select("table").isEmpty mustBe true
+            document.select(".govuk-pagination").isEmpty mustBe true
+            document.select("#return-to-active-reports").size() mustBe 1
+          }
+        }
+      }
+
+      "must filter before pagination and link to paid-report pages" in {
+        val reports =
+          (1 to 16).flatMap(index => Seq(overviewReport, paidReport.copy(firstForename = Some(s"Person$index"))))
+        val application = builder(response(reports)).build()
         running(application) {
-          val result = route(application, FakeRequest(GET, routes.PaidReportsController.onPageLoad(srn).url)).value
+          val url = routes.PaidReportsController.onPageLoad(srn).url
+          val result = route(application, FakeRequest(GET, s"$url?page=2")).value
           status(result) mustBe OK
           val document = Jsoup.parse(contentAsString(result))
-          document.select("h1").text() mustBe "Paid Inheritance Tax on a pension reports"
-          document.select("h1").hasClass("govuk-heading-l") mustBe true
-          document.select("h1").hasClass("govuk-heading-xl") mustBe false
-          document.select("#scheme-name-caption").first().ownText() mustBe schemeName
-          document.select("#scheme-name-caption").hasClass("govuk-caption-l") mustBe true
           document.select("tbody tr").size() mustBe 1
-          document.select("tbody td").first().text() mustBe "Tax paid"
-          document.select("tbody th a").text() must include(paidReport.deceasedName)
-          document
-            .select("tbody th a")
-            .attr("href") mustBe routes.ViewPaidSubmissionReportController
-            .onViewPaid(srn, paidReport.fbNumber.value)
-            .url
-          document
-            .select("tbody td a")
-            .attr("href") mustBe routes.ViewPaidSubmissionReportController
-            .onViewPaid(srn, paidReport.fbNumber.value)
-            .url
-          document.select("#find-report").size() mustBe 1
-          document.select("label[for=find-report]").text() mustBe messages(application)(
-            "submissionList.find.input.label"
-          )
-          document.select("fieldset button[type=button]").text() mustBe "Search"
-          document.select("#find-report").first().closest("form") mustBe null
-          document.select("#return-to-active-reports").attr("href") mustBe routes.SubmissionListController
-            .onPageLoad(srn)
-            .url
-          document.text() must include("Showing 1 - 1 of 1 reports")
+          document.select("tbody").text() must include("Person16")
+          document.text() must include("Showing 16 - 16 of 16 reports")
+          document.select(".govuk-pagination a").eachAttr("href").forEach(href => href must startWith(url))
         }
       }
-    }
 
-    Seq(
-      response(Seq.empty),
-      response(Seq(overviewReport)),
-      Left(UpstreamErrorResponse("No records", UNPROCESSABLE_ENTITY))
-    ).zipWithIndex.foreach { (data, index) =>
-      s"must show the empty state without a table or pagination ($index)" in {
-        val application = builder(data).build()
+      "must render reports with no due date or payment reference" in {
+        val application =
+          builder(response(Seq(paidReport.copy(paymentDueDate = None, ihtPaymentReference = None)))).build()
+        running(application) {
+          status(route(application, FakeRequest(GET, routes.PaidReportsController.onPageLoad(srn).url)).value) mustBe OK
+        }
+      }
+
+      "must redirect retrieval failures to journey recovery" in {
+        val application = builder(Left(UpstreamErrorResponse("failed", INTERNAL_SERVER_ERROR))).build()
         running(application) {
           val result = route(application, FakeRequest(GET, routes.PaidReportsController.onPageLoad(srn).url)).value
-          status(result) mustBe OK
-          val document = Jsoup.parse(contentAsString(result))
-          document.text() must include("This scheme does not currently have any paid reports.")
-          document.select("h1").hasClass("govuk-heading-l") mustBe true
-          document.select("h1").hasClass("govuk-heading-xl") mustBe false
-          document.select("#find-report").size() mustBe 1
-          document.select("fieldset button[type=button]").text() mustBe "Search"
-          document.select("table").isEmpty mustBe true
-          document.select(".govuk-pagination").isEmpty mustBe true
-          document.select("#return-to-active-reports").size() mustBe 1
+          status(result) mustBe SEE_OTHER
+          redirectLocation(result).value mustBe routes.JourneyRecoveryController.onPageLoad().url
         }
       }
     }
 
-    "must filter before pagination and link to paid-report pages" in {
-      val reports =
-        (1 to 16).flatMap(index => Seq(overviewReport, paidReport.copy(firstForename = Some(s"Person$index"))))
-      val application = builder(response(reports)).build()
-      running(application) {
-        val url = routes.PaidReportsController.onPageLoad(srn).url
-        val result = route(application, FakeRequest(GET, s"$url?page=2")).value
-        status(result) mustBe OK
-        val document = Jsoup.parse(contentAsString(result))
-        document.select("tbody tr").size() mustBe 1
-        document.select("tbody").text() must include("Person16")
-        document.text() must include("Showing 16 - 16 of 16 reports")
-        document.select(".govuk-pagination a").eachAttr("href").forEach(href => href must startWith(url))
-      }
-    }
+    "onSubmitSearch" - {
+      Seq(true, false).foreach { isPsa =>
+        s"must render the page ok for isPsa=$isPsa" in {
+          val service = mock[SubmissionListService]
+          val reports = Seq(overviewReport)
+          when(service.getSubmissionList(any(), any(), any())(using any(), any()))
+            .thenReturn(Future.successful(Right(IhtpOverviewResponse(IhtpOverviewSuccess(reports)))))
 
-    "must render reports with no due date or payment reference" in {
-      val application =
-        builder(response(Seq(paidReport.copy(paymentDueDate = None, ihtPaymentReference = None)))).build()
-      running(application) {
-        status(route(application, FakeRequest(GET, routes.PaidReportsController.onPageLoad(srn).url)).value) mustBe OK
-      }
-    }
+          val application = applicationBuilder(userAnswers = Some(emptyUserAnswers), isPsa = isPsa, usesSession = true)
+            .overrides(bind[SubmissionListService].toInstance(service))
+            .build()
 
-    "must redirect retrieval failures to journey recovery" in {
-      val application = builder(Left(UpstreamErrorResponse("failed", INTERNAL_SERVER_ERROR))).build()
-      running(application) {
-        val result = route(application, FakeRequest(GET, routes.PaidReportsController.onPageLoad(srn).url)).value
-        status(result) mustBe SEE_OTHER
-        redirectLocation(result).value mustBe routes.JourneyRecoveryController.onPageLoad().url
+          running(application) {
+            val postRequest = FakeRequest(POST, onSubmitSearch)
+              .withFormUrlEncodedBody(("value", testNino))
+
+            val result = route(application, postRequest).value
+
+            status(result) mustBe OK
+          }
+        }
+
+        s"must return a Bad Request and errors when invalid data is submitted for isPsa=$isPsa" in {
+          val service = mock[SubmissionListService]
+          val reports = Seq(overviewReport)
+          when(service.getSubmissionList(any(), any(), any())(using any(), any()))
+            .thenReturn(Future.successful(Right(IhtpOverviewResponse(IhtpOverviewSuccess(reports)))))
+
+          val application = applicationBuilder(userAnswers = Some(emptyUserAnswers), isPsa = isPsa, usesSession = true)
+            .overrides(bind[SubmissionListService].toInstance(service))
+            .build()
+
+          running(application) {
+            val postRequest = FakeRequest(POST, onSubmitSearch)
+              .withFormUrlEncodedBody(("value", ""))
+
+            val result = route(application, postRequest).value
+
+            status(result) mustBe BAD_REQUEST
+          }
+        }
       }
     }
   }
