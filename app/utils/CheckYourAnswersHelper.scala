@@ -175,6 +175,10 @@ object CheckYourAnswersHelper {
       ContinuationPage(
         answers => answers.get(BirthDeathDatesPage).isEmpty,
         routes.BirthDeathDatesController.onPageLoad(srn, NormalMode)
+      ),
+      ContinuationPage(
+        answers => answers.get(WhoRepresentsEstatePage).isEmpty,
+        routes.WhoRepresentsEstateController.onPageLoad(srn, NormalMode)
       )
     )
 

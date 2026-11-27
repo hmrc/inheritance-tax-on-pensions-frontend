@@ -512,3 +512,10 @@ interestPayable.error.required = Enter the interest payable amount
 interestPayable.error.invalid = Enter the amount in pounds and pence
 interestPayable.checkYourAnswersLabel = Amount of interest payable
 interestPayable.change.hidden = the amount of interest payable
+
+whoRepresentsEstate.title = Who is representing the estate of {0}?
+whoRepresentsEstate.heading = Who is representing the estate of {0}?
+whoRepresentsEstate.02 = a personal representative (PR)
+whoRepresentsEstate.01 = a prospective personal representative (PPR)
+whoRepresentsEstate.error.required = Select the representative type
+whoRepresentsEstate.deceased = the deceased
