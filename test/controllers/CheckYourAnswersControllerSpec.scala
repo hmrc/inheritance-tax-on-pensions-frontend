@@ -166,6 +166,7 @@ class CheckYourAnswersControllerSpec extends SpecBase {
           )
           val prDetailsSummaryList = SummaryListViewModel(
             rows = Seq(
+              WhoRepresentsEstateSummary.row(srn, userAnswers)(using messages(application)).get,
               PrTypeSummary.row(srn, userAnswers)(using messages(application)).get,
               PrIndividualNameSummary.row(srn, userAnswers)(using messages(application)).get
             )
@@ -257,6 +258,7 @@ class CheckYourAnswersControllerSpec extends SpecBase {
           )
           val prDetailsSummaryList = SummaryListViewModel(
             rows = Seq(
+              WhoRepresentsEstateSummary.row(srn, userAnswers)(using messages(application)).get,
               PrTypeSummary.row(srn, userAnswers)(using messages(application)).get,
               PrIndividualNameSummary.row(srn, userAnswers)(using messages(application)).get
             )
@@ -343,6 +345,7 @@ class CheckYourAnswersControllerSpec extends SpecBase {
           )
           val prDetailsSummaryList = SummaryListViewModel(
             rows = Seq(
+              WhoRepresentsEstateSummary.row(srn, userAnswers)(using messages(application)).get,
               PrTypeSummary.row(srn, userAnswers)(using messages(application)).get,
               PrIndividualNameSummary.row(srn, userAnswers)(using messages(application)).get
             )
