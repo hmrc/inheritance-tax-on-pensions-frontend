@@ -92,5 +92,24 @@ class BeneficiaryTypePageSpec extends SpecBase {
       updatedAnswers.get(BeneficiaryInterestPayablePage(testIndex)) mustBe None
     }
 
+    "must leave other beneficiary answers unchanged when the type is removed" in {
+      val userAnswers = emptyUserAnswers
+        .set(BeneficiaryTypePage(testIndex), BeneficiaryType.Individual)
+        .success
+        .value
+        .set(BeneficiaryNamePage(testIndex, JourneyRole.BeneficiaryIndividual), individualName)
+        .success
+        .value
+        .set(BeneficiaryNinoPage(testIndex), testNino)
+        .success
+        .value
+
+      val updatedAnswers = userAnswers.remove(BeneficiaryTypePage(testIndex)).success.value
+
+      updatedAnswers.get(BeneficiaryTypePage(testIndex)) mustBe None
+      updatedAnswers.get(BeneficiaryNamePage(testIndex, JourneyRole.BeneficiaryIndividual)) mustBe Some(individualName)
+      updatedAnswers.get(BeneficiaryNinoPage(testIndex)) mustBe Some(testNino)
+    }
+
   }
 }
