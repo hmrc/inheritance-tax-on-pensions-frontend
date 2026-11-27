@@ -28,8 +28,7 @@
 
 @(form: Form[?], srn: Srn, mode: Mode, deceasedName: Option[String])(implicit request: Request[?], messages: Messages)
 
-@layout(pageTitle = title(form, messages("whoRepresentsEstate.title", deceasedName.getOrElse(messages("whoRepresentsEstate.deceased"))))) {
-
+@layout(pageTitle = title(form, messages("whoRepresentsEstate.title"))) {
     @formHelper(action = routes.WhoRepresentsEstateController.onSubmit(srn, mode), Symbol("autoComplete") -> "off") {
 
         @if(form.errors.nonEmpty) {

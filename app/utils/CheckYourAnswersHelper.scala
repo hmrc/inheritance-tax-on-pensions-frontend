@@ -54,6 +54,7 @@ object CheckYourAnswersHelper {
     )
     val prDetailsSummaryList = SummaryListViewModel(
       rows = Seq(
+        WhoRepresentsEstateSummary.row(srn, userAnswers),
         PrTypeSummary.row(srn, userAnswers),
         PrIndividualNameSummary.row(srn, userAnswers),
         PrOrganisationNameSummary.row(srn, userAnswers),
